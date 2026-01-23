@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Array Language Runner</title>
+    <style>
+        @font-face {
+            font-family: 'BQN';
+            src: url('fonts/BQN386.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'Uiua';
+            src: url('fonts/Uiua386.ttf') format('truetype');
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .language-selector {
+            position: relative;
+        }
+
+        .language-button {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 60px;
+            height: 44px;
+            transition: border-color 0.2s;
+        }
+
+        .language-button:hover {
+            border-color: #999;
+        }
+
+        .language-button img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+
+        .language-button svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 4px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            min-width: 120px;
+            display: none;
+        }
+
+        .dropdown.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .dropdown-item img {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+        }
+
+        .dropdown-item svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .input-container {
+            flex: 1;
+            position: relative;
+        }
+
+        .code-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            transition: border-color 0.2s;
+            height: 44px;
+        }
+
+        .code-input:focus {
+            outline: none;
+            border-color: #4a90e2;
+        }
+
+        .code-input.bqn {
+            font-family: 'BQN', 'Courier New', monospace;
+        }
+
+        .code-input.uiua {
+            font-family: 'Uiua', 'Courier New', monospace;
+        }
+
+        .output {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 8px;
+            padding: 12px 16px;
+            background: #f8f8f8;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .output.show {
+            display: block;
+        }
+
+        .output.error {
+            color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="language-selector">
+            <button class="language-button" id="languageButton">
+                <img id="currentLogo" src="assets/bqn.svg" alt="BQN">
+            </button>
+            <div class="dropdown" id="dropdown">
+                <div class="dropdown-item" data-lang="bqn">
+                    <img src="assets/bqn.svg" alt="BQN">
+                    <span>BQN</span>
+                </div>
+                <div class="dropdown-item" data-lang="uiua">
+                    <img src="assets/uiua.png" alt="Uiua">
+                    <span>Uiua</span>
+                </div>
+            </div>
+        </div>
+        <div class="input-container">
+            <input 
+                type="text" 
+                class="code-input bqn" 
+                id="codeInput" 
+                placeholder="Enter array language code..."
+                autocomplete="off"
+            >
+            <div class="output" id="output"></div>
+        </div>
+    </div>
+
+    <!-- BQN JavaScript implementation -->
+    <script src="https://cdn.jsdelivr.net/gh/mlochbaum/BQN@master/docs/bqn.js"></script>
+
+    <script>
+        // Language configuration
+        const languages = {
+            bqn: {
+                name: 'BQN',
+                logo: 'assets/bqn.svg',
+                fontClass: 'bqn',
+                evaluate: (code) => {
+                    try {
+                        const result = bqn(code);
+                        return { success: true, output: fmt(result) };
+                    } catch (error) {
+                        return { success: false, output: error.message || String(error) };
+                    }
+                }
+            },
+            uiua: {
+                name: 'Uiua',
+                logo: 'assets/uiua.png',
+                fontClass: 'uiua',
+                evaluate: (code) => {
+                    // Placeholder for Uiua WASM integration
+                    return { success: false, output: 'Uiua WASM integration coming soon' };
+                }
+            }
+        };
+
+        let currentLanguage = 'bqn';
+
+        // DOM elements
+        const languageButton = document.getElementById('languageButton');
+        const currentLogo = document.getElementById('currentLogo');
+        const dropdown = document.getElementById('dropdown');
+        const codeInput = document.getElementById('codeInput');
+        const output = document.getElementById('output');
+
+        // Language selector functionality
+        languageButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!languageButton.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // Language selection
+        document.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const lang = item.dataset.lang;
+                switchLanguage(lang);
+                dropdown.classList.remove('show');
+            });
+        });
+
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+            const langConfig = languages[lang];
+            
+            // Update logo
+            currentLogo.src = langConfig.logo;
+            currentLogo.alt = langConfig.name;
+            
+            // Update input font class
+            codeInput.className = `code-input ${langConfig.fontClass}`;
+            
+            // Clear output
+            hideOutput();
+        }
+
+        // Evaluation function
+        function evaluateCode() {
+            const code = codeInput.value.trim();
+            if (!code) {
+                hideOutput();
+                return;
+            }
+
+            const langConfig = languages[currentLanguage];
+            const result = langConfig.evaluate(code);
+            
+            output.textContent = result.output;
+            output.className = `output show ${result.success ? '' : 'error'}`;
+        }
+
+        function hideOutput() {
+            output.classList.remove('show');
+        }
+
+        // Ctrl+Enter to evaluate
+        codeInput.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                e.preventDefault();
+                evaluateCode();
+            }
+        });
+
+        // Hide output when input changes
+        codeInput.addEventListener('input', () => {
+            hideOutput();
+        });
+    </script>
+</body>
+</html>
