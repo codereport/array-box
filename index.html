@@ -262,12 +262,29 @@
                 logo: 'assets/bqn.svg',
                 fontClass: 'bqn',
                 evaluate: (code) => {
+                    const startTime = performance.now();
+                    let result;
                     try {
-                        const result = bqn(code);
-                        return { success: true, output: fmt(result) };
+                        const output = bqn(code);
+                        result = { success: true, output: fmt(output) };
                     } catch (error) {
-                        return { success: false, output: error.message || String(error) };
+                        result = { success: false, output: error.message || String(error) };
                     }
+                    const duration = Math.round(performance.now() - startTime);
+                    
+                    // Log to server manager (fire and forget)
+                    fetch('http://localhost:8082/log', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            language: 'bqn',
+                            code: code,
+                            success: result.success,
+                            duration: duration
+                        })
+                    }).catch(() => {}); // Ignore errors if server not running
+                    
+                    return result;
                 }
             },
             uiua: {

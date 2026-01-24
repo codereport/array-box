@@ -45,6 +45,20 @@ const ansi = {
 
 // Server configuration
 const servers = {
+    bqn: {
+        name: 'BQN (client)',
+        script: null,  // Runs in browser
+        port: null,
+        color: ansi.green,
+        symbol: 'BQN',
+        process: null,
+        status: 'browser',  // Always running in browser
+        requests: 0,
+        errors: 0,
+        lastRequest: null,
+        startTime: null,
+        executable: 'JavaScript'
+    },
     j: {
         name: 'J Server',
         script: 'j-server.js',
@@ -74,6 +88,9 @@ const servers = {
         executable: null
     }
 };
+
+// Log server port for receiving client-side execution logs
+const LOG_SERVER_PORT = 8082;
 
 // Request log (circular buffer)
 const MAX_LOG_ENTRIES = 15;
@@ -163,14 +180,12 @@ function renderDashboard() {
     
     let output = ansi.clear;
     
-    // Header
-    output += ansi.bold + ansi.bgBlue + ansi.white;
-    output += centerText('  ╔══════════════════════════════════════╗  ', width) + ansi.reset + '\n';
-    output += ansi.bold + ansi.bgBlue + ansi.white;
-    output += centerText('  ║     ARRAY BOX SERVER MANAGER         ║  ', width) + ansi.reset + '\n';
-    output += ansi.bold + ansi.bgBlue + ansi.white;
-    output += centerText('  ╚══════════════════════════════════════╝  ', width) + ansi.reset + '\n';
+    // Header - ASCII art title
     output += '\n';
+    output += ansi.bold + ansi.cyan + '   ╭─────────────────────────────────────────────────────╮' + ansi.reset + '\n';
+    output += ansi.bold + ansi.cyan + '   │  ' + ansi.yellow + '█▀█ █▀█ █▀█ █▀█ █▄█' + ansi.white + '   █▄▄ █▀█ ▀▄▀' + ansi.cyan + '   Server Manager │' + ansi.reset + '\n';
+    output += ansi.bold + ansi.cyan + '   │  ' + ansi.yellow + '█▀█ █▀▄ █▀▄ █▀█ ░█░' + ansi.white + '   █▄█ █▄█ █░█' + ansi.cyan + '                  │' + ansi.reset + '\n';
+    output += ansi.bold + ansi.cyan + '   ╰─────────────────────────────────────────────────────╯' + ansi.reset + '\n';
     
     // Uptime
     output += ansi.dim + `  Manager uptime: ${formatUptime(now - startTime)}` + ansi.reset + '\n\n';
@@ -181,17 +196,22 @@ function renderDashboard() {
     
     for (const [key, server] of Object.entries(servers)) {
         const statusColor = server.status === 'running' ? ansi.green : 
-                           server.status === 'starting' ? ansi.yellow : ansi.red;
+                           server.status === 'starting' ? ansi.yellow :
+                           server.status === 'browser' ? ansi.green : ansi.red;
         const statusIcon = server.status === 'running' ? '●' : 
-                          server.status === 'starting' ? '◐' : '○';
+                          server.status === 'starting' ? '◐' :
+                          server.status === 'browser' ? '◈' : '○';
         
         const uptime = server.startTime ? formatUptime(now - server.startTime) : '-';
         const lastReq = server.lastRequest ? formatTime(server.lastRequest) : 'none';
         
         output += `  ${server.color}${server.symbol} ${server.name}${ansi.reset}\n`;
         output += `    ${statusColor}${statusIcon} ${server.status.toUpperCase()}${ansi.reset}`;
-        output += `  │  Port: ${ansi.bold}${server.port}${ansi.reset}`;
-        output += `  │  Uptime: ${uptime}`;
+        
+        // Show port for server-based languages, or "in-browser" for client-side
+        if (server.port) {
+            output += `  │  Port: ${ansi.bold}${server.port}${ansi.reset}`;
+        }
         output += `  │  Requests: ${ansi.cyan}${server.requests}${ansi.reset}`;
         if (server.errors > 0) {
             output += `  │  Errors: ${ansi.red}${server.errors}${ansi.reset}`;
@@ -220,8 +240,11 @@ function renderDashboard() {
             const code = truncate(entry.code, codeWidth);
             const duration = entry.duration ? `${entry.duration}ms` : '';
             
+            // Pad symbol to 3 chars for alignment (BQN, APL, J)
+            const paddedSymbol = server.symbol.padEnd(3);
+            
             output += `  ${ansi.dim}${time}${ansi.reset} `;
-            output += `${server.color}${server.symbol}${ansi.reset} `;
+            output += `${server.color}${paddedSymbol}${ansi.reset} `;
             output += `${statusIcon}${ansi.reset} `;
             output += `${ansi.dim}${duration.padEnd(7)}${ansi.reset} `;
             output += `${code}\n`;
@@ -530,6 +553,51 @@ async function main() {
     });
     aplProc.stderr.on('data', () => {});
     aplProc.on('close', () => { servers.apl.status = 'stopped'; servers.apl.process = null; renderDashboard(); });
+    
+    // Create log server for client-side languages (BQN)
+    const http = require('http');
+    const logServer = http.createServer((req, res) => {
+        // CORS headers
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+        
+        if (req.method === 'OPTIONS') {
+            res.writeHead(200);
+            res.end();
+            return;
+        }
+        
+        if (req.method === 'POST' && req.url === '/log') {
+            let body = '';
+            req.on('data', chunk => body += chunk.toString());
+            req.on('end', () => {
+                try {
+                    const data = JSON.parse(body);
+                    const { language, code, success, duration } = data;
+                    
+                    if (language && servers[language]) {
+                        logRequest(language, 'eval', code, success, duration);
+                    }
+                    
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ ok: true }));
+                } catch (e) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Invalid request' }));
+                }
+            });
+        } else {
+            res.writeHead(404);
+            res.end();
+        }
+    });
+    
+    logServer.on('error', () => {}); // Silently handle errors
+    logServer.listen(LOG_SERVER_PORT, () => {
+        // Log server ready
+    });
+    proxies.push(logServer); // Add to proxies array for cleanup
     
     // Update dashboard periodically for uptime
     dashboardInterval = setInterval(renderDashboard, 1000);

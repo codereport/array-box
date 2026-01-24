@@ -19,9 +19,10 @@ function findJExecutable() {
     const path = require('path');
     
     const candidates = [
+        'ijconsole',  // Prefer ijconsole - it's the console-only version
         'jconsole',
-        'ijconsole',
         'j',
+        path.join(homedir(), 'j9.6/bin/ijconsole'),
         path.join(homedir(), 'j9.6/bin/jconsole'),
         '/usr/local/bin/jconsole',
         '/usr/bin/jconsole'
@@ -30,7 +31,12 @@ function findJExecutable() {
     for (const cmd of candidates) {
         try {
             // Just try to spawn it - some J versions don't support --version
-            execSync(`"${cmd}" -js -e "exit 0"`, { timeout: 2000, stdio: 'ignore' });
+            // Use DISPLAY='' to prevent any GUI windows
+            execSync(`"${cmd}" -js -e "exit 0"`, { 
+                timeout: 2000, 
+                stdio: 'ignore',
+                env: { ...process.env, DISPLAY: '' }
+            });
             return cmd;
         } catch (e) {
             // Try next candidate
@@ -55,8 +61,14 @@ function executeJCode(code) {
         // J script that evaluates the code and prints the result
         const jScript = `${code}\nexit 0\n`;
 
+        // Run J in script mode to prevent GUI windows
         const jProcess = spawn(jExecutable, [], {
-            stdio: ['pipe', 'pipe', 'pipe']
+            stdio: ['pipe', 'pipe', 'pipe'],
+            env: { 
+                ...process.env, 
+                DISPLAY: '',           // Prevent X11 windows
+                TERM: 'dumb'           // Simple terminal mode
+            }
         });
 
         let stdout = '';
