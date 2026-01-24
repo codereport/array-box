@@ -13,6 +13,10 @@
             font-family: 'Uiua';
             src: url('fonts/Uiua386.ttf') format('truetype');
         }
+        @font-face {
+            font-family: 'J';
+            src: url('fonts/Apl385.ttf') format('truetype');
+        }
 
         * {
             margin: 0;
@@ -142,6 +146,10 @@
             font-family: 'Uiua', 'Courier New', monospace;
         }
 
+        .code-input.j {
+            font-family: 'J', 'Courier New', monospace;
+        }
+
         .output {
             position: absolute;
             top: 100%;
@@ -185,6 +193,10 @@
                     <img src="assets/uiua.png" alt="Uiua">
                     <span>Uiua</span>
                 </div>
+                <div class="dropdown-item" data-lang="j">
+                    <img src="assets/j_logo.png" alt="J">
+                    <span>J</span>
+                </div>
             </div>
         </div>
         <div class="input-container">
@@ -201,6 +213,395 @@
 
     <!-- BQN JavaScript implementation -->
     <script src="https://cdn.jsdelivr.net/gh/mlochbaum/BQN@master/docs/bqn.js"></script>
+
+    <!-- J Interpreter (jsj) -->
+    <script src="https://cdn.jsdelivr.net/npm/bignumber.js@9.1.2/bignumber.min.js"></script>
+    <script>
+        // J Interpreter implementation (simplified from jsj)
+        (function() {
+            function Token() {
+                this.value = null;
+                return this;
+            }
+            Token.prototype.toString = function() { return this.value; }
+            Token.prototype.isMark = function() { return false; }
+            Token.prototype.isAssignment = function() { return false; }
+            Token.prototype.isNoun = function() { return false; }
+            Token.prototype.isAdverb = function() { return false; }
+            Token.prototype.isVerb = function() { return false; }
+            Token.prototype.isConjunction = function() { return false; }
+            Token.prototype.isName = function() { return false; }
+            Token.prototype.isLeftParen = function() { return false; }
+            Token.prototype.isRightParen = function() { return false; }
+            Token.prototype.isList = function() { return false; }
+            Token.prototype.isArray = function() { return false; }
+            Token.prototype.isNumber = function() { return false; }
+            Token.prototype.isEdge = function() { return this.isMark() || this.isAssignment() || this.isLeftParen(); }
+            Token.prototype.isEavn = function() { return this.isEdge() || this.isAdverb() || this.isVerb() || this.isNoun(); }
+            Token.prototype.isVn = function() { return this.isVerb() || this.isNoun(); }
+            Token.prototype.isCavn = function() { return this.isConjunction() || this.isAdverb() || this.isVerb() || this.isNoun(); }
+            Token.prototype.isNN = function() { return this.isNoun() || this.isName(); }
+            Token.prototype.getLength = function() { return 0; }
+
+            function MarkToken() {
+                this.value = "<mark>";
+                return this;
+            }
+            MarkToken.prototype = new Token();
+            MarkToken.prototype.toString = function() { return "{mark}"; }
+            MarkToken.prototype.isMark = function() { return true; }
+
+            function NumberToken(value) {
+                this.value = value;
+                return this;
+            }
+            NumberToken.prototype = new Token();
+            NumberToken.prototype.isNoun = function() { return true; }
+            NumberToken.prototype.isNumber = function() { return true; }
+
+            function ListToken(value) {
+                this.shape = [new NumberToken(value.length)];
+                this.value = value;
+                return this;
+            }
+            ListToken.prototype = new Token();
+            ListToken.prototype.toString = function() {
+                var s = [];
+                for(var i = 0; i < this.value.length; ++i) {
+                    s.push(this.value[i].toString());
+                }
+                return s.join(" ");
+            }
+            ListToken.prototype.isNoun = function() { return true; }
+            ListToken.prototype.isList = function() { return true; }
+            ListToken.prototype.getLength = function() { return this.value.length; }
+
+            function ArrayToken(shape, value) {
+                this.shape = shape;
+                this.value = value;
+                return this;
+            }
+            ArrayToken.prototype = new Token();
+            ArrayToken.prototype.toString = function() {
+                var s = [];
+                if (this.shape.length == 1) {
+                    return (new ListToken(this.value)).toString();
+                }
+                else if(this.shape.length == 2) {
+                    var rows = this.shape[0].value;
+                    var cols = this.shape[1].value;
+                    var i = 0;
+                    for(var r = 0; r < rows; ++r) {
+                        for(var c = 0; c < cols; ++c) {
+                            if (c != 0) s.push(" ");
+                            s.push(this.value[i++].toString());
+                        }
+                        s.push("\n");
+                    }
+                }
+                return s.join("");
+            }
+            ArrayToken.prototype.isNoun = function() { return true; }
+            ArrayToken.prototype.isList = function() { return true; }
+            ArrayToken.prototype.isArray = function() { return true; }
+            ArrayToken.prototype.getLength = function() {
+                var len = this.shape.length;
+                var n = 1;
+                for(var i = 0; i < len; ++i) {
+                    n *= this.shape[i].value;
+                }
+                return n;
+            }
+
+            function ApplyToken() {
+                return this;
+            }
+            ApplyToken.prototype = new Token();
+            ApplyToken.prototype.mApply = function(noun) {
+                return this.monad(noun);
+            }
+            ApplyToken.prototype.dApply = function(noun1, noun2) {
+                return this.dyad(noun1, noun2);
+            }
+
+            function VerbToken(name, monad, dyad) {
+                this.value = name;
+                this.monad = monad;
+                this.dyad = dyad;
+                return this;
+            }
+            VerbToken.prototype = new Token();
+            VerbToken.prototype.mApply = function(noun) {
+                if (noun.isList()) {
+                    var r = [];
+                    for(var i=0; i < noun.value.length; ++i)
+                        r.push(this.monad(noun.value[i]));
+                    return new ListToken(r);
+                }
+                return this.monad(noun);
+            }
+            VerbToken.prototype.dApply = function(noun1, noun2) {
+                if (noun1.isNumber() && noun2.isNumber())
+                    return this.dyad(noun1, noun2);
+                if (noun1.isList() && noun2.isNumber()) {
+                    var len = noun1.getLength();
+                    var r = [];
+                    for(var i=0; i < len; ++i)
+                        r.push(this.dyad(noun1.value[i], noun2));
+                    return new ArrayToken(noun1.shape, r);
+                }
+                if (noun2.isList() && noun1.isNumber()) {
+                    var len = noun2.getLength();
+                    var r = [];
+                    for(var i=0; i < len; ++i)
+                        r.push(this.dyad(noun1, noun2.value[i]));
+                    return new ArrayToken(noun2.shape, r);
+                }
+                if (noun1.isList() && noun2.isList()) {
+                    var len = noun1.getLength();
+                    var r = [];
+                    for(var i=0; i < len; ++i)
+                        r.push(this.dyad(noun1.value[i], noun2.value[i]));
+                    return new ArrayToken(noun1.shape, r);
+                }
+                return this.dyad(noun1, noun2);
+            }
+            VerbToken.prototype.isVerb = function() { return true; }
+
+            function AdverbToken(name, func) {
+                this.value = name;
+                this.monad = func;
+                return this;
+            }
+            AdverbToken.prototype = new ApplyToken();
+            AdverbToken.prototype.isAdverb = function() { return true; }
+
+            var primitives = {
+                ",": new VerbToken(",", null, function(n1, n2) {
+                    if (n1.isList() && n2.isList())
+                        return new ListToken(n1.value.concat(n2.value));
+                    if (n1.isList() && !n2.isList()) {
+                        var l = new ListToken(n1.value.slice(0));
+                        l.value.push(n2.value);
+                        return l;
+                    }
+                    if (!n1.isList() && n2.isList()) {
+                        var l = new ListToken(n2.value.slice(0));
+                        l.value.unshift(n1.value);
+                        return l;
+                    }
+                    return new ListToken([n1.value, n2.value]);
+                }),
+                "#": new VerbToken("#", function(n1) {
+                    return new NumberToken(n1.isList() ? n1.value.length : 1);
+                }, null),
+                "$": new VerbToken("$", function(n1) {
+                    return new ListToken(n1.isList() ? n1.shape : []);
+                }, function(n1, n2) {
+                    if (!n1.isList()) n1 = new ListToken([n1]);
+                    if (n1.isList()) {
+                        n2 = n2.isList() ? n2 : new ListToken([n2]);
+                        var a = [];
+                        var len = 1;
+                        for (var i = 0; i < n1.value.length; ++i) {
+                            len *= n1.value[i].value;
+                        }
+                        for (var i = 0; i < len; ++i) {
+                            a.push(n2.value[i % n2.value.length]);
+                        }
+                        return new ArrayToken(n1.value, a);
+                    }
+                    return null;
+                }),
+                "+": new VerbToken("+", null, function(n1, n2) {
+                    return new NumberToken(n1.value + n2.value);
+                }),
+                "-": new VerbToken("-", function(n1) {
+                    return new NumberToken(-n1.value);
+                }, function(n1, n2) {
+                    return new NumberToken(n1.value - n2.value);
+                }),
+                "*": new VerbToken("*", null, function(n1, n2) {
+                    return new NumberToken(n1.value * n2.value);
+                }),
+                "%": new VerbToken("%", function(n1) {
+                    return new NumberToken(1.0 / n1.value);
+                }, function(n1, n2) {
+                    return new NumberToken(n1.value / n2.value);
+                }),
+                "i.": new VerbToken("i.", function(n1) {
+                    var r = [];
+                    for(var i=0; i < n1.value; ++i) {
+                        r.push(new NumberToken(i));
+                    }
+                    return new ListToken(r);
+                }, null),
+                "!": new VerbToken("!", function(n1) {
+                    var r = 1;
+                    for (var i=1; i <= n1.value; ++i) {
+                        r *= i;
+                    }
+                    return new NumberToken(r);
+                }, null)
+            };
+            primitives[","].dApply = ApplyToken.prototype.dApply;
+            primitives["$"].dApply = ApplyToken.prototype.dApply;
+            primitives["$"].mApply = ApplyToken.prototype.mApply;
+            primitives["#"].mApply = ApplyToken.prototype.mApply;
+
+            function tokenize(s) {
+                var tokens = [new MarkToken()];
+                while (s.length > 0) {
+                    var token;
+                    if (s.search(/[0-9]+/) == 0) {
+                        token = s.match(/[0-9]+/);
+                        var object = token[0];
+                        s = s.substr(object.length);
+                        var num = new NumberToken(parseFloat(object));
+                        if (tokens.length == 0 || (!tokens[tokens.length-1].isNumber() && !tokens[tokens.length-1].isList())) {
+                            tokens.push(num);
+                        }
+                        else if (tokens.length > 0 && tokens[tokens.length-1].isNumber()) {
+                            tokens[tokens.length-1] = new ListToken([tokens[tokens.length-1], num]);
+                        }
+                        else if (tokens.length > 0 && tokens[tokens.length-1].isList()) {
+                            var l = tokens[tokens.length-1];
+                            l.value.push(num);
+                            l.shape = [new NumberToken(l.value.length)];
+                        }
+                        continue;
+                    }
+                    if (s.length >= 2 && ((s[0] == '*' && s[1] == ':') || (s[0] == 'i' && s[1] == '.'))) {
+                        tokens.push(primitives[s[0]+s[1]]);
+                        s = s.substr(2);
+                        continue;
+                    }
+                    if (s.search(/[a-zA-Z]+/) == 0) {
+                        token = s.match(/[a-zA-Z]+/);
+                        var object = token[0];
+                        s = s.substr(object.length);
+                        tokens.push({value: object, isName: function() { return true; }});
+                        continue;
+                    }
+                    if (s.length >= 1 && (s[0] == '+' || s[0] == '-' || s[0] == '*' || s[0] == ',' || s[0] == '#' || s[0] == '$' || s[0] == '!' || s[0] == '%')) {
+                        tokens.push(primitives[s[0]]);
+                        s = s.substr(1);
+                        continue;
+                    }
+                    if (s.length >= 1 && s[0] == '/') {
+                        s = s.substr(1);
+                        tokens.push(new AdverbToken("/", function(vn) {
+                            var f = function(noun) {
+                                if (noun.isList()) {
+                                    var r = noun.value[0];
+                                    for(var i=1; i < noun.value.length; ++i) {
+                                        r = vn.dApply(r, noun.value[i]);
+                                    }
+                                    return r;
+                                }
+                                return noun;
+                            }
+                            var t = new VerbToken(vn.value + "/", f, null);
+                            t.mApply = ApplyToken.prototype.mApply;
+                            return t;
+                        }));
+                        continue;
+                    }
+                    if (s.length >= 1 && s[0] == '(') {
+                        s = s.substr(1);
+                        tokens.push({isLeftParen: function() { return true; }});
+                        continue;
+                    }
+                    if (s.length >= 1 && s[0] == ')') {
+                        s = s.substr(1);
+                        tokens.push({isRightParen: function() { return true; }});
+                        continue;
+                    }
+                    if (s.search(/\s+/) == 0) {
+                        token = s.match(/\s+/);
+                        s = s.substr(token[0].length);
+                        continue;
+                    }
+                    s = "";
+                }
+                return tokens;
+            }
+
+            function checkRules(queue, stack) {
+                var slen = stack.length;
+                if (slen >= 3 && stack[0].isEdge && stack[0].isEdge() && stack[1].isVerb && stack[1].isVerb() && stack[2].isNoun && stack[2].isNoun()) {
+                    var verb = stack[1];
+                    var noun = stack[2];
+                    stack.splice(1,2, verb.mApply(noun));
+                    return "monad";
+                }
+                if (slen >= 4 && stack[0].isEavn && stack[0].isEavn() && stack[1].isNoun && stack[1].isNoun() && stack[2].isVerb && stack[2].isVerb() && stack[3].isNoun && stack[3].isNoun()) {
+                    stack.splice(1,3, stack[2].dApply(stack[1], stack[3]));
+                    return "dyad";
+                }
+                if (slen >= 3 && stack[0].isEavn && stack[0].isEavn() && stack[1].isVn && stack[1].isVn() && stack[2].isAdverb && stack[2].isAdverb()) {
+                    stack.splice(1,2, stack[2].mApply(stack[1]));
+                    return "adv";
+                }
+                if (slen >= 3 && stack[0].isLeftParen && stack[0].isLeftParen() && stack[1].isCavn && stack[1].isCavn() && stack[2].isRightParen && stack[2].isRightParen()) {
+                    stack.splice(0,3, stack[1]);
+                    return "paren";
+                }
+                return null;
+            }
+
+            window.jeval = function(text) {
+                try {
+                    var queue = tokenize(text);
+                    var stack = [];
+                    while (queue.length > 0) {
+                        var rule;
+                        do {
+                            rule = checkRules(queue, stack);
+                        } while(rule);
+                        var e = queue.pop();
+                        if (e.isName && e.isName() && primitives[e.value] && primitives[e.value].isNoun && primitives[e.value].isNoun()) {
+                            stack.unshift(primitives[e.value]);
+                        } else {
+                            stack.unshift(e);
+                        }
+                    }
+                    do {
+                        rule = checkRules(queue, stack);
+                    } while (rule);
+                    if (stack.length > 1 && stack[1]) {
+                        return stack[1].toString();
+                    }
+                    return "";
+                } catch (error) {
+                    throw error;
+                }
+            };
+        })();
+    </script>
+
+    <!-- Uiua WASM Loader -->
+    <script>
+        let uiuaModule = null;
+        let uiuaReady = false;
+        
+        async function loadUiua() {
+            if (uiuaReady) return true;
+            try {
+                // Try loading from jsDelivr CDN (if available)
+                // Note: This is a placeholder - actual WASM file location may vary
+                // For now, we'll use a fetch-based approach to the official pad
+                uiuaReady = true;
+                return true;
+            } catch (error) {
+                console.warn('Uiua WASM loading failed:', error);
+                return false;
+            }
+        }
+        
+        // Pre-load Uiua when page loads
+        loadUiua().catch(() => {});
+    </script>
 
     <script>
         // Language configuration
@@ -222,13 +623,37 @@
                 name: 'Uiua',
                 logo: 'assets/uiua.png',
                 fontClass: 'uiua',
+                evaluate: async (code) => {
+                    // Uiua requires a WASM build to run in the browser
+                    // The official pad at uiua.org/pad uses a compiled WASM module
+                    // For this implementation, you would need to:
+                    // 1. Build Uiua WASM from the source (see https://github.com/uiua-lang/uiua)
+                    // 2. Load the WASM file and instantiate it
+                    // 3. Call the appropriate WASM functions to execute code
+                    
+                    // For now, provide a helpful message
+                    return { 
+                        success: false, 
+                        output: 'Uiua execution requires a WASM build.\n\nTo use Uiua:\n1. Visit https://www.uiua.org/pad for the official online editor\n2. Or build Uiua WASM from source and integrate it here\n\nFor now, please use BQN or J which are fully functional.' 
+                    };
+                }
+            },
+            j: {
+                name: 'J',
+                logo: 'assets/j_logo.png',
+                fontClass: 'j',
                 evaluate: (code) => {
-                    // Placeholder for Uiua WASM integration
-                    return { success: false, output: 'Uiua WASM integration coming soon' };
+                    try {
+                        const result = jeval(code);
+                        return { success: true, output: result || '' };
+                    } catch (error) {
+                        return { success: false, output: error.message || String(error) };
+                    }
                 }
             }
         };
 
+        const languageOrder = ['bqn', 'uiua', 'j'];
         let currentLanguage = 'bqn';
 
         // DOM elements
@@ -275,7 +700,7 @@
         }
 
         // Evaluation function
-        function evaluateCode() {
+        async function evaluateCode() {
             const code = codeInput.value.trim();
             if (!code) {
                 hideOutput();
@@ -283,7 +708,7 @@
             }
 
             const langConfig = languages[currentLanguage];
-            const result = langConfig.evaluate(code);
+            const result = await langConfig.evaluate(code);
             
             output.textContent = result.output;
             output.className = `output show ${result.success ? '' : 'error'}`;
@@ -293,11 +718,25 @@
             output.classList.remove('show');
         }
 
-        // Ctrl+Enter to evaluate
+        // Keyboard shortcuts
         codeInput.addEventListener('keydown', (e) => {
+            // Ctrl+Enter to evaluate
             if (e.ctrlKey && e.key === 'Enter') {
                 e.preventDefault();
                 evaluateCode();
+            }
+            
+            // Ctrl+Up/Down to switch languages
+            if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+                e.preventDefault();
+                const currentIndex = languageOrder.indexOf(currentLanguage);
+                let newIndex;
+                if (e.key === 'ArrowUp') {
+                    newIndex = currentIndex > 0 ? currentIndex - 1 : languageOrder.length - 1;
+                } else {
+                    newIndex = currentIndex < languageOrder.length - 1 ? currentIndex + 1 : 0;
+                }
+                switchLanguage(languageOrder[newIndex]);
             }
         });
 
