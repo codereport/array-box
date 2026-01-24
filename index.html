@@ -269,6 +269,9 @@
 
     <!-- BQN JavaScript implementation -->
     <script src="https://cdn.jsdelivr.net/gh/mlochbaum/BQN@master/docs/bqn.js"></script>
+    
+    <!-- Keyboard mappings for BQN and APL -->
+    <script src="keymap.js"></script>
 
 
     <!-- Uiua WASM Loader -->
@@ -426,6 +429,7 @@
 
         const languageOrder = ['bqn', 'uiua', 'j', 'apl'];
         let currentLanguage = 'bqn';
+        let currentKeyboardCleanup = null;
 
         // DOM elements
         const languageButton = document.getElementById('languageButton');
@@ -465,6 +469,17 @@
             
             // Update input font class
             codeInput.className = `code-input ${langConfig.fontClass}`;
+            
+            // Update keyboard handler
+            if (currentKeyboardCleanup) {
+                currentKeyboardCleanup();
+                currentKeyboardCleanup = null;
+            }
+            
+            // BQN uses \ prefix, APL uses ` prefix
+            if (lang === 'bqn' || lang === 'apl') {
+                currentKeyboardCleanup = ArrayKeymap.createKeyboardHandler(codeInput, lang);
+            }
             
             // Clear output
             hideOutput();
@@ -534,6 +549,9 @@
                 toggleDarkMode();
             }
         });
+
+        // Initialize keyboard handler for default language (BQN)
+        currentKeyboardCleanup = ArrayKeymap.createKeyboardHandler(codeInput, 'bqn');
     </script>
 </body>
 </html>
