@@ -1,0 +1,54 @@
+{
+  "name": "array-box",
+  "version": "1.0.0",
+  "description": "Array language code editor with syntax highlighting and keyboard mappings for BQN, APL, J, and Uiua",
+  "type": "module",
+  "main": "./src/keymap.js",
+  "exports": {
+    ".": {
+      "import": "./src/keymap.js",
+      "default": "./src/keymap.js"
+    },
+    "./keymap": {
+      "import": "./src/keymap.js",
+      "default": "./src/keymap.js"
+    },
+    "./keymap.js": {
+      "import": "./src/keymap.js",
+      "default": "./src/keymap.js"
+    },
+    "./syntax": {
+      "import": "./src/syntax.js",
+      "default": "./src/syntax.js"
+    },
+    "./syntax.js": {
+      "import": "./src/syntax.js",
+      "default": "./src/syntax.js"
+    },
+    "./theme.css": "./src/theme.css",
+    "./fonts/*": "./fonts/*",
+    "./assets/*": "./assets/*"
+  },
+  "files": [
+    "src/",
+    "fonts/",
+    "assets/"
+  ],
+  "keywords": [
+    "bqn",
+    "apl",
+    "j",
+    "uiua",
+    "array-language",
+    "syntax-highlighting",
+    "keyboard-mapping",
+    "code-editor"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codereport/array-box"
+  },
+  "homepage": "https://github.com/codereport/array-box#readme"
+}

@@ -75,7 +75,7 @@ const servers = {
     },
     j: {
         name: 'J Server',
-        script: 'j-server.js',
+        script: 'j-server.cjs',
         port: 8080,
         color: ansi.cyan,
         symbol: 'J',
@@ -89,7 +89,7 @@ const servers = {
     },
     apl: {
         name: 'APL Server',
-        script: 'apl-server.js',
+        script: 'apl-server.cjs',
         port: 8081,
         color: ansi.magenta,
         symbol: 'APL',
@@ -508,7 +508,7 @@ async function main() {
     
     // Start J server
     servers.j.port = jExternalPort;
-    const jScriptPath = path.join(__dirname, 'j-server.js');
+    const jScriptPath = path.join(__dirname, 'j-server.cjs');
     const jProc = spawn('node', [jScriptPath, String(jInternalPort)], {
         stdio: ['ignore', 'pipe', 'pipe'],
         cwd: __dirname
@@ -539,7 +539,7 @@ async function main() {
     
     // Start APL server
     servers.apl.port = aplExternalPort;
-    const aplScriptPath = path.join(__dirname, 'apl-server.js');
+    const aplScriptPath = path.join(__dirname, 'apl-server.cjs');
     const aplProc = spawn('node', [aplScriptPath, String(aplInternalPort)], {
         stdio: ['ignore', 'pipe', 'pipe'],
         cwd: __dirname

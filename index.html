@@ -13,68 +13,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Theme CSS with variables and syntax highlighting classes -->
+    <link rel="stylesheet" href="src/theme.css">
+    
     <style>
-        @font-face {
-            font-family: 'BQN';
-            src: url('fonts/BQN386.ttf') format('truetype');
-        }
-        @font-face {
-            font-family: 'Uiua';
-            src: url('fonts/Uiua386.ttf') format('truetype');
-        }
-        @font-face {
-            font-family: 'J';
-            src: url('fonts/Apl385.ttf') format('truetype');
-        }
-        @font-face {
-            font-family: 'APL';
-            src: url('fonts/Apl385.ttf') format('truetype');
-        }
-
-        :root {
-            --bg-color: #ffffff;
-            --text-color: #333333;
-            --border-color: #e0e0e0;
-            --border-hover: #999999;
-            --input-bg: #ffffff;
-            --output-bg: #f8f8f8;
-            --dropdown-bg: #ffffff;
-            --dropdown-hover: #f5f5f5;
-            --shadow-color: rgba(0, 0, 0, 0.1);
-            --focus-color: #4a90e2;
-            --error-color: #d32f2f;
-            
-            /* VS Light syntax colors */
-            --syntax-function: #0000FF;       /* Blue - dyadic functions */
-            --syntax-monadic: #008000;        /* Green - monadic functions */
-            --syntax-dyadic: #B8860B;         /* Dark goldenrod - 2-modifiers */
-            --syntax-modifier: #D2691E;       /* Chocolate/Orange - 1-modifiers */
-            --syntax-number: #A31515;         /* Red */
-            --syntax-default: #333333;        /* Default text */
-        }
-
-        html.dark, body.dark {
-            --bg-color: #1a1a1a;
-            --text-color: #e0e0e0;
-            --border-color: #404040;
-            --border-hover: #606060;
-            --input-bg: #2a2a2a;
-            --output-bg: #252525;
-            --dropdown-bg: #2a2a2a;
-            --dropdown-hover: #383838;
-            --shadow-color: rgba(0, 0, 0, 0.4);
-            --focus-color: #5a9cf2;
-            --error-color: #ff6b6b;
-            
-            /* Dracula syntax colors */
-            --syntax-function: #8BE9FD;       /* Cyan - dyadic functions */
-            --syntax-monadic: #50FA7B;        /* Green - monadic functions */
-            --syntax-dyadic: #F1FA8C;         /* Yellow - 2-modifiers */
-            --syntax-modifier: #FFB86C;       /* Orange (Dracula orange) - 1-modifiers */
-            --syntax-number: #BD93F9;         /* Purple (Dracula purple) */
-            --syntax-default: #F8F8F2;        /* Foreground (Dracula foreground) */
-        }
-
+        /* App-specific styles (layout, components) */
         * {
             margin: 0;
             padding: 0;
@@ -209,27 +153,6 @@
             color: var(--border-hover);
             pointer-events: none;
         }
-        
-        /* Syntax highlighting */
-        .syntax-function {
-            color: var(--syntax-function);
-        }
-        
-        .syntax-monadic {
-            color: var(--syntax-monadic);
-        }
-        
-        .syntax-dyadic {
-            color: var(--syntax-dyadic);
-        }
-        
-        .syntax-modifier {
-            color: var(--syntax-modifier);
-        }
-
-        .syntax-number {
-            color: var(--syntax-number);
-        }
 
         .code-input.bqn {
             font-family: 'BQN', 'Courier New', monospace;
@@ -351,10 +274,6 @@
 
     <!-- BQN JavaScript implementation -->
     <script src="https://cdn.jsdelivr.net/gh/mlochbaum/BQN@master/docs/bqn.js"></script>
-    
-    <!-- Keyboard mappings for BQN and APL -->
-    <script src="keymap.js"></script>
-
 
     <!-- Uiua WASM Loader -->
     <script type="module">
@@ -402,258 +321,11 @@
         loadUiua().catch(() => {});
     </script>
 
-    <script>
-        // Syntax highlighting token classifications for each language
-        const syntaxRules = {
-            bqn: {
-                // Functions (blue) - primitive functions
-                functions: [
-                    '+', '-', '×', '÷', '⋆', '√', '⌊', '⌈', '|', '¬', '∧', '∨',
-                    '<', '>', '≠', '=', '≤', '≥', '≡', '≢',
-                    '⊣', '⊢', '⥊', '∾', '≍', '⋈', '↑', '↓', '↕', '«', '»',
-                    '⌽', '⍉', '/', '⊏', '⊐', '⊑', '⊒', '⊔', '!',
-                    '∊', '⍷', '⍋', '⍒'
-                ],
-                // 1-modifiers (green) - monadic operators/adverbs
-                monadic: [
-                    '˜', '˘', '¨', '⌜', '⁼', '´', '˝', '`'
-                ],
-                // 2-modifiers (yellow) - dyadic operators/conjunctions  
-                dyadic: [
-                    '∘', '○', '⊸', '⟜', '⌾', '⊘', '◶', '⎉', '⚇', '⍟'
-                ],
-                // Numbers pattern (no global flag - we check index manually)
-                numberPattern: /^¯?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?/i
-            },
-            apl: {
-                // Functions (blue) - primitive functions
-                functions: [
-                    '+', '-', '×', '÷', '⌈', '⌊', '|', '!', '○', '*', '⍟', '?', '~',
-                    '<', '>', '=', '≠', '≤', '≥', '≡', '≢', '∧', '∨', '⍲', '⍱',
-                    '⍴', '⍳', ',', '⍪', '⌽', '⊖', '⍉', '↑', '↓', '⊂', '⊃', '⌷',
-                    '⊣', '⊢', '∪', '∩', '⊥', '⊤', '⍋', '⍒', '∊', '⍷', '⍸', '⊆',
-                    '⎕', '⍎', '⍕', '⍬', '∆', '∇', '⍞'
-                ],
-                // 1-modifiers (green) - monadic operators/adverbs
-                monadic: [
-                    '/', '\\', '⌿', '⍀', '¨', '⍨'
-                ],
-                // 2-modifiers (yellow) - dyadic operators/conjunctions
-                dyadic: [
-                    '∘', '.', '⍤', '⍥', '⍣', '@', '⍠', '⌸', '⌺', '⌶', '⍛'
-                ],
-                // Numbers pattern
-                numberPattern: /^¯?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?/i
-            },
-            j: {
-                // Functions (blue) - J verbs (single character)
-                functions: [
-                    '+', '-', '*', '%', '^', '$', '~', '|', ',', ';', '#',
-                    '{', '}', '[', ']', '"', '?', '!'
-                ],
-                // 1-modifiers / Adverbs (green) - single character
-                monadic: [
-                    '/', '\\'
-                ],
-                // 2-modifiers / Conjunctions (yellow) - single character
-                dyadic: [
-                    '@', '&', '`', ':'
-                ],
-                // Comparison verbs (also functions)
-                comparison: ['<', '>', '='],
-                // Multi-char tokens for J - digraphs ending in . or :
-                multiChar: {
-                    // Verbs with . suffix
-                    functions: [
-                        // Structural/selection verbs
-                        '{.', '}.', '{:', '}:', ',.', ',:', '{::', 
-                        // Math verbs
-                        '<.', '>.', '+.', '*.', '-.', '%.', '^.', '|.',
-                        '$.',  '~.', '#.', '#:',
-                        // Comparison/logic
-                        '<:', '>:', '+:', '*:', '-:', '%:', '~:', '=.',
-                        // Special verbs
-                        '?.', '?:', '".', '":', '!.',
-                        // Named primitives
-                        'i.', 'i:', 'j.', 'o.', 'p.', 'p:', 'q.', 'q:', 'r.',
-                        'A.', 'C.', 'e.', 'E.', 'I.', 'L.', 's:', 'S:', 'u:', 'x:',
-                        // Control
-                        '$:', '[:', '_.'
-                    ],
-                    // Adverbs with . or : suffix
-                    monadic: [
-                        '/.', '\\.', 
-                        'b.', 'f.', 'M.',
-                        't.', 't:'
-                    ],
-                    // Conjunctions with . or : suffix
-                    dyadic: [
-                        '@.', '@:', '&.', '&:',
-                        '!:', 
-                        'd.', 'D.', 'D:',
-                        'F.', 'F:', 'F..', 'F.:' , 'F:.', 'F::',
-                        'H.', 'L:', 'S:', 'T.',
-                        '^:', '`:', '".'
-                    ]
-                },
-                // Numbers pattern (J uses _ for negative, also infinity)
-                numberPattern: /^_?(\d+\.?\d*|\.\d+)([ejrx][+-]?\d+\.?\d*)?/i
-            },
-            uiua: {
-                // Monadic functions (green) - take 1 array argument
-                monadic: [
-                    '¬', '±', '√', '○', '⌵', '⌈', '⌊', '⧻', '△', '⇡', '⊢', '⇌', 
-                    '♭', '¤', '⊚', '⊛', '◴', '⍏', '⍖', '⊝', 'ℂ', '⁅', '°', '¯',
-                    '⍉', '⋯', '⍜', '⍘', '⬚', 'η', 'π', 'τ', '∞', '⚙', '◌', '⸮',
-                    '∩', '⍣', '⊓', '⊙', '⋅', '⬛'
-                ],
-                // Dyadic functions (blue) - take 2 array arguments
-                functions: [
-                    '+', '-', '×', '÷', '◿', 'ⁿ', 'ₙ', '=', '≠', '<', '>', '≤', '≥',
-                    '↧', '↥', '∠', '∧', '∨', '⊻', '⊼', '⊽', '⊂', '⊏', '⊡', '↯', '☇',
-                    '↙', '↘', '↻', '⊗', '∈', '⊟', '▽', '◫', '▩', '⊞', '⊃', '⍥',
-                    '⊜', '⊕', '⬚', '⤸', '⤙', '◠'
-                ],
-                // 1-modifiers (orange) - take 1 function argument
-                modifier: [
-                    '/', '\\', '∵', '≡', '⍢', '◡', '⚂', '⋕', '`', '¨'
-                ],
-                // 2-modifiers (yellow) - take 2+ function arguments
-                dyadic: [
-                    '⊃', '⊓', '⊩', '⊔', '◇', '◰', '∘', '⊸', '⟜', '⊙', '⋅', '⍣'
-                ],
-                // Subscript characters (should inherit color from preceding glyph)
-                subscripts: '₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎ₐₑₒₓₔₕₖₗₘₙₚₛₜ',
-                // Numbers pattern
-                numberPattern: /^¯?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?/i
-            }
-        };
-
-        // Syntax highlighter
-        function highlightCode(text, language) {
-            if (!text || !syntaxRules[language]) {
-                return escapeHtml(text);
-            }
-            
-            const rules = syntaxRules[language];
-            const tokens = [];
-            let i = 0;
-            let lastGlyphType = 'default'; // Track last glyph type for subscript inheritance
-            
-            while (i < text.length) {
-                const remainingText = text.substring(i);
-                const char = text[i];
-                
-                // Check for numbers first (including negative numbers with ¯ or _)
-                const numberMatch = remainingText.match(rules.numberPattern);
-                if (numberMatch) {
-                    tokens.push({
-                        type: 'number',
-                        value: numberMatch[0]
-                    });
-                    lastGlyphType = 'number';
-                    i += numberMatch[0].length;
-                    continue;
-                }
-                
-                // For Uiua: Check for subscript characters - inherit color from preceding glyph
-                if (language === 'uiua' && rules.subscripts && rules.subscripts.includes(char)) {
-                    tokens.push({ type: lastGlyphType, value: char });
-                    i++;
-                    continue;
-                }
-                
-                // Check for multi-character operators (J language)
-                if (language === 'j' && rules.multiChar) {
-                    // Try longest matches first (3-char, then 2-char)
-                    let matched = false;
-                    
-                    for (const len of [3, 2]) {
-                        if (i + len > text.length) continue;
-                        const substr = text.substring(i, i + len);
-                        
-                        if (rules.multiChar.functions.includes(substr)) {
-                            tokens.push({ type: 'function', value: substr });
-                            lastGlyphType = 'function';
-                            i += len;
-                            matched = true;
-                            break;
-                        } else if (rules.multiChar.monadic.includes(substr)) {
-                            tokens.push({ type: 'monadic', value: substr });
-                            lastGlyphType = 'monadic';
-                            i += len;
-                            matched = true;
-                            break;
-                        } else if (rules.multiChar.dyadic.includes(substr)) {
-                            tokens.push({ type: 'dyadic', value: substr });
-                            lastGlyphType = 'dyadic';
-                            i += len;
-                            matched = true;
-                            break;
-                        }
-                    }
-                    
-                    if (matched) continue;
-                }
-                
-                // Check single character
-                if (rules.functions && rules.functions.includes(char)) {
-                    tokens.push({ type: 'function', value: char });
-                    lastGlyphType = 'function';
-                } else if (rules.monadic && rules.monadic.includes(char)) {
-                    tokens.push({ type: 'monadic', value: char });
-                    lastGlyphType = 'monadic';
-                } else if (rules.modifier && rules.modifier.includes(char)) {
-                    tokens.push({ type: 'modifier', value: char });
-                    lastGlyphType = 'modifier';
-                } else if (rules.dyadic && rules.dyadic.includes(char)) {
-                    tokens.push({ type: 'dyadic', value: char });
-                    lastGlyphType = 'dyadic';
-                } else if (rules.comparison && rules.comparison.includes(char)) {
-                    // J comparison verbs
-                    tokens.push({ type: 'function', value: char });
-                    lastGlyphType = 'function';
-                } else {
-                    tokens.push({ type: 'default', value: char });
-                    // Don't reset lastGlyphType for whitespace/default chars
-                    // so subscripts after spaces still work
-                }
-                
-                i++;
-            }
-            
-            // Build HTML
-            return tokens.map(token => {
-                const escaped = escapeHtml(token.value);
-                    
-                if (token.type === 'number') {
-                    return `<span class="syntax-number">${escaped}</span>`;
-                } else if (token.type === 'function') {
-                    return `<span class="syntax-function">${escaped}</span>`;
-                } else if (token.type === 'monadic') {
-                    return `<span class="syntax-monadic">${escaped}</span>`;
-                } else if (token.type === 'modifier') {
-                    return `<span class="syntax-modifier">${escaped}</span>`;
-                } else if (token.type === 'dyadic') {
-                    return `<span class="syntax-dyadic">${escaped}</span>`;
-                } else {
-                    return escaped;
-                }
-            }).join('');
-        }
-        
-        // Helper to escape HTML
-        // Note: We don't convert spaces to &nbsp; because CSS white-space: pre-wrap
-        // handles space preservation, and &nbsp; becomes U+00A0 which breaks Uiua
-        function escapeHtml(text) {
-            return text
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;')
-                .replace(/\n/g, '<br>');
-        }
+    <!-- Main application module -->
+    <script type="module">
+        // Import from modular files
+        import { createKeyboardHandler } from './src/keymap.js';
+        import { syntaxRules, highlightCode, escapeHtml } from './src/syntax.js';
 
         // Language configuration
         const languages = {
@@ -875,7 +547,7 @@
             
             // BQN uses \ prefix, APL uses ` prefix
             if (lang === 'bqn' || lang === 'apl') {
-                currentKeyboardCleanup = ArrayKeymap.createKeyboardHandler(codeInput, lang);
+                currentKeyboardCleanup = createKeyboardHandler(codeInput, lang);
             }
             
             // Re-apply syntax highlighting for new language
@@ -1058,7 +730,7 @@
         });
 
         // Initialize keyboard handler for default language (APL)
-        currentKeyboardCleanup = ArrayKeymap.createKeyboardHandler(codeInput, 'apl');
+        currentKeyboardCleanup = createKeyboardHandler(codeInput, 'apl');
         
         // Apply initial syntax highlighting
         applySyntaxHighlighting();

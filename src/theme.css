@@ -1,0 +1,106 @@
+/**
+ * Array Box Theme CSS
+ * Light and dark mode CSS variables for array language interfaces
+ */
+
+/* Font faces for array languages */
+@font-face {
+    font-family: 'BQN';
+    src: url('../fonts/BQN386.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'Uiua';
+    src: url('../fonts/Uiua386.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'J';
+    src: url('../fonts/Apl385.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'APL';
+    src: url('../fonts/Apl385.ttf') format('truetype');
+}
+
+/* Light mode (default) */
+:root {
+    --bg-color: #ffffff;
+    --text-color: #333333;
+    --border-color: #e0e0e0;
+    --border-hover: #999999;
+    --input-bg: #ffffff;
+    --output-bg: #f8f8f8;
+    --dropdown-bg: #ffffff;
+    --dropdown-hover: #f5f5f5;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --focus-color: #4a90e2;
+    --error-color: #d32f2f;
+    
+    /* VS Light syntax colors */
+    --syntax-function: #0000FF;       /* Blue - dyadic functions */
+    --syntax-monadic: #008000;        /* Green - monadic functions */
+    --syntax-dyadic: #B8860B;         /* Dark goldenrod - 2-modifiers */
+    --syntax-modifier: #D2691E;       /* Chocolate/Orange - 1-modifiers */
+    --syntax-number: #A31515;         /* Red */
+    --syntax-default: #333333;        /* Default text */
+}
+
+/* Dark mode */
+html.dark, body.dark {
+    --bg-color: #1a1a1a;
+    --text-color: #e0e0e0;
+    --border-color: #404040;
+    --border-hover: #606060;
+    --input-bg: #2a2a2a;
+    --output-bg: #252525;
+    --dropdown-bg: #2a2a2a;
+    --dropdown-hover: #383838;
+    --shadow-color: rgba(0, 0, 0, 0.4);
+    --focus-color: #5a9cf2;
+    --error-color: #ff6b6b;
+    
+    /* Dracula syntax colors */
+    --syntax-function: #8BE9FD;       /* Cyan - dyadic functions */
+    --syntax-monadic: #50FA7B;        /* Green - monadic functions */
+    --syntax-dyadic: #F1FA8C;         /* Yellow - 2-modifiers */
+    --syntax-modifier: #FFB86C;       /* Orange (Dracula orange) - 1-modifiers */
+    --syntax-number: #BD93F9;         /* Purple (Dracula purple) */
+    --syntax-default: #F8F8F2;        /* Foreground (Dracula foreground) */
+}
+
+/* Syntax highlighting classes */
+.syntax-function {
+    color: var(--syntax-function);
+}
+
+.syntax-monadic {
+    color: var(--syntax-monadic);
+}
+
+.syntax-dyadic {
+    color: var(--syntax-dyadic);
+}
+
+.syntax-modifier {
+    color: var(--syntax-modifier);
+}
+
+.syntax-number {
+    color: var(--syntax-number);
+}
+
+/* Language-specific font classes */
+.font-bqn {
+    font-family: 'BQN', 'Courier New', monospace;
+}
+
+.font-uiua {
+    font-family: 'Uiua', 'Courier New', monospace;
+}
+
+.font-j {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.font-apl {
+    font-family: 'APL', 'Courier New', monospace;
+}
