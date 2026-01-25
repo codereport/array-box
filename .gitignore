@@ -7,3 +7,6 @@ uiua-wasm/Cargo.lock
 # Keep wasm/ directory (contains built WASM files for distribution)
 # But ignore the gitignore that wasm-pack generates
 wasm/.gitignore
+
+# Dyalog APL crash dumps
+aplcore

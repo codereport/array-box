@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Array Language Runner</title>
+    <!-- Prevent flash of light mode by applying dark mode immediately -->
+    <script>
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -39,14 +45,15 @@
             --error-color: #d32f2f;
             
             /* VS Light syntax colors */
-            --syntax-function: #0000FF;       /* Blue */
-            --syntax-monadic: #008000;        /* Green */
-            --syntax-dyadic: #B8860B;         /* Dark goldenrod - Yellow */
+            --syntax-function: #0000FF;       /* Blue - dyadic functions */
+            --syntax-monadic: #008000;        /* Green - monadic functions */
+            --syntax-dyadic: #B8860B;         /* Dark goldenrod - 2-modifiers */
+            --syntax-modifier: #D2691E;       /* Chocolate/Orange - 1-modifiers */
             --syntax-number: #A31515;         /* Red */
             --syntax-default: #333333;        /* Default text */
         }
 
-        body.dark {
+        html.dark, body.dark {
             --bg-color: #1a1a1a;
             --text-color: #e0e0e0;
             --border-color: #404040;
@@ -60,9 +67,10 @@
             --error-color: #ff6b6b;
             
             /* Dracula syntax colors */
-            --syntax-function: #8BE9FD;       /* Cyan (Dracula's blue) */
-            --syntax-monadic: #50FA7B;        /* Green (Dracula green) */
-            --syntax-dyadic: #F1FA8C;         /* Yellow (Dracula yellow) */
+            --syntax-function: #8BE9FD;       /* Cyan - dyadic functions */
+            --syntax-monadic: #50FA7B;        /* Green - monadic functions */
+            --syntax-dyadic: #F1FA8C;         /* Yellow - 2-modifiers */
+            --syntax-modifier: #FFB86C;       /* Orange (Dracula orange) - 1-modifiers */
             --syntax-number: #BD93F9;         /* Purple (Dracula purple) */
             --syntax-default: #F8F8F2;        /* Foreground (Dracula foreground) */
         }
@@ -98,9 +106,8 @@
         }
 
         .language-button {
-            background: var(--input-bg);
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
+            background: transparent;
+            border: none;
             padding: 14px 21px;
             cursor: pointer;
             display: flex;
@@ -108,11 +115,11 @@
             gap: 14px;
             min-width: 105px;
             height: 77px;
-            transition: border-color 0.2s, background-color 0.3s;
+            transition: opacity 0.2s;
         }
 
         .language-button:hover {
-            border-color: var(--border-hover);
+            opacity: 0.8;
         }
 
         .language-button img {
@@ -216,6 +223,10 @@
             color: var(--syntax-dyadic);
         }
         
+        .syntax-modifier {
+            color: var(--syntax-modifier);
+        }
+
         .syntax-number {
             color: var(--syntax-number);
         }
@@ -280,6 +291,22 @@
         .output.error {
             color: var(--error-color);
         }
+
+        .bug-report {
+            position: fixed;
+            bottom: 16px;
+            right: 20px;
+            font-size: 14px;
+            color: var(--border-hover);
+            text-decoration: none;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .bug-report:hover {
+            opacity: 1;
+            color: var(--text-color);
+        }
     </style>
 </head>
 <body>
@@ -319,6 +346,8 @@
             <div class="output" id="output"></div>
         </div>
     </div>
+
+    <a href="https://github.com/codereport/array-box/issues" target="_blank" class="bug-report">Report 🐛</a>
 
     <!-- BQN JavaScript implementation -->
     <script src="https://cdn.jsdelivr.net/gh/mlochbaum/BQN@master/docs/bqn.js"></script>
@@ -471,21 +500,30 @@
                 numberPattern: /^_?(\d+\.?\d*|\.\d+)([ejrx][+-]?\d+\.?\d*)?/i
             },
             uiua: {
-                // Functions (blue)
-                functions: [
-                    '+', '-', '×', '÷', '=', '≠', '<', '>', '≤', '≥',
-                    '√', '⌊', '⌈', '◿', 'ⁿ', 'ⁱ', '¬', '|', '°', '∿',
-                    '⊂', '⊏', '⊡', '⊢', '⊣', '↯', '☇', '△', '⇌', '⍉', '⊚',
-                    '⍏', '⍖', '⊟', '∈', '▽', '↥', '↧', '∧', '∨', '⊻', '⊼', '⊽', '◌'
-                ],
-                // 1-modifiers (green)
+                // Monadic functions (green) - take 1 array argument
                 monadic: [
-                    '/', '\\', '∵', '≡', '⚂', '⍥', '⍢', '◡'
+                    '¬', '±', '√', '○', '⌵', '⌈', '⌊', '⧻', '△', '⇡', '⊢', '⇌', 
+                    '♭', '¤', '⊚', '⊛', '◴', '⍏', '⍖', '⊝', 'ℂ', '⁅', '°', '¯',
+                    '⍉', '⋯', '⍜', '⍘', '⬚', 'η', 'π', 'τ', '∞', '⚙', '◌', '⸮',
+                    '∩', '⍣', '⊓', '⊙', '⋅', '⬛'
                 ],
-                // 2-modifiers (yellow)
+                // Dyadic functions (blue) - take 2 array arguments
+                functions: [
+                    '+', '-', '×', '÷', '◿', 'ⁿ', 'ₙ', '=', '≠', '<', '>', '≤', '≥',
+                    '↧', '↥', '∠', '∧', '∨', '⊻', '⊼', '⊽', '⊂', '⊏', '⊡', '↯', '☇',
+                    '↙', '↘', '↻', '⊗', '∈', '⊟', '▽', '◫', '▩', '⊞', '⊃', '⍥',
+                    '⊜', '⊕', '⬚', '⤸', '⤙', '◠'
+                ],
+                // 1-modifiers (orange) - take 1 function argument
+                modifier: [
+                    '/', '\\', '∵', '≡', '⍢', '◡', '⚂', '⋕', '`', '¨'
+                ],
+                // 2-modifiers (yellow) - take 2+ function arguments
                 dyadic: [
-                    '⊃', '⊓', '⊩', '⊔', '◇', '◰', '⍜', '∘', '⊸', '⟜', '⊙', '⋅'
+                    '⊃', '⊓', '⊩', '⊔', '◇', '◰', '∘', '⊸', '⟜', '⊙', '⋅', '⍣'
                 ],
+                // Subscript characters (should inherit color from preceding glyph)
+                subscripts: '₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎ₐₑₒₓₔₕₖₗₘₙₚₛₜ',
                 // Numbers pattern
                 numberPattern: /^¯?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?/i
             }
@@ -500,9 +538,11 @@
             const rules = syntaxRules[language];
             const tokens = [];
             let i = 0;
+            let lastGlyphType = 'default'; // Track last glyph type for subscript inheritance
             
             while (i < text.length) {
                 const remainingText = text.substring(i);
+                const char = text[i];
                 
                 // Check for numbers first (including negative numbers with ¯ or _)
                 const numberMatch = remainingText.match(rules.numberPattern);
@@ -511,7 +551,15 @@
                         type: 'number',
                         value: numberMatch[0]
                     });
+                    lastGlyphType = 'number';
                     i += numberMatch[0].length;
+                    continue;
+                }
+                
+                // For Uiua: Check for subscript characters - inherit color from preceding glyph
+                if (language === 'uiua' && rules.subscripts && rules.subscripts.includes(char)) {
+                    tokens.push({ type: lastGlyphType, value: char });
+                    i++;
                     continue;
                 }
                 
@@ -526,16 +574,19 @@
                         
                         if (rules.multiChar.functions.includes(substr)) {
                             tokens.push({ type: 'function', value: substr });
+                            lastGlyphType = 'function';
                             i += len;
                             matched = true;
                             break;
                         } else if (rules.multiChar.monadic.includes(substr)) {
                             tokens.push({ type: 'monadic', value: substr });
+                            lastGlyphType = 'monadic';
                             i += len;
                             matched = true;
                             break;
                         } else if (rules.multiChar.dyadic.includes(substr)) {
                             tokens.push({ type: 'dyadic', value: substr });
+                            lastGlyphType = 'dyadic';
                             i += len;
                             matched = true;
                             break;
@@ -546,19 +597,26 @@
                 }
                 
                 // Check single character
-                const char = text[i];
-                
-                if (rules.functions.includes(char)) {
+                if (rules.functions && rules.functions.includes(char)) {
                     tokens.push({ type: 'function', value: char });
-                } else if (rules.monadic.includes(char)) {
+                    lastGlyphType = 'function';
+                } else if (rules.monadic && rules.monadic.includes(char)) {
                     tokens.push({ type: 'monadic', value: char });
-                } else if (rules.dyadic.includes(char)) {
+                    lastGlyphType = 'monadic';
+                } else if (rules.modifier && rules.modifier.includes(char)) {
+                    tokens.push({ type: 'modifier', value: char });
+                    lastGlyphType = 'modifier';
+                } else if (rules.dyadic && rules.dyadic.includes(char)) {
                     tokens.push({ type: 'dyadic', value: char });
+                    lastGlyphType = 'dyadic';
                 } else if (rules.comparison && rules.comparison.includes(char)) {
                     // J comparison verbs
                     tokens.push({ type: 'function', value: char });
+                    lastGlyphType = 'function';
                 } else {
                     tokens.push({ type: 'default', value: char });
+                    // Don't reset lastGlyphType for whitespace/default chars
+                    // so subscripts after spaces still work
                 }
                 
                 i++;
@@ -574,6 +632,8 @@
                     return `<span class="syntax-function">${escaped}</span>`;
                 } else if (token.type === 'monadic') {
                     return `<span class="syntax-monadic">${escaped}</span>`;
+                } else if (token.type === 'modifier') {
+                    return `<span class="syntax-modifier">${escaped}</span>`;
                 } else if (token.type === 'dyadic') {
                     return `<span class="syntax-dyadic">${escaped}</span>`;
                 } else {
@@ -979,12 +1039,13 @@
 
         // Dark mode toggle with Ctrl+D
         function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
             document.body.classList.toggle('dark');
-            localStorage.setItem('darkMode', document.body.classList.contains('dark'));
+            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
         }
 
-        // Load dark mode preference
-        if (localStorage.getItem('darkMode') === 'true') {
+        // Sync body class with html class (html class was set in head to prevent flash)
+        if (document.documentElement.classList.contains('dark')) {
             document.body.classList.add('dark');
         }
 

@@ -53,7 +53,8 @@ function executeAPLCode(code) {
         // Use ⍎ (execute) to evaluate and ⎕← to display the result
         // Escape single quotes in the code
         const escapedCode = code.replace(/'/g, "''");
-        const aplInput = `⎕←⍎'${escapedCode}'\n`;
+        // Enable boxing with min style (only boxes nested/enclosed arrays, not simple arrays)
+        const aplInput = `]boxing on -s=min\n⎕←⍎'${escapedCode}'\n`;
         
         // Run in batch mode (-b) to get cleaner output
         const aplProcess = spawn(aplExecutable, ['-b'], {
@@ -96,6 +97,7 @@ function executeAPLCode(code) {
                     if (trimmed.includes('ANGLE')) return false;
                     if (trimmed.includes('glX')) return false;
                     if (trimmed.includes('⎕←⍎')) return false;
+                    if (trimmed.includes(']boxing')) return false;
                     return true;
                 })
                 .join('\n')
@@ -104,8 +106,22 @@ function executeAPLCode(code) {
             if (cleanError) {
                 resolve(cleanError);
             } else {
-                // Return the stdout which contains the actual result
-                resolve(stdout.trim());
+                // Return the stdout, filtering out ]boxing command output
+                const cleanOutput = stdout
+                    .split('\n')
+                    .filter(line => {
+                        const trimmed = line.trim();
+                        // Filter out ]boxing output (e.g., "Was OFF -style=min")
+                        if (trimmed.startsWith('Was ')) return false;
+                        if (trimmed.match(/^Was (ON|OFF)/)) return false;
+                        if (trimmed.includes('-style=')) return false;
+                        // Filter out user command status/error messages (start with *)
+                        if (trimmed.startsWith('*')) return false;
+                        return true;
+                    })
+                    .join('\n')
+                    .trim();
+                resolve(cleanOutput);
             }
         });
 
