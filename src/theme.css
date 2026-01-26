@@ -20,6 +20,10 @@
     font-family: 'APL';
     src: url('../fonts/Apl385.ttf') format('truetype');
 }
+@font-face {
+    font-family: 'Kap';
+    src: url('../fonts/APL387.ttf') format('truetype');
+}
 
 /* Dark mode (always on) - using Tailwind gray palette */
 :root {
@@ -43,6 +47,7 @@
     --syntax-dyadic: #F1FA8C;         /* Yellow - 2-modifiers */
     --syntax-modifier: #FFB86C;       /* Orange (Dracula orange) - 1-modifiers */
     --syntax-number: #BD93F9;         /* Purple (Dracula purple) */
+    --syntax-comment: #6272A4;        /* Dracula comment grey */
     --syntax-default: #F8F8F2;        /* Foreground (Dracula foreground) */
 }
 
@@ -67,6 +72,10 @@
     color: var(--syntax-number);
 }
 
+.syntax-comment {
+    color: var(--syntax-comment);
+}
+
 /* Language-specific font classes */
 .font-bqn {
     font-family: 'BQN', 'Courier New', monospace;
@@ -82,4 +91,180 @@
 
 .font-apl {
     font-family: 'APL', 'Courier New', monospace;
+}
+
+/* Visual Keyboard Styles */
+.keyboard-overlay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--input-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 8px 32px var(--shadow-color);
+    z-index: 1000;
+    display: none;
+    max-width: 95vw;
+}
+
+.keyboard-overlay.show {
+    display: block;
+}
+
+.keyboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.keyboard-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--text-color);
+    opacity: 0.8;
+}
+
+.keyboard-hint {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--border-hover);
+}
+
+.keyboard-row {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 4px;
+    justify-content: center;
+}
+
+.keyboard-key {
+    width: 48px;
+    height: 48px;
+    background: var(--dropdown-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.keyboard-key:hover {
+    background: var(--dropdown-hover);
+    border-color: var(--border-hover);
+}
+
+.keyboard-key.wide-1-5 {
+    width: 76px;
+}
+
+.keyboard-key.wide-2 {
+    width: 104px;
+}
+
+.keyboard-key.space {
+    width: 280px;
+}
+
+.key-symbol {
+    font-size: 20px;
+    line-height: 1;
+}
+
+/* Language-specific fonts for symbols */
+.keyboard-overlay.bqn .key-symbol,
+.keyboard-overlay.bqn .key-shift-symbol {
+    font-family: 'BQN', 'Courier New', monospace;
+}
+
+.keyboard-overlay.apl .key-symbol,
+.keyboard-overlay.apl .key-shift-symbol {
+    font-family: 'APL', 'Courier New', monospace;
+}
+
+.keyboard-overlay.kap .key-symbol,
+.keyboard-overlay.kap .key-shift-symbol {
+    font-family: 'Kap', 'Courier New', monospace;
+}
+
+.key-symbol.empty {
+    color: var(--border-color);
+}
+
+/* Syntax highlighting for keyboard symbols */
+.key-symbol.syntax-function {
+    color: var(--syntax-function);
+}
+
+.key-symbol.syntax-monadic {
+    color: var(--syntax-monadic);
+}
+
+.key-symbol.syntax-dyadic {
+    color: var(--syntax-dyadic);
+}
+
+.key-symbol.syntax-modifier {
+    color: var(--syntax-modifier);
+}
+
+.key-symbol.syntax-number {
+    color: var(--syntax-number);
+}
+
+.key-symbol.syntax-default {
+    color: var(--syntax-default);
+}
+
+.key-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--border-hover);
+    position: absolute;
+    bottom: 3px;
+    right: 4px;
+}
+
+.key-shift-symbol {
+    font-size: 12px;
+    position: absolute;
+    top: 3px;
+    left: 4px;
+    line-height: 1;
+}
+
+.key-shift-symbol.empty {
+    color: var(--border-color);
+}
+
+/* Syntax highlighting for shifted symbols */
+.key-shift-symbol.syntax-function {
+    color: var(--syntax-function);
+}
+
+.key-shift-symbol.syntax-monadic {
+    color: var(--syntax-monadic);
+}
+
+.key-shift-symbol.syntax-dyadic {
+    color: var(--syntax-dyadic);
+}
+
+.key-shift-symbol.syntax-modifier {
+    color: var(--syntax-modifier);
+}
+
+.key-shift-symbol.syntax-number {
+    color: var(--syntax-number);
+}
+
+.key-shift-symbol.syntax-default {
+    color: var(--syntax-default);
 }

@@ -6,6 +6,8 @@
  * Based on standard keymaps:
  * - BQN: https://mlochbaum.github.io/BQN/keymap.html
  * - APL: https://aplwiki.com/wiki/Typing_glyphs (Dyalog layout)
+ * - Uiua: https://www.uiua.org/docs/
+ * - J: https://code.jsoftware.com/wiki/NuVoc
  */
 
 /**
@@ -133,6 +135,204 @@ export const aplKeymap = {
 };
 
 /**
+ * Kap keymap: backtick (`) prefix
+ * Based on https://kapdemo.dhsdevelopments.com/clientweb2/
+ * Kap has its own keyboard layout distinct from Dyalog APL
+ */
+export const kapKeymap = {
+    // Numbers row
+    '`': '⋄', '~': '',
+    '1': '¨', '!': '⌶',
+    '2': '¯', '@': '⍫',
+    '3': '≤', '#': '⍒',
+    '4': '≥', '$': '⍋',
+    '5': '⟦', '%': '⌽',
+    '6': '⟧', '^': '⍉',
+    '7': '',  '&': '⊖',
+    '8': '≠', '*': '⍟',
+    '9': '∨', '(': '⍱',
+    '0': '∧', ')': '⍲',
+    '-': '×', '_': '⍠',
+    '=': '÷', '+': '⌹',
+    
+    // QWERTY row
+    'q': '⦻', 'Q': '⫇',
+    'w': '⍵', 'W': '',
+    'e': '∊', 'E': '⍷',
+    'r': '⍴', 'R': '√',
+    't': '⍓', 'T': '⍨',
+    'y': '↑', 'Y': '≬',
+    'u': '↓', 'U': '⇐',
+    'i': '⍳', 'I': '⍸',
+    'o': '○', 'O': '⍥',
+    'p': '⋆', 'P': '⍣',
+    '[': '←', '{': '⍞',
+    ']': '→', '}': '⍬',
+    '\\': '⊢', '|': '⊣',
+    
+    // Home row
+    'a': '⍺', 'A': '⍰',
+    's': '⌈', 'S': '∵',
+    'd': '⌊', 'D': '˝',
+    'f': '_', 'F': '⍛',
+    'g': '∇', 'G': '⍢',
+    'h': '∆', 'H': '⍙',
+    'j': '∘', 'J': '⍤',
+    'k': '⌸', 'K': '⌻',
+    'l': '⎕', 'L': '⌷',
+    ';': '⍎', ':': '≡',
+    "'": '⍕', '"': '≢',
+    
+    // Bottom row
+    'z': '⊂', 'Z': '⊆',
+    'x': '⊃', 'X': '⊇',
+    'c': '∩', 'C': '∙',
+    'v': '∪', 'V': 'λ',
+    'b': '⊥', 'B': '«',
+    'n': '⊤', 'N': '»',
+    'm': '…', 'M': '∥',
+    ',': '⍝', '<': '⍪',
+    '.': '⍀', '>': '⍮',
+    '/': '⌿', '?': '⫽'
+};
+
+/**
+ * Uiua glyph reference (not a keymap - Uiua uses named functions)
+ * Organized by category for reference display
+ * Based on https://www.uiua.org/docs/
+ */
+export const uiuaGlyphs = {
+    // Monadic functions (stack functions taking 1 argument) - green
+    monadic: [
+        '¬', '±', '⌵', '√', '○', '⌈', '⌊', '⧻', '△', '⇡', '⊢', '⇌',
+        '♭', '¤', '⊚', '⊛', '◴', '⍏', '⍖', '⊝', 'ℂ', '⁅', '°',
+        '⍉', '⋯', '⍜', '⍘', '⬚', '⚙', '◌', '⸮'
+    ],
+    // Dyadic functions (stack functions taking 2 arguments) - blue
+    functions: [
+        '+', '-', '×', '÷', '◿', 'ⁿ', 'ₙ', '=', '≠', '<', '>', '≤', '≥',
+        '↧', '↥', '∠', '∧', '∨', '⊻', '⊼', '⊽', '⊂', '⊏', '⊡', '↯', '☇',
+        '↙', '↘', '↻', '⊗', '∈', '⊟', '▽', '◫', '▩', '⊞', '⊃', '⍥',
+        '⊜', '⊕', '⬚', '⤸', '⤙', '◠'
+    ],
+    // Modifiers (take function arguments) - orange
+    modifier: [
+        '/', '\\', '∵', '≡', '⍢', '◡', '⚂', '⋕', '`', '¨'
+    ],
+    // Planet modifiers (2+ function arguments) - yellow
+    dyadic: [
+        '⊃', '⊓', '⊩', '⊔', '◇', '◰', '∘', '⊸', '⟜', '⊙', '⋅', '⍣'
+    ],
+    // Constants - purple
+    constants: [
+        'η', 'π', 'τ', '∞', '¯'
+    ],
+    // System/stack functions
+    system: [
+        '∩', '⊓', '⊙', '⋅', '⬛'
+    ]
+};
+
+/**
+ * J primitive reference (digraphs and single chars)
+ * Organized by category based on NuVoc: https://code.jsoftware.com/wiki/NuVoc
+ */
+export const jGlyphs = {
+    // Verbs (functions) - blue
+    // Single character verbs
+    functions: [
+        // Arithmetic
+        '+', '-', '*', '%', '^',
+        // Comparison  
+        '<', '=', '>',
+        // Structural
+        '$', '~', '|', ',', ';', '#',
+        // Selection/indexing
+        '{', '}', '[', ']',
+        // Other
+        '"', '?', '!'
+    ],
+    // Verb digraphs (with . or :)
+    verbDigraphs: [
+        // Floor/Ceiling/Min/Max
+        '<.', '>.', '<:', '>:',
+        // Arithmetic extensions
+        '+.', '+:', '*.', '*:', '-.', '-:', '%.', '%:',
+        // Power/Log
+        '^.', '^:',
+        // Structural
+        '$.', '$:', '|.', '|:',
+        // Tally/Copy/Base
+        '#.', '#:',
+        // Nub/Not-Equal
+        '~.', '~:',
+        // Box/Open
+        // Selection
+        '{.', '}.', '{:', '}:', '{::',
+        // Ravel/Append
+        ',.', ',:',
+        // Raze/Link
+        ';:', 
+        // Format/Do
+        '".', '":', 
+        // Roll/Deal
+        '?.', '?:',
+        // Factorial/Fit
+        '!.',
+        // Named primitives
+        'i.', 'i:', 'j.', 'o.', 'p.', 'p:', 'q:', 'r.',
+        'A.', 'C.', 'e.', 'E.', 'I.', 'L.', 's:', 'S:', 'u:', 'x:'
+    ],
+    // Adverbs (1-modifiers) - green
+    monadic: [
+        '/', '\\',           // Insert, Prefix
+        '/.',                // Oblique/Key
+        '\\.',               // Suffix
+        '~'                  // Reflex/Passive
+    ],
+    adverbDigraphs: [
+        '/:', '\\:',         // Grade Up/Down
+        'b.', 'f.', 'M.',    // Boolean, Fix, Memo
+        't.', 't:'           // Taylor
+    ],
+    // Conjunctions (2-modifiers) - yellow
+    dyadic: [
+        '@', '&', '`', ':',  // Atop, Bond/Compose, Tie, Define
+        '.'                  // Determinant/Matrix Product
+    ],
+    conjunctionDigraphs: [
+        '@.', '@:',          // Agenda, At
+        '&.', '&:', '&.:',   // Under, Appose
+        '`:',                // Evoke Gerund  
+        '!:',                // Foreign
+        '"',                 // Rank
+        'd.', 'D.', 'D:',    // Derivative
+        'F.', 'F:', 'F..', 'F.:', 'F:.', 'F::',  // Fold
+        'H.', 'L:', 'S:', 'T.',
+        '^:'                 // Power of Verb
+    ],
+    // Constants/Special - purple
+    constants: [
+        '_', '__',           // Negative sign, Infinity
+        '_.',                // Indeterminate
+        'a.', 'a:'           // Alphabet, Ace
+    ],
+    // Comments
+    comments: [
+        'NB.'
+    ],
+    // Control structures (for reference)
+    control: [
+        'if.', 'else.', 'elseif.', 'end.',
+        'for.', 'do.', 'while.', 'whilst.',
+        'select.', 'case.', 'fcase.',
+        'try.', 'catch.', 'catchd.', 'catcht.', 'throw.',
+        'return.', 'break.', 'continue.', 'goto.', 'label.',
+        'assert.'
+    ]
+};
+
+/**
  * Insert text at cursor position in an input/textarea or contenteditable element
  * @param {HTMLElement} element - The input element
  * @param {string} text - Text to insert
@@ -177,18 +377,24 @@ export function insertText(element, text) {
 /**
  * Creates a keyboard input handler for an input element
  * @param {HTMLInputElement|HTMLTextAreaElement|HTMLElement} inputElement - The input element to attach to
- * @param {string} language - 'bqn' or 'apl'
+ * @param {string} language - 'bqn', 'apl', or 'kap'
  * @returns {function} - Cleanup function to remove the handler
  */
 export function createKeyboardHandler(inputElement, language) {
     let prefixActive = false;
     const prefixKey = language === 'bqn' ? '\\' : '`';
-    const keymap = language === 'bqn' ? bqnKeymap : aplKeymap;
+    const keymap = language === 'bqn' ? bqnKeymap : (language === 'kap' ? kapKeymap : aplKeymap);
     const DEBUG = false; // Set to true to enable debug logging
     
     function handleKeyDown(e) {
         // Don't interfere with modifier keys or special keys
         if (e.key === 'Shift' || e.key === 'Control' || e.key === 'Alt' || e.key === 'Meta') {
+            return;
+        }
+        
+        // Don't interfere with Ctrl/Alt/Meta key combinations (like Ctrl+K, Ctrl+Enter, etc.)
+        if (e.ctrlKey || e.altKey || e.metaKey) {
+            prefixActive = false; // Reset prefix state
             return;
         }
         
@@ -200,7 +406,7 @@ export function createKeyboardHandler(inputElement, language) {
                             (prefixKey === '\\' && e.code === 'Backslash') ||
                             (prefixKey === '`' && (e.code === 'Backquote' || e.key === '`')));
         
-        if (isPrefixKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        if (isPrefixKey) {
             if (prefixActive) {
                 // Double prefix key - insert the prefix character itself
                 prefixActive = false;
@@ -348,19 +554,19 @@ export function createKeyboardHandler(inputElement, language) {
 
 /**
  * Get info about a keyboard mapping for display
- * @param {string} language - 'bqn' or 'apl'
+ * @param {string} language - 'bqn', 'apl', or 'kap'
  * @returns {object} Object with prefixKey, keymap, and description
  */
 export function getKeymapInfo(language) {
     const prefixKey = language === 'bqn' ? '\\' : '`';
-    const keymap = language === 'bqn' ? bqnKeymap : aplKeymap;
+    const keymap = language === 'bqn' ? bqnKeymap : (language === 'kap' ? kapKeymap : aplKeymap);
     
     return {
         prefixKey,
         keymap,
         description: language === 'bqn' 
             ? 'Press \\ followed by a key to insert BQN characters'
-            : 'Press ` followed by a key to insert APL characters'
+            : `Press \` followed by a key to insert ${language === 'kap' ? 'Kap' : 'APL'} characters`
     };
 }
 
@@ -368,6 +574,9 @@ export function getKeymapInfo(language) {
 export default {
     bqnKeymap,
     aplKeymap,
+    kapKeymap,
+    uiuaGlyphs,
+    jGlyphs,
     createKeyboardHandler,
     getKeymapInfo,
     insertText

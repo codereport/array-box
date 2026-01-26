@@ -24,6 +24,10 @@ export const syntaxRules = {
         dyadic: [
             '∘', '○', '⊸', '⟜', '⌾', '⊘', '◶', '⎉', '⚇', '⍟'
         ],
+        // Constants/number literals (purple) - used in numeric literals or represent constants
+        constants: [
+            '∞', '¯', 'π'
+        ],
         // Numbers pattern (no global flag - we check index manually)
         numberPattern: /^¯?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?/i
     },
@@ -43,6 +47,14 @@ export const syntaxRules = {
         // 2-modifiers (yellow) - dyadic operators/conjunctions
         dyadic: [
             '∘', '.', '⍤', '⍥', '⍣', '@', '⍠', '⌸', '⌺', '⌶', '⍛'
+        ],
+        // Constants/number literals (purple)
+        constants: [
+            '¯'
+        ],
+        // Comments (grey)
+        comments: [
+            '⍝'
         ],
         // Numbers pattern
         numberPattern: /^¯?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?/i
@@ -96,6 +108,10 @@ export const syntaxRules = {
                 'F.', 'F:', 'F..', 'F.:' , 'F:.', 'F::',
                 'H.', 'L:', 'S:', 'T.',
                 '^:', '`:', '".'
+            ],
+            // Comments
+            comments: [
+                'NB.'
             ]
         },
         // Numbers pattern (J uses _ for negative, also infinity)
@@ -105,8 +121,8 @@ export const syntaxRules = {
         // Monadic functions (green) - take 1 array argument
         monadic: [
             '¬', '±', '√', '○', '⌵', '⌈', '⌊', '⧻', '△', '⇡', '⊢', '⇌', 
-            '♭', '¤', '⊚', '⊛', '◴', '⍏', '⍖', '⊝', 'ℂ', '⁅', '°', '¯',
-            '⍉', '⋯', '⍜', '⍘', '⬚', 'η', 'π', 'τ', '∞', '⚙', '◌', '⸮',
+            '♭', '¤', '⊚', '⊛', '◴', '⍏', '⍖', '⊝', 'ℂ', '⁅', '°',
+            '⍉', '⋯', '⍜', '⍘', '⬚', '⚙', '◌', '⸮',
             '∩', '⍣', '⊓', '⊙', '⋅', '⬛'
         ],
         // Dyadic functions (blue) - take 2 array arguments
@@ -124,6 +140,10 @@ export const syntaxRules = {
         dyadic: [
             '⊃', '⊓', '⊩', '⊔', '◇', '◰', '∘', '⊸', '⟜', '⊙', '⋅', '⍣'
         ],
+        // Constants/number literals (purple)
+        constants: [
+            'η', 'π', 'τ', '∞', '¯'
+        ],
         // Subscript characters (should inherit color from preceding glyph)
         subscripts: '₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎ₐₑₒₓₔₕₖₗₘₙₚₛₜ',
         // Numbers pattern
@@ -132,17 +152,21 @@ export const syntaxRules = {
     kap: {
         // Functions (blue) - scalar and structural functions
         functions: [
-            // Scalar functions
+            // Scalar functions (arithmetic, comparison, logical)
             '+', '-', '×', '÷', '|', '⋆', '⍟', '=', '≠', '<', '>', '≤', '≥',
             '∧', '∨', '⍲', '⍱', '~', '√', '⌊', '⌈', '!',
             // Structural functions
             '⍴', '⍳', '⊢', '⊣', '⌷', '⊂', '⊃', ',', '⍪', '⍮', '↑', '↓',
             '?', '⌽', '⊖', '⍉', '∊', '⍷', '⍋', '⍒', '⍕', '⍎', '%',
             '⊆', '⊇', '⫇', '⍸', '∪', '⊤', '⊥', '∩', '⌸', '⌹', '…',
-            // Reduce/replicate
+            // Reduce/replicate (as functions)
             '/', '⌿',
-            // Other
-            '≡', '≢', '→', '←', '⇐', '∇', 'λ', '⍞', '≬'
+            // Comparison functions
+            '≡', '≢',
+            // Flow control
+            '→',
+            // Specialized functions
+            '≬'
         ],
         // 1-modifiers (green) - operators/adverbs
         monadic: [
@@ -152,8 +176,16 @@ export const syntaxRules = {
         dyadic: [
             '∘', '⍛', '⍥', '⍢', '«', '»', '∙', '⌻', '⍣'
         ],
-        // Reduce/replicate can be either function or operator depending on context
-        // We'll treat / and ⌿ as functions since they're more commonly used that way
+        // Constants/number literals (purple)
+        constants: [
+            '¯', '⍬'
+        ],
+        // Comments (grey)
+        comments: [
+            '⍝'
+        ],
+        // Syntax/special elements (not highlighted differently)
+        // '←', '⇐', '∇', 'λ', '⍞', '⍺', '⍵', '⎕', '⋄' - left as default
         // Numbers pattern (Kap uses ¯ for negative)
         numberPattern: /^¯?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?/i
     }
@@ -224,7 +256,14 @@ export function highlightCode(text, language) {
                 if (i + len > text.length) continue;
                 const substr = text.substring(i, i + len);
                 
-                if (rules.multiChar.functions.includes(substr)) {
+                // Check comments first (NB.)
+                if (rules.multiChar.comments && rules.multiChar.comments.includes(substr)) {
+                    tokens.push({ type: 'comment', value: substr });
+                    lastGlyphType = 'comment';
+                    i += len;
+                    matched = true;
+                    break;
+                } else if (rules.multiChar.functions.includes(substr)) {
                     tokens.push({ type: 'function', value: substr });
                     lastGlyphType = 'function';
                     i += len;
@@ -249,7 +288,15 @@ export function highlightCode(text, language) {
         }
         
         // Check single character
-        if (rules.functions && rules.functions.includes(char)) {
+        if (rules.comments && rules.comments.includes(char)) {
+            // Comments are grey
+            tokens.push({ type: 'comment', value: char });
+            lastGlyphType = 'comment';
+        } else if (rules.constants && rules.constants.includes(char)) {
+            // Constants like ∞, ¯, π are colored like numbers (purple)
+            tokens.push({ type: 'number', value: char });
+            lastGlyphType = 'number';
+        } else if (rules.functions && rules.functions.includes(char)) {
             tokens.push({ type: 'function', value: char });
             lastGlyphType = 'function';
         } else if (rules.monadic && rules.monadic.includes(char)) {
@@ -288,6 +335,8 @@ export function highlightCode(text, language) {
             return `<span class="syntax-modifier">${escaped}</span>`;
         } else if (token.type === 'dyadic') {
             return `<span class="syntax-dyadic">${escaped}</span>`;
+        } else if (token.type === 'comment') {
+            return `<span class="syntax-comment">${escaped}</span>`;
         } else {
             return escaped;
         }

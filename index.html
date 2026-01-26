@@ -164,7 +164,7 @@
         }
 
         .code-input.kap {
-            font-family: 'APL', 'Courier New', monospace;
+            font-family: 'Kap', 'Courier New', monospace;
         }
 
         .output {
@@ -205,7 +205,7 @@
         }
 
         .output.kap {
-            font-family: 'APL', 'Courier New', monospace;
+            font-family: 'Kap', 'Courier New', monospace;
         }
 
         .output.show {
@@ -329,8 +329,169 @@
     <!-- Main application module -->
     <script type="module">
         // Import from modular files
-        import { createKeyboardHandler } from './src/keymap.js';
+        import { createKeyboardHandler, bqnKeymap, aplKeymap, kapKeymap, uiuaGlyphs, jGlyphs } from './src/keymap.js';
         import { syntaxRules, highlightCode, escapeHtml } from './src/syntax.js';
+        import { ArrayKeyboard } from './src/keyboard.js';
+        
+        // Keyboard configurations for each language
+        const keyboardConfigs = {
+            bqn: {
+                keymap: bqnKeymap,
+                language: 'BQN',
+                prefixKey: '\\',
+                fontFamily: "'BQN', 'Courier New', monospace",
+                syntaxRules: syntaxRules.bqn,
+                displayMode: 'keyboard'
+            },
+            apl: {
+                keymap: aplKeymap,
+                language: 'APL',
+                prefixKey: '`',
+                fontFamily: "'APL', 'Courier New', monospace",
+                syntaxRules: syntaxRules.apl,
+                displayMode: 'keyboard'
+            },
+            kap: {
+                keymap: kapKeymap,
+                language: 'Kap',
+                prefixKey: '`',
+                fontFamily: "'Kap', 'Courier New', monospace",
+                syntaxRules: syntaxRules.kap,
+                displayMode: 'keyboard'
+            },
+            uiua: {
+                language: 'Uiua',
+                fontFamily: "'Uiua', 'Courier New', monospace",
+                syntaxRules: syntaxRules.uiua,
+                displayMode: 'category',
+                glyphCategories: {
+                    monadic: {
+                        glyphs: uiuaGlyphs.monadic,
+                        label: 'Monadic Functions (1 arg)',
+                        syntaxClass: 'syntax-monadic'
+                    },
+                    functions: {
+                        glyphs: uiuaGlyphs.functions,
+                        label: 'Dyadic Functions (2 args)',
+                        syntaxClass: 'syntax-function'
+                    },
+                    modifier: {
+                        glyphs: uiuaGlyphs.modifier,
+                        label: 'Modifiers (1 function)',
+                        syntaxClass: 'syntax-modifier'
+                    },
+                    dyadic: {
+                        glyphs: uiuaGlyphs.dyadic,
+                        label: 'Planet Modifiers (2+ functions)',
+                        syntaxClass: 'syntax-dyadic'
+                    },
+                    constants: {
+                        glyphs: uiuaGlyphs.constants,
+                        label: 'Constants',
+                        syntaxClass: 'syntax-number'
+                    }
+                }
+            },
+            j: {
+                language: 'J',
+                fontFamily: "'J', 'Courier New', monospace",
+                syntaxRules: syntaxRules.j,
+                displayMode: 'category',
+                glyphCategories: {
+                    functions: {
+                        glyphs: jGlyphs.functions,
+                        label: 'Verbs (single char)',
+                        syntaxClass: 'syntax-function'
+                    },
+                    verbDigraphs: {
+                        glyphs: jGlyphs.verbDigraphs,
+                        label: 'Verbs (digraphs)',
+                        syntaxClass: 'syntax-function'
+                    },
+                    monadic: {
+                        glyphs: jGlyphs.monadic,
+                        label: 'Adverbs (single char)',
+                        syntaxClass: 'syntax-monadic'
+                    },
+                    adverbDigraphs: {
+                        glyphs: jGlyphs.adverbDigraphs,
+                        label: 'Adverbs (digraphs)',
+                        syntaxClass: 'syntax-monadic'
+                    },
+                    dyadic: {
+                        glyphs: jGlyphs.dyadic,
+                        label: 'Conjunctions (single char)',
+                        syntaxClass: 'syntax-dyadic'
+                    },
+                    conjunctionDigraphs: {
+                        glyphs: jGlyphs.conjunctionDigraphs,
+                        label: 'Conjunctions (digraphs)',
+                        syntaxClass: 'syntax-dyadic'
+                    },
+                    constants: {
+                        glyphs: jGlyphs.constants,
+                        label: 'Constants & Special',
+                        syntaxClass: 'syntax-number'
+                    },
+                    comments: {
+                        glyphs: jGlyphs.comments,
+                        label: 'Comments',
+                        syntaxClass: 'syntax-comment'
+                    },
+                    control: {
+                        glyphs: jGlyphs.control,
+                        label: 'Control Structures',
+                        syntaxClass: 'syntax-default'
+                    }
+                }
+            }
+        };
+        
+        // Create the visual keyboard (initialized later)
+        let visualKeyboard = null;
+        
+        // Check if keyboard should be shown for this language
+        function languageSupportsKeyboard(lang) {
+            return lang in keyboardConfigs;
+        }
+        
+        // Update keyboard for current language
+        function updateKeyboardForLanguage(lang) {
+            if (!visualKeyboard) return;
+            
+            if (!languageSupportsKeyboard(lang)) {
+                visualKeyboard.disable();
+                return;
+            }
+            
+            const config = keyboardConfigs[lang];
+            if (!config) {
+                visualKeyboard.disable();
+                return;
+            }
+            
+            // Check if display mode or language changed - need to recreate overlay for category view
+            const modeChanged = visualKeyboard.displayMode !== (config.displayMode || 'keyboard');
+            const languageChanged = visualKeyboard.language !== config.language;
+            const needsRecreate = modeChanged || (config.displayMode === 'category' && languageChanged);
+            
+            visualKeyboard.enable();
+            visualKeyboard.keymap = config.keymap || {};
+            visualKeyboard.language = config.language;
+            visualKeyboard.prefixKey = config.prefixKey || '';
+            visualKeyboard.fontFamily = config.fontFamily;
+            visualKeyboard.syntaxRules = config.syntaxRules;
+            visualKeyboard.displayMode = config.displayMode || 'keyboard';
+            visualKeyboard.glyphCategories = config.glyphCategories || null;
+            
+            if (needsRecreate) {
+                // Recreate the overlay for new display mode or different category content
+                visualKeyboard.recreateOverlay();
+            } else if (config.displayMode !== 'category') {
+                visualKeyboard.updateKeymap(config.keymap, config.language, config.prefixKey);
+            }
+            visualKeyboard.updateFont(config.fontFamily);
+        }
 
         // Language configuration
         const languages = {
@@ -588,12 +749,13 @@
                 currentKeyboardCleanup = null;
             }
             
-            // BQN uses \ prefix, APL and Kap use ` prefix
+            // BQN uses \ prefix, APL and Kap use ` prefix (but Kap has its own keymap)
             if (lang === 'bqn' || lang === 'apl' || lang === 'kap') {
-                // Kap uses the same keymap as APL (backtick prefix)
-                const keymapLang = lang === 'kap' ? 'apl' : lang;
-                currentKeyboardCleanup = createKeyboardHandler(codeInput, keymapLang);
+                currentKeyboardCleanup = createKeyboardHandler(codeInput, lang);
             }
+            
+            // Update keyboard overlay for new language
+            updateKeyboardForLanguage(lang);
             
             // Re-apply syntax highlighting for new language
             applySyntaxHighlighting();
@@ -658,18 +820,41 @@
             return preCaretRange.toString().length;
         }
         
-        // Apply syntax highlighting
+        // Debounced syntax highlighting for performance
+        let highlightTimeout = null;
+        let highlightAnimationFrame = null;
+        
         function applySyntaxHighlighting() {
-            const cursorPos = getCursorPosition();
-            const text = getInputText();
-            const highlighted = highlightCode(text, currentLanguage);
-            
-            // Only update if content actually changed
-            if (codeInput.innerHTML !== highlighted) {
-                codeInput.innerHTML = highlighted;
-                // Restore cursor position
-                setCursorPosition(codeInput, cursorPos);
+            // Clear any pending timeout
+            if (highlightTimeout) {
+                clearTimeout(highlightTimeout);
+                highlightTimeout = null;
             }
+            
+            // Cancel any pending animation frame
+            if (highlightAnimationFrame) {
+                cancelAnimationFrame(highlightAnimationFrame);
+                highlightAnimationFrame = null;
+            }
+            
+            // Debounce: wait 50ms after last keystroke before highlighting
+            highlightTimeout = setTimeout(() => {
+                highlightAnimationFrame = requestAnimationFrame(() => {
+                    const cursorPos = getCursorPosition();
+                    const text = getInputText();
+                    const highlighted = highlightCode(text, currentLanguage);
+                    
+                    // Only update if content actually changed
+                    if (codeInput.innerHTML !== highlighted) {
+                        codeInput.innerHTML = highlighted;
+                        // Restore cursor position
+                        setCursorPosition(codeInput, cursorPos);
+                    }
+                    
+                    highlightAnimationFrame = null;
+                });
+                highlightTimeout = null;
+            }, 50);
         }
 
         // Evaluation function
@@ -727,8 +912,9 @@
         // Handle input changes - apply syntax highlighting and hide output
         codeInput.addEventListener('input', () => {
             hideOutput();
+            // Debounced highlighting will be applied automatically
             applySyntaxHighlighting();
-        });
+        }, { passive: true });
         
         // Handle paste - ensure plain text only
         codeInput.addEventListener('paste', (e) => {
@@ -756,6 +942,16 @@
 
         // Initialize keyboard handler for default language (APL)
         currentKeyboardCleanup = createKeyboardHandler(codeInput, 'apl');
+        
+        // Initialize visual keyboard for default language (APL)
+        const aplConfig = keyboardConfigs.apl;
+        visualKeyboard = new ArrayKeyboard({
+            keymap: aplConfig.keymap,
+            language: aplConfig.language,
+            prefixKey: aplConfig.prefixKey,
+            fontFamily: aplConfig.fontFamily,
+            syntaxRules: aplConfig.syntaxRules
+        });
         
         // Apply initial syntax highlighting
         applySyntaxHighlighting();
