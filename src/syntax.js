@@ -33,12 +33,21 @@ export const syntaxRules = {
     },
     apl: {
         // Functions (blue) - primitive functions
+        // Categories based on APL Wiki (https://aplwiki.com/wiki/Dyalog_APL):
+        // - Arithmetic: +, -, ×, ÷, |, ⌊, ⌈, *, ⍟, !, ○
+        // - Logic: ~, ?, ∧, ∨, ⍲, ⍱
+        // - Comparison: <, ≤, =, ≥, >, ≠, ≡, ≢
+        // - Structural: ⍴, ,, ⍪, ⌽, ⊖, ⍉, ↑, ↓, ⊂, ⊆, ∊, ⊃, ∩, ∪, ⊣, ⊢
+        // - Search/Index: ⍳, ⍸, ⍒, ⍋, ⍷
+        // - Numeric: ⊥, ⊤, ⌹
+        // - I/O: ⍎, ⍕, ⌷
         functions: [
             '+', '-', '×', '÷', '⌈', '⌊', '|', '!', '○', '*', '⍟', '?', '~',
             '<', '>', '=', '≠', '≤', '≥', '≡', '≢', '∧', '∨', '⍲', '⍱',
             '⍴', '⍳', ',', '⍪', '⌽', '⊖', '⍉', '↑', '↓', '⊂', '⊃', '⌷',
             '⊣', '⊢', '∪', '∩', '⊥', '⊤', '⍋', '⍒', '∊', '⍷', '⍸', '⊆',
-            '⎕', '⍎', '⍕', '⍬', '∆', '∇', '⍞'
+            '⎕', '⍎', '⍕', '⍬', '∆', '∇', '⍞',
+            '⌹'  // Matrix Inverse / Matrix Divide
         ],
         // 1-modifiers (green) - monadic operators/adverbs
         monadic: [

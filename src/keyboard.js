@@ -22,6 +22,7 @@
  */
 
 // Glyph names for BQN (monadic/dyadic names)
+// Based on official BQN documentation (https://mlochbaum.github.io/BQN/doc/primitive.html)
 export const bqnGlyphNames = {
     // Arithmetic
     '+': 'conjugate / add',
@@ -32,50 +33,51 @@ export const bqnGlyphNames = {
     '√': 'square root / root',
     '⌊': 'floor / minimum',
     '⌈': 'ceiling / maximum',
-    '|': 'absolute / modulus',
+    '|': 'absolute value / modulus',
     '¬': 'not / span',
     
-    // Comparison
+    // Logic/Comparison
     '∧': 'sort up / and',
     '∨': 'sort down / or',
-    '<': 'enclose / less',
-    '>': 'merge / greater',
+    '<': 'enclose / less than',
+    '>': 'merge / greater than',
     '≠': 'length / not equals',
     '=': 'rank / equals',
-    '≤': 'dedupe / less or equal',
-    '≥': 'find / greater or equal',
+    '≤': 'less than or equal',
+    '≥': 'greater than or equal',
     '≡': 'depth / match',
     '≢': 'shape / not match',
     
-    // Array
+    // Structural
     '⊣': 'identity / left',
     '⊢': 'identity / right',
     '⥊': 'deshape / reshape',
     '∾': 'join / join to',
     '≍': 'solo / couple',
-    '⋈': 'pair',
+    '⋈': 'enlist / pair',
     '↑': 'prefixes / take',
     '↓': 'suffixes / drop',
     '↕': 'range / windows',
-    '«': 'shift before',
-    '»': 'shift after',
+    '«': 'nudge back / shift after',
+    '»': 'nudge / shift before',
     '⌽': 'reverse / rotate',
-    '⍉': 'transpose',
+    '⍉': 'transpose / reorder axes',
     '/': 'indices / replicate',
+    
+    // Selection/Search
     '⊏': 'first cell / select',
     '⊐': 'classify / index of',
     '⊑': 'first / pick',
-    '⊒': 'occurrence / progressive index',
-    '⊔': 'group indices / group',
-    '!': 'assert / assert message',
-    
-    // Search
+    '⊒': 'occurrence count / progressive index of',
     '∊': 'mark firsts / member of',
     '⍷': 'deduplicate / find',
+    '⊔': 'group indices / group',
     '⍋': 'grade up / bins up',
     '⍒': 'grade down / bins down',
+    '!': 'assert / assert with message',
     
     // 1-modifiers (green)
+    '˙': 'constant',
     '˜': 'self / swap',
     '˘': 'cells',
     '¨': 'each',
@@ -96,8 +98,9 @@ export const bqnGlyphNames = {
     '⎉': 'rank',
     '⚇': 'depth',
     '⍟': 'repeat',
+    '⎊': 'catch',
     
-    // Special
+    // Constants/Special
     '∞': 'infinity',
     '¯': 'negative',
     'π': 'pi',
@@ -106,7 +109,6 @@ export const bqnGlyphNames = {
     '↩': 'change',
     '⋄': 'separator',
     '·': 'nothing',
-    '˙': 'constant',
     
     // System values
     '•': 'system',
@@ -118,11 +120,12 @@ export const bqnGlyphNames = {
 };
 
 // Glyph names for Dyalog APL (monadic/dyadic names)
+// Based on official Dyalog terminology from APL Wiki (https://aplwiki.com/wiki/Dyalog_APL)
 export const aplGlyphNames = {
     // Arithmetic
-    '+': 'conjugate / add',
-    '-': 'negate / subtract',
-    '×': 'signum / multiply',
+    '+': 'conjugate / plus',
+    '-': 'negate / minus',
+    '×': 'direction / times',
     '÷': 'reciprocal / divide',
     '|': 'magnitude / residue',
     '⌈': 'ceiling / maximum',
@@ -134,47 +137,52 @@ export const aplGlyphNames = {
     '?': 'roll / deal',
     '~': 'not / without',
     
-    // Comparison
-    '<': 'less than',
-    '>': 'greater than',
-    '=': 'equal',
-    '≠': 'not equal',
-    '≤': 'less or equal',
-    '≥': 'greater or equal',
-    '≡': 'depth / match',
-    '≢': 'tally / not match',
+    // Logic
     '∧': 'lcm / and',
     '∨': 'gcd / or',
     '⍲': 'nand',
     '⍱': 'nor',
     
+    // Comparison
+    '<': 'less',
+    '>': 'greater',
+    '=': 'equal',
+    '≠': 'unique mask / not equal',
+    '≤': 'less or equal',
+    '≥': 'greater or equal',
+    '≡': 'depth / match',
+    '≢': 'tally / not match',
+    
     // Structural
     '⍴': 'shape / reshape',
-    '⍳': 'index gen / index of',
-    '⍸': 'where / interval index',
     ',': 'ravel / catenate',
     '⍪': 'table / catenate first',
     '⌽': 'reverse / rotate',
     '⊖': 'reverse first / rotate first',
     '⍉': 'transpose',
-    '↑': 'mix / take',
+    '↑': 'mix (first) / take',
     '↓': 'split / drop',
     '⊂': 'enclose / partitioned enclose',
-    '⊃': 'disclose / pick',
+    '⊃': 'first (mix) / pick',
     '⊆': 'nest / partition',
-    '⌷': 'materialise / index',
+    '∊': 'enlist / membership',
+    '∩': 'intersection',
+    '∪': 'unique / union',
     '⊣': 'same / left',
     '⊢': 'same / right',
     
-    // Selection/Search
-    '∪': 'unique / union',
-    '∩': 'intersection',
-    '∊': 'enlist / member',
-    '⍷': 'find',
+    // Search/Index
+    '⍳': 'index generator / index of',
+    '⍸': 'where / interval index',
     '⍋': 'grade up',
     '⍒': 'grade down',
-    '⊥': 'decode',
-    '⊤': 'encode',
+    '⍷': 'find',
+    '⌷': 'materialise / index',
+    
+    // Numeric/Math
+    '⊥': 'decode (base)',
+    '⊤': 'encode (represent)',
+    '⌹': 'matrix inverse / matrix divide',
     
     // Operators/Modifiers
     '/': 'replicate / reduce',
@@ -190,75 +198,76 @@ export const aplGlyphNames = {
     '@': 'at',
     '⌸': 'key',
     '⌺': 'stencil',
+    '⍠': 'variant',
+    '⌶': 'i-beam',
     
-    // System/Special
-    '⎕': 'quad',
-    '⍞': 'quote-quad',
+    // I/O & Evaluation
     '⍎': 'execute',
     '⍕': 'format',
+    '⎕': 'quad',
+    '⍞': 'quote-quad',
+    
+    // System/Special
     '⍬': 'zilde (empty)',
     '∇': 'del (function)',
     '∆': 'delta',
     '←': 'assign',
     '→': 'branch',
-    '⋄': 'statement sep',
+    '⋄': 'statement separator',
     '⍝': 'comment',
-    '¨': 'diaeresis',
-    '⌹': 'matrix inv / matrix div',
-    '⍠': 'variant',
-    '⌶': 'i-beam',
 };
 
-// Glyph names for Kap (monadic/dyadic names)  
+// Glyph names for Kap (monadic/dyadic names)
+// Based on official Kap reference (https://kapdemo.dhsdevelopments.com/reference.html)
 export const kapGlyphNames = {
-    // Arithmetic
+    // Scalar/Arithmetic
     '+': 'conjugate / add',
     '-': 'negate / subtract',
-    '×': 'signum / multiply',
+    '×': 'angle (signum) / multiply',
     '÷': 'reciprocal / divide',
-    '|': 'magnitude / residue',
-    '⌈': 'ceiling / maximum',
-    '⌊': 'floor / minimum',
+    '|': 'magnitude / modulo',
+    '⌈': 'ceiling / max',
+    '⌊': 'floor / min',
     '⋆': 'exponential / power',
-    '⍟': 'natural log / logarithm',
-    '!': 'factorial / binomial',
+    '⍟': 'natural log / log base',
+    '!': 'gamma / binomial',
     '√': 'square root / root',
     '~': 'not / without',
     
-    // Comparison
-    '<': 'less than',
-    '>': 'greater than',
-    '=': 'equal',
-    '≠': 'not equal',
+    // Logic/Comparison
+    '<': 'increase rank / less than',
+    '>': 'decrease rank / greater than',
+    '=': 'classify / equals',
+    '≠': 'unique mask / not equals',
     '≤': 'less or equal',
     '≥': 'greater or equal',
-    '≡': 'depth / match',
-    '≢': 'tally / not match',
-    '∧': 'lcm / and',
-    '∨': 'gcd / or',
+    '≡': 'depth / compare equal',
+    '≢': 'major axis size / compare not equal',
+    '∧': 'sort up / logical and',
+    '∨': 'sort down / logical or',
     '⍲': 'nand',
     '⍱': 'nor',
     
     // Structural
     '⍴': 'shape / reshape',
-    '⍳': 'index gen / index of',
+    '⍳': 'index generator / index of',
     '⍸': 'where / interval index',
-    ',': 'ravel / catenate',
-    '⍪': 'table / catenate first',
-    '⍮': 'ravel / catenate',
+    ',': 'ravel / concatenate',
+    '⍪': 'table / concatenate first',
+    '⍮': 'singleton / pair',
     '⌽': 'reverse / rotate',
     '⊖': 'reverse first / rotate first',
-    '⍉': 'transpose',
-    '↑': 'mix / take',
-    '↓': 'split / drop',
+    '⍉': 'transpose / transpose by axis',
+    '↑': 'take first / take',
+    '↓': 'drop first / drop',
     '⊂': 'enclose / partition',
-    '⊃': 'disclose / pick',
-    '⊆': 'nest / partition',
-    '⊇': 'pick',
-    '⫇': 'pick',
-    '⌷': 'index',
-    '⊣': 'same / left',
-    '⊢': 'same / right',
+    '⊃': 'disclose (mix) / pick',
+    '⊆': 'nest / partitioned enclose',
+    '⊇': 'select',
+    '⫇': 'group',
+    '⌷': 'list to array / index lookup',
+    '⊣': 'hide / left',
+    '⊢': 'identity / right',
     
     // Selection/Search
     '∪': 'unique / union',
@@ -270,37 +279,44 @@ export const kapGlyphNames = {
     '⊥': 'decode',
     '⊤': 'encode',
     '?': 'roll / deal',
-    '%': 'reciprocal / divide',
+    '%': 'case',
+    
+    // Numeric/Math
+    '⌹': 'matrix inverse / matrix divide',
+    '…': 'range',
+    '≬': 'create list',
     
     // Operators/Modifiers
     '/': 'replicate / reduce',
-    '\\': 'expand / scan',
+    '\\': 'scan',
     '⌿': 'replicate first / reduce first',
-    '⍀': 'expand first / scan first',
+    '⍀': 'scan first',
     '¨': 'each',
-    '⍨': 'commute / constant',
-    '∘': 'beside / bind',
+    '⍨': 'commute / duplicate',
+    '∘': 'compose',
     '⍤': 'rank',
     '⍥': 'over',
     '⍣': 'power operator',
-    '⍢': 'under',
-    '∵': 'each',
-    '∥': 'parallel each',
-    '˝': 'rank',
-    '⍰': 'trace',
-    '«': 'before',
-    '»': 'after',
+    '⍢': 'structural under',
+    '∵': 'derive bitwise',
+    '∥': 'parallel',
+    '˝': 'inverse',
+    '⍰': 'conditional null',
+    '«': 'fork (left)',
+    '»': 'fork (right)',
     '∙': 'inner product',
     '⌻': 'outer product',
-    '⍛': 'beside',
+    '⍛': 'inverse compose',
     
-    // System/Special
+    // I/O & Evaluation
+    '⍎': 'parse number',
+    '⍕': 'format',
     '⎕': 'quad',
     '⍞': 'quote-quad',
-    '⍎': 'execute',
-    '⍕': 'format',
+    
+    // System/Special
     '⍬': 'zilde (empty)',
-    '∇': 'del (function)',
+    '∇': 'function definition',
     'λ': 'lambda',
     '←': 'assign',
     '⇐': 'const assign',
@@ -511,6 +527,7 @@ const defaultStyles = `
     gap: 4px;
     margin-bottom: 4px;
     justify-content: center;
+    position: relative;
 }
 
 .array-keyboard-key {
@@ -780,6 +797,34 @@ const defaultStyles = `
     text-align: center;
     margin-top: 4px;
 }
+
+.array-keyboard-doc-links {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: #6b7280;
+    opacity: 0.5;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: flex-end;
+}
+
+.array-keyboard-doc-links a {
+    color: #8BE9FD;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.array-keyboard-doc-links a:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+.array-keyboard-doc-links .separator {
+    color: #4b5563;
+    margin: 0 6px;
+}
 `;
 
 export class ArrayKeyboard {
@@ -799,6 +844,7 @@ export class ArrayKeyboard {
      * @param {Object} options.glyphCategories - For category mode: { categoryName: { glyphs: [], label: '', syntaxClass: '' }, ... }
      * @param {string} options.categoryTitle - Custom title for category view (default: '{language} Glyphs')
      * @param {Object} options.glyphNames - Glyph to name mapping for leader line labels { '⍺': 'alpha', ... }
+     * @param {Object} options.docLinks - Documentation links { layout: 'url', names: 'url' }
      */
     constructor(options = {}) {
         this.keymap = options.keymap || {};
@@ -814,6 +860,7 @@ export class ArrayKeyboard {
         this.glyphCategories = options.glyphCategories || null;
         this.categoryTitle = options.categoryTitle || null;
         this.glyphNames = options.glyphNames || null;
+        this.docLinks = options.docLinks || null;
         
         this.overlay = null;
         this.namesOverlay = null;
@@ -929,7 +976,8 @@ export class ArrayKeyboard {
         const rowsContainer = document.createElement('div');
         rowsContainer.className = 'array-keyboard-rows';
         
-        this.layout.forEach((row) => {
+        const totalRows = this.layout.length;
+        this.layout.forEach((row, rowIndex) => {
             const rowDiv = document.createElement('div');
             rowDiv.className = 'array-keyboard-row';
             
@@ -979,6 +1027,23 @@ export class ArrayKeyboard {
                 
                 rowDiv.appendChild(keyDiv);
             });
+            
+            // Add doc links to the last row (space bar row)
+            if (rowIndex === totalRows - 1 && this.docLinks && (this.docLinks.layout || this.docLinks.names)) {
+                const linksContainer = document.createElement('span');
+                linksContainer.className = 'array-keyboard-doc-links';
+                
+                const links = [];
+                if (this.docLinks.layout) {
+                    links.push(`<a href="${this.docLinks.layout}" target="_blank" rel="noopener">Layout</a>`);
+                }
+                if (this.docLinks.names) {
+                    links.push(`<a href="${this.docLinks.names}" target="_blank" rel="noopener">Names</a>`);
+                }
+                linksContainer.innerHTML = links.join('<span class="separator">|</span>');
+                
+                rowDiv.appendChild(linksContainer);
+            }
             
             rowsContainer.appendChild(rowDiv);
         });
@@ -1139,8 +1204,8 @@ export class ArrayKeyboard {
             const glyphCenterX = rect.left + rect.width / 2;
             const glyphCenterY = rect.top + rect.height / 2;
             
-            // Estimate label width based on name length
-            const labelWidth = item.name.length * 7 + 12;
+            // Estimate label width based on name length (will be measured after creation)
+            const estimatedLabelWidth = item.name.length * 7 + 12;
             
             let side;
             
@@ -1185,7 +1250,7 @@ export class ArrayKeyboard {
                 ...item,
                 glyphX: glyphCenterX,
                 glyphY: glyphCenterY,
-                labelWidth,
+                labelWidth: estimatedLabelWidth,
                 side
             };
         });
@@ -1317,7 +1382,9 @@ export class ArrayKeyboard {
             
             labelGroup.forEach((item, i) => {
                 item.labelY = groupStartY + i * fixedSpacing;
-                item.labelX = isLeft ? baseX - item.labelWidth : baseX;
+                // For left labels, store the right edge position (baseX)
+                // For right labels, store the left edge position (baseX)
+                item.labelBaseX = baseX;
             });
             
             // Ensure we don't overflow top
@@ -1341,28 +1408,63 @@ export class ArrayKeyboard {
         positionVerticalLabels(sides.left, true);
         positionVerticalLabels(sides.right, false);
         
-        // Create labels and leader lines for all sides
+        // Create labels first, then measure and position, then create leader lines
         const allLabels = [...sides.top, ...sides.right, ...sides.bottom, ...sides.left];
+        const labelElements = [];
         
+        // First pass: create all labels with visibility hidden to measure actual widths
         allLabels.forEach(item => {
-            // Create label
             const label = document.createElement('div');
             label.className = `array-keyboard-name-label ${this._getSyntaxClass(item.glyph)}`;
             label.textContent = item.name;
-            label.style.left = `${item.labelX}px`;
+            label.style.visibility = 'hidden';
+            label.style.position = 'absolute';
             label.style.top = `${item.labelY}px`;
-            this.namesOverlay.appendChild(label);
             
-            // Create leader line with bezier curve
+            // For horizontal labels, use the pre-calculated labelX
+            // For vertical labels, we'll adjust after measuring
+            if (item.side === 'top' || item.side === 'bottom') {
+                label.style.left = `${item.labelX}px`;
+            } else {
+                // Temporarily position for measurement
+                label.style.left = '0px';
+            }
+            
+            this.namesOverlay.appendChild(label);
+            labelElements.push({ label, item });
+        });
+        
+        // Second pass: measure actual widths and reposition left/right labels
+        labelElements.forEach(({ label, item }) => {
+            const actualWidth = label.getBoundingClientRect().width;
+            item.actualWidth = actualWidth;
+            
+            if (item.side === 'left') {
+                // Position so right edge aligns with baseX
+                item.labelX = item.labelBaseX - actualWidth;
+                label.style.left = `${item.labelX}px`;
+            } else if (item.side === 'right') {
+                // Position so left edge aligns with baseX
+                item.labelX = item.labelBaseX;
+                label.style.left = `${item.labelX}px`;
+            }
+            
+            // Make visible
+            label.style.visibility = 'visible';
+        });
+        
+        // Third pass: create leader lines using actual measured widths
+        labelElements.forEach(({ label, item }) => {
             const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             line.setAttribute('class', 'array-keyboard-leader-line');
             
             const startX = item.glyphX;
             const startY = item.glyphY;
+            const actualWidth = item.actualWidth || item.labelWidth;
             
             // Calculate endpoint based on side
             let endX, endY, d;
-            const labelCenterX = item.labelX + item.labelWidth / 2;
+            const labelCenterX = item.labelX + actualWidth / 2;
             const labelCenterY = item.labelY + labelHeight / 2;
             
             switch (item.side) {
@@ -1377,11 +1479,13 @@ export class ArrayKeyboard {
                     d = `M ${startX} ${startY} C ${startX} ${startY + 30}, ${endX} ${endY - 30}, ${endX} ${endY}`;
                     break;
                 case 'left':
-                    endX = item.labelX + item.labelWidth;
+                    // Connect to right edge of label
+                    endX = item.labelX + actualWidth;
                     endY = labelCenterY;
                     d = `M ${startX} ${startY} C ${startX - 40} ${startY}, ${endX + 40} ${endY}, ${endX} ${endY}`;
                     break;
                 case 'right':
+                    // Connect to left edge of label
                     endX = item.labelX;
                     endY = labelCenterY;
                     d = `M ${startX} ${startY} C ${startX + 40} ${startY}, ${endX - 40} ${endY}, ${endX} ${endY}`;

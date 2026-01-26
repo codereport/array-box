@@ -81,7 +81,7 @@
             border-radius: 8px;
             box-shadow: 0 4px 12px var(--shadow-color);
             z-index: 1000;
-            min-width: 120px;
+            min-width: 190px;
             display: none;
         }
 
@@ -90,14 +90,15 @@
         }
 
         .dropdown-item {
-            padding: 21px 28px;
+            padding: 10px 14px;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 17.5px;
+            gap: 10px;
             transition: background-color 0.2s;
-            font-size: 24.5px;
+            font-size: 13px;
             color: var(--text-color);
+            white-space: nowrap;
         }
 
         .dropdown-item:hover {
@@ -105,14 +106,23 @@
         }
 
         .dropdown-item img {
-            width: 42px;
-            height: 42px;
+            width: 24px;
+            height: 24px;
             object-fit: contain;
         }
 
         .dropdown-item svg {
-            width: 42px;
-            height: 42px;
+            width: 24px;
+            height: 24px;
+        }
+
+        .dropdown-item .lang-name {
+            font-weight: 500;
+        }
+
+        .dropdown-item .lang-version {
+            color: #9CA3AF;
+            font-size: 11px;
         }
 
         .input-container {
@@ -271,23 +281,27 @@
             <div class="dropdown" id="dropdown">
                 <div class="dropdown-item" data-lang="bqn">
                     <img src="assets/bqn.svg" alt="BQN">
-                    <span>BQN</span>
+                    <span class="lang-name">BQN</span>
+                    <span class="lang-version">bqn.js</span>
                 </div>
                 <div class="dropdown-item" data-lang="uiua">
                     <img src="assets/uiua.png" alt="Uiua">
-                    <span>Uiua</span>
+                    <span class="lang-name">Uiua</span>
+                    <span class="lang-version" id="uiua-version">0.x</span>
                 </div>
                 <div class="dropdown-item" data-lang="j">
                     <img src="assets/j_logo.png" alt="J">
-                    <span>J</span>
+                    <span class="lang-name">J</span>
+                    <span class="lang-version">J9.6</span>
                 </div>
                 <div class="dropdown-item" data-lang="apl">
                     <img src="assets/apl.png" alt="APL">
-                    <span>APL</span>
+                    <span class="lang-name">APL</span>
+                    <span class="lang-version">Dyalog v20.0</span>
                 </div>
                 <div class="dropdown-item" data-lang="kap">
                     <img src="assets/kap.png" alt="Kap">
-                    <span>Kap</span>
+                    <span class="lang-name">Kap</span>
                 </div>
             </div>
         </div>
@@ -327,7 +341,13 @@
             try {
                 await initUiua();
                 uiuaReady = true;
-                console.log('Uiua WASM loaded, version:', uiua_version());
+                const version = uiua_version();
+                console.log('Uiua WASM loaded, version:', version);
+                // Update version display in dropdown
+                const versionEl = document.getElementById('uiua-version');
+                if (versionEl && version) {
+                    versionEl.textContent = version;
+                }
                 return true;
             } catch (error) {
                 console.warn('Uiua WASM loading failed:', error);
@@ -374,7 +394,11 @@
                 fontFamily: "'BQN', 'Courier New', monospace",
                 syntaxRules: syntaxRules.bqn,
                 displayMode: 'keyboard',
-                glyphNames: bqnGlyphNames
+                glyphNames: bqnGlyphNames,
+                docLinks: {
+                    layout: 'https://mlochbaum.github.io/BQN/keymap.html',
+                    names: 'https://mlochbaum.github.io/BQN/doc/primitive.html'
+                }
             },
             apl: {
                 keymap: aplKeymap,
@@ -383,7 +407,11 @@
                 fontFamily: "'APL', 'Courier New', monospace",
                 syntaxRules: syntaxRules.apl,
                 displayMode: 'keyboard',
-                glyphNames: aplGlyphNames
+                glyphNames: aplGlyphNames,
+                docLinks: {
+                    layout: 'https://dfns.dyalog.com/n_keyboards.htm',
+                    names: 'https://aplwiki.com/wiki/Dyalog_APL'
+                }
             },
             kap: {
                 keymap: kapKeymap,
@@ -392,7 +420,11 @@
                 fontFamily: "'Kap', 'Courier New', monospace",
                 syntaxRules: syntaxRules.kap,
                 displayMode: 'keyboard',
-                glyphNames: kapGlyphNames
+                glyphNames: kapGlyphNames,
+                docLinks: {
+                    layout: 'https://kapdemo.dhsdevelopments.com/clientweb2/',
+                    names: 'https://kapdemo.dhsdevelopments.com/reference.html'
+                }
             },
             uiua: {
                 language: 'Uiua',
@@ -507,11 +539,12 @@
                 return;
             }
             
-            // Check if display mode, language, or glyphNames changed - need to recreate overlay
+            // Check if display mode, language, glyphNames, or docLinks changed - need to recreate overlay
             const modeChanged = visualKeyboard.displayMode !== (config.displayMode || 'keyboard');
             const languageChanged = visualKeyboard.language !== config.language;
             const glyphNamesChanged = visualKeyboard.glyphNames !== (config.glyphNames || null);
-            const needsRecreate = modeChanged || languageChanged || glyphNamesChanged;
+            const docLinksChanged = JSON.stringify(visualKeyboard.docLinks) !== JSON.stringify(config.docLinks || null);
+            const needsRecreate = modeChanged || languageChanged || glyphNamesChanged || docLinksChanged;
             
             visualKeyboard.enable();
             visualKeyboard.keymap = config.keymap || {};
@@ -523,6 +556,7 @@
             visualKeyboard.glyphCategories = config.glyphCategories || null;
             visualKeyboard.categoryTitle = config.categoryTitle || null;
             visualKeyboard.glyphNames = config.glyphNames || null;
+            visualKeyboard.docLinks = config.docLinks || null;
             
             if (needsRecreate) {
                 // Recreate the overlay for new display mode, language, or glyphNames
@@ -1004,7 +1038,8 @@
             prefixKey: aplConfig.prefixKey,
             fontFamily: aplConfig.fontFamily,
             syntaxRules: aplConfig.syntaxRules,
-            glyphNames: aplConfig.glyphNames
+            glyphNames: aplConfig.glyphNames,
+            docLinks: aplConfig.docLinks
         });
         
         // Apply initial syntax highlighting
