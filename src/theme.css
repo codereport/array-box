@@ -1,6 +1,6 @@
 /**
  * Array Box Theme CSS
- * Light and dark mode CSS variables for array language interfaces
+ * Dark mode CSS variables for array language interfaces
  */
 
 /* Font faces for array languages */
@@ -21,42 +21,21 @@
     src: url('../fonts/Apl385.ttf') format('truetype');
 }
 
-/* Light mode (default) */
+/* Dark mode (always on) - using Tailwind gray palette */
 :root {
-    --bg-color: #ffffff;
-    --text-color: #333333;
-    --border-color: #e0e0e0;
-    --border-hover: #999999;
-    --input-bg: #ffffff;
-    --output-bg: #f8f8f8;
-    --dropdown-bg: #ffffff;
-    --dropdown-hover: #f5f5f5;
-    --shadow-color: rgba(0, 0, 0, 0.1);
-    --focus-color: #4a90e2;
-    --error-color: #d32f2f;
-    
-    /* VS Light syntax colors */
-    --syntax-function: #0000FF;       /* Blue - dyadic functions */
-    --syntax-monadic: #008000;        /* Green - monadic functions */
-    --syntax-dyadic: #B8860B;         /* Dark goldenrod - 2-modifiers */
-    --syntax-modifier: #D2691E;       /* Chocolate/Orange - 1-modifiers */
-    --syntax-number: #A31515;         /* Red */
-    --syntax-default: #333333;        /* Default text */
-}
-
-/* Dark mode */
-html.dark, body.dark {
-    --bg-color: #1a1a1a;
-    --text-color: #e0e0e0;
-    --border-color: #404040;
-    --border-hover: #606060;
-    --input-bg: #2a2a2a;
-    --output-bg: #252525;
-    --dropdown-bg: #2a2a2a;
-    --dropdown-hover: #383838;
+    /* Gradient background: from-gray-900 via-gray-800 to-gray-900 */
+    --bg-gradient: linear-gradient(to bottom right, #111827, #1f2937, #111827);
+    --bg-color: #111827;           /* gray-900 */
+    --text-color: #e5e7eb;         /* gray-200 */
+    --border-color: #4b5563;       /* gray-600 */
+    --border-hover: #6b7280;       /* gray-500 */
+    --input-bg: #1f2937;           /* gray-800 */
+    --output-bg: #1f2937;          /* gray-800 */
+    --dropdown-bg: #1f2937;        /* gray-800 */
+    --dropdown-hover: #374151;     /* gray-700 */
     --shadow-color: rgba(0, 0, 0, 0.4);
-    --focus-color: #5a9cf2;
-    --error-color: #ff6b6b;
+    --focus-color: #22c55e;        /* green-500 */
+    --error-color: #ef4444;        /* red-500 */
     
     /* Dracula syntax colors */
     --syntax-function: #8BE9FD;       /* Cyan - dyadic functions */

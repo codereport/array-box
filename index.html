@@ -4,12 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Array Language Runner</title>
-    <!-- Prevent flash of light mode by applying dark mode immediately -->
-    <script>
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.documentElement.classList.add('dark');
-        }
-    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -27,14 +21,13 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: var(--bg-color);
+            background: var(--bg-gradient);
             color: var(--text-color);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             padding: 20px;
-            transition: background-color 0.3s, color 0.3s;
         }
 
         .container {
@@ -82,14 +75,13 @@
             top: 100%;
             left: 0;
             margin-top: 4px;
-            background: var(--dropdown-bg);
-            border: 2px solid var(--border-color);
+            background: #1f2937;
+            border: 2px solid #4b5563;
             border-radius: 8px;
             box-shadow: 0 4px 12px var(--shadow-color);
             z-index: 1000;
             min-width: 120px;
             display: none;
-            transition: background-color 0.3s;
         }
 
         .dropdown.show {
@@ -108,7 +100,7 @@
         }
 
         .dropdown-item:hover {
-            background-color: var(--dropdown-hover);
+            background-color: #374151;
         }
 
         .dropdown-item img {
@@ -129,28 +121,29 @@
 
         .code-input {
             width: 100%;
-            padding: 21px 28px;
-            border: 2px solid var(--border-color);
+            padding: 16px 20px;
+            border: 2px solid #4b5563;
             border-radius: 8px;
-            font-size: 28px;
+            font-size: 24px;
             font-family: 'Courier New', monospace;
-            transition: border-color 0.2s, background-color 0.3s, color 0.3s;
-            min-height: 77px;
-            background: var(--input-bg);
+            transition: border-color 0.2s;
+            min-height: 56px;
+            background: #1f2937;
             color: var(--text-color);
             overflow-wrap: break-word;
             white-space: pre-wrap;
-            line-height: 1.2;
+            line-height: 1.5;
+            caret-color: #10b981;
         }
 
         .code-input:focus {
             outline: none;
-            border-color: var(--border-color);
+            border-color: #22c55e;
         }
 
         .code-input:empty:before {
             content: attr(data-placeholder);
-            color: var(--border-hover);
+            color: #6b7280;
             pointer-events: none;
         }
 
@@ -176,19 +169,19 @@
             left: 0;
             right: 0;
             margin-top: 14px;
-            padding: 21px 28px;
-            background: var(--output-bg);
-            border: 2px solid var(--border-color);
+            padding: 16px 20px;
+            background: #1f2937;
+            border: 2px solid #4b5563;
             border-radius: 8px;
             font-family: 'Courier New', monospace;
-            font-size: 24.5px;
+            font-size: 24px;
             white-space: pre-wrap;
             word-wrap: break-word;
             display: none;
             max-height: 525px;
             overflow-y: auto;
             color: var(--text-color);
-            transition: background-color 0.3s, color 0.3s;
+            line-height: 1.5;
         }
 
         .output.bqn {
@@ -706,26 +699,6 @@
                 
                 // Trigger input event to apply highlighting
                 codeInput.dispatchEvent(new Event('input', { bubbles: true }));
-            }
-        });
-
-        // Dark mode toggle with Ctrl+D
-        function toggleDarkMode() {
-            document.documentElement.classList.toggle('dark');
-            document.body.classList.toggle('dark');
-            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
-        }
-
-        // Sync body class with html class (html class was set in head to prevent flash)
-        if (document.documentElement.classList.contains('dark')) {
-            document.body.classList.add('dark');
-        }
-
-        // Global keyboard shortcut for dark mode
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key === 'd') {
-                e.preventDefault();
-                toggleDarkMode();
             }
         });
 
