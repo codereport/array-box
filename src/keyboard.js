@@ -10,14 +10,448 @@
  *     language: 'apl',
  *     prefixKey: '`',
  *     fontFamily: "'APL', monospace",
- *     syntaxRules: { functions: [...], monadic: [...], ... }
+ *     syntaxRules: { functions: [...], monadic: [...], ... },
+ *     glyphNames: { '⍺': 'alpha', '⍵': 'omega', ... }  // Optional: for leader line labels
  *   });
  *   
  *   keyboard.toggle();  // Toggle visibility
  *   keyboard.show();    // Show keyboard
  *   keyboard.hide();    // Hide keyboard
  *   keyboard.destroy(); // Remove from DOM
+ *   keyboard.toggleNames(); // Toggle leader line labels (press ? when visible)
  */
+
+// Glyph names for BQN (monadic/dyadic names)
+export const bqnGlyphNames = {
+    // Arithmetic
+    '+': 'conjugate / add',
+    '-': 'negate / subtract',
+    '×': 'sign / multiply',
+    '÷': 'reciprocal / divide',
+    '⋆': 'exponential / power',
+    '√': 'square root / root',
+    '⌊': 'floor / minimum',
+    '⌈': 'ceiling / maximum',
+    '|': 'absolute / modulus',
+    '¬': 'not / span',
+    
+    // Comparison
+    '∧': 'sort up / and',
+    '∨': 'sort down / or',
+    '<': 'enclose / less',
+    '>': 'merge / greater',
+    '≠': 'length / not equals',
+    '=': 'rank / equals',
+    '≤': 'dedupe / less or equal',
+    '≥': 'find / greater or equal',
+    '≡': 'depth / match',
+    '≢': 'shape / not match',
+    
+    // Array
+    '⊣': 'identity / left',
+    '⊢': 'identity / right',
+    '⥊': 'deshape / reshape',
+    '∾': 'join / join to',
+    '≍': 'solo / couple',
+    '⋈': 'pair',
+    '↑': 'prefixes / take',
+    '↓': 'suffixes / drop',
+    '↕': 'range / windows',
+    '«': 'shift before',
+    '»': 'shift after',
+    '⌽': 'reverse / rotate',
+    '⍉': 'transpose',
+    '/': 'indices / replicate',
+    '⊏': 'first cell / select',
+    '⊐': 'classify / index of',
+    '⊑': 'first / pick',
+    '⊒': 'occurrence / progressive index',
+    '⊔': 'group indices / group',
+    '!': 'assert / assert message',
+    
+    // Search
+    '∊': 'mark firsts / member of',
+    '⍷': 'deduplicate / find',
+    '⍋': 'grade up / bins up',
+    '⍒': 'grade down / bins down',
+    
+    // 1-modifiers (green)
+    '˜': 'self / swap',
+    '˘': 'cells',
+    '¨': 'each',
+    '⌜': 'table',
+    '⁼': 'undo',
+    '´': 'fold',
+    '˝': 'insert',
+    '`': 'scan',
+    
+    // 2-modifiers (yellow)
+    '∘': 'atop',
+    '○': 'over',
+    '⊸': 'before / bind',
+    '⟜': 'after / bind',
+    '⌾': 'under',
+    '⊘': 'valences',
+    '◶': 'choose',
+    '⎉': 'rank',
+    '⚇': 'depth',
+    '⍟': 'repeat',
+    
+    // Special
+    '∞': 'infinity',
+    '¯': 'negative',
+    'π': 'pi',
+    '←': 'define',
+    '→': 'export',
+    '↩': 'change',
+    '⋄': 'separator',
+    '·': 'nothing',
+    '˙': 'constant',
+    
+    // System values
+    '•': 'system',
+    
+    // Strand/list
+    '⟨': 'list start',
+    '⟩': 'list end',
+    '‿': 'strand',
+};
+
+// Glyph names for Dyalog APL (monadic/dyadic names)
+export const aplGlyphNames = {
+    // Arithmetic
+    '+': 'conjugate / add',
+    '-': 'negate / subtract',
+    '×': 'signum / multiply',
+    '÷': 'reciprocal / divide',
+    '|': 'magnitude / residue',
+    '⌈': 'ceiling / maximum',
+    '⌊': 'floor / minimum',
+    '*': 'exponential / power',
+    '⍟': 'natural log / logarithm',
+    '!': 'factorial / binomial',
+    '○': 'pi times / circular',
+    '?': 'roll / deal',
+    '~': 'not / without',
+    
+    // Comparison
+    '<': 'less than',
+    '>': 'greater than',
+    '=': 'equal',
+    '≠': 'not equal',
+    '≤': 'less or equal',
+    '≥': 'greater or equal',
+    '≡': 'depth / match',
+    '≢': 'tally / not match',
+    '∧': 'lcm / and',
+    '∨': 'gcd / or',
+    '⍲': 'nand',
+    '⍱': 'nor',
+    
+    // Structural
+    '⍴': 'shape / reshape',
+    '⍳': 'index gen / index of',
+    '⍸': 'where / interval index',
+    ',': 'ravel / catenate',
+    '⍪': 'table / catenate first',
+    '⌽': 'reverse / rotate',
+    '⊖': 'reverse first / rotate first',
+    '⍉': 'transpose',
+    '↑': 'mix / take',
+    '↓': 'split / drop',
+    '⊂': 'enclose / partitioned enclose',
+    '⊃': 'disclose / pick',
+    '⊆': 'nest / partition',
+    '⌷': 'materialise / index',
+    '⊣': 'same / left',
+    '⊢': 'same / right',
+    
+    // Selection/Search
+    '∪': 'unique / union',
+    '∩': 'intersection',
+    '∊': 'enlist / member',
+    '⍷': 'find',
+    '⍋': 'grade up',
+    '⍒': 'grade down',
+    '⊥': 'decode',
+    '⊤': 'encode',
+    
+    // Operators/Modifiers
+    '/': 'replicate / reduce',
+    '\\': 'expand / scan',
+    '⌿': 'replicate first / reduce first',
+    '⍀': 'expand first / scan first',
+    '¨': 'each',
+    '⍨': 'commute / constant',
+    '∘': 'beside / bind',
+    '⍤': 'atop / rank',
+    '⍥': 'over',
+    '⍣': 'power operator',
+    '@': 'at',
+    '⌸': 'key',
+    '⌺': 'stencil',
+    
+    // System/Special
+    '⎕': 'quad',
+    '⍞': 'quote-quad',
+    '⍎': 'execute',
+    '⍕': 'format',
+    '⍬': 'zilde (empty)',
+    '∇': 'del (function)',
+    '∆': 'delta',
+    '←': 'assign',
+    '→': 'branch',
+    '⋄': 'statement sep',
+    '⍝': 'comment',
+    '¨': 'diaeresis',
+    '⌹': 'matrix inv / matrix div',
+    '⍠': 'variant',
+    '⌶': 'i-beam',
+};
+
+// Glyph names for Kap (monadic/dyadic names)  
+export const kapGlyphNames = {
+    // Arithmetic
+    '+': 'conjugate / add',
+    '-': 'negate / subtract',
+    '×': 'signum / multiply',
+    '÷': 'reciprocal / divide',
+    '|': 'magnitude / residue',
+    '⌈': 'ceiling / maximum',
+    '⌊': 'floor / minimum',
+    '⋆': 'exponential / power',
+    '⍟': 'natural log / logarithm',
+    '!': 'factorial / binomial',
+    '√': 'square root / root',
+    '~': 'not / without',
+    
+    // Comparison
+    '<': 'less than',
+    '>': 'greater than',
+    '=': 'equal',
+    '≠': 'not equal',
+    '≤': 'less or equal',
+    '≥': 'greater or equal',
+    '≡': 'depth / match',
+    '≢': 'tally / not match',
+    '∧': 'lcm / and',
+    '∨': 'gcd / or',
+    '⍲': 'nand',
+    '⍱': 'nor',
+    
+    // Structural
+    '⍴': 'shape / reshape',
+    '⍳': 'index gen / index of',
+    '⍸': 'where / interval index',
+    ',': 'ravel / catenate',
+    '⍪': 'table / catenate first',
+    '⍮': 'ravel / catenate',
+    '⌽': 'reverse / rotate',
+    '⊖': 'reverse first / rotate first',
+    '⍉': 'transpose',
+    '↑': 'mix / take',
+    '↓': 'split / drop',
+    '⊂': 'enclose / partition',
+    '⊃': 'disclose / pick',
+    '⊆': 'nest / partition',
+    '⊇': 'pick',
+    '⫇': 'pick',
+    '⌷': 'index',
+    '⊣': 'same / left',
+    '⊢': 'same / right',
+    
+    // Selection/Search
+    '∪': 'unique / union',
+    '∩': 'intersection',
+    '∊': 'enlist / member',
+    '⍷': 'find',
+    '⍋': 'grade up',
+    '⍒': 'grade down',
+    '⊥': 'decode',
+    '⊤': 'encode',
+    '?': 'roll / deal',
+    '%': 'reciprocal / divide',
+    
+    // Operators/Modifiers
+    '/': 'replicate / reduce',
+    '\\': 'expand / scan',
+    '⌿': 'replicate first / reduce first',
+    '⍀': 'expand first / scan first',
+    '¨': 'each',
+    '⍨': 'commute / constant',
+    '∘': 'beside / bind',
+    '⍤': 'rank',
+    '⍥': 'over',
+    '⍣': 'power operator',
+    '⍢': 'under',
+    '∵': 'each',
+    '∥': 'parallel each',
+    '˝': 'rank',
+    '⍰': 'trace',
+    '«': 'before',
+    '»': 'after',
+    '∙': 'inner product',
+    '⌻': 'outer product',
+    '⍛': 'beside',
+    
+    // System/Special
+    '⎕': 'quad',
+    '⍞': 'quote-quad',
+    '⍎': 'execute',
+    '⍕': 'format',
+    '⍬': 'zilde (empty)',
+    '∇': 'del (function)',
+    'λ': 'lambda',
+    '←': 'assign',
+    '⇐': 'const assign',
+    '→': 'guard',
+    '⋄': 'statement sep',
+    '⍝': 'comment',
+    '⌸': 'key',
+    '⌹': 'matrix inv / matrix div',
+    '…': 'range',
+    '≬': 'between',
+    '⍺': 'left arg',
+    '⍵': 'right arg',
+};
+
+// Glyph names for Uiua (single name per primitive)
+export const uiuaGlyphNames = {
+    // Stack
+    '.': 'duplicate',
+    ':': 'flip',
+    '◌': 'pop',
+    '⟜': 'on',
+    '⊸': 'by',
+    '⤙': 'with',
+    '⤚': 'off',
+    '◡': 'below',
+    '˙': 'self',
+    '˜': 'backward',
+    
+    // Constants
+    'η': 'eta',
+    'π': 'pi',
+    'τ': 'tau',
+    '∞': 'infinity',
+    
+    // Monadic Pervasive
+    '¬': 'not',
+    '±': 'sign',
+    '¯': 'negate',
+    '⌵': 'absolute',
+    '√': 'sqrt',
+    'ₑ': 'exponential',
+    '∿': 'sine',
+    '⌊': 'floor',
+    '⌈': 'ceiling',
+    '⁅': 'round',
+    
+    // Dyadic Pervasive
+    '=': 'equals',
+    '≠': 'not equals',
+    '<': 'less than',
+    '≤': 'less or equal',
+    '>': 'greater than',
+    '≥': 'greater or equal',
+    '+': 'add',
+    '-': 'subtract',
+    '×': 'multiply',
+    '÷': 'divide',
+    '◿': 'modulo',
+    'ⁿ': 'power',
+    '↧': 'minimum',
+    '↥': 'maximum',
+    '∠': 'atangent',
+    'ℂ': 'complex',
+    
+    // Monadic Array
+    '⧻': 'length',
+    '△': 'shape',
+    '⇡': 'range',
+    '⊢': 'first',
+    '⊣': 'last',
+    '⇌': 'reverse',
+    '♭': 'deshape',
+    '¤': 'fix',
+    '⋯': 'bits',
+    '⍉': 'transpose',
+    '⍆': 'sort',
+    '⍏': 'rise',
+    '⍖': 'fall',
+    '⊚': 'where',
+    '⊛': 'classify',
+    '◴': 'deduplicate',
+    '⧆': 'occurrences',
+    '□': 'box',
+    
+    // Dyadic Array
+    '≍': 'match',
+    '⊟': 'couple',
+    '⊂': 'join',
+    '⊏': 'select',
+    '⊡': 'pick',
+    '↯': 'reshape',
+    '↙': 'take',
+    '↘': 'drop',
+    '↻': 'rotate',
+    '⤸': 'orient',
+    '▽': 'keep',
+    '⌕': 'find',
+    '⦷': 'mask',
+    '∊': 'member',
+    '⊗': 'indexof',
+    '⊥': 'base',
+    
+    // Iterating Modifiers
+    '≡': 'rows',
+    '⍚': 'inventory',
+    '⊞': 'table',
+    '⧅': 'tuples',
+    '⧈': 'stencil',
+    '⍥': 'repeat',
+    '⍢': 'do',
+    
+    // Aggregating Modifiers
+    '/': 'reduce',
+    '∧': 'fold',
+    '\\': 'scan',
+    '⊕': 'group',
+    '⊜': 'partition',
+    
+    // Inversion Modifiers
+    '⌅': 'obverse',
+    '°': 'un',
+    '⌝': 'anti',
+    '⍜': 'under',
+    
+    // Planet (advanced stack)
+    '∘': 'identity',
+    '⋅': 'gap',
+    '⊙': 'dip',
+    '∩': 'both',
+    '⊃': 'fork',
+    '⊓': 'bracket',
+    
+    // Other Modifiers
+    '◇': 'content',
+    '⬚': 'fill',
+    '⨬': 'switch',
+    
+    // Additional glyphs from syntax.js that might be on keyboard
+    '‿': 'strand',
+    '←': 'binding',
+    '↚': 'private binding',
+    '~': 'import',
+    '|': 'signature',
+    '#': 'comment',
+    '?': 'stack trace',
+    '!': 'assert',
+    '``': 'format string',
+    '@': 'character',
+    '$': 'format/system',
+    '⸮': 'recur',
+};
 
 // Default keyboard layout (US QWERTY)
 const defaultLayout = [
@@ -238,6 +672,114 @@ const defaultStyles = `
 .array-keyboard-glyph.syntax-number { color: #BD93F9; }
 .array-keyboard-glyph.syntax-comment { color: #6272A4; }
 .array-keyboard-glyph.syntax-default { color: #F8F8F2; }
+
+/* Leader lines overlay for glyph names */
+.array-keyboard-names-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 10001;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.array-keyboard-names-overlay.show {
+    opacity: 1;
+}
+
+.array-keyboard-names-overlay svg {
+    width: 100%;
+    height: 100%;
+}
+
+.array-keyboard-leader-line {
+    stroke: #6b7280;
+    stroke-width: 1;
+    fill: none;
+    opacity: 0.6;
+}
+
+.array-keyboard-name-label {
+    position: absolute;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: #374151;
+    border: 1px solid #4b5563;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.array-keyboard-name-label.syntax-function { color: #8BE9FD; border-color: #8BE9FD40; }
+.array-keyboard-name-label.syntax-monadic { color: #50FA7B; border-color: #50FA7B40; }
+.array-keyboard-name-label.syntax-dyadic { color: #F1FA8C; border-color: #F1FA8C40; }
+.array-keyboard-name-label.syntax-modifier { color: #FFB86C; border-color: #FFB86C40; }
+.array-keyboard-name-label.syntax-number { color: #BD93F9; border-color: #BD93F940; }
+.array-keyboard-name-label.syntax-comment { color: #6272A4; border-color: #6272A440; }
+.array-keyboard-name-label.syntax-default { color: #e5e7eb; border-color: #e5e7eb40; }
+
+/* Hint for names toggle */
+.array-keyboard-names-hint {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #9CA3AF;
+    margin-left: 12px;
+}
+
+.array-keyboard-names-hint kbd {
+    background: #374151;
+    border: 1px solid #4b5563;
+    border-radius: 3px;
+    padding: 1px 4px;
+    font-size: 10px;
+}
+
+/* Search input for filtering names */
+.array-keyboard-search-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10002;
+    display: none;
+}
+
+.array-keyboard-search-container.show {
+    display: block;
+}
+
+.array-keyboard-search-input {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    padding: 8px 16px;
+    border: 2px solid #4b5563;
+    border-radius: 8px;
+    background: #1f2937;
+    color: #e5e7eb;
+    width: 300px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.array-keyboard-search-input:focus {
+    border-color: #8BE9FD;
+}
+
+.array-keyboard-search-input::placeholder {
+    color: #6b7280;
+}
+
+.array-keyboard-search-hint {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #6b7280;
+    text-align: center;
+    margin-top: 4px;
+}
 `;
 
 export class ArrayKeyboard {
@@ -256,6 +798,7 @@ export class ArrayKeyboard {
      * @param {string} options.displayMode - 'keyboard' or 'category' (default: 'keyboard')
      * @param {Object} options.glyphCategories - For category mode: { categoryName: { glyphs: [], label: '', syntaxClass: '' }, ... }
      * @param {string} options.categoryTitle - Custom title for category view (default: '{language} Glyphs')
+     * @param {Object} options.glyphNames - Glyph to name mapping for leader line labels { '⍺': 'alpha', ... }
      */
     constructor(options = {}) {
         this.keymap = options.keymap || {};
@@ -270,13 +813,20 @@ export class ArrayKeyboard {
         this.displayMode = options.displayMode || 'keyboard';
         this.glyphCategories = options.glyphCategories || null;
         this.categoryTitle = options.categoryTitle || null;
+        this.glyphNames = options.glyphNames || null;
         
         this.overlay = null;
+        this.namesOverlay = null;
+        this.namesVisible = false;
+        this.searchInput = null;
+        this.searchVisible = false;
+        this.searchFilter = '';
         this.styleElement = null;
         this.keydownHandler = null;
         
         this._injectStyles();
         this._createOverlay();
+        this._createNamesOverlay();
         this._setupKeyboardShortcuts();
     }
     
@@ -347,12 +897,20 @@ export class ArrayKeyboard {
             title.textContent = `${this.language} Keyboard (prefix: ${this.prefixKey})`;
         }
         
-        const hint = document.createElement('span');
-        hint.className = 'array-keyboard-hint';
-        hint.textContent = `Ctrl+${this.toggleKey.toUpperCase()} to toggle`;
+        const hintContainer = document.createElement('span');
+        hintContainer.className = 'array-keyboard-hint';
+        hintContainer.textContent = `Ctrl+${this.toggleKey.toUpperCase()} to toggle`;
+        
+        // Add names hint if glyphNames are available
+        if (this.glyphNames) {
+            const namesHint = document.createElement('span');
+            namesHint.className = 'array-keyboard-names-hint';
+            namesHint.innerHTML = `<kbd>n</kbd> names <kbd>s</kbd> search`;
+            hintContainer.appendChild(namesHint);
+        }
         
         header.appendChild(title);
-        header.appendChild(hint);
+        header.appendChild(hintContainer);
         this.overlay.appendChild(header);
         
         if (this.displayMode === 'category' && this.glyphCategories) {
@@ -468,6 +1026,491 @@ export class ArrayKeyboard {
     }
     
     /**
+     * Create the names overlay with leader lines
+     */
+    _createNamesOverlay() {
+        if (!this.glyphNames) return;
+        
+        this.namesOverlay = document.createElement('div');
+        this.namesOverlay.className = 'array-keyboard-names-overlay';
+        
+        // Create SVG for leader lines
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', 'array-keyboard-leader-svg');
+        this.namesOverlay.appendChild(svg);
+        
+        this.container.appendChild(this.namesOverlay);
+    }
+    
+    /**
+     * Position labels with leader lines surrounding all four sides of the popup
+     * For keyboard view: top row -> above, bottom row -> below, middle rows -> left/right
+     * For category view: use angle-based positioning
+     */
+    _updateLeaderLines() {
+        if (!this.namesOverlay || !this.glyphNames || !this.isVisible()) return;
+        
+        // Clear existing content
+        this.namesOverlay.innerHTML = '';
+        
+        // Create SVG for lines
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        this.namesOverlay.appendChild(svg);
+        
+        // Collect all glyphs that need labels
+        const glyphElements = [];
+        
+        // Helper function to check if name matches search filter (fuzzy)
+        const matchesFilter = (name) => {
+            if (!this.searchFilter) return true;
+            return name.toLowerCase().includes(this.searchFilter);
+        };
+        
+        if (this.displayMode === 'category') {
+            // Category view: get all glyph divs
+            this.overlay.querySelectorAll('.array-keyboard-glyph').forEach(el => {
+                const glyph = el.textContent.trim();
+                if (this.glyphNames[glyph]) {
+                    const name = this.glyphNames[glyph];
+                    if (matchesFilter(name)) {
+                        glyphElements.push({ el, glyph, name });
+                    }
+                }
+            });
+        } else {
+            // Keyboard view: get symbols from keys, track which row they're in
+            const rows = this.overlay.querySelectorAll('.array-keyboard-row');
+            const totalRows = rows.length;
+            
+            rows.forEach((rowEl, rowIndex) => {
+                rowEl.querySelectorAll('.array-keyboard-key').forEach(keyEl => {
+                    const symbolEl = keyEl.querySelector('.array-keyboard-symbol');
+                    const shiftSymbolEl = keyEl.querySelector('.array-keyboard-shift-symbol');
+                    
+                    if (symbolEl) {
+                        const glyph = symbolEl.textContent.trim();
+                        if (glyph && this.glyphNames[glyph]) {
+                            const name = this.glyphNames[glyph];
+                            if (matchesFilter(name)) {
+                                glyphElements.push({ 
+                                    el: symbolEl, 
+                                    glyph, 
+                                    name, 
+                                    isShifted: false,
+                                    rowIndex,
+                                    totalRows
+                                });
+                            }
+                        }
+                    }
+                    if (shiftSymbolEl) {
+                        const glyph = shiftSymbolEl.textContent.trim();
+                        if (glyph && this.glyphNames[glyph]) {
+                            const name = this.glyphNames[glyph];
+                            if (matchesFilter(name)) {
+                                glyphElements.push({ 
+                                    el: shiftSymbolEl, 
+                                    glyph, 
+                                    name, 
+                                    isShifted: true,
+                                    rowIndex,
+                                    totalRows
+                                });
+                            }
+                        }
+                    }
+                });
+            });
+        }
+        
+        if (glyphElements.length === 0) return;
+        
+        // Get overlay bounds for positioning
+        const overlayRect = this.overlay.getBoundingClientRect();
+        const margin = 25;
+        const labelHeight = 20;
+        
+        // Determine which side each glyph's label should go to
+        const centerX = overlayRect.left + overlayRect.width / 2;
+        const centerY = overlayRect.top + overlayRect.height / 2;
+        
+        const labels = glyphElements.map(item => {
+            const rect = item.el.getBoundingClientRect();
+            const glyphCenterX = rect.left + rect.width / 2;
+            const glyphCenterY = rect.top + rect.height / 2;
+            
+            // Estimate label width based on name length
+            const labelWidth = item.name.length * 7 + 12;
+            
+            let side;
+            
+            if (this.displayMode === 'category') {
+                // Category view: use angle-based positioning
+                const dx = glyphCenterX - centerX;
+                const dy = glyphCenterY - centerY;
+                const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+                
+                if (angle >= -45 && angle < 45) {
+                    side = 'right';
+                } else if (angle >= 45 && angle < 135) {
+                    side = 'bottom';
+                } else if (angle >= -135 && angle < -45) {
+                    side = 'top';
+                } else {
+                    side = 'left';
+                }
+            } else {
+                // Keyboard view: use row-based positioning
+                // Row 0 (number row) -> top
+                // Row 1-2 (QWERTY + home row) -> left/right based on X position
+                // Row 3-4 (ZXCV row + space bar) -> bottom
+                const rowIndex = item.rowIndex;
+                const totalRows = item.totalRows;
+                
+                if (rowIndex === 0) {
+                    // Number row only -> labels above
+                    side = 'top';
+                } else if (rowIndex >= totalRows - 2) {
+                    // Bottom two rows -> labels below
+                    side = 'bottom';
+                } else {
+                    // QWERTY and home rows -> left/right based on position
+                    // Split at 60% to put more labels on the left
+                    const splitPoint = overlayRect.left + overlayRect.width * 0.6;
+                    side = glyphCenterX < splitPoint ? 'left' : 'right';
+                }
+            }
+            
+            return {
+                ...item,
+                glyphX: glyphCenterX,
+                glyphY: glyphCenterY,
+                labelWidth,
+                side
+            };
+        });
+        
+        // Group labels by side
+        const sides = {
+            top: labels.filter(l => l.side === 'top').sort((a, b) => a.glyphX - b.glyphX),
+            right: labels.filter(l => l.side === 'right').sort((a, b) => a.glyphY - b.glyphY),
+            bottom: labels.filter(l => l.side === 'bottom').sort((a, b) => a.glyphX - b.glyphX),
+            left: labels.filter(l => l.side === 'left').sort((a, b) => a.glyphY - b.glyphY)
+        };
+        
+        // Cap left and right sides at 13 labels each
+        // Overflow goes to top or bottom based on which is closer
+        const maxSideLabels = 13;
+        const overflowToTopOrBottom = (labelGroup, sideName) => {
+            if (labelGroup.length <= maxSideLabels) return;
+            
+            // Sort by distance from vertical center - keep the middle ones, overflow the edges
+            const centerY = overlayRect.top + overlayRect.height / 2;
+            labelGroup.sort((a, b) => Math.abs(a.glyphY - centerY) - Math.abs(b.glyphY - centerY));
+            
+            // Keep the first maxSideLabels (closest to center)
+            const overflow = labelGroup.splice(maxSideLabels);
+            
+            // Move overflow to top or bottom based on Y position
+            overflow.forEach(item => {
+                if (item.glyphY < centerY) {
+                    item.side = 'top';
+                    sides.top.push(item);
+                } else {
+                    item.side = 'bottom';
+                    sides.bottom.push(item);
+                }
+            });
+            
+            // Re-sort the side group by Y
+            labelGroup.sort((a, b) => a.glyphY - b.glyphY);
+        };
+        
+        overflowToTopOrBottom(sides.left, 'left');
+        overflowToTopOrBottom(sides.right, 'right');
+        
+        // Re-sort top and bottom by X after overflow additions
+        sides.top.sort((a, b) => a.glyphX - b.glyphX);
+        sides.bottom.sort((a, b) => a.glyphX - b.glyphX);
+        
+        // Position labels on each side with multiple tiers if needed
+        const positionHorizontalLabels = (labelGroup, isTop) => {
+            if (labelGroup.length === 0) return;
+            
+            const availableWidth = overlayRect.width + 300;
+            const startX = overlayRect.left - 150;
+            
+            // Calculate total width needed
+            let totalWidth = 0;
+            labelGroup.forEach(item => totalWidth += item.labelWidth + 8);
+            
+            // Determine number of tiers needed
+            const numTiers = Math.ceil(totalWidth / availableWidth);
+            const tierHeight = labelHeight + 8;
+            
+            // Assign items to tiers (distribute evenly)
+            const itemsPerTier = Math.ceil(labelGroup.length / numTiers);
+            
+            labelGroup.forEach((item, i) => {
+                const tier = Math.floor(i / itemsPerTier);
+                const indexInTier = i % itemsPerTier;
+                const itemsInThisTier = Math.min(itemsPerTier, labelGroup.length - tier * itemsPerTier);
+                
+                // Base Y position with tier offset
+                if (isTop) {
+                    item.labelY = overlayRect.top - margin - labelHeight - (numTiers - 1 - tier) * tierHeight;
+                } else {
+                    item.labelY = overlayRect.bottom + margin + tier * tierHeight;
+                }
+                
+                // Spread horizontally within tier based on glyph X
+                const relativeX = (item.glyphX - overlayRect.left) / overlayRect.width;
+                item.labelX = overlayRect.left + relativeX * overlayRect.width - item.labelWidth / 2;
+            });
+            
+            // Resolve collisions within each tier
+            for (let tier = 0; tier < numTiers; tier++) {
+                const tierItems = labelGroup.filter((_, i) => Math.floor(i / itemsPerTier) === tier);
+                const minSpacing = 6;
+                
+                for (let i = 1; i < tierItems.length; i++) {
+                    const prev = tierItems[i - 1];
+                    const curr = tierItems[i];
+                    const prevRight = prev.labelX + prev.labelWidth;
+                    if (curr.labelX < prevRight + minSpacing) {
+                        curr.labelX = prevRight + minSpacing;
+                    }
+                }
+                
+                // Center the tier if it overflows
+                if (tierItems.length > 0) {
+                    const first = tierItems[0];
+                    const last = tierItems[tierItems.length - 1];
+                    const groupRight = last.labelX + last.labelWidth;
+                    const groupLeft = first.labelX;
+                    
+                    if (groupRight > startX + availableWidth) {
+                        const shift = groupRight - (startX + availableWidth);
+                        tierItems.forEach(item => item.labelX -= shift);
+                    }
+                    if (first.labelX < startX) {
+                        const shift = startX - first.labelX;
+                        tierItems.forEach(item => item.labelX += shift);
+                    }
+                }
+            }
+        };
+        
+        const positionVerticalLabels = (labelGroup, isLeft) => {
+            if (labelGroup.length === 0) return;
+            
+            const baseX = isLeft ? overlayRect.left - margin : overlayRect.right + margin;
+            
+            // Use fixed spacing regardless of label count
+            const fixedSpacing = labelHeight + 8;
+            const totalHeight = (labelGroup.length - 1) * fixedSpacing;
+            // Center vertically but shift up a bit
+            const groupStartY = overlayRect.top + (overlayRect.height - totalHeight) / 2 - 10;
+            
+            const startY = overlayRect.top - 30;
+            const maxY = overlayRect.bottom + 30;
+            
+            labelGroup.forEach((item, i) => {
+                item.labelY = groupStartY + i * fixedSpacing;
+                item.labelX = isLeft ? baseX - item.labelWidth : baseX;
+            });
+            
+            // Ensure we don't overflow top
+            if (labelGroup.length > 0 && labelGroup[0].labelY < startY) {
+                const shift = startY - labelGroup[0].labelY;
+                labelGroup.forEach(l => l.labelY += shift);
+            }
+            
+            // Ensure we don't overflow bottom
+            if (labelGroup.length > 0) {
+                const last = labelGroup[labelGroup.length - 1];
+                if (last.labelY > maxY) {
+                    const overflow = last.labelY - maxY;
+                    labelGroup.forEach(l => l.labelY -= overflow);
+                }
+            }
+        };
+        
+        positionHorizontalLabels(sides.top, true);
+        positionHorizontalLabels(sides.bottom, false);
+        positionVerticalLabels(sides.left, true);
+        positionVerticalLabels(sides.right, false);
+        
+        // Create labels and leader lines for all sides
+        const allLabels = [...sides.top, ...sides.right, ...sides.bottom, ...sides.left];
+        
+        allLabels.forEach(item => {
+            // Create label
+            const label = document.createElement('div');
+            label.className = `array-keyboard-name-label ${this._getSyntaxClass(item.glyph)}`;
+            label.textContent = item.name;
+            label.style.left = `${item.labelX}px`;
+            label.style.top = `${item.labelY}px`;
+            this.namesOverlay.appendChild(label);
+            
+            // Create leader line with bezier curve
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            line.setAttribute('class', 'array-keyboard-leader-line');
+            
+            const startX = item.glyphX;
+            const startY = item.glyphY;
+            
+            // Calculate endpoint based on side
+            let endX, endY, d;
+            const labelCenterX = item.labelX + item.labelWidth / 2;
+            const labelCenterY = item.labelY + labelHeight / 2;
+            
+            switch (item.side) {
+                case 'top':
+                    endX = labelCenterX;
+                    endY = item.labelY + labelHeight;
+                    d = `M ${startX} ${startY} C ${startX} ${startY - 30}, ${endX} ${endY + 30}, ${endX} ${endY}`;
+                    break;
+                case 'bottom':
+                    endX = labelCenterX;
+                    endY = item.labelY;
+                    d = `M ${startX} ${startY} C ${startX} ${startY + 30}, ${endX} ${endY - 30}, ${endX} ${endY}`;
+                    break;
+                case 'left':
+                    endX = item.labelX + item.labelWidth;
+                    endY = labelCenterY;
+                    d = `M ${startX} ${startY} C ${startX - 40} ${startY}, ${endX + 40} ${endY}, ${endX} ${endY}`;
+                    break;
+                case 'right':
+                    endX = item.labelX;
+                    endY = labelCenterY;
+                    d = `M ${startX} ${startY} C ${startX + 40} ${startY}, ${endX - 40} ${endY}, ${endX} ${endY}`;
+                    break;
+            }
+            
+            line.setAttribute('d', d);
+            svg.appendChild(line);
+        });
+    }
+    
+    /**
+     * Show names overlay with leader lines
+     */
+    showNames() {
+        if (!this.namesOverlay || !this.glyphNames) return;
+        
+        this._updateLeaderLines();
+        this.namesOverlay.classList.add('show');
+        this.namesVisible = true;
+    }
+    
+    /**
+     * Hide names overlay
+     */
+    hideNames() {
+        if (!this.namesOverlay) return;
+        
+        this.namesOverlay.classList.remove('show');
+        this.namesVisible = false;
+        this.hideSearch();
+    }
+    
+    /**
+     * Create the search input element
+     */
+    _createSearchInput() {
+        if (this.searchInput) return;
+        
+        const container = document.createElement('div');
+        container.className = 'array-keyboard-search-container';
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'array-keyboard-search-input';
+        input.placeholder = 'Filter names...';
+        input.autocomplete = 'off';
+        input.spellcheck = false;
+        
+        // Filter as user types
+        input.addEventListener('input', () => {
+            this.searchFilter = input.value.toLowerCase();
+            this._updateLeaderLines();
+        });
+        
+        const hint = document.createElement('div');
+        hint.className = 'array-keyboard-search-hint';
+        hint.textContent = 'ESC to close';
+        
+        container.appendChild(input);
+        container.appendChild(hint);
+        this.container.appendChild(container);
+        
+        this.searchInput = input;
+        this.searchContainer = container;
+    }
+    
+    /**
+     * Show search input
+     */
+    showSearch() {
+        if (!this.namesVisible) return;
+        
+        this._createSearchInput();
+        this.searchContainer.classList.add('show');
+        this.searchVisible = true;
+        this.searchInput.value = '';
+        this.searchFilter = '';
+        this.searchInput.focus();
+    }
+    
+    /**
+     * Hide search input
+     */
+    hideSearch() {
+        if (!this.searchContainer) return;
+        
+        this.searchContainer.classList.remove('show');
+        this.searchVisible = false;
+        this.searchFilter = '';
+        if (this.searchInput) {
+            this.searchInput.value = '';
+        }
+        // Re-render without filter
+        if (this.namesVisible) {
+            this._updateLeaderLines();
+        }
+    }
+    
+    /**
+     * Toggle search input
+     */
+    toggleSearch() {
+        if (this.searchVisible) {
+            this.hideSearch();
+        } else {
+            this.showSearch();
+        }
+    }
+    
+    /**
+     * Toggle names overlay visibility
+     */
+    toggleNames() {
+        if (this.namesVisible) {
+            this.hideNames();
+        } else {
+            this.showNames();
+        }
+    }
+    
+    /**
+     * Check if names are currently visible
+     */
+    areNamesVisible() {
+        return this.namesVisible;
+    }
+    
+    /**
      * Setup keyboard shortcuts
      */
     _setupKeyboardShortcuts() {
@@ -475,17 +1518,58 @@ export class ArrayKeyboard {
             // Only respond if enabled
             if (!this.enabled) return;
             
-            // Ctrl+toggleKey to toggle
+            // Don't intercept if search input is focused
+            if (this.searchInput && document.activeElement === this.searchInput) {
+                // ESC to close search
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.hideSearch();
+                    return;
+                }
+                // Let other keys go through to the search input
+                return;
+            }
+            
+            // Ctrl+toggleKey to toggle keyboard visibility
             if (e.ctrlKey && (e.key === this.toggleKey || e.key === this.toggleKey.toUpperCase())) {
                 e.preventDefault();
                 e.stopPropagation();
                 this.toggle();
+                return;
             }
             
-            // ESC to close
-            if (e.key === 'Escape' && this.isVisible()) {
+            // Only handle remaining shortcuts if keyboard is visible
+            if (!this.isVisible()) return;
+            
+            // 'n' to toggle names (if glyphNames available)
+            if ((e.key === 'n' || e.key === 'N') && this.glyphNames && !e.ctrlKey && !e.altKey && !e.metaKey) {
                 e.preventDefault();
-                this.hide();
+                e.stopPropagation();
+                this.toggleNames();
+                return;
+            }
+            
+            // 's' to toggle search (if names are visible)
+            if ((e.key === 's' || e.key === 'S') && this.namesVisible && !e.ctrlKey && !e.altKey && !e.metaKey) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggleSearch();
+                return;
+            }
+            
+            // ESC to close (search first, then names, then keyboard)
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
+                if (this.searchVisible) {
+                    this.hideSearch();
+                } else if (this.namesVisible) {
+                    this.hideNames();
+                } else {
+                    this.hide();
+                }
+                return;
             }
         };
         
@@ -512,12 +1596,23 @@ export class ArrayKeyboard {
      */
     recreateOverlay() {
         const wasVisible = this.isVisible();
+        const namesWereVisible = this.namesVisible;
+        
         if (this.overlay) {
             this.overlay.remove();
         }
+        if (this.namesOverlay) {
+            this.namesOverlay.remove();
+        }
+        
         this._createOverlay();
+        this._createNamesOverlay();
+        
         if (wasVisible) {
             this.show();
+            if (namesWereVisible) {
+                this.showNames();
+            }
         }
     }
     
@@ -544,6 +1639,8 @@ export class ArrayKeyboard {
         if (this.overlay) {
             this.overlay.classList.remove('show');
         }
+        // Also hide names when hiding keyboard
+        this.hideNames();
     }
     
     /**
@@ -610,7 +1707,35 @@ export class ArrayKeyboard {
         if (this.overlay) {
             this.overlay.remove();
         }
+        if (this.namesOverlay) {
+            this.namesOverlay.remove();
+        }
+        if (this.searchContainer) {
+            this.searchContainer.remove();
+        }
         // Note: We don't remove styles as other instances might use them
+    }
+    
+    /**
+     * Update glyph names mapping
+     * @param {Object} glyphNames - New glyph names mapping
+     */
+    updateGlyphNames(glyphNames) {
+        this.glyphNames = glyphNames;
+        
+        // Recreate names overlay
+        if (this.namesOverlay) {
+            this.namesOverlay.remove();
+        }
+        this._createNamesOverlay();
+        
+        // Update header hint
+        if (this.overlay) {
+            const wasVisible = this.isVisible();
+            this.overlay.remove();
+            this._createOverlay();
+            if (wasVisible) this.show();
+        }
     }
 }
 

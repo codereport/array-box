@@ -363,7 +363,7 @@
         // Import from modular files
         import { createKeyboardHandler, bqnKeymap, aplKeymap, kapKeymap, uiuaGlyphs, jGlyphs } from './src/keymap.js';
         import { syntaxRules, highlightCode, escapeHtml } from './src/syntax.js';
-        import { ArrayKeyboard } from './src/keyboard.js';
+        import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames } from './src/keyboard.js';
         
         // Keyboard configurations for each language
         const keyboardConfigs = {
@@ -373,7 +373,8 @@
                 prefixKey: '\\',
                 fontFamily: "'BQN', 'Courier New', monospace",
                 syntaxRules: syntaxRules.bqn,
-                displayMode: 'keyboard'
+                displayMode: 'keyboard',
+                glyphNames: bqnGlyphNames
             },
             apl: {
                 keymap: aplKeymap,
@@ -381,7 +382,8 @@
                 prefixKey: '`',
                 fontFamily: "'APL', 'Courier New', monospace",
                 syntaxRules: syntaxRules.apl,
-                displayMode: 'keyboard'
+                displayMode: 'keyboard',
+                glyphNames: aplGlyphNames
             },
             kap: {
                 keymap: kapKeymap,
@@ -389,13 +391,15 @@
                 prefixKey: '`',
                 fontFamily: "'Kap', 'Courier New', monospace",
                 syntaxRules: syntaxRules.kap,
-                displayMode: 'keyboard'
+                displayMode: 'keyboard',
+                glyphNames: kapGlyphNames
             },
             uiua: {
                 language: 'Uiua',
                 fontFamily: "'Uiua', 'Courier New', monospace",
                 syntaxRules: syntaxRules.uiua,
                 displayMode: 'category',
+                glyphNames: uiuaGlyphNames,  // Enable leader line labels
                 glyphCategories: {
                     monadic: {
                         glyphs: uiuaGlyphs.monadic,
@@ -503,10 +507,11 @@
                 return;
             }
             
-            // Check if display mode or language changed - need to recreate overlay for category view
+            // Check if display mode, language, or glyphNames changed - need to recreate overlay
             const modeChanged = visualKeyboard.displayMode !== (config.displayMode || 'keyboard');
             const languageChanged = visualKeyboard.language !== config.language;
-            const needsRecreate = modeChanged || (config.displayMode === 'category' && languageChanged);
+            const glyphNamesChanged = visualKeyboard.glyphNames !== (config.glyphNames || null);
+            const needsRecreate = modeChanged || languageChanged || glyphNamesChanged;
             
             visualKeyboard.enable();
             visualKeyboard.keymap = config.keymap || {};
@@ -517,12 +522,11 @@
             visualKeyboard.displayMode = config.displayMode || 'keyboard';
             visualKeyboard.glyphCategories = config.glyphCategories || null;
             visualKeyboard.categoryTitle = config.categoryTitle || null;
+            visualKeyboard.glyphNames = config.glyphNames || null;
             
             if (needsRecreate) {
-                // Recreate the overlay for new display mode or different category content
+                // Recreate the overlay for new display mode, language, or glyphNames
                 visualKeyboard.recreateOverlay();
-            } else if (config.displayMode !== 'category') {
-                visualKeyboard.updateKeymap(config.keymap, config.language, config.prefixKey);
             }
             visualKeyboard.updateFont(config.fontFamily);
         }
@@ -742,11 +746,25 @@
         const output = document.getElementById('output');
         const container = document.querySelector('.container');
         
-        // Space to focus input when text box is not selected
+        // Global keyboard shortcuts
         document.addEventListener('keydown', (e) => {
+            // Space to focus input when text box is not selected
             if (e.key === ' ' && document.activeElement !== codeInput) {
                 e.preventDefault();
                 codeInput.focus();
+            }
+            
+            // Ctrl+Up/Down to switch languages (works globally)
+            if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+                e.preventDefault();
+                const currentIndex = languageOrder.indexOf(currentLanguage);
+                let newIndex;
+                if (e.key === 'ArrowUp') {
+                    newIndex = currentIndex > 0 ? currentIndex - 1 : languageOrder.length - 1;
+                } else {
+                    newIndex = currentIndex < languageOrder.length - 1 ? currentIndex + 1 : 0;
+                }
+                switchLanguage(languageOrder[newIndex]);
             }
         });
 
@@ -936,25 +954,12 @@
             container.style.transform = '';
         }
 
-        // Keyboard shortcuts
+        // Keyboard shortcuts for code input
         codeInput.addEventListener('keydown', (e) => {
             // Enter to evaluate
             if (e.key === 'Enter') {
                 e.preventDefault();
                 evaluateCode();
-            }
-            
-            // Ctrl+Up/Down to switch languages
-            if (e.ctrlKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
-                e.preventDefault();
-                const currentIndex = languageOrder.indexOf(currentLanguage);
-                let newIndex;
-                if (e.key === 'ArrowUp') {
-                    newIndex = currentIndex > 0 ? currentIndex - 1 : languageOrder.length - 1;
-                } else {
-                    newIndex = currentIndex < languageOrder.length - 1 ? currentIndex + 1 : 0;
-                }
-                switchLanguage(languageOrder[newIndex]);
             }
         });
 
@@ -998,7 +1003,8 @@
             language: aplConfig.language,
             prefixKey: aplConfig.prefixKey,
             fontFamily: aplConfig.fontFamily,
-            syntaxRules: aplConfig.syntaxRules
+            syntaxRules: aplConfig.syntaxRules,
+            glyphNames: aplConfig.glyphNames
         });
         
         // Apply initial syntax highlighting
