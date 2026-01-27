@@ -407,17 +407,21 @@ export const kapGlyphNames = {
 
 // Glyph names for Uiua (single name per primitive)
 export const uiuaGlyphNames = {
-    // Stack
-    '.': 'duplicate',
-    ':': 'flip',
+    // Arguments - Manipulate function arguments
+    '∘': 'identity',
     '◌': 'pop',
+    '˙': 'self',
+    '˜': 'backward',
+    '⊙': 'dip',
+    '⋅': 'gap',
     '⟜': 'on',
     '⊸': 'by',
     '⤙': 'with',
     '⤚': 'off',
     '◡': 'below',
-    '˙': 'self',
-    '˜': 'backward',
+    '∩': 'both',
+    '⊃': 'fork',
+    '⊓': 'bracket',
     
     // Constants
     'η': 'eta',
@@ -429,7 +433,8 @@ export const uiuaGlyphNames = {
     '¬': 'not',
     '±': 'sign',
     '¯': 'negate',
-    '⌵': 'absolute',
+    '⨪': 'reciprocal',
+    '⌵': 'absolute value',
     '√': 'sqrt',
     'ₑ': 'exponential',
     '∿': 'sine',
@@ -470,8 +475,8 @@ export const uiuaGlyphNames = {
     '⍏': 'rise',
     '⍖': 'fall',
     '⊚': 'where',
-    '⊛': 'classify',
     '◴': 'deduplicate',
+    '⊛': 'classify',
     '⧆': 'occurrences',
     '□': 'box',
     
@@ -489,25 +494,25 @@ export const uiuaGlyphNames = {
     '▽': 'keep',
     '⌕': 'find',
     '⦷': 'mask',
-    '∊': 'member',
-    '⊗': 'indexof',
+    '∊': 'memberof',
+    '⨂': 'indexin',
     '⊥': 'base',
     
-    // Iterating Modifiers
+    // Mapping Modifiers
     '≡': 'rows',
     '⍚': 'inventory',
     '⊞': 'table',
     '⧅': 'tuples',
     '⧈': 'stencil',
-    '⍥': 'repeat',
-    '⍢': 'do',
+    '⊕': 'group',
+    '⊜': 'partition',
     
-    // Aggregating Modifiers
+    // Iterating Modifiers
     '/': 'reduce',
     '∧': 'fold',
     '\\': 'scan',
-    '⊕': 'group',
-    '⊜': 'partition',
+    '⍥': 'repeat',
+    '⍢': 'do',
     
     // Inversion Modifiers
     '⌅': 'obverse',
@@ -515,20 +520,13 @@ export const uiuaGlyphNames = {
     '⌝': 'anti',
     '⍜': 'under',
     
-    // Planet (advanced stack)
-    '∘': 'identity',
-    '⋅': 'gap',
-    '⊙': 'dip',
-    '∩': 'both',
-    '⊃': 'fork',
-    '⊓': 'bracket',
-    
     // Other Modifiers
+    '⧋': 'evert',
     '◇': 'content',
     '⬚': 'fill',
     '⨬': 'switch',
     
-    // Additional glyphs from syntax.js that might be on keyboard
+    // Syntax
     '‿': 'strand',
     '←': 'binding',
     '↚': 'private binding',
@@ -778,10 +776,10 @@ const defaultStyles = `
     color: #F8F8F2;
 }
 
-/* Category view styles - wider for glyph reference */
+/* Category view styles */
 .array-keyboard-overlay.category-view {
-    width: 1000px;
-    max-width: 130vw;
+    width: 620px;
+    max-width: 95vw;
 }
 
 .array-keyboard-category-container {
@@ -830,11 +828,13 @@ const defaultStyles = `
     flex-wrap: wrap;
     gap: 6px;
     margin-bottom: 12px;
+    max-width: 570px;
 }
 
 .array-keyboard-legend {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 12px;
     padding-top: 8px;
     border-top: 1px solid #4b5563;
@@ -860,6 +860,7 @@ const defaultStyles = `
 .array-keyboard-legend-dot.syntax-number { background-color: #BD93F9; }
 .array-keyboard-legend-dot.syntax-comment { background-color: #6272A4; }
 .array-keyboard-legend-dot.syntax-default { background-color: #9CA3AF; }
+.array-keyboard-legend-dot.syntax-stack { background-color: #F8F8F2; }
 
 .array-keyboard-legend-text {
     font-family: 'JetBrains Mono', monospace;
@@ -868,7 +869,7 @@ const defaultStyles = `
 }
 
 .array-keyboard-glyph {
-    min-width: 32px;
+    width: 38px;
     height: 32px;
     background: #1f2937;
     border: 1px solid #4b5563;
@@ -877,8 +878,13 @@ const defaultStyles = `
     align-items: center;
     justify-content: center;
     font-size: 18px;
-    padding: 0 8px;
+    padding: 0;
     transition: background-color 0.15s, border-color 0.15s;
+}
+
+/* Smaller font for trigraphs (3+ chars like NB.) to fit in fixed-width box */
+.array-keyboard-glyph.trigraph {
+    font-size: 13px;
 }
 
 .array-keyboard-glyph:hover {
@@ -893,6 +899,12 @@ const defaultStyles = `
 .array-keyboard-glyph.syntax-number { color: #BD93F9; }
 .array-keyboard-glyph.syntax-comment { color: #6272A4; }
 .array-keyboard-glyph.syntax-default { color: #F8F8F2; }
+.array-keyboard-glyph.syntax-stack { color: #F8F8F2; }
+
+/* Solid border with filled background for array functions */
+.array-keyboard-glyph.array-glyph {
+    background: #374151;
+}
 
 /* Leader lines overlay for glyph names */
 .array-keyboard-names-overlay {
@@ -942,6 +954,7 @@ const defaultStyles = `
 .array-keyboard-name-label.syntax-number { color: #BD93F9; border-color: #BD93F940; }
 .array-keyboard-name-label.syntax-comment { color: #6272A4; border-color: #6272A440; }
 .array-keyboard-name-label.syntax-default { color: #e5e7eb; border-color: #e5e7eb40; }
+.array-keyboard-name-label.syntax-stack { color: #F8F8F2; border-color: #F8F8F240; }
 
 /* Hint for names toggle */
 .array-keyboard-names-hint {
@@ -1138,6 +1151,34 @@ export class ArrayKeyboard {
         }
         
         return 'syntax-default';
+    }
+    
+    /**
+     * Get syntax class from glyph categories (for category view)
+     */
+    _getCategorySyntaxClass(symbol) {
+        if (!symbol || !this.glyphCategories) return null;
+        
+        for (const [categoryKey, categoryData] of Object.entries(this.glyphCategories)) {
+            const { glyphs, syntaxClass } = categoryData;
+            if (glyphs && glyphs.includes(symbol)) {
+                return syntaxClass || 'syntax-default';
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Get the appropriate syntax class for a symbol (category mode uses categories, keyboard mode uses syntax rules)
+     */
+    _getNameLabelSyntaxClass(symbol) {
+        // In category mode, prefer the category syntax class
+        if (this.displayMode === 'category' && this.glyphCategories) {
+            const categoryClass = this._getCategorySyntaxClass(symbol);
+            if (categoryClass) return categoryClass;
+        }
+        // Fall back to syntax rules
+        return this._getSyntaxClass(symbol);
     }
     
     /**
@@ -1436,7 +1477,12 @@ export class ArrayKeyboard {
             
             for (const glyph of glyphs) {
                 const glyphDiv = document.createElement('div');
-                glyphDiv.className = `array-keyboard-glyph ${syntaxClass || 'syntax-default'}`;
+                let className = `array-keyboard-glyph ${syntaxClass || 'syntax-default'}`;
+                // Smaller font for trigraphs (3+ chars)
+                if (glyph.length >= 3) {
+                    className += ' trigraph';
+                }
+                glyphDiv.className = className;
                 glyphDiv.style.fontFamily = this.fontFamily;
                 glyphDiv.textContent = glyph;
                 glyphGrid.appendChild(glyphDiv);
@@ -1457,24 +1503,35 @@ export class ArrayKeyboard {
         const glyphRow = document.createElement('div');
         glyphRow.className = 'array-keyboard-compact-glyphs';
         
-        // Collect legend items
-        const legendItems = [];
+        // Collect legend items (deduplicated by label)
+        const legendMap = new Map();
         
         for (const [categoryKey, categoryData] of Object.entries(this.glyphCategories)) {
-            const { glyphs, label, syntaxClass } = categoryData;
+            const { glyphs, label, syntaxClass, isArray } = categoryData;
             if (!glyphs || glyphs.length === 0) continue;
             
             // Add glyphs to the row
             for (const glyph of glyphs) {
                 const glyphDiv = document.createElement('div');
-                glyphDiv.className = `array-keyboard-glyph ${syntaxClass || 'syntax-default'}`;
+                let className = `array-keyboard-glyph ${syntaxClass || 'syntax-default'}`;
+                if (isArray) {
+                    className += ' array-glyph';
+                }
+                // Smaller font for trigraphs (3+ chars)
+                if (glyph.length >= 3) {
+                    className += ' trigraph';
+                }
+                glyphDiv.className = className;
                 glyphDiv.style.fontFamily = this.fontFamily;
                 glyphDiv.textContent = glyph;
                 glyphRow.appendChild(glyphDiv);
             }
             
-            // Track for legend
-            legendItems.push({ label: label || categoryKey, syntaxClass: syntaxClass || 'syntax-default' });
+            // Track for legend (deduplicate by label)
+            const legendLabel = label || categoryKey;
+            if (!legendMap.has(legendLabel)) {
+                legendMap.set(legendLabel, { label: legendLabel, syntaxClass: syntaxClass || 'syntax-default' });
+            }
         }
         
         container.appendChild(glyphRow);
@@ -1483,7 +1540,7 @@ export class ArrayKeyboard {
         const legend = document.createElement('div');
         legend.className = 'array-keyboard-legend';
         
-        for (const item of legendItems) {
+        for (const item of legendMap.values()) {
             const legendItem = document.createElement('div');
             legendItem.className = 'array-keyboard-legend-item';
             
@@ -1992,7 +2049,7 @@ export class ArrayKeyboard {
         // First pass: create all labels with visibility hidden to measure actual widths
         allLabels.forEach(item => {
             const label = document.createElement('div');
-            label.className = `array-keyboard-name-label ${this._getSyntaxClass(item.glyph)}`;
+            label.className = `array-keyboard-name-label ${this._getNameLabelSyntaxClass(item.glyph)}`;
             label.textContent = item.name;
             label.style.visibility = 'hidden';
             label.style.position = 'absolute';

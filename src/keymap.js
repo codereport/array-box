@@ -202,34 +202,41 @@ export const kapKeymap = {
  * Based on https://www.uiua.org/docs/
  */
 export const uiuaGlyphs = {
-    // Monadic functions (stack functions taking 1 argument) - green
-    monadic: [
-        '¬', '±', '⌵', '√', '○', '⌈', '⌊', '⧻', '△', '⇡', '⊢', '⇌',
-        '♭', '¤', '⊚', '⊛', '◴', '⍏', '⍖', '⊝', 'ℂ', '⁅', '°',
-        '⍉', '⋯', '⍜', '⍘', '⬚', '⚙', '◌', '⸮'
+    // Stack - Basic stack operations
+    stack: [
+        '∘', '◌'
     ],
-    // Dyadic functions (stack functions taking 2 arguments) - blue
-    functions: [
-        '+', '-', '×', '÷', '◿', 'ⁿ', 'ₙ', '=', '≠', '<', '>', '≤', '≥',
-        '↧', '↥', '∠', '∧', '∨', '⊻', '⊼', '⊽', '⊂', '⊏', '⊡', '↯', '☇',
-        '↙', '↘', '↻', '⊗', '∈', '⊟', '▽', '◫', '▩', '⊞', '⊃', '⍥',
-        '⊜', '⊕', '⬚', '⤸', '⤙', '◠'
+    // Monadic Pervasive - Operate on every element in an array
+    monadicPervasive: [
+        '¬', '±', '¯', '⨪', '⌵', '√', 'ₑ', '∿', '⌊', '⌈', '⁅'
     ],
-    // Modifiers (take function arguments) - orange
-    modifier: [
-        '/', '\\', '∵', '≡', '⍢', '◡', '⚂', '⋕', '`', '¨'
+    // Monadic Array - Operate on a single array
+    monadicArray: [
+        '⧻', '△', '⇡', '⊢', '⊣', '⇌', '♭', '¤', '⋯', '⍉', '⍆', '⍏', '⍖', '⊚', '◴', '⊛', '⧆', '□'
     ],
-    // Planet modifiers (2+ function arguments) - yellow
-    dyadic: [
-        '⊃', '⊓', '⊩', '⊔', '◇', '◰', '∘', '⊸', '⟜', '⊙', '⋅', '⍣'
+    // Dyadic Pervasive - Operate on every pair of elements in two arrays
+    dyadicPervasive: [
+        '=', '≠', '<', '≤', '>', '≥', '+', '-', '×', '÷', '◿', 'ⁿ', '↧', '↥', '∠', 'ℂ'
     ],
-    // Constants - purple
+    // Dyadic Array - Operate on two arrays
+    dyadicArray: [
+        '≍', '⊟', '⊂', '⊏', '⊡', '↯', '↙', '↘', '↻', '⤸', '▽', '⌕', '⦷', '∊', '⨂', '⊥'
+    ],
+    // 1-Modifiers (monadic modifiers) - Take 1 function argument
+    monadicModifiers: [
+        '˙', '˜', '⊙', '⋅', '⟜', '⊸', '⤙', '⤚', '◡', '∩',
+        '≡', '⍚', '⊞', '⧅', '⧈', '⊕', '⊜',
+        '/', '∧', '\\', '⍥',
+        '⌅', '°', '⌝',
+        '⧋', '◇'
+    ],
+    // 2-Modifiers (dyadic modifiers) - Take 2+ function arguments
+    dyadicModifiers: [
+        '⊃', '⊓', '⍜', '⍢', '⬚', '⨬'
+    ],
+    // Constants - Symbolic constants
     constants: [
-        'η', 'π', 'τ', '∞', '¯'
-    ],
-    // System/stack functions
-    system: [
-        '∩', '⊓', '⊙', '⋅', '⬛'
+        'η', 'π', 'τ', '∞'
     ]
 };
 

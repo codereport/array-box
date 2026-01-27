@@ -381,9 +381,9 @@
     <!-- Main application module -->
     <script type="module">
         // Import from modular files
-        import { createKeyboardHandler, bqnKeymap, aplKeymap, kapKeymap, uiuaGlyphs, jGlyphs } from './src/keymap.js?v=3';
-        import { syntaxRules, highlightCode, escapeHtml } from './src/syntax.js?v=3';
-        import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames } from './src/keyboard.js?v=3';
+        import { createKeyboardHandler, bqnKeymap, aplKeymap, kapKeymap, uiuaGlyphs, jGlyphs } from './src/keymap.js?v=12';
+        import { syntaxRules, highlightCode, escapeHtml } from './src/syntax.js?v=12';
+        import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames } from './src/keyboard.js?v=12';
         
         // Keyboard configurations for each language
         const keyboardConfigs = {
@@ -436,26 +436,46 @@
                 displayMode: 'category',
                 compactCategories: true,  // All glyphs inline with legend at bottom
                 glyphNames: uiuaGlyphNames,  // Enable leader line labels
+                docLinks: {
+                    primitives: 'https://www.uiua.org/docs#functions'
+                },
                 glyphCategories: {
-                    monadic: {
-                        glyphs: uiuaGlyphs.monadic,
-                        label: 'Monadic Functions (1 arg)',
+                    stack: {
+                        glyphs: uiuaGlyphs.stack,
+                        label: 'Stack',
+                        syntaxClass: 'syntax-stack'
+                    },
+                    monadicPervasive: {
+                        glyphs: uiuaGlyphs.monadicPervasive,
+                        label: 'Monadic Functions',
                         syntaxClass: 'syntax-monadic'
                     },
-                    functions: {
-                        glyphs: uiuaGlyphs.functions,
-                        label: 'Dyadic Functions (2 args)',
+                    monadicArray: {
+                        glyphs: uiuaGlyphs.monadicArray,
+                        label: 'Monadic Functions',
+                        syntaxClass: 'syntax-monadic',
+                        isArray: true
+                    },
+                    dyadicPervasive: {
+                        glyphs: uiuaGlyphs.dyadicPervasive,
+                        label: 'Dyadic Functions',
                         syntaxClass: 'syntax-function'
                     },
-                    modifier: {
-                        glyphs: uiuaGlyphs.modifier,
-                        label: 'Modifiers (1 function)',
-                        syntaxClass: 'syntax-modifier'
+                    dyadicArray: {
+                        glyphs: uiuaGlyphs.dyadicArray,
+                        label: 'Dyadic Functions',
+                        syntaxClass: 'syntax-function',
+                        isArray: true
                     },
-                    dyadic: {
-                        glyphs: uiuaGlyphs.dyadic,
-                        label: 'Planet Modifiers (2+ functions)',
+                    monadicModifiers: {
+                        glyphs: uiuaGlyphs.monadicModifiers,
+                        label: '1-Modifiers',
                         syntaxClass: 'syntax-dyadic'
+                    },
+                    dyadicModifiers: {
+                        glyphs: uiuaGlyphs.dyadicModifiers,
+                        label: '2-Modifiers',
+                        syntaxClass: 'syntax-modifier'
                     },
                     constants: {
                         glyphs: uiuaGlyphs.constants,
@@ -469,52 +489,48 @@
                 fontFamily: "'JetBrains Mono', monospace",
                 syntaxRules: syntaxRules.j,
                 displayMode: 'category',
+                compactCategories: true,  // All glyphs inline with legend at bottom
                 categoryTitle: 'J Primitives',
                 glyphCategories: {
                     functions: {
                         glyphs: jGlyphs.functions,
-                        label: 'Verbs (single char)',
+                        label: 'Verbs',
                         syntaxClass: 'syntax-function'
                     },
                     verbDigraphs: {
                         glyphs: jGlyphs.verbDigraphs,
-                        label: 'Verbs (digraphs)',
+                        label: 'Verbs',
                         syntaxClass: 'syntax-function'
                     },
                     monadic: {
                         glyphs: jGlyphs.monadic,
-                        label: 'Adverbs (single char)',
+                        label: 'Adverbs',
                         syntaxClass: 'syntax-monadic'
                     },
                     adverbDigraphs: {
                         glyphs: jGlyphs.adverbDigraphs,
-                        label: 'Adverbs (digraphs)',
+                        label: 'Adverbs',
                         syntaxClass: 'syntax-monadic'
                     },
                     dyadic: {
                         glyphs: jGlyphs.dyadic,
-                        label: 'Conjunctions (single char)',
+                        label: 'Conjunctions',
                         syntaxClass: 'syntax-dyadic'
                     },
                     conjunctionDigraphs: {
                         glyphs: jGlyphs.conjunctionDigraphs,
-                        label: 'Conjunctions (digraphs)',
+                        label: 'Conjunctions',
                         syntaxClass: 'syntax-dyadic'
                     },
                     constants: {
                         glyphs: jGlyphs.constants,
-                        label: 'Constants & Special',
+                        label: 'Constants',
                         syntaxClass: 'syntax-number'
                     },
                     comments: {
                         glyphs: jGlyphs.comments,
                         label: 'Comments',
                         syntaxClass: 'syntax-comment'
-                    },
-                    control: {
-                        glyphs: jGlyphs.control,
-                        label: 'Control Structures',
-                        syntaxClass: 'syntax-default'
                     }
                 }
             }
