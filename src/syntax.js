@@ -28,6 +28,10 @@ export const syntaxRules = {
         constants: [
             '∞', '¯', 'π'
         ],
+        // Comments (grey)
+        comments: [
+            '#'
+        ],
         // Numbers pattern (no global flag - we check index manually)
         numberPattern: /^¯?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?/i
     },

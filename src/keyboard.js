@@ -743,6 +743,21 @@ const defaultStyles = `
     object-fit: contain;
 }
 
+.array-keyboard-title-link {
+    font-size: 12px;
+    color: var(--syntax-function, #8BE9FD);
+    text-decoration: none;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    margin-left: -2px;
+    position: relative;
+    top: -6px;
+}
+
+.array-keyboard-title-link:hover {
+    opacity: 1;
+}
+
 .array-keyboard-hint {
     font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
@@ -1381,9 +1396,33 @@ export class ArrayKeyboard {
                 textSpan.textContent = `Keyboard (prefix: ${this.prefixKey})`;
             }
             titleElement.appendChild(textSpan);
+            
+            // Add primitives link arrow for category mode
+            if (this.displayMode === 'category' && this.docLinks && this.docLinks.primitives) {
+                const arrowLink = document.createElement('a');
+                arrowLink.className = 'array-keyboard-title-link';
+                arrowLink.href = this.docLinks.primitives;
+                arrowLink.target = '_blank';
+                arrowLink.rel = 'noopener';
+                arrowLink.innerHTML = '↗';
+                arrowLink.title = 'View documentation';
+                titleElement.appendChild(arrowLink);
+            }
         } else {
             if (this.displayMode === 'category') {
                 titleElement.textContent = this.categoryTitle || `${this.language} Glyphs`;
+                
+                // Add primitives link arrow for category mode (no logo)
+                if (this.docLinks && this.docLinks.primitives) {
+                    const arrowLink = document.createElement('a');
+                    arrowLink.className = 'array-keyboard-title-link';
+                    arrowLink.href = this.docLinks.primitives;
+                    arrowLink.target = '_blank';
+                    arrowLink.rel = 'noopener';
+                    arrowLink.innerHTML = '↗';
+                    arrowLink.title = 'View documentation';
+                    titleElement.appendChild(arrowLink);
+                }
             } else {
                 titleElement.textContent = `${this.language} Keyboard (prefix: ${this.prefixKey})`;
             }
@@ -1523,13 +1562,13 @@ export class ArrayKeyboard {
                 
                 const links = [];
                 if (this.docLinks.layout) {
-                    links.push(`<a href="${this.docLinks.layout}" target="_blank" rel="noopener">Layout</a>`);
+                    links.push(`<a href="${this.docLinks.layout}" target="_blank" rel="noopener">layout</a>`);
                 }
                 if (this.docLinks.primitives) {
-                    links.push(`<a href="${this.docLinks.primitives}" target="_blank" rel="noopener">Primitives</a>`);
+                    links.push(`<a href="${this.docLinks.primitives}" target="_blank" rel="noopener">primitives</a>`);
                 }
                 if (this.docLinks.syntax) {
-                    links.push(`<a href="${this.docLinks.syntax}" target="_blank" rel="noopener">Syntax</a>`);
+                    links.push(`<a href="${this.docLinks.syntax}" target="_blank" rel="noopener">syntax</a>`);
                 }
                 linksContainer.innerHTML = links.join('<span class="separator">|</span>');
                 
