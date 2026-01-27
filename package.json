@@ -4,6 +4,9 @@
   "description": "Array language code editor with syntax highlighting and keyboard mappings for BQN, APL, J, and Uiua",
   "type": "module",
   "main": "./src/keymap.js",
+  "scripts": {
+    "scrape:bqn": "node scripts/scrape-bqn-docs.cjs"
+  },
   "exports": {
     ".": {
       "import": "./src/keymap.js",
@@ -25,14 +28,32 @@
       "import": "./src/syntax.js",
       "default": "./src/syntax.js"
     },
+    "./keyboard": {
+      "import": "./src/keyboard.js",
+      "default": "./src/keyboard.js"
+    },
+    "./keyboard.js": {
+      "import": "./src/keyboard.js",
+      "default": "./src/keyboard.js"
+    },
     "./theme.css": "./src/theme.css",
+    "./bqn-docs": {
+      "import": "./src/bqn-docs.js",
+      "default": "./src/bqn-docs.js"
+    },
+    "./bqn-docs.js": {
+      "import": "./src/bqn-docs.js",
+      "default": "./src/bqn-docs.js"
+    },
     "./fonts/*": "./fonts/*",
-    "./assets/*": "./assets/*"
+    "./assets/*": "./assets/*",
+    "./docs/*": "./docs/*"
   },
   "files": [
     "src/",
     "fonts/",
-    "assets/"
+    "assets/",
+    "docs/"
   ],
   "keywords": [
     "bqn",

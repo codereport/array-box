@@ -382,9 +382,9 @@
     <!-- Main application module -->
     <script type="module">
         // Import from modular files
-        import { createKeyboardHandler, bqnKeymap, aplKeymap, kapKeymap, uiuaGlyphs, jGlyphs } from './src/keymap.js?v=12';
-        import { syntaxRules, highlightCode, escapeHtml } from './src/syntax.js?v=12';
-        import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames, jGlyphNames } from './src/keyboard.js?v=12';
+        import { createKeyboardHandler, bqnKeymap, aplKeymap, kapKeymap, uiuaGlyphs, jGlyphs } from './src/keymap.js?v=13';
+        import { syntaxRules, highlightCode, escapeHtml } from './src/syntax.js?v=13';
+        import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames, jGlyphNames, bqnGlyphDocs } from './src/keyboard.js?v=13';
         
         // Keyboard configurations for each language
         const keyboardConfigs = {
@@ -396,6 +396,7 @@
                 syntaxRules: syntaxRules.bqn,
                 displayMode: 'keyboard',
                 glyphNames: bqnGlyphNames,
+                glyphDocs: bqnGlyphDocs,
                 logoPath: 'assets/bqn.svg',
                 docLinks: {
                     layout: 'https://mlochbaum.github.io/BQN/keymap.html',
@@ -569,14 +570,15 @@
                 return;
             }
             
-            // Check if display mode, language, glyphNames, docLinks, or logoPath changed - need to recreate overlay
+            // Check if display mode, language, glyphNames, glyphDocs, docLinks, or logoPath changed - need to recreate overlay
             const modeChanged = visualKeyboard.displayMode !== (config.displayMode || 'keyboard');
             const languageChanged = visualKeyboard.language !== config.language;
             const glyphNamesChanged = visualKeyboard.glyphNames !== (config.glyphNames || null);
+            const glyphDocsChanged = visualKeyboard.glyphDocs !== (config.glyphDocs || null);
             const docLinksChanged = JSON.stringify(visualKeyboard.docLinks) !== JSON.stringify(config.docLinks || null);
             const compactChanged = visualKeyboard.compactCategories !== (config.compactCategories || false);
             const logoChanged = visualKeyboard.logoPath !== (config.logoPath || null);
-            const needsRecreate = modeChanged || languageChanged || glyphNamesChanged || docLinksChanged || compactChanged || logoChanged;
+            const needsRecreate = modeChanged || languageChanged || glyphNamesChanged || glyphDocsChanged || docLinksChanged || compactChanged || logoChanged;
             
             visualKeyboard.enable();
             visualKeyboard.keymap = config.keymap || {};
@@ -588,6 +590,7 @@
             visualKeyboard.glyphCategories = config.glyphCategories || null;
             visualKeyboard.categoryTitle = config.categoryTitle || null;
             visualKeyboard.glyphNames = config.glyphNames || null;
+            visualKeyboard.glyphDocs = config.glyphDocs || null;
             visualKeyboard.docLinks = config.docLinks || null;
             visualKeyboard.compactCategories = config.compactCategories || false;
             visualKeyboard.logoPath = config.logoPath || null;

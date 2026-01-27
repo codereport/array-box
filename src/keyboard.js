@@ -21,6 +21,9 @@
  *   keyboard.toggleNames(); // Toggle leader line labels (press ? when visible)
  */
 
+// Re-export BQN documentation for hover tooltips
+export { bqnGlyphDocs, bqnDocsMeta, getBqnHoverContent } from './bqn-docs.js';
+
 // Glyph names for BQN (monadic/dyadic names)
 // Based on official BQN documentation (https://mlochbaum.github.io/BQN/doc/primitive.html)
 export const bqnGlyphNames = {
@@ -1220,6 +1223,94 @@ const defaultStyles = `
     color: #4b5563;
     margin: 0 6px;
 }
+
+/* Hover tooltip styles */
+.array-keyboard-tooltip {
+    position: fixed;
+    background: #1f2937;
+    border: 1px solid #4b5563;
+    border-radius: 8px;
+    padding: 14px 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    z-index: 10001;
+    max-width: 440px;
+    min-width: 280px;
+    pointer-events: auto;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s ease-in-out, visibility 0.15s ease-in-out;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.array-keyboard-tooltip.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.array-keyboard-tooltip-header {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #374151;
+}
+
+.array-keyboard-tooltip-glyph {
+    font-size: 28px;
+    line-height: 1;
+}
+
+.array-keyboard-tooltip-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    color: #e5e7eb;
+}
+
+.array-keyboard-tooltip-type {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: auto;
+    background: #374151;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+.array-keyboard-tooltip-desc {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #d1d5db;
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+.array-keyboard-tooltip-example {
+    font-size: 12px;
+    color: #e5e7eb;
+    background: #111827;
+    padding: 10px;
+    border-radius: 4px;
+    white-space: pre-wrap;
+    overflow-x: auto;
+    margin-bottom: 8px;
+}
+
+.array-keyboard-tooltip-link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--syntax-function, #8BE9FD);
+    text-decoration: none;
+    opacity: 0.7;
+}
+
+.array-keyboard-tooltip-link:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
 `;
 
 export class ArrayKeyboard {
@@ -1242,6 +1333,7 @@ export class ArrayKeyboard {
      * @param {Object} options.docLinks - Documentation links { layout: 'url', primitives: 'url', syntax: 'url' }
      * @param {boolean} options.compactCategories - For category mode: show all glyphs inline with legend at bottom (default: false)
      * @param {string} options.logoPath - Path to logo image to display instead of text title (optional)
+     * @param {Object} options.glyphDocs - Glyph documentation for hover tooltips { '⥊': { monadic: '...', ... }, ... }
      */
     constructor(options = {}) {
         this.keymap = options.keymap || {};
@@ -1260,6 +1352,7 @@ export class ArrayKeyboard {
         this.docLinks = options.docLinks || null;
         this.compactCategories = options.compactCategories || false;
         this.logoPath = options.logoPath || null;
+        this.glyphDocs = options.glyphDocs || null;
         
         this.overlay = null;
         this.namesOverlay = null;
@@ -1270,10 +1363,13 @@ export class ArrayKeyboard {
         this.styleElement = null;
         this.keydownHandler = null;
         this.resizeHandler = null;
+        this.tooltip = null;
+        this.tooltipTimeout = null;
         
         this._injectStyles();
         this._createOverlay();
         this._createNamesOverlay();
+        this._createTooltip();
         this._setupKeyboardShortcuts();
         this._setupResizeHandler();
     }
@@ -1535,12 +1631,14 @@ export class ArrayKeyboard {
                     shiftSymbolSpan.className = `array-keyboard-shift-symbol ${shiftedSyntaxClass}`;
                     shiftSymbolSpan.style.fontFamily = this.fontFamily;
                     shiftSymbolSpan.textContent = shiftedSymbol || '';
+                    if (shiftedSymbol) this._addHoverHandlers(shiftSymbolSpan, shiftedSymbol);
                     
                     // Main symbol
                     const symbolSpan = document.createElement('span');
                     symbolSpan.className = `array-keyboard-symbol ${symbolSyntaxClass}`;
                     symbolSpan.style.fontFamily = this.fontFamily;
                     symbolSpan.textContent = symbol || '';
+                    if (symbol) this._addHoverHandlers(symbolSpan, symbol);
                     
                     // Key label
                     const labelSpan = document.createElement('span');
@@ -1646,6 +1744,7 @@ export class ArrayKeyboard {
             span.style.fontFamily = this.fontFamily;
             span.textContent = g.char;
             span.dataset.type = g.type;
+            this._addHoverHandlers(span, g.char);
             keyDiv.appendChild(span);
         });
         
@@ -1708,6 +1807,7 @@ export class ArrayKeyboard {
                 glyphDiv.className = className;
                 glyphDiv.style.fontFamily = this.fontFamily;
                 glyphDiv.textContent = glyph;
+                this._addHoverHandlers(glyphDiv, glyph);
                 glyphGrid.appendChild(glyphDiv);
             }
             
@@ -1747,6 +1847,7 @@ export class ArrayKeyboard {
                 glyphDiv.className = className;
                 glyphDiv.style.fontFamily = this.fontFamily;
                 glyphDiv.textContent = glyph;
+                this._addHoverHandlers(glyphDiv, glyph);
                 glyphRow.appendChild(glyphDiv);
             }
             
@@ -1797,6 +1898,184 @@ export class ArrayKeyboard {
         this.namesOverlay.appendChild(svg);
         
         this.container.appendChild(this.namesOverlay);
+    }
+    
+    /**
+     * Create hover tooltip element
+     */
+    _createTooltip() {
+        if (!this.glyphDocs) return;
+        
+        this.tooltip = document.createElement('div');
+        this.tooltip.className = 'array-keyboard-tooltip';
+        
+        // Keep tooltip visible when mouse enters it
+        this.tooltip.addEventListener('mouseenter', () => {
+            if (this.tooltipTimeout) {
+                clearTimeout(this.tooltipTimeout);
+                this.tooltipTimeout = null;
+            }
+        });
+        
+        // Hide tooltip when mouse leaves it
+        this.tooltip.addEventListener('mouseleave', () => {
+            this._hideTooltip();
+        });
+        
+        // Append to body for proper fixed positioning
+        document.body.appendChild(this.tooltip);
+    }
+    
+    /**
+     * Show tooltip for a glyph
+     * @param {string} glyph - The glyph character
+     * @param {HTMLElement} targetEl - The element being hovered
+     */
+    _showTooltip(glyph, targetEl) {
+        if (!this.tooltip || !this.glyphDocs) return;
+        
+        const doc = this.glyphDocs[glyph];
+        if (!doc) return;
+        
+        // Clear any pending hide timeout
+        if (this.tooltipTimeout) {
+            clearTimeout(this.tooltipTimeout);
+            this.tooltipTimeout = null;
+        }
+        
+        // Build tooltip content
+        let html = '<div class="array-keyboard-tooltip-header">';
+        
+        // Glyph with syntax coloring and language font
+        const syntaxClass = this._getSyntaxClass(glyph);
+        html += `<span class="array-keyboard-tooltip-glyph ${syntaxClass}" style="font-family: ${this.fontFamily}">${glyph}</span>`;
+        
+        // Title (name)
+        html += `<span class="array-keyboard-tooltip-title">${this._escapeHtml(doc.name || '')}</span>`;
+        
+        // Type badge
+        html += `<span class="array-keyboard-tooltip-type">${doc.type}</span>`;
+        html += '</div>';
+        
+        // Description
+        if (doc.description) {
+            // Truncate long descriptions
+            const shortDesc = doc.description.length > 180 ? doc.description.substring(0, 177) + '...' : doc.description;
+            html += `<div class="array-keyboard-tooltip-desc">${this._escapeHtml(shortDesc)}</div>`;
+        }
+        
+        // Example (with language font for code)
+        if (doc.example) {
+            html += `<div class="array-keyboard-tooltip-example" style="font-family: ${this.fontFamily}">${this._escapeHtml(doc.example)}</div>`;
+        }
+        
+        // Doc link
+        if (doc.docUrl) {
+            html += `<a class="array-keyboard-tooltip-link" href="${doc.docUrl}" target="_blank" rel="noopener">View full docs ↗</a>`;
+        }
+        
+        this.tooltip.innerHTML = html;
+        
+        // Position tooltip
+        this._positionTooltip(targetEl);
+        
+        // Show tooltip
+        this.tooltip.classList.add('show');
+        
+        // Make links clickable
+        this.tooltip.style.pointerEvents = 'auto';
+    }
+    
+    /**
+     * Position tooltip relative to target element
+     */
+    _positionTooltip(targetEl) {
+        const rect = targetEl.getBoundingClientRect();
+        const padding = 10;
+        
+        // Get tooltip dimensions - need to make it visible first
+        this.tooltip.style.visibility = 'hidden';
+        this.tooltip.style.opacity = '0';
+        this.tooltip.classList.add('show');
+        
+        // Force reflow to get accurate dimensions
+        const tooltipWidth = this.tooltip.offsetWidth;
+        const tooltipHeight = this.tooltip.offsetHeight;
+        
+        // Remove temporary show class
+        this.tooltip.classList.remove('show');
+        
+        // Calculate position - prefer above, fallback to below
+        let top = rect.top - tooltipHeight - padding;
+        let left = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+        
+        // If too high, position below
+        if (top < padding) {
+            top = rect.bottom + padding;
+        }
+        
+        // Keep within viewport horizontally
+        const maxLeft = window.innerWidth - tooltipWidth - padding;
+        if (left < padding) {
+            left = padding;
+        } else if (left > maxLeft) {
+            left = maxLeft;
+        }
+        
+        // Keep within viewport vertically
+        const maxTop = window.innerHeight - tooltipHeight - padding;
+        if (top > maxTop) {
+            top = maxTop;
+        }
+        if (top < padding) {
+            top = padding;
+        }
+        
+        this.tooltip.style.top = `${top}px`;
+        this.tooltip.style.left = `${left}px`;
+        
+        // Reset styles for animation
+        this.tooltip.style.visibility = '';
+        this.tooltip.style.opacity = '';
+    }
+    
+    /**
+     * Hide tooltip
+     */
+    _hideTooltip() {
+        if (!this.tooltip) return;
+        
+        // Add a small delay before hiding to allow moving to the tooltip
+        this.tooltipTimeout = setTimeout(() => {
+            this.tooltip.classList.remove('show');
+            this.tooltip.style.pointerEvents = 'none';
+        }, 100);
+    }
+    
+    /**
+     * Escape HTML special characters
+     */
+    _escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    /**
+     * Add hover handlers to a glyph element
+     */
+    _addHoverHandlers(element, glyph) {
+        if (!this.glyphDocs || !this.glyphDocs[glyph]) return;
+        
+        element.style.cursor = 'help';
+        
+        element.addEventListener('mouseenter', () => {
+            this._showTooltip(glyph, element);
+        });
+        
+        element.addEventListener('mouseleave', () => {
+            this._hideTooltip();
+        });
     }
     
     /**
@@ -1924,7 +2203,20 @@ export class ArrayKeyboard {
             });
         }
         
-        if (glyphElements.length === 0) return;
+        if (glyphElements.length === 0) {
+            // Hide tooltip if no results
+            this._hideTooltip();
+            return;
+        }
+        
+        // Show tooltip when search narrows to a single result
+        if (this.searchFilter && glyphElements.length === 1 && this.glyphDocs) {
+            const singleResult = glyphElements[0];
+            this._showTooltip(singleResult.glyph, singleResult.el);
+        } else if (this.searchFilter && glyphElements.length > 1) {
+            // Hide tooltip when multiple results
+            this._hideTooltip();
+        }
         
         // Calculate dynamic font size based on number of results
         // Fewer results = larger font for better readability
@@ -2594,9 +2886,13 @@ export class ArrayKeyboard {
         if (this.namesOverlay) {
             this.namesOverlay.remove();
         }
+        if (this.tooltip) {
+            this.tooltip.remove();
+        }
         
         this._createOverlay();
         this._createNamesOverlay();
+        this._createTooltip();
         
         if (wasVisible) {
             this.show();
@@ -2706,6 +3002,12 @@ export class ArrayKeyboard {
         if (this.searchContainer) {
             this.searchContainer.remove();
         }
+        if (this.tooltip) {
+            this.tooltip.remove();
+        }
+        if (this.tooltipTimeout) {
+            clearTimeout(this.tooltipTimeout);
+        }
         // Note: We don't remove styles as other instances might use them
     }
     
@@ -2723,6 +3025,28 @@ export class ArrayKeyboard {
         this._createNamesOverlay();
         
         // Update header hint
+        if (this.overlay) {
+            const wasVisible = this.isVisible();
+            this.overlay.remove();
+            this._createOverlay();
+            if (wasVisible) this.show();
+        }
+    }
+    
+    /**
+     * Update glyph documentation for hover tooltips
+     * @param {Object} glyphDocs - New glyph documentation mapping
+     */
+    updateGlyphDocs(glyphDocs) {
+        this.glyphDocs = glyphDocs;
+        
+        // Recreate tooltip
+        if (this.tooltip) {
+            this.tooltip.remove();
+        }
+        this._createTooltip();
+        
+        // Recreate overlay to re-add hover handlers
         if (this.overlay) {
             const wasVisible = this.isVisible();
             this.overlay.remove();

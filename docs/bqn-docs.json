@@ -1,0 +1,778 @@
+{
+  "_meta": {
+    "language": "BQN",
+    "source": "https://mlochbaum.github.io/BQN/help/index.html",
+    "scrapedAt": "2026-01-27T17:31:35.336Z",
+    "version": "2.0.0"
+  },
+  "primitives": {
+    "+": {
+      "glyph": "+",
+      "type": "function",
+      "name": "Conjugate, Add",
+      "description": "Complex conjugate of 𝕩. BQN doesn't support complex numbers yet, so it has no effect. 𝕨 added to 𝕩. Either 𝕨 or 𝕩 can be a character, and if so, the other has to be an integer.",
+      "example": "+ 1\n1\n + ¯1\n¯1",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/arithmetic.html#basic-arithmetic"
+    },
+    "-": {
+      "glyph": "-",
+      "type": "function",
+      "name": "Negate, Subtract",
+      "description": "Additive Inverse of 𝕩. Subtract 𝕩 from 𝕨. 𝕨 and 𝕩 can be characters or numbers.",
+      "example": "- 1\n¯1\n - ¯1\n1",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/arithmetic.html#basic-arithmetic"
+    },
+    "×": {
+      "glyph": "×",
+      "type": "function",
+      "name": "Sign, Multiply",
+      "description": "Sign of 𝕩. 𝕨 multiplied by 𝕩.",
+      "example": "× ¯5‿0‿5‿1\n⟨ ¯1 0 1 1 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/arithmetic.html#basic-arithmetic"
+    },
+    "÷": {
+      "glyph": "÷",
+      "type": "function",
+      "name": "Reciprocal, Divide",
+      "description": "Gives 1 ÷ 𝕩. 𝕨 divided by 𝕩.",
+      "example": "÷ 5\n0.2",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/arithmetic.html#basic-arithmetic"
+    },
+    "⋆": {
+      "glyph": "⋆",
+      "type": "function",
+      "name": "Exponential, Power",
+      "description": "e (Euler's constant) to the power of 𝕩. 𝕨 to the power of 𝕩.",
+      "example": "⋆ 0‿1‿2‿3\n⟨ 1 2.718281828459045 7.38905609893065 20.085536923187668 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/arithmetic.html#basic-arithmetic"
+    },
+    "√": {
+      "glyph": "√",
+      "type": "function",
+      "name": "Square root, Root",
+      "description": "𝕨th root of 𝕩.",
+      "example": "√ 2\n1.4142135623730951",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/arithmetic.html#basic-arithmetic"
+    },
+    "⌊": {
+      "glyph": "⌊",
+      "type": "function",
+      "name": "Floor, Minimum",
+      "description": "Round 𝕩 down to the nearest integer. Minimum of 𝕨 and 𝕩.",
+      "example": "⌊ 1.2‿π‿3‿7.89\n⟨ 1 3 3 7 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/arithmetic.html#additional-arithmetic"
+    },
+    "⌈": {
+      "glyph": "⌈",
+      "type": "function",
+      "name": "Ceiling, Maximum",
+      "description": "Round 𝕩 up to the nearest integer. Maximum of 𝕨 and 𝕩.",
+      "example": "⌈ 1.2‿π‿3‿7.89\n⟨ 2 4 3 8 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/arithmetic.html#additional-arithmetic"
+    },
+    "∧": {
+      "glyph": "∧",
+      "type": "function",
+      "name": "Sort Up, Logical And",
+      "description": "Sort array 𝕩 in ascending order. Logical And of 𝕨 and 𝕩.",
+      "example": "∧ 3‿1‿4‿1‿5\n⟨ 1 1 3 4 5 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/order.html#sort"
+    },
+    "∨": {
+      "glyph": "∨",
+      "type": "function",
+      "name": "Sort Down, Logical Or",
+      "description": "Sort array 𝕩 in descending order. Logical Or of 𝕨 and 𝕩.",
+      "example": "∨ 3‿1‿4‿1‿5\n⟨ 5 4 3 1 1 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/order.html#sort"
+    },
+    "¬": {
+      "glyph": "¬",
+      "type": "function",
+      "name": "Logical Not, Span",
+      "description": "Logical Not of 𝕩. Count of numbers in the inclusive range from 𝕩 to 𝕨.",
+      "example": "¬ 0\n1\n ¬ 1‿0\n⟨ 0 1 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/logic.html"
+    },
+    "|": {
+      "glyph": "|",
+      "type": "function",
+      "name": "Absolute Value, Modulus",
+      "description": "Absolute Value of 𝕩. Remainder of 𝕩 divided by 𝕨.",
+      "example": "| ¯2\n2\n | 1‿3‿¯4‿3\n⟨ 1 3 4 3 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/arithmetic.html#additional-arithmetic"
+    },
+    "≤": {
+      "glyph": "≤",
+      "type": "function",
+      "name": "Lesser Than or Equal To",
+      "description": "𝕨 and 𝕩 can both be either numbers or characters.",
+      "example": "1 ≤ 3\n1\n 2‿3‿0 ≤ 3‿1‿0\n⟨ 1 0 1 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/arithmetic.html#comparisons"
+    },
+    "<": {
+      "glyph": "<",
+      "type": "function",
+      "name": "Enclose, Lesser Than",
+      "description": "Create a unit array containing 𝕩. ((≢<𝕩) ≡ ⟨⟩) 𝕨 and 𝕩 can both be either numbers or characters.",
+      "example": "<1\n┌·   \n· 1  \n ┘\n ≢<1\n⟨⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/enclose.html"
+    },
+    ">": {
+      "glyph": ">",
+      "type": "function",
+      "name": "Merge, Greater Than",
+      "description": "Combine an array of arrays into one array. All elements of 𝕩 must have the same rank, and the result rank is that plus the rank of 𝕩. Returns and boxed atoms unchanged.",
+      "example": "a ← ⟨⟨1, 2⟩, ⟨3, 4⟩⟩\n >a\n┌─     \n╵ 1 2  \n 3 4  \n ┘\n ≢a\n⟨ 2 ⟩\n ≢>a\n⟨ 2 2 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/couple.html"
+    },
+    "≥": {
+      "glyph": "≥",
+      "type": "function",
+      "name": "Greater Than or Equal To",
+      "description": "𝕨 and 𝕩 can both be either numbers or characters.",
+      "example": "1 ≥ 3\n0\n 2‿3‿0 ≥ 3‿1‿0\n⟨ 0 1 1 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/arithmetic.html#comparisons"
+    },
+    "=": {
+      "glyph": "=",
+      "type": "function",
+      "name": "Rank, Equal To",
+      "description": "Returns the number of dimensions in 𝕩. Do argument atoms match?",
+      "example": "= 0\n0\n = 3⥊0\n1\n = 3‿3⥊0\n2\n 3‿3‿3 ⥊ ⟨⟨0⟩⟩\n┌─                   \n╎ ⟨ 0 ⟩ ⟨ 0 ⟩ ⟨ 0 ⟩  \n ⟨ 0 ⟩ ⟨ 0 ⟩ ⟨ 0 ⟩  \n ⟨ 0 ⟩ ⟨ 0 ⟩ ⟨ 0 ⟩  \n ⟨ 0 ⟩ ⟨ 0 ⟩ ⟨ 0 ⟩  \n ⟨ 0 ⟩ ⟨ 0 ⟩ ⟨ 0 ⟩  \n ⟨ 0 ⟩ ⟨ 0 ⟩ ⟨ 0 ⟩  \n ⟨ 0 ⟩ ⟨ 0 ⟩ ⟨ 0 ⟩  \n ⟨ 0 ⟩ ⟨ 0 ⟩ ⟨ 0 ⟩  \n ⟨ 0 ⟩ ⟨ 0 ⟩ ⟨ 0 ⟩  \n ┘",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/shape.html"
+    },
+    "≠": {
+      "glyph": "≠",
+      "type": "function",
+      "name": "Length, Not Equal To",
+      "description": "Length of the first dimension of 𝕩. Do argument atoms not match?",
+      "example": "≠ 3\n1\n ≠ ⟨1, 2, 3⟩\n3\n ≠ 3‿4‿5⥊0\n3\n ≠ 1‿4‿5⥊0\n1\n ≠ 4‿4‿5⥊0\n4",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/shape.html"
+    },
+    "≡": {
+      "glyph": "≡",
+      "type": "function",
+      "name": "Depth, Match",
+      "description": "Highest level of nesting in 𝕩. Does 𝕨 exactly match 𝕩?",
+      "example": "≡ 2‿3‿4\n1\n ≡ ⟨2,<3,4,<<<5⟩\n4\n ≡ 9\n0",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/depth.html"
+    },
+    "≢": {
+      "glyph": "≢",
+      "type": "function",
+      "name": "Shape, Not Match",
+      "description": "Length of each dimension of x. Does 𝕨 not exactly match 𝕩?",
+      "example": "≢ 1\n⟨⟩\n ≢ 1‿2\n⟨ 2 ⟩\n ≢ 1‿2 ≍ 3‿4\n⟨ 2 2 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/shape.html"
+    },
+    "⊣": {
+      "glyph": "⊣",
+      "type": "function",
+      "name": "Identity, Left",
+      "description": "Identity, Left",
+      "example": "⊣ 5\n5",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/identity.html"
+    },
+    "⊢": {
+      "glyph": "⊢",
+      "type": "function",
+      "name": "Identity, Right",
+      "description": "Identity, Right",
+      "example": "⊢ 5\n5",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/identity.html"
+    },
+    "⥊": {
+      "glyph": "⥊",
+      "type": "function",
+      "name": "Deshape, Reshape",
+      "description": "Put all elements of 𝕩 in a rank 1 array, promoting to an array if necessary. Put all elements of 𝕩 in an array of shape 𝕨, removing elements or repeating them cyclically if necessary.",
+      "example": "⥊ 1\n⟨ 1 ⟩\n ⥊ 1‿2 ≍ 3‿4\n⟨ 1 2 3 4 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/reshape.html"
+    },
+    "∾": {
+      "glyph": "∾",
+      "type": "function",
+      "name": "Join, Join To",
+      "description": "Join all elements of 𝕩 together. Element ranks must be compatible.",
+      "example": "∾ ⟨1‿2, 3, 4‿5⟩\n⟨ 1 2 3 4 5 ⟩\n m ← (3‿1≍⌜4‿2‿5) ⥊¨ 2‿3⥊↕6\n ∾ m\n┌─                       \n╵ 0 0 0 0 1 1 2 2 2 2 2  \n 0 0 0 0 1 1 2 2 2 2 2  \n 0 0 0 0 1 1 2 2 2 2 2  \n 3 3 3 3 4 4 5 5 5 5 5  \n ┘",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/join.html"
+    },
+    "≍": {
+      "glyph": "≍",
+      "type": "function",
+      "name": "Solo, Couple",
+      "description": "Add a dimension to 𝕩. Join 𝕨 and 𝕩 along a newly created axis.",
+      "example": "≍ 1\n⟨ 1 ⟩\n ≍≍ 1\n┌─   \n╵ 1  \n ┘\n ≍≍≍ 1\n┌─   \n╎ 1  \n ┘\n ≍≍ 1‿2‿3‿4\n┌─         \n╎ 1 2 3 4  \n ┘\n ≍≍≍ 1‿2‿3‿4\n┌─         \n┆ 1 2 3 4  \n ┘",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/couple.html"
+    },
+    "⋈": {
+      "glyph": "⋈",
+      "type": "function",
+      "name": "Enlist, Pair",
+      "description": "Put 𝕩 in a single element list. (⟨𝕩⟩) Put 𝕨 and 𝕩 in a two element list. (⟨𝕨, 𝕩⟩)",
+      "example": "⋈ 1\n⟨ 1 ⟩\n ⋈ 4‿4 ⥊ 3‿67‿8‿0\n┌─              \n· ┌─            \n ╵ 3 67 8 0    \n 3 67 8 0    \n 3 67 8 0    \n 3 67 8 0    \n ┘  \n ┘",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/pair.html"
+    },
+    "↑": {
+      "glyph": "↑",
+      "type": "function",
+      "name": "Prefixes, Take",
+      "description": "Prefixes of array 𝕩 along its first axis. For each integer in 𝕨, take that many elements from each dimension of 𝕩.",
+      "example": "↑ 1‿2‿3‿4\n⟨ ⟨⟩ ⟨ 1 ⟩ ⟨ 1 2 ⟩ ⟨ 1 2 3 ⟩ ⟨ 1 2 3 4 ⟩ ⟩\n a ← 3‿3 ⥊ ↕9\n ↑ a\n┌─                                    \n· ↕0‿3 ┌─        ┌─        ┌─         \n ╵ 0 1 2   ╵ 0 1 2   ╵ 0 1 2    \n ┘   3 4 5     3 4 5    \n ┘   6 7 8    \n ┘  \n ┘",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/prefixes.html"
+    },
+    "↓": {
+      "glyph": "↓",
+      "type": "function",
+      "name": "Suffixes, Drop",
+      "description": "Suffixes of array 𝕩 along its first axis. For each integer in 𝕨, drop that many elements from the beginning of each dimension of 𝕩.",
+      "example": "↓ 1‿2‿3‿4\n⟨ ⟨ 1 2 3 4 ⟩ ⟨ 2 3 4 ⟩ ⟨ 3 4 ⟩ ⟨ 4 ⟩ ⟨⟩ ⟩\n a ← 3‿3 ⥊ ↕9\n ↓ a\n┌─                                    \n· ┌─        ┌─        ┌─        ↕0‿3  \n ╵ 0 1 2   ╵ 3 4 5   ╵ 6 7 8         \n 3 4 5     6 7 8           ┘       \n 6 7 8           ┘                 \n ┘                           \n ┘",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/prefixes.html"
+    },
+    "↕": {
+      "glyph": "↕",
+      "type": "function",
+      "name": "Range, Windows",
+      "description": "Return all indices that would index into an array of shape 𝕩. When given a single number, range from 0 to 𝕩-1.",
+      "example": "↕ 4\n⟨ 0 1 2 3 ⟩\n ↕ 4‿5\n┌─                                         \n╵ ⟨ 0 0 ⟩ ⟨ 0 1 ⟩ ⟨ 0 2 ⟩ ⟨ 0 3 ⟩ ⟨ 0 4 ⟩  \n ⟨ 1 0 ⟩ ⟨ 1 1 ⟩ ⟨ 1 2 ⟩ ⟨ 1 3 ⟩ ⟨ 1 4 ⟩  \n ⟨ 2 0 ⟩ ⟨ 2 1 ⟩ ⟨ 2 2 ⟩ ⟨ 2 3 ⟩ ⟨ 2 4 ⟩  \n ⟨ 3 0 ⟩ ⟨ 3 1 ⟩ ⟨ 3 2 ⟩ ⟨ 3 3 ⟩ ⟨ 3 4 ⟩  \n ┘",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/range.html"
+    },
+    "»": {
+      "glyph": "»",
+      "type": "function",
+      "name": "Nudge, Shift Before",
+      "description": "Remove the last element of 𝕩, add a cell of fill values to the start of the first axis of 𝕩. Remove the last ≠𝕨 (length) major cells from 𝕩, join 𝕨 to the start of 𝕩. Ranks must match.",
+      "example": "» 1‿2‿3\n⟨ 0 1 2 ⟩\n » 3‿3 ⥊ 9\n┌─       \n╵ 0 0 0  \n 9 9 9  \n 9 9 9  \n ┘",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/shift.html"
+    },
+    "«": {
+      "glyph": "«",
+      "type": "function",
+      "name": "Nudge Back, Shift After",
+      "description": "Remove the first element of 𝕩, add a cell of fill values to the end of the first axis of 𝕩. Remove the first ≠𝕨 (length) major cells from 𝕩, join 𝕨 to the end of 𝕩. Ranks must match.",
+      "example": "« 1‿2‿3\n⟨ 2 3 0 ⟩\n « 3‿3 ⥊ 9\n┌─       \n╵ 9 9 9  \n 9 9 9  \n 0 0 0  \n ┘",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/shift.html"
+    },
+    "⌽": {
+      "glyph": "⌽",
+      "type": "function",
+      "name": "Reverse, Rotate",
+      "description": "Reverse 𝕩 along the first axis. Move the first 𝕨 elements of 𝕩 to its end. Negative 𝕨 reverses the direction of rotation.",
+      "example": "⌽ 1‿2‿3\n⟨ 3 2 1 ⟩\n a ← 3‿3 ⥊ ↕9\n ⌽ a\n┌─       \n╵ 6 7 8  \n 3 4 5  \n 0 1 2  \n ┘",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/reverse.html"
+    },
+    "⍉": {
+      "glyph": "⍉",
+      "type": "function",
+      "name": "Transpose, Reorder Axes",
+      "description": "Move the first axis of 𝕩 to the end. Rearrange the axes of 𝕩 as per the axis indices in 𝕨.",
+      "example": "a ← 3‿3 ⥊ ↕9\n ⍉ a\n┌─       \n╵ 0 3 6  \n 1 4 7  \n 2 5 8  \n ┘\n b ← 1‿2‿3 ⥊ ↕6\n ≢⍉ b\n⟨ 2 3 1 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/transpose.html"
+    },
+    "/": {
+      "glyph": "/",
+      "type": "function",
+      "name": "Indices, Replicate",
+      "description": "Repeat the index of each element in 𝕩 by the element's value. 𝕩 must be rank 1. Repeat each major cell in 𝕩 by the corresponding element in 𝕨.",
+      "example": "/ 1‿2‿3\n⟨ 0 1 1 2 2 2 ⟩\n / 1‿0‿1\n⟨ 0 2 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/replicate.html#indices"
+    },
+    "⍋": {
+      "glyph": "⍋",
+      "type": "function",
+      "name": "Grade Up, Bins Up",
+      "description": "Indices of 𝕩 that would sort its major cells in ascending order. Binary search for each cell of 𝕩 in 𝕨, returning the number of major cells in 𝕨 less than or equal to that cell.",
+      "example": "a ← 3‿2‿1\n ⍋ a\n⟨ 2 1 0 ⟩\n (⍋a) ⊏ a\n⟨ 1 2 3 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/order.html#grade"
+    },
+    "⍒": {
+      "glyph": "⍒",
+      "type": "function",
+      "name": "Grade Down, Bins Down",
+      "description": "Indices of 𝕩 that would sort its major cells in descending order. Binary search for each cell of 𝕩 in 𝕨, returning the number of major cells in 𝕨 greater than or equal to that cell.",
+      "example": "a ← 1‿2‿3\n ⍒ a\n⟨ 2 1 0 ⟩\n (⍒a) ⊏ a\n⟨ 3 2 1 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/order.html#grade"
+    },
+    "⊏": {
+      "glyph": "⊏",
+      "type": "function",
+      "name": "First Cell, Select",
+      "description": "First major cell of 𝕩. Select the major cells of 𝕩 at the indices in 𝕨.",
+      "example": "⊏ ⟨1, 2, 3⟩\n┌·   \n· 1  \n ┘\n a ← 3‿3 ⥊ ↕9\n ⊏ a\n⟨ 0 1 2 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/select.html#first-cell"
+    },
+    "⊑": {
+      "glyph": "⊑",
+      "type": "function",
+      "name": "First, Pick",
+      "description": "First element of 𝕩. Pick the element of 𝕩 at index 𝕨.",
+      "example": "⊑ ⟨1, 2, 3⟩\n1\n a ← 3‿3 ⥊ ↕9\n ⊑ a\n0",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/pick.html#first"
+    },
+    "⊐": {
+      "glyph": "⊐",
+      "type": "function",
+      "name": "Classify, Index Of",
+      "description": "Translate major cells of 𝕩 to unique ID numbers based on first occurrence. First index of each major cell of 𝕩 in 𝕨. Rank of 𝕩 must be at least cell rank of 𝕨.",
+      "example": "⊐ 5‿6‿2‿2‿5‿1\n⟨ 0 1 2 2 0 3 ⟩\n a ← 3‿3 ⥊ 0‿1‿2‿9‿0‿9‿0‿1‿2\n ⊐ a\n⟨ 0 1 0 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/selfcmp.html#classify"
+    },
+    "⊒": {
+      "glyph": "⊒",
+      "type": "function",
+      "name": "Occurrence Count, Progressive Index Of",
+      "description": "Number of times each major cell of 𝕩 has occurred before the current position. Index of the first unused match of each major cell of 𝕩 in 𝕨. If there are no more matches left, the length of 𝕨 is placed in that position.",
+      "example": "⊒   2‿7‿1‿8‿1‿7‿1‿8‿2‿8‿4\n⟨ 0 0 0 0 1 1 2 1 1 2 0 ⟩\n ≍⟜⊒ 2‿7‿1‿8‿1‿7‿1‿8‿2‿8‿4\n┌─                       \n╵ 2 7 1 8 1 7 1 8 2 8 4  \n 0 0 0 0 1 1 2 1 1 2 0  \n ┘",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/selfcmp.html#occurrence-count"
+    },
+    "∊": {
+      "glyph": "∊",
+      "type": "function",
+      "name": "Mark Firsts, Member Of",
+      "description": "Mark the first occurrence of each major cell in 𝕩 with a 1, and all other occurrences with a 0. Is each cell in 𝕨 a major cell of 𝕩?",
+      "example": "∊ 4‿5‿6‿6‿4‿7‿5\n⟨ 1 1 1 0 0 1 0 ⟩\n a ← 3‿3 ⥊ ↕9\n ∊ a\n⟨ 1 1 1 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/selfcmp.html#mark-firsts"
+    },
+    "⍷": {
+      "glyph": "⍷",
+      "type": "function",
+      "name": "Deduplicate, Find",
+      "description": "Unique major cells of 𝕩. Mark the top left location of the occurrences of 𝕨 in 𝕩 with a 1, and other locations with 0.",
+      "example": "⍷ 4‿5‿6‿6‿4‿7‿5\n⟨ 4 5 6 7 ⟩\n a ← 3‿3 ⥊ ↕6\n ⍷ a\n┌─       \n╵ 0 1 2  \n 3 4 5  \n ┘",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/selfcmp.html#deduplicate"
+    },
+    "⊔": {
+      "glyph": "⊔",
+      "type": "function",
+      "name": "Group Indices, Group",
+      "description": "Group the indices of the major cells of 𝕩 by their respective values. 𝕩 must consist of integers. Groups start from 0.",
+      "example": "⊔ 4‿5‿6‿6‿4‿7‿5\n⟨ ⟨⟩ ⟨⟩ ⟨⟩ ⟨⟩ ⟨ 0 4 ⟩ ⟨ 1 6 ⟩ ⟨ 2 3 ⟩ ⟨ 5 ⟩ ⟩\n (↕8) ≍ ⊔ 4‿5‿6‿6‿4‿7‿5\n┌─                                           \n╵ 0  1  2  3  4       5       6       7      \n ⟨⟩ ⟨⟩ ⟨⟩ ⟨⟩ ⟨ 0 4 ⟩ ⟨ 1 6 ⟩ ⟨ 2 3 ⟩ ⟨ 5 ⟩  \n ┘",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/group.html"
+    },
+    "!": {
+      "glyph": "!",
+      "type": "function",
+      "name": "Assert, Assert With Message",
+      "description": "Throw an error if 𝕩 is not 1. Throw an error with message 𝕨 if 𝕩 is not 1.",
+      "example": "! 1\n1\n ! 2\nError: Assertion error\n ! \"hello\"\nError: hello",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/assert.html#assert"
+    },
+    "˙": {
+      "glyph": "˙",
+      "type": "1-modifier",
+      "name": "Constant",
+      "description": "Returns a function that will always return 𝕗.",
+      "example": "\"hello\" 1˙ 2\n1\n \"hello\" {𝕨+𝕩}˙ 2\n(function block)",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/constant.html"
+    },
+    "˜": {
+      "glyph": "˜",
+      "type": "1-modifier",
+      "name": "Self, Swap",
+      "description": "Supplies 𝕩 as a left argument to 𝔽 (𝕩 𝔽 𝕩). Swaps the arguments of 𝔽 (𝕩 𝔽 𝕨).",
+      "example": "1 + 1\n2\n +˜ 1\n2",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/swap.html"
+    },
+    "∘": {
+      "glyph": "∘",
+      "type": "2-modifier",
+      "name": "Atop, Dyadic Atop",
+      "description": "Apply 𝔾 to 𝕩, then apply 𝔽 (𝔽 𝔾 𝕩). 𝔽 and 𝔾 must be monadic.",
+      "example": "-∘- 5\n5\n - - 5\n5",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/compose.html"
+    },
+    "○": {
+      "glyph": "○",
+      "type": "2-modifier",
+      "name": "Atop, Over",
+      "description": "Apply 𝔾 to 𝕩, then apply 𝔽 (𝔽 𝔾 𝕩). 𝔽 and 𝔾 must be monadic.",
+      "example": "-○- 5\n5\n - - 5\n5",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/compose.html"
+    },
+    "⊸": {
+      "glyph": "⊸",
+      "type": "2-modifier",
+      "name": "Bind Left, Before, Dyadic Before",
+      "description": "Supply 𝕗 as a left argument to 𝔾 (𝕗 𝔾 𝕩). 𝕗 is a constant, 𝔾 must be dyadic.",
+      "example": "3⊸- 9\n¯6\n 3 - 9\n¯6",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/hook.html#bind"
+    },
+    "⟜": {
+      "glyph": "⟜",
+      "type": "2-modifier",
+      "name": "Bind, After, Dyadic After",
+      "description": "Supply 𝕘 as a right argument to 𝔽 (𝕩 𝔽 𝕘). 𝕘 is a constant, 𝔽 must be dyadic.",
+      "example": "-⟜3 9\n6\n - 3 9\nError: Double subjects (missing ‿?)\n 9 - 3\n6",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/hook.html#bind"
+    },
+    "⌾": {
+      "glyph": "⌾",
+      "type": "2-modifier",
+      "name": "Under",
+      "description": "Where 𝔾 must be",
+      "example": "9⌾(1⊸⊑) 1‿2‿3\n⟨ 1 9 3 ⟩\n √⁼ (√1) + (√9)\n16\n 1 +⌾√ 9\n16",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/under.html"
+    },
+    "⊘": {
+      "glyph": "⊘",
+      "type": "2-modifier",
+      "name": "Valences, Dyadic Valences",
+      "description": "Apply 𝔽 to 𝕩. Apply 𝔾 to 𝕨 and 𝕩.",
+      "example": "+⊘- 5\n5\n -⊘+ 5\n¯5",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/valences.html"
+    },
+    "◶": {
+      "glyph": "◶",
+      "type": "2-modifier",
+      "name": "Choose",
+      "description": "Apply 𝔽 to the arguments and use the result to pick (⊑) a function from list 𝕘. Apply the picked function to the arguments.",
+      "example": "F ← ⊢◶+‿-‿÷‿×\n F 0\n0\n F 1\n¯1\n F 2\n0.5\n F 3\n1",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/choose.html"
+    },
+    "⎊": {
+      "glyph": "⎊",
+      "type": "2-modifier",
+      "name": "Catch",
+      "description": "Apply 𝔽 to the arguments. If an error happens when 𝔽 is applied, cancel its execution, apply 𝔾 to the arguments and return its result.",
+      "example": "∾⎊{\"error occurred with argument: \"∾•Fmt 𝕩} 1\n\"error occurred with argument: 1\"\n ∾⎊{\"error occurred with argument: \"∾•Fmt 𝕩} ⟨⟨1,2⟩, ⟨3,4⟩⟩\n⟨ 1 2 3 4 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/assert.html#catch"
+    },
+    "⎉": {
+      "glyph": "⎉",
+      "type": "2-modifier",
+      "name": "Rank",
+      "description": "Apply 𝔽 to cells at ranks given in 𝕘. Non-negative numbers indicate the rank of the cell and negative ones indicate the difference from full rank. The ranks applied are given by the following:",
+      "example": "a ← 3‿2‿4⥊\"ABCDEFGHIJKLMNOPQRSTUVWXYZ\"\n ⌽⎉2 a\n┌─      \n╎\"EFGH  \n ABCD  \n ·MNOP  \n IJKL  \n ·UVWX  \n QRST\" \n ┘",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/rank.html#rank"
+    },
+    "˘": {
+      "glyph": "˘",
+      "type": "1-modifier",
+      "name": "Cells",
+      "description": "Apply 𝔽 to/between the major cells of the arguments. (𝔽⎉¯1)",
+      "example": "a ← 3‿3 ⥊ ↕9\n <˘ a\n⟨ ⟨ 0 1 2 ⟩ ⟨ 3 4 5 ⟩ ⟨ 6 7 8 ⟩ ⟩\n a ≍˘ a\n┌─       \n╎ 0 1 2  \n 0 1 2  \n 3 4 5  \n 3 4 5  \n 6 7 8  \n 6 7 8  \n ┘",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/rank.html#cells"
+    },
+    "⚇": {
+      "glyph": "⚇",
+      "type": "2-modifier",
+      "name": "Depth",
+      "description": "Apply 𝔽 to the cells of the arguments at depth given in 𝕘. Negative numbers count down from the top level and non-negative ones from the bottom up.",
+      "example": "1⊸↓⚇1 ⟨⟨1,2,3⟩, ⟨4,5,6⟩⟩\n⟨ ⟨ 2 3 ⟩ ⟨ 5 6 ⟩ ⟩\n 1 ↓⚇1 ⟨⟨1,2,3⟩, ⟨4,5,6⟩⟩\n⟨ ⟨ 2 3 ⟩ ⟨ 5 6 ⟩ ⟩\n (+´↕)⚇0 ⟨2,4‿7,3⟩  # Implements pervasion\n⟨ 1 ⟨ 6 21 ⟩ 3 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/depth.html#the-depth-modifier"
+    },
+    "¨": {
+      "glyph": "¨",
+      "type": "1-modifier",
+      "name": "Each",
+      "description": "Apply 𝔽 to/between the elements of the arguments. (𝔽⚇¯1)",
+      "example": "<¨ 1‿2‿3\n┌─                   \n· ┌·    ┌·    ┌·     \n · 1   · 2   · 3    \n ┘     ┘     ┘  \n ┘\n 4‿5‿6 ∾¨ 1‿2‿3\n⟨ ⟨ 4 1 ⟩ ⟨ 5 2 ⟩ ⟨ 6 3 ⟩ ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/map.html"
+    },
+    "⌜": {
+      "glyph": "⌜",
+      "type": "1-modifier",
+      "name": "Table",
+      "description": "Apply 𝔽 between every possible pair of the elements of the arguments. Identical to Each when called with one argument.",
+      "example": "1‿2‿3‿4 +⌜ 4‿5‿6‿7\n┌─           \n╵ 5 6  7  8  \n 6 7  8  9  \n 7 8  9 10  \n 8 9 10 11  \n ┘\n \"abc\" ∾⌜ \"xyz\"\n┌─                \n╵ \"ax\" \"ay\" \"az\"  \n \"bx\" \"by\" \"bz\"  \n \"cx\" \"cy\" \"cz\"  \n ┘",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/map.html"
+    },
+    "⍟": {
+      "glyph": "⍟",
+      "type": "2-modifier",
+      "name": "Repeat",
+      "description": "Apply 𝔾 to 𝕨 and 𝕩, then apply 𝔽 to 𝕩 that many times. If 𝕨 is given, use it each time as a constant left argument. If 𝔾 returns an array, give 𝔽⍟𝕩 for each of its elements.",
+      "example": "1 +⍟⊢ 4\n8\n 1 +⍟1‿2‿3 4\n⟨ 5 6 7 ⟩\n 3 ∾⍟{≠𝕩} ⟨4,5,6⟩\n⟨ 3 3 3 4 5 6 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/repeat.html"
+    },
+    "⁼": {
+      "glyph": "⁼",
+      "type": "1-modifier",
+      "name": "Undo",
+      "description": "Invert the function 𝔽, or use its defined inverse. Not all functions have inverses.",
+      "example": "1 - 2\n¯1\n 1 -⁼ 2\n¯1\n √ 16\n4\n √⁼ 4\n16\n ⋆ 1\n2.718281828459045\n ⋆⁼ 2.718281828459045\n1",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/undo.html"
+    },
+    "´": {
+      "glyph": "´",
+      "type": "1-modifier",
+      "name": "Fold, Fold With Initial",
+      "description": "Fold over 𝕩 with 𝔽 from right to left i.e. Insert 𝔽 between the elements of 𝕩. 𝕩 must be a simple list (1 = =𝕩).",
+      "example": "+´ 1‿2‿3\n6\n 1+2+3\n6\n -´ 1‿2‿3\n2\n 1-2-3\n2",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/fold.html"
+    },
+    "˝": {
+      "glyph": "˝",
+      "type": "1-modifier",
+      "name": "Insert, Insert With Initial",
+      "description": "Fold over cells of 𝕩 with 𝔽 from end to start, that is, insert 𝔽 between the major cells of 𝕩. Monadic insert, but use 𝕨 as initial right argument.",
+      "example": "a ← 3‿3 ⥊ ↕9\n +˝ a\n⟨ 9 12 15 ⟩\n 0‿1‿2 + 3‿4‿5 + 6‿7‿8\n⟨ 9 12 15 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/fold.html"
+    },
+    "`": {
+      "glyph": "`",
+      "type": "1-modifier",
+      "name": "Scan, Scan With initial",
+      "description": "Scan over 𝕩 with 𝔽 from left to right, producing intermediate values. Monadic scan, but use 𝕨 as initial left argument.",
+      "example": "+` 1‿2‿3\n⟨ 1 3 6 ⟩\n ⟨1, 1+2, (1+2)+3⟩\n⟨ 1 3 6 ⟩\n -` 1‿2‿3\n⟨ 1 ¯1 ¯4 ⟩\n ⟨1, 1-2, (1-2)-3⟩\n⟨ 1 ¯1 ¯4 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/scan.html"
+    },
+    "←": {
+      "glyph": "←",
+      "type": "syntax",
+      "name": "Define",
+      "description": "Defines a new variable with name n and value v. Variable n must not already exist in the scope.",
+      "example": "⊢ a ← 1\n1\n ⊢ b ← 3‿3 ⥊ 5\n┌─       \n╵ 5 5 5  \n 5 5 5  \n 5 5 5  \n ┘\n C ← ↑",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/expression.html#assignment"
+    },
+    "⇐": {
+      "glyph": "⇐",
+      "type": "syntax",
+      "name": "Export Definition, Export names",
+      "description": "Define a variable with name n and export it from the current namespace. Export the names given in n from the current namespace. Names must be defined somewhere in the scope.",
+      "example": "ns ← { exported ⇐ 5, unexported ← 0}\n ns.exported\n5\n ns.unexported\nError: Field named \"unexported\" not found",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/namespace.html#exports"
+    },
+    "↩": {
+      "glyph": "↩",
+      "type": "syntax",
+      "name": "Change, Modify",
+      "description": "Changes the value of variable with name n to value v. Variable n must already exist.",
+      "example": "a ↩ 1\nError: Undefined identifier\n ⊢ b ← 3\n3\n ⊢ b ↩ \"Be the change you wish to see in the world.\"\n\"Be the change you wish to see in the world.\"",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/expression.html#assignment"
+    },
+    "⋄": {
+      "glyph": "⋄",
+      "type": "syntax",
+      "name": "Separator",
+      "description": "Separates statements in blocks, programs, and arrays. Characters , and ⋄ are interchangeable with each other and with newline.",
+      "example": "a ← 3 , ⊢ b ← 2\n2\n 1 ⋄ 2 , 3\n3\n ⟨1 , 2 ⋄ 3⟩\n⟨ 1 2 3 ⟩\n {1 ⋄ 2 ⋄ 3}\n3",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/token.html#separators"
+    },
+    ".": {
+      "glyph": ".",
+      "type": "function",
+      "name": "Namespace Field",
+      "description": "Access a field with name name in namespace ns. Field must have been exported with ⇐.",
+      "example": "{a⇐1} . a\n1\n {F⇐-}.F 5\n¯5",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/namespace.html"
+    },
+    "(": {
+      "glyph": "(",
+      "type": "syntax",
+      "name": "Begin Expression",
+      "description": "Starts an expression, and only one expression. Must end with a corresponding ). ( supercedes any precedence order, so that an expression in () is evaluated fully before it can be used in the outer context.",
+      "example": "1 + 2 - 3\n0\n (1 + 2) - 3\n0",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/expression.html#parentheses"
+    },
+    ")": {
+      "glyph": ")",
+      "type": "syntax",
+      "name": "End Expression",
+      "description": "The closing symbol for (. See Begin Expression for more details.",
+      "example": "1 + 2 - 3\n0\n (1 + 2) - 3\n0",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/expression.html#parentheses"
+    },
+    "{": {
+      "glyph": "{",
+      "type": "syntax",
+      "name": "Begin Block",
+      "description": "Starts a block, which can be one of: Must end with a corresponding }.",
+      "example": "{𝕨 + 𝕩}   # Function\n(function block)\n {𝕨‿𝔽‿𝕩}   # 1-modifier\n(1-modifier block)\n {𝕨‿𝔽‿𝔾‿𝕩} # 2-modifier\n(2-modifier block)\n {a ⇐ 5}   # Namespace\n{a⇐}\n {5+4+6}   # Immediate block\n15",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/block.html"
+    },
+    "}": {
+      "glyph": "}",
+      "type": "syntax",
+      "name": "End Block",
+      "description": "Starts a block, which starts with }. See Begin Block for more details.",
+      "example": "{𝕨 + 𝕩}   # Function\n(function block)\n {𝕨‿𝔽‿𝕩}   # 1-modifier\n(1-modifier block)\n {𝕨‿𝔽‿𝔾‿𝕩} # 2-modifier\n(2-modifier block)\n {a ⇐ 5}   # Namespace\n{a⇐}\n {5+4+6}   # Immediate block\n15",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/block.html"
+    },
+    ";": {
+      "glyph": ";",
+      "type": "syntax",
+      "name": "Next Body",
+      "description": "End the current block body and start a new one. Headers (:) and predicates (?) can control which body is evaluated. A function can have two headers without these, indicating the monadic and dyadic cases.",
+      "example": "3 { 𝕩÷2 ; -𝕨‿𝕩 } 4   # Monadic and dyadic cases\n⟨ ¯3 ¯4 ⟩\n F ← {𝕊a‿b: a-b; 𝕊a‿b‿c: b+c}\n F 5‿2                # Matches first header\n3\n F 1‿3‿6              # Matches second header\n9",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/block.html#multiple-bodies"
+    },
+    ":": {
+      "glyph": ":",
+      "type": "syntax",
+      "name": "Header",
+      "description": "Placed at the end of a block header. A header has syntax that matches the way the block is called. It indicates the block type, and number and structure of inputs. Multiple bodies are searched in order to find one with a matching header.",
+      "example": "\"xy\" {a‿b _op c: b} ∞\n'y'",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/block.html#block-headers"
+    },
+    "?": {
+      "glyph": "?",
+      "type": "syntax",
+      "name": "Predicate",
+      "description": "Follows a statement in a block, which must return 0 or 1. If it's 0, stop the current body and evaluate the next eligible one instead. Variables defined before the ? stay if execution continues (1) but don't carry over to other bodies (0).",
+      "example": "{0 ? 3 ; 4}\n4\n Min ← {𝕨<𝕩 ? 𝕨 ; 𝕩}\n 3 Min 5\n3\n 4 Min 2\n2",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/block.html#predicates"
+    },
+    "⟨": {
+      "glyph": "⟨",
+      "type": "syntax",
+      "name": "Begin list",
+      "description": "Starts a list. Inner elements must be separated by , or ⋄. Lists can be nested in other lists. Must end with a corresponding ⟩.",
+      "example": "⟨1, 2, 3⟩\n⟨ 1 2 3 ⟩\n ⟨+ ⋄ - ⋄ 56⟩\n⟨ + - 56 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/arrayrepr.html#brackets"
+    },
+    "⟩": {
+      "glyph": "⟩",
+      "type": "syntax",
+      "name": "End list",
+      "description": "Ends a list started by a ⟨. See Begin List for more details.",
+      "example": "⟨1, 2, 3⟩\n⟨ 1 2 3 ⟩\n ⟨+ ⋄ - ⋄ 56⟩\n⟨ + - 56 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/arrayrepr.html#brackets"
+    },
+    "[": {
+      "glyph": "[",
+      "type": "syntax",
+      "name": "Begin array",
+      "description": "Starts a high-rank array. Entries must be separated by , or ⋄. These must have the same shape. They become major cells of the result. Must end with a corresponding ].",
+      "example": "[\"abc\", \"def\"]\n┌─     \n╵\"abc  \n def\" \n ┘\n [↕4, ↕5]\nError: […]: Incompatible element shapes (encountered shapes ⟨4⟩ and ⟨5⟩)",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/arrayrepr.html#high-rank-arrays"
+    },
+    "]": {
+      "glyph": "]",
+      "type": "syntax",
+      "name": "End array",
+      "description": "Ends an array started by a [. See Begin Array for more details.",
+      "example": "[\"abc\", \"def\"]\n┌─     \n╵\"abc  \n def\" \n ┘\n [↕4, ↕5]\nError: […]: Incompatible element shapes (encountered shapes ⟨4⟩ and ⟨5⟩)",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/arrayrepr.html#high-rank-arrays"
+    },
+    "‿": {
+      "glyph": "‿",
+      "type": "syntax",
+      "name": "Strand",
+      "description": "Create a list via strand notation. Placing ‿ between valid BQN expressions will create a list out of the end results of those expressions.",
+      "example": "1‿2‿3\n⟨ 1 2 3 ⟩\n +‿-‿56\n⟨ + - 56 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/arrayrepr.html#strands"
+    },
+    "·": {
+      "glyph": "·",
+      "type": "syntax",
+      "name": "Nothing",
+      "description": "Indicates no value. If a left argument is Nothing, the function is called with no left argument, and if the right is Nothing, it's not called and \"returns\" Nothing. Nothing can serve as a left argument in a train to string together multiple monadic functions.",
+      "example": "· ⌽ \"abc\"  # Reverse instead of Rotate\n\"cba\"",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/expression.html#nothing"
+    },
+    "•": {
+      "glyph": "•",
+      "type": "syntax",
+      "name": "System",
+      "description": "→specification A prefix for system functions. •listSys gives a list of defined system value names.",
+      "example": null,
+      "docUrl": "https://mlochbaum.github.io/BQN/help/system.html"
+    },
+    "𝕨": {
+      "glyph": "𝕨",
+      "type": "syntax",
+      "name": "Left Argument",
+      "description": "A variable assigned to the left argument of a block. 𝕎 can be used to access the left argument as a function. In a call with no left argument, 𝕨 functions as Nothing and 𝕎 can't be used.",
+      "example": "5 {𝕨} 1\n5\n -‿÷ {𝕎𝕩}¨ 4\n⟨ ¯4 0.25 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/block.html#arguments"
+    },
+    "𝕩": {
+      "glyph": "𝕩",
+      "type": "syntax",
+      "name": "Right Argument",
+      "description": "A variable assigned to the right argument of a block. 𝕏 can be used to access the right argument as a function.",
+      "example": "5 {𝕩} 1\n1",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/block.html#arguments"
+    },
+    "𝔽": {
+      "glyph": "𝔽",
+      "type": "syntax",
+      "name": "Modifier Left operand",
+      "description": "A variable assigned to the left operand of a modifier block. 𝕗 can be used to access the left operand as a subject.",
+      "example": "5 +{𝕗⊣𝕨} 1\n+",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/block.html#operands"
+    },
+    "𝔾": {
+      "glyph": "𝔾",
+      "type": "syntax",
+      "name": "2-Modifier Right operand",
+      "description": "A variable assigned to the right operand of a 2-modifier block. 𝕘 can be used to access the right operand as a subject.",
+      "example": "5 +{𝕘}3 1\n3",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/block.html#operands"
+    },
+    "𝕊": {
+      "glyph": "𝕊",
+      "type": "syntax",
+      "name": "Current Function",
+      "description": "A variable assigned to the current function block. 𝕤 accesses the same value but has a subject role. 𝕊 can be used for recursion.",
+      "example": "F ← {𝕊 0: 1; 𝕩 × 𝕊 𝕩-1} # Factorial\n F 5\n120\n {𝕤‿𝕤}4\n⟨ (function block) (function block) ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/block.html#self-reference"
+    },
+    "𝕣": {
+      "glyph": "𝕣",
+      "type": "syntax",
+      "name": "Current Modifier",
+      "description": "A variable assigned to the current modifier block. Add underscores to the beginning and/or end (_𝕣, _𝕣_) to use it in a modifier role.",
+      "example": "+{𝕣⊣𝕩} 4\n(1-modifier block)",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/block.html#self-reference"
+    },
+    "¯": {
+      "glyph": "¯",
+      "type": "syntax",
+      "name": "Minus",
+      "description": "Prefix before numbers to indicate that they are negative. Note that this is not the same as -, since it is part of the number, rather than a primitive that negates its value.",
+      "example": "-1‿2‿3\n⟨ ¯1 ¯2 ¯3 ⟩\n ¯1‿2‿3\n⟨ ¯1 2 3 ⟩",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/token.html#numbers"
+    },
+    "π": {
+      "glyph": "π",
+      "type": "syntax",
+      "name": "Pi",
+      "description": "The mathematical constant pi, a numeric literal. Can be negative (¯π).",
+      "example": "π\n3.141592653589793\n ¯π\n¯3.141592653589793",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/token.html#numbers"
+    },
+    "∞": {
+      "glyph": "∞",
+      "type": "syntax",
+      "name": "Infinity",
+      "description": "Mathematical constant Infinity, a numeric literal. Can be negative (¯∞).",
+      "example": "∞\n∞\n ¯∞\n¯∞\n 1+∞\n∞",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/token.html#numbers"
+    },
+    "@": {
+      "glyph": "@",
+      "type": "syntax",
+      "name": "Null Character",
+      "description": "Null character, code point 0 in ASCII. A shortcut character literal. Add to a code point number to get that character.",
+      "example": "@+50\n'2'\n @\n@\n @+64\n'@'",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/token.html#characters-and-strings"
+    },
+    "#": {
+      "glyph": "#",
+      "type": "syntax",
+      "name": "Comment",
+      "description": "Create a comment that extends to the end of the line. Anything written in comments is ignored.",
+      "example": "1 + 2 # + 3 + 4\n3\n \"Hello world!\" # this is ignored!\n\"Hello world!\"",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/token.html#comments"
+    },
+    "'": {
+      "glyph": "'",
+      "type": "syntax",
+      "name": "Character",
+      "description": "A character literal whose value is the character between quotes. Any character can be used, even ' and newline.",
+      "example": "'a'‿'b'\n\"ab\"",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/token.html#characters-and-strings"
+    },
+    "\"": {
+      "glyph": "\"",
+      "type": "syntax",
+      "name": "String",
+      "description": "Literal notation for a string, or list of characters. Double quotes must be escaped by writing them twice. Any other characters can be included directly.",
+      "example": "2 ⊑ \"string\"\n'r'\n 2 ⊑ \"ab\"\"cd\"\n'\"'",
+      "docUrl": "https://mlochbaum.github.io/BQN/doc/token.html#characters-and-strings"
+    }
+  }
+}
