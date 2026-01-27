@@ -623,6 +623,11 @@ const defaultStyles = `
     border-color: #6b7280;
 }
 
+.array-keyboard-key.search-match {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: #10B981;
+}
+
 .array-keyboard-key.space {
     width: 280px;
 }
@@ -1022,11 +1027,25 @@ export class ArrayKeyboard {
         this.searchFilter = '';
         this.styleElement = null;
         this.keydownHandler = null;
+        this.resizeHandler = null;
         
         this._injectStyles();
         this._createOverlay();
         this._createNamesOverlay();
         this._setupKeyboardShortcuts();
+        this._setupResizeHandler();
+    }
+    
+    /**
+     * Setup resize handler to redraw leader lines on zoom/resize
+     */
+    _setupResizeHandler() {
+        this.resizeHandler = () => {
+            if (this.namesVisible) {
+                this._updateLeaderLines();
+            }
+        };
+        window.addEventListener('resize', this.resizeHandler);
     }
     
     /**
@@ -1395,6 +1414,11 @@ export class ArrayKeyboard {
         // Clear existing content
         this.namesOverlay.innerHTML = '';
         
+        // Clear previous search highlights
+        this.overlay.querySelectorAll('.array-keyboard-key.search-match').forEach(el => {
+            el.classList.remove('search-match');
+        });
+        
         // Create SVG for lines
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         this.namesOverlay.appendChild(svg);
@@ -1402,10 +1426,17 @@ export class ArrayKeyboard {
         // Collect all glyphs that need labels
         const glyphElements = [];
         
+        // Track keys that match the search filter
+        const matchingKeys = new Set();
+        
         // Helper function to check if name matches search filter (fuzzy)
-        const matchesFilter = (name) => {
+        const matchesFilter = (name, keyEl = null) => {
             if (!this.searchFilter) return true;
-            return name.toLowerCase().includes(this.searchFilter);
+            const matches = name.toLowerCase().includes(this.searchFilter);
+            if (matches && keyEl) {
+                matchingKeys.add(keyEl);
+            }
+            return matches;
         };
         
         if (this.displayMode === 'category') {
@@ -1414,7 +1445,7 @@ export class ArrayKeyboard {
                 const glyph = el.textContent.trim();
                 if (this.glyphNames[glyph]) {
                     const name = this.glyphNames[glyph];
-                    if (matchesFilter(name)) {
+                    if (matchesFilter(name, el)) {
                         glyphElements.push({ el, glyph, name });
                     }
                 }
@@ -1437,7 +1468,7 @@ export class ArrayKeyboard {
                         const glyph = symbolEl.textContent.trim();
                         if (glyph && this.glyphNames[glyph]) {
                             const name = this.glyphNames[glyph];
-                            if (matchesFilter(name)) {
+                            if (matchesFilter(name, keyEl)) {
                                 glyphElements.push({ 
                                     el: symbolEl, 
                                     glyph, 
@@ -1453,7 +1484,7 @@ export class ArrayKeyboard {
                         const glyph = shiftSymbolEl.textContent.trim();
                         if (glyph && this.glyphNames[glyph]) {
                             const name = this.glyphNames[glyph];
-                            if (matchesFilter(name)) {
+                            if (matchesFilter(name, keyEl)) {
                                 glyphElements.push({ 
                                     el: shiftSymbolEl, 
                                     glyph, 
@@ -1471,7 +1502,7 @@ export class ArrayKeyboard {
                         const glyph = quadEl.textContent.trim();
                         if (glyph && this.glyphNames[glyph]) {
                             const name = this.glyphNames[glyph];
-                            if (matchesFilter(name)) {
+                            if (matchesFilter(name, keyEl)) {
                                 // Determine if shifted based on position class
                                 const isShifted = quadEl.classList.contains('top-left') || 
                                                   quadEl.classList.contains('top-right');
@@ -1487,6 +1518,13 @@ export class ArrayKeyboard {
                         }
                     });
                 });
+            });
+        }
+        
+        // Apply search highlights to matching keys
+        if (this.searchFilter) {
+            matchingKeys.forEach(keyEl => {
+                keyEl.classList.add('search-match');
             });
         }
         
@@ -1663,7 +1701,7 @@ export class ArrayKeyboard {
             const targetWidthPerTier = totalWidth / numTiers;
             
             // Assign items to tiers, balancing by width
-            const tiers = [];
+            let tiers = [];
             for (let i = 0; i < numTiers; i++) {
                 tiers.push({ items: [], width: 0 });
             }
@@ -1676,13 +1714,11 @@ export class ArrayKeyboard {
                 const itemWidth = item.labelWidth + minSpacing;
                 
                 // Find the tier with the least width that won't exceed target too much
-                // Prefer tiers in order for visual coherence, but balance width
                 let bestTier = 0;
                 let bestScore = Infinity;
                 
                 for (let t = 0; t < numTiers; t++) {
                     const newWidth = tiers[t].width + itemWidth;
-                    // Score: prefer tiers that stay close to target, with slight preference for earlier tiers
                     const score = Math.abs(newWidth - targetWidthPerTier) + t * 0.1;
                     if (tiers[t].width < availableWidth && score < bestScore) {
                         bestScore = score;
@@ -1690,7 +1726,6 @@ export class ArrayKeyboard {
                     }
                 }
                 
-                // If all tiers would overflow, pick the one with least width
                 if (bestScore === Infinity) {
                     bestTier = tiers.reduce((minIdx, tier, idx, arr) => 
                         tier.width < arr[minIdx].width ? idx : minIdx, 0);
@@ -1698,18 +1733,52 @@ export class ArrayKeyboard {
                 
                 tiers[bestTier].items.push(item);
                 tiers[bestTier].width += itemWidth;
-                item.tier = bestTier;
             });
+            
+            // Remove empty tiers
+            tiers = tiers.filter(tier => tier.items.length > 0);
+            
+            // Merge single-item tiers into adjacent tiers
+            while (tiers.some(t => t.items.length === 1) && tiers.length > 1) {
+                const singleIdx = tiers.findIndex(t => t.items.length === 1);
+                if (singleIdx === -1) break;
+                
+                const singleTier = tiers[singleIdx];
+                // Merge with adjacent tier (prefer the one with less width)
+                let targetIdx;
+                if (singleIdx === 0) {
+                    targetIdx = 1;
+                } else if (singleIdx === tiers.length - 1) {
+                    targetIdx = singleIdx - 1;
+                } else {
+                    // Pick the neighbor with less width
+                    targetIdx = tiers[singleIdx - 1].width <= tiers[singleIdx + 1].width 
+                        ? singleIdx - 1 : singleIdx + 1;
+                }
+                
+                // Move the single item to target tier
+                tiers[targetIdx].items.push(...singleTier.items);
+                tiers[targetIdx].width += singleTier.width;
+                tiers.splice(singleIdx, 1);
+            }
             
             // Sort items within each tier by X position
             tiers.forEach(tier => tier.items.sort((a, b) => a.glyphX - b.glyphX));
+            
+            // Sort tiers: for top, put shortest tier first (at top); for bottom, put shortest tier last (at bottom)
+            tiers.sort((a, b) => a.width - b.width);
+            if (!isTop) {
+                tiers.reverse();
+            }
+            
+            const actualNumTiers = tiers.length;
             
             // Position labels
             tiers.forEach((tier, tierIdx) => {
                 tier.items.forEach(item => {
                     // Base Y position with tier offset
                     if (isTop) {
-                        item.labelY = overlayRect.top - margin - labelHeight - (numTiers - 1 - tierIdx) * tierHeight;
+                        item.labelY = overlayRect.top - margin - labelHeight - (actualNumTiers - 1 - tierIdx) * tierHeight;
                     } else {
                         item.labelY = overlayRect.bottom + margin + tierIdx * tierHeight;
                     }
@@ -1729,19 +1798,30 @@ export class ArrayKeyboard {
                     }
                 }
                 
-                // Adjust if tier overflows
+                // Calculate actual tier width after collision resolution
                 if (tier.items.length > 0) {
                     const first = tier.items[0];
                     const last = tier.items[tier.items.length - 1];
-                    const groupRight = last.labelX + last.labelWidth;
+                    const actualTierWidth = (last.labelX + last.labelWidth) - first.labelX;
                     
-                    if (groupRight > startX + availableWidth) {
-                        const shift = groupRight - (startX + availableWidth);
-                        tier.items.forEach(item => item.labelX -= shift);
-                    }
-                    if (first.labelX < startX) {
-                        const shift = startX - first.labelX;
+                    // Center the tier within available width
+                    const centerX = overlayRect.left + overlayRect.width / 2;
+                    const tierCenterX = first.labelX + actualTierWidth / 2;
+                    const centerShift = centerX - tierCenterX;
+                    
+                    tier.items.forEach(item => item.labelX += centerShift);
+                    
+                    // Clamp to bounds if needed
+                    const newFirst = tier.items[0];
+                    const newLast = tier.items[tier.items.length - 1];
+                    
+                    if (newFirst.labelX < startX) {
+                        const shift = startX - newFirst.labelX;
                         tier.items.forEach(item => item.labelX += shift);
+                    }
+                    if (newLast.labelX + newLast.labelWidth > startX + availableWidth) {
+                        const shift = (newLast.labelX + newLast.labelWidth) - (startX + availableWidth);
+                        tier.items.forEach(item => item.labelX -= shift);
                     }
                 }
             });
@@ -1898,6 +1978,11 @@ export class ArrayKeyboard {
         this.namesOverlay.classList.remove('show');
         this.namesVisible = false;
         this.hideSearch();
+        
+        // Clear search highlights from keys
+        this.overlay.querySelectorAll('.array-keyboard-key.search-match').forEach(el => {
+            el.classList.remove('search-match');
+        });
     }
     
     /**
@@ -2188,6 +2273,9 @@ export class ArrayKeyboard {
     destroy() {
         if (this.keydownHandler) {
             document.removeEventListener('keydown', this.keydownHandler, true);
+        }
+        if (this.resizeHandler) {
+            window.removeEventListener('resize', this.resizeHandler);
         }
         if (this.overlay) {
             this.overlay.remove();
