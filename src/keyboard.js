@@ -1887,10 +1887,25 @@ export class ArrayKeyboard {
         
         if (glyphElements.length === 0) return;
         
+        // Calculate dynamic font size based on number of results
+        // Fewer results = larger font for better readability
+        const baseFontSize = 11;
+        const maxFontSize = 18;
+        const maxResultsForScaling = 20; // Start scaling when below this many results
+        
+        let dynamicFontSize = baseFontSize;
+        if (this.searchFilter && glyphElements.length <= maxResultsForScaling) {
+            // Scale from baseFontSize (at maxResultsForScaling) to maxFontSize (at 1 result)
+            const scaleFactor = 1 - (glyphElements.length - 1) / (maxResultsForScaling - 1);
+            dynamicFontSize = baseFontSize + (maxFontSize - baseFontSize) * Math.max(0, scaleFactor);
+        }
+        
         // Get overlay bounds for positioning
         const overlayRect = this.overlay.getBoundingClientRect();
         const margin = 25;
-        const labelHeight = 20;
+        // Scale label height proportionally with font size
+        const baseLabelHeight = 20;
+        const labelHeight = baseLabelHeight * (dynamicFontSize / baseFontSize);
         
         // Determine which side each glyph's label should go to
         const centerX = overlayRect.left + overlayRect.width / 2;
@@ -1902,7 +1917,9 @@ export class ArrayKeyboard {
             const glyphCenterY = rect.top + rect.height / 2;
             
             // Estimate label width based on name length (will be measured after creation)
-            const estimatedLabelWidth = item.name.length * 7 + 12;
+            // Scale with dynamic font size
+            const fontScale = dynamicFontSize / baseFontSize;
+            const estimatedLabelWidth = (item.name.length * 7 + 12) * fontScale;
             
             let side;
             
@@ -2238,6 +2255,13 @@ export class ArrayKeyboard {
             label.style.visibility = 'hidden';
             label.style.position = 'absolute';
             label.style.top = `${item.labelY}px`;
+            // Apply dynamic font size based on number of results
+            if (dynamicFontSize !== baseFontSize) {
+                label.style.fontSize = `${dynamicFontSize}px`;
+                // Scale padding proportionally
+                const paddingScale = dynamicFontSize / baseFontSize;
+                label.style.padding = `${2 * paddingScale}px ${6 * paddingScale}px`;
+            }
             
             // For horizontal labels, use the pre-calculated labelX
             // For vertical labels, we'll adjust after measuring
