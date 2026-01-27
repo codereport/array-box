@@ -130,15 +130,7 @@ export const bqnGlyphNames = {
     '#': 'comment',
     '@': 'null character',
     '?': 'predicate',
-    ':': 'header',
-    ';': 'body separator',
     '.': 'field access',
-    '(': 'open paren',
-    ')': 'close paren',
-    '{': 'open block',
-    '}': 'close block',
-    '[': 'open array',
-    ']': 'close array',
     
     // Special names
     '𝕨': 'left argument',
@@ -257,14 +249,6 @@ export const aplGlyphNames = {
     '_': 'underscore',
     
     // Syntax elements
-    '(': 'open paren',
-    ')': 'close paren',
-    '[': 'bracket index',
-    ']': 'close bracket',
-    '{': 'dfn open',
-    '}': 'dfn close',
-    ':': 'guard / control',
-    ';': 'separator',
     '⍺': 'left argument',
     '⍵': 'right argument',
 };
@@ -394,15 +378,6 @@ export const kapGlyphNames = {
     '⍓': 'grade up prefix',
     '⫽': 'double slash / parallel',
     
-    // Syntax elements
-    '(': 'open paren',
-    ')': 'close paren',
-    '[': 'open bracket',
-    ']': 'close bracket',
-    '{': 'open block',
-    '}': 'close block',
-    ':': 'guard',
-    ';': 'separator',
 };
 
 // Glyph names for J (monadic/dyadic names)
@@ -844,63 +819,67 @@ const defaultStyles = `
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
-    padding: 2px;
+    padding: 0px;
     gap: 0;
 }
 
 .array-keyboard-quadrant-glyph {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
+    font-size: 17px;
     line-height: 1;
 }
 
-/* Top-left: shifted prefix symbol */
+/* Quadrant positioning - adjust padding to push glyphs toward center
+ * All glyphs start at their outer corners, padding moves them inward
+ * - Increase padding = move toward center of key
+ * - Decrease padding (toward 0) = move toward corner of key
+ */
+
+/* Top-left: shifted prefix symbol (starts at top-left corner) */
 .array-keyboard-quadrant-glyph.top-left {
     grid-column: 1;
     grid-row: 1;
-    justify-content: flex-start;
     align-items: flex-start;
-    padding-left: 3px;
-    padding-top: 2px;
+    justify-content: flex-start;
+    padding-top: 6px;      /* increase = move down */
+    padding-left: 11px;     /* increase = move right */
 }
 
-/* Top-right: shifted ASCII primitive */
+/* Top-right: shifted ASCII primitive (starts at top-right corner) */
 .array-keyboard-quadrant-glyph.top-right {
     grid-column: 2;
     grid-row: 1;
-    justify-content: flex-end;
     align-items: flex-start;
-    padding-right: 3px;
-    padding-top: 2px;
+    justify-content: flex-end;
+    padding-top: 6px;      /* increase = move down */
+    padding-right: 9px;    /* increase = move left */
 }
 
-/* Bottom-left: unshifted prefix symbol */
+/* Bottom-left: unshifted prefix symbol (starts at bottom-left corner) */
 .array-keyboard-quadrant-glyph.bottom-left {
     grid-column: 1;
     grid-row: 2;
-    justify-content: flex-start;
     align-items: flex-end;
-    padding-left: 3px;
-    padding-bottom: 2px;
+    justify-content: flex-start;
+    padding-bottom: 2px;   /* increase = move up */
+    padding-left: 11px;     /* increase = move right */
 }
 
-/* Bottom-right: unshifted ASCII primitive */
+/* Bottom-right: unshifted ASCII primitive (starts at bottom-right corner) */
 .array-keyboard-quadrant-glyph.bottom-right {
     grid-column: 2;
     grid-row: 2;
-    justify-content: flex-end;
     align-items: flex-end;
-    padding-right: 3px;
-    padding-bottom: 2px;
+    justify-content: flex-end;
+    padding-bottom: 2px;   /* increase = move up */
+    padding-right: 9px;    /* increase = move left */
 }
 
-/* Key label in quadrant layout - absolute position to match letter keys exactly */
+/* Key label in quadrant layout - positioned in bottom-right area */
 .array-keyboard-key.quadrant-layout .array-keyboard-label {
     position: absolute;
-    bottom: 3px;
-    right: 4px;
+    bottom: 4px;
+    right: 5px;
     font-size: 9px;
 }
 
