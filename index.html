@@ -381,9 +381,9 @@
     <!-- Main application module -->
     <script type="module">
         // Import from modular files
-        import { createKeyboardHandler, bqnKeymap, aplKeymap, kapKeymap, uiuaGlyphs, jGlyphs } from './src/keymap.js';
-        import { syntaxRules, highlightCode, escapeHtml } from './src/syntax.js';
-        import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames } from './src/keyboard.js';
+        import { createKeyboardHandler, bqnKeymap, aplKeymap, kapKeymap, uiuaGlyphs, jGlyphs } from './src/keymap.js?v=3';
+        import { syntaxRules, highlightCode, escapeHtml } from './src/syntax.js?v=3';
+        import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames } from './src/keyboard.js?v=3';
         
         // Keyboard configurations for each language
         const keyboardConfigs = {
@@ -434,6 +434,7 @@
                 fontFamily: "'Uiua', 'Courier New', monospace",
                 syntaxRules: syntaxRules.uiua,
                 displayMode: 'category',
+                compactCategories: true,  // All glyphs inline with legend at bottom
                 glyphNames: uiuaGlyphNames,  // Enable leader line labels
                 glyphCategories: {
                     monadic: {
@@ -547,7 +548,8 @@
             const languageChanged = visualKeyboard.language !== config.language;
             const glyphNamesChanged = visualKeyboard.glyphNames !== (config.glyphNames || null);
             const docLinksChanged = JSON.stringify(visualKeyboard.docLinks) !== JSON.stringify(config.docLinks || null);
-            const needsRecreate = modeChanged || languageChanged || glyphNamesChanged || docLinksChanged;
+            const compactChanged = visualKeyboard.compactCategories !== (config.compactCategories || false);
+            const needsRecreate = modeChanged || languageChanged || glyphNamesChanged || docLinksChanged || compactChanged;
             
             visualKeyboard.enable();
             visualKeyboard.keymap = config.keymap || {};
@@ -560,6 +562,7 @@
             visualKeyboard.categoryTitle = config.categoryTitle || null;
             visualKeyboard.glyphNames = config.glyphNames || null;
             visualKeyboard.docLinks = config.docLinks || null;
+            visualKeyboard.compactCategories = config.compactCategories || false;
             
             if (needsRecreate) {
                 // Recreate the overlay for new display mode, language, or glyphNames

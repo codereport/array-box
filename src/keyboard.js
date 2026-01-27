@@ -820,6 +820,53 @@ const defaultStyles = `
     gap: 6px;
 }
 
+/* Compact category view */
+.array-keyboard-category-container.compact {
+    max-height: none;
+}
+
+.array-keyboard-compact-glyphs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.array-keyboard-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-top: 8px;
+    border-top: 1px solid #4b5563;
+}
+
+.array-keyboard-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.array-keyboard-legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.array-keyboard-legend-dot.syntax-function { background-color: #8BE9FD; }
+.array-keyboard-legend-dot.syntax-monadic { background-color: #50FA7B; }
+.array-keyboard-legend-dot.syntax-dyadic { background-color: #F1FA8C; }
+.array-keyboard-legend-dot.syntax-modifier { background-color: #FFB86C; }
+.array-keyboard-legend-dot.syntax-number { background-color: #BD93F9; }
+.array-keyboard-legend-dot.syntax-comment { background-color: #6272A4; }
+.array-keyboard-legend-dot.syntax-default { background-color: #9CA3AF; }
+
+.array-keyboard-legend-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: #9CA3AF;
+}
+
 .array-keyboard-glyph {
     min-width: 32px;
     height: 32px;
@@ -1002,6 +1049,7 @@ export class ArrayKeyboard {
      * @param {string} options.categoryTitle - Custom title for category view (default: '{language} Glyphs')
      * @param {Object} options.glyphNames - Glyph to name mapping for leader line labels { '⍺': 'alpha', ... }
      * @param {Object} options.docLinks - Documentation links { layout: 'url', primitives: 'url', syntax: 'url' }
+     * @param {boolean} options.compactCategories - For category mode: show all glyphs inline with legend at bottom (default: false)
      */
     constructor(options = {}) {
         this.keymap = options.keymap || {};
@@ -1018,6 +1066,7 @@ export class ArrayKeyboard {
         this.categoryTitle = options.categoryTitle || null;
         this.glyphNames = options.glyphNames || null;
         this.docLinks = options.docLinks || null;
+        this.compactCategories = options.compactCategories || false;
         
         this.overlay = null;
         this.namesOverlay = null;
@@ -1354,6 +1403,20 @@ export class ArrayKeyboard {
         const container = document.createElement('div');
         container.className = 'array-keyboard-category-container';
         
+        // Check if compact mode is enabled
+        if (this.compactCategories) {
+            this._createCompactCategoryView(container);
+        } else {
+            this._createStandardCategoryView(container);
+        }
+        
+        this.overlay.appendChild(container);
+    }
+    
+    /**
+     * Create standard category view with separate sections
+     */
+    _createStandardCategoryView(container) {
         for (const [categoryKey, categoryData] of Object.entries(this.glyphCategories)) {
             const { glyphs, label, syntaxClass } = categoryData;
             if (!glyphs || glyphs.length === 0) continue;
@@ -1382,8 +1445,61 @@ export class ArrayKeyboard {
             categoryDiv.appendChild(glyphGrid);
             container.appendChild(categoryDiv);
         }
+    }
+    
+    /**
+     * Create compact category view with all glyphs inline and legend at bottom
+     */
+    _createCompactCategoryView(container) {
+        container.classList.add('compact');
         
-        this.overlay.appendChild(container);
+        // Single row of all glyphs
+        const glyphRow = document.createElement('div');
+        glyphRow.className = 'array-keyboard-compact-glyphs';
+        
+        // Collect legend items
+        const legendItems = [];
+        
+        for (const [categoryKey, categoryData] of Object.entries(this.glyphCategories)) {
+            const { glyphs, label, syntaxClass } = categoryData;
+            if (!glyphs || glyphs.length === 0) continue;
+            
+            // Add glyphs to the row
+            for (const glyph of glyphs) {
+                const glyphDiv = document.createElement('div');
+                glyphDiv.className = `array-keyboard-glyph ${syntaxClass || 'syntax-default'}`;
+                glyphDiv.style.fontFamily = this.fontFamily;
+                glyphDiv.textContent = glyph;
+                glyphRow.appendChild(glyphDiv);
+            }
+            
+            // Track for legend
+            legendItems.push({ label: label || categoryKey, syntaxClass: syntaxClass || 'syntax-default' });
+        }
+        
+        container.appendChild(glyphRow);
+        
+        // Create legend at bottom
+        const legend = document.createElement('div');
+        legend.className = 'array-keyboard-legend';
+        
+        for (const item of legendItems) {
+            const legendItem = document.createElement('div');
+            legendItem.className = 'array-keyboard-legend-item';
+            
+            const dot = document.createElement('span');
+            dot.className = `array-keyboard-legend-dot ${item.syntaxClass}`;
+            
+            const text = document.createElement('span');
+            text.className = 'array-keyboard-legend-text';
+            text.textContent = item.label;
+            
+            legendItem.appendChild(dot);
+            legendItem.appendChild(text);
+            legend.appendChild(legendItem);
+        }
+        
+        container.appendChild(legend);
     }
     
     /**
