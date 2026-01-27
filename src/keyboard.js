@@ -105,18 +105,53 @@ export const bqnGlyphNames = {
     '¯': 'negative',
     'π': 'pi',
     '←': 'define',
-    '→': 'export',
+    '⇐': 'export',
     '↩': 'change',
     '⋄': 'separator',
     '·': 'nothing',
+    '→': 'return',
     
     // System values
     '•': 'system',
+    '⍎': 'evaluate',
+    '⍕': 'format',
     
     // Strand/list
     '⟨': 'list start',
     '⟩': 'list end',
     '‿': 'strand',
+    
+    // Deprecated/Alternative glyphs
+    '↙': 'take (deprecated)',
+    '↖': 'drop (deprecated)',
+    '⍳': 'iota (APL compat)',
+    
+    // Syntax elements
+    '#': 'comment',
+    '@': 'null character',
+    '?': 'predicate',
+    ':': 'header',
+    ';': 'body separator',
+    '.': 'field access',
+    '(': 'open paren',
+    ')': 'close paren',
+    '{': 'open block',
+    '}': 'close block',
+    '[': 'open array',
+    ']': 'close array',
+    
+    // Special names
+    '𝕨': 'left argument',
+    '𝕎': 'Left argument (function)',
+    '𝕩': 'right argument',
+    '𝕏': 'Right argument (function)',
+    '𝕤': 'self reference',
+    '𝕊': 'Self reference (function)',
+    '𝕗': 'left operand',
+    '𝔽': 'Left operand (function)',
+    '𝕘': 'right operand',
+    '𝔾': 'Right operand (function)',
+    '𝕣': 'modifier self-reference',
 };
 
 // Glyph names for Dyalog APL (monadic/dyadic names)
@@ -215,6 +250,23 @@ export const aplGlyphNames = {
     '→': 'branch',
     '⋄': 'statement separator',
     '⍝': 'comment',
+    '¯': 'negative / high minus',
+    '⍫': 'del tilde',
+    '⍛': 'behind',
+    '⍙': 'delta underbar',
+    '_': 'underscore',
+    
+    // Syntax elements
+    '(': 'open paren',
+    ')': 'close paren',
+    '[': 'bracket index',
+    ']': 'close bracket',
+    '{': 'dfn open',
+    '}': 'dfn close',
+    ':': 'guard / control',
+    ';': 'separator',
+    '⍺': 'left argument',
+    '⍵': 'right argument',
 };
 
 // Glyph names for Kap (monadic/dyadic names)
@@ -329,6 +381,28 @@ export const kapGlyphNames = {
     '≬': 'between',
     '⍺': 'left arg',
     '⍵': 'right arg',
+    '¯': 'negative / high minus',
+    '⍫': 'del tilde',
+    '⍠': 'variant',
+    '⍙': 'delta underbar',
+    '_': 'underscore',
+    
+    // Kap-specific
+    '⟦': 'open list',
+    '⟧': 'close list',
+    '⦻': 'circle stile',
+    '⍓': 'grade up prefix',
+    '⫽': 'double slash / parallel',
+    
+    // Syntax elements
+    '(': 'open paren',
+    ')': 'close paren',
+    '[': 'open bracket',
+    ']': 'close bracket',
+    '{': 'open block',
+    '}': 'close block',
+    ':': 'guard',
+    ';': 'separator',
 };
 
 // Glyph names for Uiua (single name per primitive)
@@ -585,39 +659,117 @@ const defaultStyles = `
     right: 4px;
 }
 
+/* Quadrant layout for symbol/number keys with ASCII primitives
+ * Layout:
+ * ┌─────────────────────┐
+ * │ SHIFT+prefix  SHIFT+ASCII │  <- TOP ROW
+ * │ prefix        ASCII/label │  <- BOTTOM ROW
+ * └─────────────────────┘
+ */
+.array-keyboard-key.quadrant-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    padding: 2px;
+    gap: 0;
+}
+
+.array-keyboard-quadrant-glyph {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    line-height: 1;
+}
+
+/* Top-left: shifted prefix symbol */
+.array-keyboard-quadrant-glyph.top-left {
+    grid-column: 1;
+    grid-row: 1;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding-left: 3px;
+    padding-top: 2px;
+}
+
+/* Top-right: shifted ASCII primitive */
+.array-keyboard-quadrant-glyph.top-right {
+    grid-column: 2;
+    grid-row: 1;
+    justify-content: flex-end;
+    align-items: flex-start;
+    padding-right: 3px;
+    padding-top: 2px;
+}
+
+/* Bottom-left: unshifted prefix symbol */
+.array-keyboard-quadrant-glyph.bottom-left {
+    grid-column: 1;
+    grid-row: 2;
+    justify-content: flex-start;
+    align-items: flex-end;
+    padding-left: 3px;
+    padding-bottom: 2px;
+}
+
+/* Bottom-right: unshifted ASCII primitive */
+.array-keyboard-quadrant-glyph.bottom-right {
+    grid-column: 2;
+    grid-row: 2;
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding-right: 3px;
+    padding-bottom: 2px;
+}
+
+/* Key label in quadrant layout - absolute position to match letter keys exactly */
+.array-keyboard-key.quadrant-layout .array-keyboard-label {
+    position: absolute;
+    bottom: 3px;
+    right: 4px;
+    font-size: 9px;
+}
+
 /* Syntax highlighting colors */
 .array-keyboard-symbol.syntax-function,
-.array-keyboard-shift-symbol.syntax-function {
+.array-keyboard-shift-symbol.syntax-function,
+.array-keyboard-quadrant-glyph.syntax-function {
     color: #8BE9FD;
 }
 
 .array-keyboard-symbol.syntax-monadic,
-.array-keyboard-shift-symbol.syntax-monadic {
+.array-keyboard-shift-symbol.syntax-monadic,
+.array-keyboard-quadrant-glyph.syntax-monadic {
     color: #50FA7B;
 }
 
 .array-keyboard-symbol.syntax-dyadic,
-.array-keyboard-shift-symbol.syntax-dyadic {
+.array-keyboard-shift-symbol.syntax-dyadic,
+.array-keyboard-quadrant-glyph.syntax-dyadic {
     color: #F1FA8C;
 }
 
 .array-keyboard-symbol.syntax-modifier,
-.array-keyboard-shift-symbol.syntax-modifier {
+.array-keyboard-shift-symbol.syntax-modifier,
+.array-keyboard-quadrant-glyph.syntax-modifier {
     color: #FFB86C;
 }
 
 .array-keyboard-symbol.syntax-number,
-.array-keyboard-shift-symbol.syntax-number {
+.array-keyboard-shift-symbol.syntax-number,
+.array-keyboard-quadrant-glyph.syntax-number {
     color: #BD93F9;
 }
 
 .array-keyboard-symbol.syntax-comment,
-.array-keyboard-shift-symbol.syntax-comment {
+.array-keyboard-shift-symbol.syntax-comment,
+.array-keyboard-quadrant-glyph.syntax-comment {
     color: #6272A4;
 }
 
 .array-keyboard-symbol.syntax-default,
-.array-keyboard-shift-symbol.syntax-default {
+.array-keyboard-shift-symbol.syntax-default,
+.array-keyboard-quadrant-glyph.syntax-default {
     color: #F8F8F2;
 }
 
@@ -844,7 +996,7 @@ export class ArrayKeyboard {
      * @param {Object} options.glyphCategories - For category mode: { categoryName: { glyphs: [], label: '', syntaxClass: '' }, ... }
      * @param {string} options.categoryTitle - Custom title for category view (default: '{language} Glyphs')
      * @param {Object} options.glyphNames - Glyph to name mapping for leader line labels { '⍺': 'alpha', ... }
-     * @param {Object} options.docLinks - Documentation links { layout: 'url', names: 'url' }
+     * @param {Object} options.docLinks - Documentation links { layout: 'url', primitives: 'url', syntax: 'url' }
      */
     constructor(options = {}) {
         this.keymap = options.keymap || {};
@@ -970,6 +1122,27 @@ export class ArrayKeyboard {
     }
     
     /**
+     * Check if a character is a primitive (has a glyph name)
+     */
+    _isPrimitive(char) {
+        return char && this.glyphNames && this.glyphNames.hasOwnProperty(char);
+    }
+    
+    /**
+     * Check if a key is a letter key (a-z)
+     */
+    _isLetterKey(key) {
+        return key && key.length === 1 && key >= 'a' && key <= 'z';
+    }
+    
+    /**
+     * Check if a key is a number key (0-9)
+     */
+    _isNumberKey(key) {
+        return key && key.length === 1 && key >= '0' && key <= '9';
+    }
+    
+    /**
      * Create keyboard layout view
      */
     _createKeyboardView() {
@@ -1000,36 +1173,58 @@ export class ArrayKeyboard {
                 else if (key === "'") displayLabel = "'";
                 else displayLabel = key.toUpperCase();
                 
-                // Syntax classes
-                const shiftedSyntaxClass = shiftedSymbol ? this._getSyntaxClass(shiftedSymbol) : 'empty';
-                const symbolSyntaxClass = symbol ? this._getSyntaxClass(symbol) : 'empty';
+                // Determine key type and whether ASCII chars are primitives
+                const isLetter = this._isLetterKey(key);
+                const isNumber = this._isNumberKey(key);
+                const baseAsciiIsPrimitive = this._isPrimitive(key);
+                const shiftedAsciiIsPrimitive = this._isPrimitive(shiftedKey);
                 
-                // Shift symbol
-                const shiftSymbolSpan = document.createElement('span');
-                shiftSymbolSpan.className = `array-keyboard-shift-symbol ${shiftedSyntaxClass}`;
-                shiftSymbolSpan.style.fontFamily = this.fontFamily;
-                shiftSymbolSpan.textContent = shiftedSymbol || '';
+                // Use quadrant layout for symbol/number keys with ASCII primitives
+                const useQuadrantLayout = !isLetter && (baseAsciiIsPrimitive || shiftedAsciiIsPrimitive);
                 
-                // Main symbol
-                const symbolSpan = document.createElement('span');
-                symbolSpan.className = `array-keyboard-symbol ${symbolSyntaxClass}`;
-                symbolSpan.style.fontFamily = this.fontFamily;
-                symbolSpan.textContent = symbol || '';
-                
-                // Key label
-                const labelSpan = document.createElement('span');
-                labelSpan.className = 'array-keyboard-label';
-                labelSpan.textContent = displayLabel;
-                
-                keyDiv.appendChild(shiftSymbolSpan);
-                keyDiv.appendChild(symbolSpan);
-                keyDiv.appendChild(labelSpan);
+                if (useQuadrantLayout) {
+                    this._createQuadrantKey(keyDiv, {
+                        key,
+                        shiftedKey,
+                        symbol,
+                        shiftedSymbol,
+                        displayLabel,
+                        isNumber,
+                        baseAsciiIsPrimitive,
+                        shiftedAsciiIsPrimitive
+                    });
+                } else {
+                    // Standard layout for letter keys and non-primitive symbol keys
+                    const shiftedSyntaxClass = shiftedSymbol ? this._getSyntaxClass(shiftedSymbol) : 'empty';
+                    const symbolSyntaxClass = symbol ? this._getSyntaxClass(symbol) : 'empty';
+                    
+                    // Shift symbol
+                    const shiftSymbolSpan = document.createElement('span');
+                    shiftSymbolSpan.className = `array-keyboard-shift-symbol ${shiftedSyntaxClass}`;
+                    shiftSymbolSpan.style.fontFamily = this.fontFamily;
+                    shiftSymbolSpan.textContent = shiftedSymbol || '';
+                    
+                    // Main symbol
+                    const symbolSpan = document.createElement('span');
+                    symbolSpan.className = `array-keyboard-symbol ${symbolSyntaxClass}`;
+                    symbolSpan.style.fontFamily = this.fontFamily;
+                    symbolSpan.textContent = symbol || '';
+                    
+                    // Key label
+                    const labelSpan = document.createElement('span');
+                    labelSpan.className = 'array-keyboard-label';
+                    labelSpan.textContent = displayLabel;
+                    
+                    keyDiv.appendChild(shiftSymbolSpan);
+                    keyDiv.appendChild(symbolSpan);
+                    keyDiv.appendChild(labelSpan);
+                }
                 
                 rowDiv.appendChild(keyDiv);
             });
             
             // Add doc links to the last row (space bar row)
-            if (rowIndex === totalRows - 1 && this.docLinks && (this.docLinks.layout || this.docLinks.names)) {
+            if (rowIndex === totalRows - 1 && this.docLinks && (this.docLinks.layout || this.docLinks.primitives || this.docLinks.syntax)) {
                 const linksContainer = document.createElement('span');
                 linksContainer.className = 'array-keyboard-doc-links';
                 
@@ -1037,8 +1232,11 @@ export class ArrayKeyboard {
                 if (this.docLinks.layout) {
                     links.push(`<a href="${this.docLinks.layout}" target="_blank" rel="noopener">Layout</a>`);
                 }
-                if (this.docLinks.names) {
-                    links.push(`<a href="${this.docLinks.names}" target="_blank" rel="noopener">Names</a>`);
+                if (this.docLinks.primitives) {
+                    links.push(`<a href="${this.docLinks.primitives}" target="_blank" rel="noopener">Primitives</a>`);
+                }
+                if (this.docLinks.syntax) {
+                    links.push(`<a href="${this.docLinks.syntax}" target="_blank" rel="noopener">Syntax</a>`);
                 }
                 linksContainer.innerHTML = links.join('<span class="separator">|</span>');
                 
@@ -1049,6 +1247,85 @@ export class ArrayKeyboard {
         });
         
         this.overlay.appendChild(rowsContainer);
+    }
+    
+    /**
+     * Create a quadrant-based key layout for symbol/number keys with ASCII primitives
+     * 
+     * Consistent layout with SHIFT values always on top:
+     * ┌─────────────────────┐
+     * │ SHIFT+prefix  SHIFT+ASCII │  <- TOP ROW: shifted values
+     * │ prefix        ASCII/label │  <- BOTTOM ROW: unshifted values
+     * └─────────────────────┘
+     * 
+     * For number key `1` (where `!` is a primitive):
+     * ┌─────────┐
+     * │ ⎉   !  │  <- shifted prefix, shifted ASCII primitive
+     * │ ˘   1  │  <- unshifted prefix, number label
+     * └─────────┘
+     * 
+     * For symbol key `=` (where both `=` and `+` are primitives):
+     * ┌─────────┐
+     * │ ⋆   +  │  <- shifted prefix, shifted ASCII primitive
+     * │ ×   =  │  <- unshifted prefix, base ASCII primitive
+     * └─────────┘
+     */
+    _createQuadrantKey(keyDiv, opts) {
+        const {
+            key,
+            shiftedKey,
+            symbol,
+            shiftedSymbol,
+            displayLabel,
+            isNumber,
+            baseAsciiIsPrimitive,
+            shiftedAsciiIsPrimitive
+        } = opts;
+        
+        keyDiv.classList.add('quadrant-layout');
+        
+        // Collect all glyphs to display
+        const glyphs = [];
+        
+        const hasSymbol = symbol && symbol !== '';
+        const hasShiftedSymbol = shiftedSymbol && shiftedSymbol !== '';
+        
+        // TOP ROW: shifted values (left = shifted prefix, right = shifted ASCII)
+        if (hasShiftedSymbol) {
+            glyphs.push({ char: shiftedSymbol, position: 'top-left', type: 'prefix-shifted' });
+        }
+        if (shiftedAsciiIsPrimitive) {
+            glyphs.push({ char: shiftedKey, position: 'top-right', type: 'ascii-shifted' });
+        }
+        
+        // BOTTOM ROW: unshifted values (left = unshifted prefix, right = base ASCII or label)
+        if (hasSymbol) {
+            glyphs.push({ char: symbol, position: 'bottom-left', type: 'prefix' });
+        }
+        if (baseAsciiIsPrimitive) {
+            glyphs.push({ char: key, position: 'bottom-right', type: 'ascii-primitive' });
+        }
+        
+        // Create glyph elements
+        glyphs.forEach(g => {
+            const span = document.createElement('span');
+            const syntaxClass = this._getSyntaxClass(g.char);
+            span.className = `array-keyboard-quadrant-glyph ${syntaxClass} ${g.position}`;
+            span.style.fontFamily = this.fontFamily;
+            span.textContent = g.char;
+            span.dataset.type = g.type;
+            keyDiv.appendChild(span);
+        });
+        
+        // Add key label in bottom-right corner (like letters) for:
+        // - Number keys: always show the number
+        // - Symbol keys: show if the base ASCII is NOT a primitive (so we need to identify the key)
+        if (isNumber || !baseAsciiIsPrimitive) {
+            const labelSpan = document.createElement('span');
+            labelSpan.className = 'array-keyboard-label';
+            labelSpan.textContent = displayLabel;
+            keyDiv.appendChild(labelSpan);
+        }
     }
     
     /**
@@ -1149,8 +1426,12 @@ export class ArrayKeyboard {
             
             rows.forEach((rowEl, rowIndex) => {
                 rowEl.querySelectorAll('.array-keyboard-key').forEach(keyEl => {
+                    // Check for standard layout elements
                     const symbolEl = keyEl.querySelector('.array-keyboard-symbol');
                     const shiftSymbolEl = keyEl.querySelector('.array-keyboard-shift-symbol');
+                    
+                    // Check for quadrant layout elements
+                    const quadrantGlyphs = keyEl.querySelectorAll('.array-keyboard-quadrant-glyph');
                     
                     if (symbolEl) {
                         const glyph = symbolEl.textContent.trim();
@@ -1184,6 +1465,27 @@ export class ArrayKeyboard {
                             }
                         }
                     }
+                    
+                    // Process quadrant glyphs
+                    quadrantGlyphs.forEach(quadEl => {
+                        const glyph = quadEl.textContent.trim();
+                        if (glyph && this.glyphNames[glyph]) {
+                            const name = this.glyphNames[glyph];
+                            if (matchesFilter(name)) {
+                                // Determine if shifted based on position class
+                                const isShifted = quadEl.classList.contains('top-left') || 
+                                                  quadEl.classList.contains('top-right');
+                                glyphElements.push({ 
+                                    el: quadEl, 
+                                    glyph, 
+                                    name, 
+                                    isShifted,
+                                    rowIndex,
+                                    totalRows
+                                });
+                            }
+                        }
+                    });
                 });
             });
         }
@@ -1294,76 +1596,155 @@ export class ArrayKeyboard {
         overflowToTopOrBottom(sides.left, 'left');
         overflowToTopOrBottom(sides.right, 'right');
         
-        // Re-sort top and bottom by X after overflow additions
+        // Rebalance top and bottom by total label width (character count as proxy)
+        // This helps balance the number of visual rows/tiers on each side
+        const getLabelWidth = (labelGroup) => labelGroup.reduce((sum, l) => sum + l.labelWidth, 0);
+        
+        const rebalanceTopBottom = () => {
+            // Keep rebalancing until roughly equal (within 5% tolerance)
+            const tolerance = 0.05;
+            let iterations = 0;
+            const maxIterations = 50;
+            
+            while (iterations < maxIterations) {
+                const topWidth = getLabelWidth(sides.top);
+                const bottomWidth = getLabelWidth(sides.bottom);
+                const total = topWidth + bottomWidth;
+                if (total === 0) break;
+                
+                const topRatio = topWidth / total;
+                
+                // If balanced enough, stop
+                if (Math.abs(topRatio - 0.5) <= tolerance) break;
+                
+                if (topRatio > 0.5 + tolerance && sides.top.length > 1) {
+                    // Top is heavier, move a label to bottom
+                    // Pick the label closest to the bottom (highest Y glyph position)
+                    sides.top.sort((a, b) => b.glyphY - a.glyphY);
+                    const toMove = sides.top.shift();
+                    toMove.side = 'bottom';
+                    sides.bottom.push(toMove);
+                } else if (topRatio < 0.5 - tolerance && sides.bottom.length > 1) {
+                    // Bottom is heavier, move a label to top
+                    // Pick the label closest to the top (lowest Y glyph position)
+                    sides.bottom.sort((a, b) => a.glyphY - b.glyphY);
+                    const toMove = sides.bottom.shift();
+                    toMove.side = 'top';
+                    sides.top.push(toMove);
+                } else {
+                    break;
+                }
+                
+                iterations++;
+            }
+        };
+        
+        rebalanceTopBottom();
+        
+        // Re-sort top and bottom by X after rebalancing
         sides.top.sort((a, b) => a.glyphX - b.glyphX);
         sides.bottom.sort((a, b) => a.glyphX - b.glyphX);
         
-        // Position labels on each side with multiple tiers if needed
+        // Position labels on each side with multiple tiers, balanced by width
         const positionHorizontalLabels = (labelGroup, isTop) => {
             if (labelGroup.length === 0) return;
             
             const availableWidth = overlayRect.width + 300;
             const startX = overlayRect.left - 150;
-            
-            // Calculate total width needed
-            let totalWidth = 0;
-            labelGroup.forEach(item => totalWidth += item.labelWidth + 8);
-            
-            // Determine number of tiers needed
-            const numTiers = Math.ceil(totalWidth / availableWidth);
+            const minSpacing = 6;
             const tierHeight = labelHeight + 8;
             
-            // Assign items to tiers (distribute evenly)
-            const itemsPerTier = Math.ceil(labelGroup.length / numTiers);
+            // Calculate total width needed (including spacing)
+            let totalWidth = 0;
+            labelGroup.forEach(item => totalWidth += item.labelWidth + minSpacing);
             
-            labelGroup.forEach((item, i) => {
-                const tier = Math.floor(i / itemsPerTier);
-                const indexInTier = i % itemsPerTier;
-                const itemsInThisTier = Math.min(itemsPerTier, labelGroup.length - tier * itemsPerTier);
+            // Determine number of tiers needed
+            const numTiers = Math.max(1, Math.ceil(totalWidth / availableWidth));
+            const targetWidthPerTier = totalWidth / numTiers;
+            
+            // Assign items to tiers, balancing by width
+            const tiers = [];
+            for (let i = 0; i < numTiers; i++) {
+                tiers.push({ items: [], width: 0 });
+            }
+            
+            // Sort labels by X position for better visual coherence
+            const sortedLabels = [...labelGroup].sort((a, b) => a.glyphX - b.glyphX);
+            
+            // Distribute labels to tiers, trying to balance width
+            sortedLabels.forEach(item => {
+                const itemWidth = item.labelWidth + minSpacing;
                 
-                // Base Y position with tier offset
-                if (isTop) {
-                    item.labelY = overlayRect.top - margin - labelHeight - (numTiers - 1 - tier) * tierHeight;
-                } else {
-                    item.labelY = overlayRect.bottom + margin + tier * tierHeight;
+                // Find the tier with the least width that won't exceed target too much
+                // Prefer tiers in order for visual coherence, but balance width
+                let bestTier = 0;
+                let bestScore = Infinity;
+                
+                for (let t = 0; t < numTiers; t++) {
+                    const newWidth = tiers[t].width + itemWidth;
+                    // Score: prefer tiers that stay close to target, with slight preference for earlier tiers
+                    const score = Math.abs(newWidth - targetWidthPerTier) + t * 0.1;
+                    if (tiers[t].width < availableWidth && score < bestScore) {
+                        bestScore = score;
+                        bestTier = t;
+                    }
                 }
                 
-                // Spread horizontally within tier based on glyph X
-                const relativeX = (item.glyphX - overlayRect.left) / overlayRect.width;
-                item.labelX = overlayRect.left + relativeX * overlayRect.width - item.labelWidth / 2;
+                // If all tiers would overflow, pick the one with least width
+                if (bestScore === Infinity) {
+                    bestTier = tiers.reduce((minIdx, tier, idx, arr) => 
+                        tier.width < arr[minIdx].width ? idx : minIdx, 0);
+                }
+                
+                tiers[bestTier].items.push(item);
+                tiers[bestTier].width += itemWidth;
+                item.tier = bestTier;
             });
             
-            // Resolve collisions within each tier
-            for (let tier = 0; tier < numTiers; tier++) {
-                const tierItems = labelGroup.filter((_, i) => Math.floor(i / itemsPerTier) === tier);
-                const minSpacing = 6;
+            // Sort items within each tier by X position
+            tiers.forEach(tier => tier.items.sort((a, b) => a.glyphX - b.glyphX));
+            
+            // Position labels
+            tiers.forEach((tier, tierIdx) => {
+                tier.items.forEach(item => {
+                    // Base Y position with tier offset
+                    if (isTop) {
+                        item.labelY = overlayRect.top - margin - labelHeight - (numTiers - 1 - tierIdx) * tierHeight;
+                    } else {
+                        item.labelY = overlayRect.bottom + margin + tierIdx * tierHeight;
+                    }
+                    
+                    // Initial X based on glyph position
+                    const relativeX = (item.glyphX - overlayRect.left) / overlayRect.width;
+                    item.labelX = overlayRect.left + relativeX * overlayRect.width - item.labelWidth / 2;
+                });
                 
-                for (let i = 1; i < tierItems.length; i++) {
-                    const prev = tierItems[i - 1];
-                    const curr = tierItems[i];
+                // Resolve collisions within tier
+                for (let i = 1; i < tier.items.length; i++) {
+                    const prev = tier.items[i - 1];
+                    const curr = tier.items[i];
                     const prevRight = prev.labelX + prev.labelWidth;
                     if (curr.labelX < prevRight + minSpacing) {
                         curr.labelX = prevRight + minSpacing;
                     }
                 }
                 
-                // Center the tier if it overflows
-                if (tierItems.length > 0) {
-                    const first = tierItems[0];
-                    const last = tierItems[tierItems.length - 1];
+                // Adjust if tier overflows
+                if (tier.items.length > 0) {
+                    const first = tier.items[0];
+                    const last = tier.items[tier.items.length - 1];
                     const groupRight = last.labelX + last.labelWidth;
-                    const groupLeft = first.labelX;
                     
                     if (groupRight > startX + availableWidth) {
                         const shift = groupRight - (startX + availableWidth);
-                        tierItems.forEach(item => item.labelX -= shift);
+                        tier.items.forEach(item => item.labelX -= shift);
                     }
                     if (first.labelX < startX) {
                         const shift = startX - first.labelX;
-                        tierItems.forEach(item => item.labelX += shift);
+                        tier.items.forEach(item => item.labelX += shift);
                     }
                 }
-            }
+            });
         };
         
         const positionVerticalLabels = (labelGroup, isLeft) => {
