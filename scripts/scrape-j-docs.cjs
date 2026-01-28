@@ -58,6 +58,9 @@ function stripHtml(html) {
         .replace(/&quot;/g, '"')
         .replace(/&#39;/g, "'")
         .replace(/&nbsp;/g, ' ')
+        .replace(/&#160;/g, ' ')  // Non-breaking space
+        .replace(/&#(\d+);/g, (_, num) => String.fromCharCode(parseInt(num, 10)))  // Numeric entities
+        .replace(/&#x([a-fA-F0-9]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))  // Hex entities
         .trim();
 }
 
@@ -145,7 +148,7 @@ const jPrimitives = {
     'b.': { page: 'bdot', monad: 'Boolean/Bitwise', dyad: null, type: 'adverb' },
     'f.': { page: 'fdot', monad: 'Fix', dyad: null, type: 'adverb' },
     'M.': { page: 'mcapdot', monad: 'Memo', dyad: null, type: 'adverb' },
-    't.': { page: 'tdot', monad: 'Taylor Coeff', dyad: null, type: 'adverb' },
+    't.': { page: 'tdot', monad: 'Run as Task', dyad: null, type: 'adverb' },
     
     // Conjunctions
     '^:': { page: 'hatco', monad: 'Power (of verb)', dyad: null, type: 'conjunction' },
@@ -171,11 +174,18 @@ const jPrimitives = {
     'd.': { page: 'ddot', monad: 'Derivative', dyad: null, type: 'conjunction' },
     'D.': { page: 'dcapdot', monad: 'Derivative', dyad: null, type: 'conjunction' },
     'D:': { page: 'dcapco', monad: 'Secant Slope', dyad: null, type: 'conjunction' },
-    'F.': { page: 'fcap', monad: 'Fold', dyad: null, type: 'conjunction' },
+    'F.': { page: 'fcap', monad: 'Fold', dyad: 'Fold', type: 'conjunction' },
+    'F..': { page: 'fcap', monad: 'Fold', dyad: 'Fold', type: 'conjunction' },
+    'F.:': { page: 'fcap', monad: 'Fold', dyad: 'Fold', type: 'conjunction' },
+    'F:': { page: 'fcap', monad: 'Fold', dyad: 'Fold', type: 'conjunction' },
+    'F:.': { page: 'fcap', monad: 'Fold', dyad: 'Fold', type: 'conjunction' },
+    'F::': { page: 'fcap', monad: 'Fold', dyad: 'Fold', type: 'conjunction' },
     'H.': { page: 'hcapdot', monad: 'Hypergeometric', dyad: null, type: 'conjunction' },
     'L:': { page: 'lcapco', monad: 'Level At', dyad: null, type: 'conjunction' },
     'S:': { page: 'scapco', monad: 'Spread', dyad: null, type: 'conjunction' },
-    'T.': { page: 'tcapdot', monad: 'Taylor', dyad: null, type: 'conjunction' },
+    't:': { page: 'tco', monad: 'Weighted Taylor', dyad: null, type: 'adverb' },
+    'T.': { page: 'tcapdot', monad: 'Set Debug Thread', dyad: 'Threads/Tasks', type: 'conjunction' },
+    'Z:': { page: 'zcapco', monad: 'Get Fold Status', dyad: 'Terminate Fold', type: 'conjunction' },
     
     // Special forms
     '$:': { page: 'dollarco', monad: 'Self-Reference', dyad: 'Self-Reference', type: 'verb' },
@@ -193,6 +203,10 @@ const jPrimitives = {
 
 /**
  * Fetch description from a wiki page
+ * 
+ * J Wiki pages have a consistent structure:
+ * - Monad section: table with "glyph y" | Name, then Rank info, then <hr>, then description
+ * - Dyad section: table with "x glyph y" | Name, then Rank info, then <hr>, then description
  */
 async function fetchPrimitiveDoc(glyph, info) {
     const url = `${BASE_URL}/wiki/Vocabulary/${info.page}`;
@@ -203,48 +217,97 @@ async function fetchPrimitiveDoc(glyph, info) {
         let monadDesc = '';
         let dyadDesc = '';
         
-        // The descriptions appear after horizontal rules (<hr>) following the rank info
-        // Split by horizontal rules to find description sections
+        // Strategy: Find all Rank sections, which immediately precede the <hr> before descriptions
+        // The HTML structure is: [table with glyph] [Rank info] <hr> [description] <hr> [common uses]...
+        
+        // Split by <hr> tags
         const sections = html.split(/<hr\s*\/?>/i);
         
         for (let i = 0; i < sections.length; i++) {
             const section = sections[i];
+            const nextSection = sections[i + 1] || '';
             
-            // Look for the first meaningful paragraph in each section
-            const paraMatch = section.match(/<p>([^<]*(?:(?!<\/p>)<[^<]*)*)<\/p>/i);
-            if (paraMatch) {
-                let text = stripHtml(paraMatch[1]);
-                
-                // Skip navigation/header text
-                if (text.includes('Down to:') || text.includes('Back to:') || 
-                    text.includes('Thru to:') || text.includes('>>') ||
-                    text.length < 10) {
-                    continue;
-                }
-                
-                // Clean up
-                text = text.replace(/\s+/g, ' ').trim();
-                
-                // Truncate if too long
-                if (text.length > 200) {
-                    text = text.substring(0, 197) + '...';
-                }
-                
-                // Check if this is monad or dyad section by looking at previous content
-                const prevSection = i > 0 ? sections[i-1] : '';
-                
-                if (!monadDesc && (prevSection.includes('Rank 0') || prevSection.includes('Rank _') || prevSection.includes('Rank 1') || prevSection.includes('Rank 2'))) {
-                    // Check if it's monad (+ y) or dyad (x + y)
-                    if (prevSection.match(/`\s*\S+\s+y\s*`/) || 
-                        (prevSection.includes(' y') && !prevSection.match(/x\s+\S+\s+y/))) {
-                        monadDesc = text;
-                    } else if (prevSection.match(/x\s+\S+\s+y/)) {
-                        dyadDesc = text;
-                    } else if (!monadDesc) {
-                        monadDesc = text;
+            // Check if this section has Rank info (indicates a definition section)
+            const hasRankInfo = section.match(/Rank\s+(?:Infinity|\d|_)/i);
+            if (!hasRankInfo) continue;
+            
+            // Check if this is a dyadic definition (look for "x glyph y" pattern)
+            // Handle various HTML structures: <td><code>x %. y</code></td> or plain text
+            // Note: &#160; is non-breaking space, \s won't match it, so we include it explicitly
+            const isDyad = section.match(/>\s*x(?:\s|&#160;|&nbsp;)+\S+(?:\s|&#160;|&nbsp;)+y\s*</i) ||  // HTML: >x %. y<
+                          section.match(/<(?:code|tt)>\s*x(?:\s|&#160;|&nbsp;)/i) ||         // <code>x ... or <tt>x ...
+                          section.match(/`x\s+/i);                   // Markdown: `x ...
+            
+            // Check if this is a monadic definition (glyph y without leading x)
+            // Look for pattern like ">%. y<" or "<code>%. y" where there's no x before the glyph
+            const isMonad = !isDyad && (
+                section.match(/>\s*[^x\s<>&][^\s<>]*(?:\s|&#160;|&nbsp;)+y\s*</i) ||   // HTML: >%. y<
+                section.match(/<(?:code|tt)>\s*[^x\s][^\s<]*(?:\s|&#160;|&nbsp;)+y/i) ||      // <code>%. y or <tt>%. y
+                section.match(/`[^x\s][^\s]*\s+y/i)                 // Markdown: `%. y
+            );
+            
+            // Extract description from next section
+            if (nextSection) {
+                const desc = extractFirstDescription(nextSection);
+                if (desc) {
+                    if (isDyad && !dyadDesc) {
+                        dyadDesc = desc;
+                    } else if (isMonad && !monadDesc) {
+                        monadDesc = desc;
+                    } else if (!monadDesc && !isDyad) {
+                        // Default to monad if we can't determine type
+                        monadDesc = desc;
                     }
-                } else if (!dyadDesc && text.length > 10) {
-                    dyadDesc = text;
+                }
+            }
+        }
+        
+        // Fallback: If still missing descriptions, try looking for specific patterns
+        if (!monadDesc || !dyadDesc) {
+            // Look for the dyadic anchor which J wiki uses
+            const dyadAnchorMatch = html.match(/id="dyadic"[^>]*>[\s\S]*?<hr\s*\/?>([\s\S]*?)<hr/i);
+            if (dyadAnchorMatch && !dyadDesc) {
+                const desc = extractFirstDescription(dyadAnchorMatch[1]);
+                if (desc) dyadDesc = desc;
+            }
+            
+            // For monad, look for first description after first Rank that's not in dyadic section
+            if (!monadDesc) {
+                const firstRankMatch = html.match(/Rank\s+(?:Infinity|\d|_)[^<]*<\/a>[^<]*<hr\s*\/?>([\s\S]*?)<hr/i);
+                if (firstRankMatch) {
+                    const desc = extractFirstDescription(firstRankMatch[1]);
+                    if (desc) monadDesc = desc;
+                }
+            }
+        }
+        
+        // For conjunctions, adverbs, and other types that don't follow monad/dyad pattern,
+        // try to extract the main description (first paragraph after the first <hr> following Rank info)
+        if (!monadDesc && (info.type === 'conjunction' || info.type === 'adverb' || info.type === 'noun' || info.type === 'other')) {
+            // Split by <hr> and find section after Rank info
+            const hrSections = html.split(/<hr\s*\/?>/i);
+            for (let i = 0; i < hrSections.length; i++) {
+                const section = hrSections[i];
+                if (section.match(/Rank\s+(?:Infinity|\d|_|depends)/i) || section.match(/WHY IS THIS IMPORTANT/i)) {
+                    // Next section should have the description
+                    const nextSection = hrSections[i + 1];
+                    if (nextSection) {
+                        const desc = extractFirstDescription(nextSection);
+                        if (desc) {
+                            monadDesc = desc;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // If still no description, try looking for any meaningful paragraph after the main table
+            if (!monadDesc) {
+                // Look for content after the main definition table
+                const tableEndMatch = html.match(/<\/table>[\s\S]*?<hr\s*\/?>([\s\S]*?)<hr/i);
+                if (tableEndMatch) {
+                    const desc = extractFirstDescription(tableEndMatch[1]);
+                    if (desc) monadDesc = desc;
                 }
             }
         }
@@ -262,6 +325,73 @@ async function fetchPrimitiveDoc(glyph, info) {
             docUrl: url
         };
     }
+}
+
+/**
+ * Extract the first meaningful description paragraph from an HTML section
+ */
+function extractFirstDescription(html) {
+    // Try to find the first paragraph
+    const paraMatches = html.match(/<p>([^]*?)<\/p>/gi) || [];
+    
+    for (const paraHtml of paraMatches) {
+        let text = stripHtml(paraHtml);
+        
+        // Skip navigation/header/footer/empty text
+        if (text.includes('Down to:') || text.includes('Back to:') || 
+            text.includes('Thru to:') || text.includes('>>') ||
+            text.includes('Common uses') || text.includes('Common Uses') ||
+            text.includes('Related Primitives') || text.includes('More Information') ||
+            text.includes('Use These Combinations') ||
+            text.includes('Retrieved from') ||
+            text.includes('Categories:') ||
+            text.includes('Jump to navigation') ||
+            text.includes('Jump to search') ||
+            text.length < 5) {
+            continue;
+        }
+        
+        // Clean up whitespace
+        text = text.replace(/\s+/g, ' ').trim();
+        
+        // Skip if it looks like a numbered list item that's not a description
+        if (/^\d+\.\s*(Convert|Remove|To|When|Find|Create|Make|Split|Count)/i.test(text)) {
+            continue;
+        }
+        
+        // Skip if it looks like footer/metadata text
+        if (text.match(/^Retrieved from\s/i) || 
+            text.match(/mediawiki\/index\.php/i) ||
+            text.match(/^Categories?:/i) ||
+            text.match(/^Hidden categor/i)) {
+            continue;
+        }
+        
+        // Truncate if too long
+        if (text.length > 300) {
+            text = text.substring(0, 297) + '...';
+        }
+        
+        return text;
+    }
+    
+    // Fallback: try to find text directly (not in <p> tags)
+    // Remove HTML tags and get first sentence-like content
+    let plainText = stripHtml(html);
+    const lines = plainText.split(/\n+/);
+    
+    for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed.length > 10 && trimmed.length < 300 &&
+            !trimmed.includes('Common uses') && !trimmed.includes('Common Uses') &&
+            !trimmed.includes('Related Primitives') &&
+            !trimmed.includes('More Information') &&
+            !trimmed.match(/^\d+\.\s*$/)) {
+            return trimmed;
+        }
+    }
+    
+    return '';
 }
 
 /**
@@ -364,9 +494,21 @@ async function scrapeJDocs() {
         
         // Add dyadic info if available
         if (info.dyad) {
+            let dyadDesc = fetched.dyadDesc || '';
+            
+            // For conjunctions/adverbs, if dyad description looks like footer text,
+            // use monad description instead (they often share the same description)
+            if ((info.type === 'conjunction' || info.type === 'adverb') &&
+                (dyadDesc.includes('Retrieved from') || 
+                 dyadDesc.includes('mediawiki/index.php') ||
+                 dyadDesc.includes('Categories:') ||
+                 dyadDesc === '')) {
+                dyadDesc = fetched.monadDesc || '';
+            }
+            
             doc.dyad = {
                 name: info.dyad,
-                description: fetched.dyadDesc || ''
+                description: dyadDesc
             };
         }
         
