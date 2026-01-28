@@ -85,3 +85,16 @@ Under the following terms:
 - **ShareAlike** — If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original.
 
 Full license text: https://creativecommons.org/licenses/by-sa/4.0/
+
+---
+
+## Kap Documentation
+
+The Kap primitive documentation in `src/kap-docs.js` is derived from the Kap project reference documentation.
+
+**Source:** https://kapdemo.dhsdevelopments.com/reference.html  
+**Repository:** https://github.com/codereport/kap  
+**Author:** DHS Developments
+
+The documentation content has been adapted and reformatted for use in hover tooltips.
+Please refer to the original source for the most up-to-date and complete documentation.

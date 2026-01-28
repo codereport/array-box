@@ -25,6 +25,7 @@
 export { bqnGlyphDocs, bqnDocsMeta, getBqnHoverContent } from './bqn-docs.js';
 export { uiuaGlyphDocs, uiuaDocsMeta, getUiuaHoverContent } from './uiua-docs.js';
 export { jGlyphDocs, jDocsMeta, getJHoverContent } from './j-docs.js';
+export { kapGlyphDocs, kapDocsMeta, getKapHoverContent } from './kap-docs.js';
 
 // Glyph names for BQN (monadic/dyadic names)
 // Based on official BQN documentation (https://mlochbaum.github.io/BQN/doc/primitive.html)

@@ -408,7 +408,7 @@
         // Import from modular files
         import { createKeyboardHandler, bqnKeymap, aplKeymap, kapKeymap, uiuaGlyphs, jGlyphs } from './src/keymap.js?v=17';
         import { syntaxRules, highlightCode, escapeHtml } from './src/syntax.js?v=17';
-        import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames, jGlyphNames, bqnGlyphDocs, uiuaGlyphDocs, jGlyphDocs } from './src/keyboard.js?v=17';
+        import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames, jGlyphNames, bqnGlyphDocs, uiuaGlyphDocs, jGlyphDocs, kapGlyphDocs } from './src/keyboard.js?v=17';
         
         // Keyboard configurations for each language
         const keyboardConfigs = {
@@ -451,6 +451,7 @@
                 syntaxRules: syntaxRules.kap,
                 displayMode: 'keyboard',
                 glyphNames: kapGlyphNames,
+                glyphDocs: kapGlyphDocs,
                 logoPath: 'assets/kap.png',
                 docLinks: {
                     layout: 'https://kapdemo.dhsdevelopments.com/clientweb2/',
