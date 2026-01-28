@@ -807,6 +807,11 @@ const defaultStyles = `
     border-color: #10B981;
 }
 
+.array-keyboard-key.nav-selected {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: #10B981;
+}
+
 .array-keyboard-glyph.search-match {
     background: rgba(16, 185, 129, 0.2);
     border-color: #10B981;
@@ -1082,6 +1087,11 @@ const defaultStyles = `
 .array-keyboard-glyph:hover {
     background: #374151;
     border-color: #6b7280;
+}
+
+.array-keyboard-glyph.nav-selected {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: #10B981;
 }
 
 .array-keyboard-glyph.syntax-function { color: var(--syntax-function, #8BE9FD); }
@@ -1445,6 +1455,11 @@ export class ArrayKeyboard {
         this.tooltipTimeout = null;
         this.currentTooltipGlyph = null;
         this.tooltipLeftPos = null;
+        
+        // Arrow navigation state
+        this.navRow = null;
+        this.navCol = null;
+        this.navActive = false;
         
         this._injectStyles();
         this._createWrapper();
@@ -2859,6 +2874,9 @@ export class ArrayKeyboard {
      * Show search input
      */
     showSearch(initialChar = '') {
+        // Clear arrow navigation when entering search mode
+        this._clearNavSelection();
+        
         // Show names first if not already visible
         if (!this.namesVisible) {
             this.showNames();
@@ -3006,12 +3024,25 @@ export class ArrayKeyboard {
                 return;
             }
             
-            // ESC to close (search first, then names, then keyboard)
+            // Arrow key navigation (works in both keyboard and category modes)
+            // Don't intercept Ctrl+Arrow - that's used for language switching
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key) && 
+                !this.searchVisible &&
+                !e.ctrlKey && !e.altKey && !e.metaKey) {
+                e.preventDefault();
+                e.stopPropagation();
+                this._handleArrowNavigation(e.key);
+                return;
+            }
+            
+            // ESC to close (search first, then names, then nav, then keyboard)
             if (e.key === 'Escape') {
                 e.preventDefault();
                 e.stopPropagation();
                 if (this.searchVisible) {
                     this.hideSearch();
+                } else if (this.navActive) {
+                    this._clearNavSelection();
                 } else if (this.namesVisible) {
                     this.hideNames();
                 } else {
@@ -3022,6 +3053,293 @@ export class ArrayKeyboard {
         };
         
         document.addEventListener('keydown', this.keydownHandler, true);
+    }
+    
+    /**
+     * Handle arrow key navigation between keys
+     * @param {string} key - Arrow key pressed (ArrowUp, ArrowDown, ArrowLeft, ArrowRight)
+     */
+    _handleArrowNavigation(key) {
+        if (this.displayMode === 'keyboard') {
+            this._handleKeyboardNavigation(key);
+        } else {
+            this._handleCategoryNavigation(key);
+        }
+    }
+    
+    /**
+     * Handle arrow navigation in keyboard mode (rows of keys)
+     */
+    _handleKeyboardNavigation(key) {
+        // Get all key elements
+        const rows = this.overlay.querySelectorAll('.array-keyboard-row');
+        if (rows.length === 0) return;
+        
+        // Initialize navigation if not active
+        if (!this.navActive || this.navRow === null) {
+            // Start at a sensible default position (first row, middle key)
+            this.navRow = 0;
+            this.navCol = Math.floor(rows[0].querySelectorAll('.array-keyboard-key').length / 2);
+            this.navActive = true;
+            this._updateNavSelection();
+            return;
+        }
+        
+        const currentRowKeys = rows[this.navRow].querySelectorAll('.array-keyboard-key');
+        const currentKeyEl = currentRowKeys[this.navCol];
+        
+        let newRow = this.navRow;
+        let newCol = this.navCol;
+        
+        switch (key) {
+            case 'ArrowLeft':
+                newCol = Math.max(0, this.navCol - 1);
+                break;
+            case 'ArrowRight':
+                newCol = Math.min(currentRowKeys.length - 1, this.navCol + 1);
+                break;
+            case 'ArrowUp':
+                if (this.navRow > 0) {
+                    newRow = this.navRow - 1;
+                    newCol = this._findClosestKeyInRow(rows, newRow, currentKeyEl);
+                }
+                break;
+            case 'ArrowDown':
+                if (this.navRow < rows.length - 1) {
+                    newRow = this.navRow + 1;
+                    newCol = this._findClosestKeyInRow(rows, newRow, currentKeyEl);
+                }
+                break;
+        }
+        
+        if (newRow !== this.navRow || newCol !== this.navCol) {
+            this.navRow = newRow;
+            this.navCol = newCol;
+            this._updateNavSelection();
+        }
+    }
+    
+    /**
+     * Handle arrow navigation in category mode (grid of glyphs)
+     */
+    _handleCategoryNavigation(key) {
+        // Get all glyph elements
+        const glyphs = this.overlay.querySelectorAll('.array-keyboard-glyph');
+        if (glyphs.length === 0) return;
+        
+        // Initialize navigation if not active - use flat index for category mode
+        if (!this.navActive || this.navCol === null) {
+            // Start at a sensible default position (first glyph)
+            this.navRow = 0; // Not used in category mode but keep for consistency
+            this.navCol = 0; // Used as flat index in category mode
+            this.navActive = true;
+            this._updateNavSelection();
+            return;
+        }
+        
+        const currentGlyph = glyphs[this.navCol];
+        if (!currentGlyph) return;
+        
+        const newIndex = this._findClosestGlyph(glyphs, this.navCol, key);
+        
+        if (newIndex !== this.navCol) {
+            this.navCol = newIndex;
+            this._updateNavSelection();
+        }
+    }
+    
+    /**
+     * Find the closest glyph in the given direction (for category mode)
+     * @param {NodeList} glyphs - All glyph elements
+     * @param {number} currentIndex - Current glyph index
+     * @param {string} direction - Arrow key direction
+     * @returns {number} New glyph index
+     */
+    _findClosestGlyph(glyphs, currentIndex, direction) {
+        const current = glyphs[currentIndex];
+        const currentRect = current.getBoundingClientRect();
+        const currentCenterX = currentRect.left + currentRect.width / 2;
+        const currentCenterY = currentRect.top + currentRect.height / 2;
+        
+        let bestIndex = currentIndex;
+        let bestDistance = Infinity;
+        
+        glyphs.forEach((glyph, index) => {
+            if (index === currentIndex) return;
+            
+            const rect = glyph.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            const dx = centerX - currentCenterX;
+            const dy = centerY - currentCenterY;
+            
+            // Check if glyph is in the right direction
+            let isValidDirection = false;
+            switch (direction) {
+                case 'ArrowLeft':
+                    isValidDirection = dx < -5 && Math.abs(dy) < rect.height * 0.8;
+                    break;
+                case 'ArrowRight':
+                    isValidDirection = dx > 5 && Math.abs(dy) < rect.height * 0.8;
+                    break;
+                case 'ArrowUp':
+                    isValidDirection = dy < -5;
+                    break;
+                case 'ArrowDown':
+                    isValidDirection = dy > 5;
+                    break;
+            }
+            
+            if (!isValidDirection) return;
+            
+            // Calculate distance with preference for primary direction
+            let distance;
+            if (direction === 'ArrowLeft' || direction === 'ArrowRight') {
+                distance = Math.abs(dx) + Math.abs(dy) * 3; // Prefer horizontal alignment
+            } else {
+                distance = Math.abs(dy) + Math.abs(dx) * 0.5; // Allow some horizontal drift for up/down
+            }
+            
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                bestIndex = index;
+            }
+        });
+        
+        return bestIndex;
+    }
+    
+    /**
+     * Find the closest key in a target row based on horizontal position
+     * @param {NodeList} rows - All row elements
+     * @param {number} targetRow - Row index to search
+     * @param {HTMLElement} currentKeyEl - Current key element to match position
+     * @returns {number} Column index of closest key
+     */
+    _findClosestKeyInRow(rows, targetRow, currentKeyEl) {
+        const targetRowKeys = rows[targetRow].querySelectorAll('.array-keyboard-key');
+        if (targetRowKeys.length === 0) return 0;
+        
+        // Get the center X position of the current key
+        const currentRect = currentKeyEl.getBoundingClientRect();
+        const currentCenterX = currentRect.left + currentRect.width / 2;
+        
+        // Find the key in target row with closest center X
+        let closestCol = 0;
+        let closestDistance = Infinity;
+        
+        targetRowKeys.forEach((keyEl, col) => {
+            const rect = keyEl.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const distance = Math.abs(centerX - currentCenterX);
+            
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestCol = col;
+            }
+        });
+        
+        return closestCol;
+    }
+    
+    /**
+     * Update the visual selection and show tooltip for selected key
+     */
+    _updateNavSelection() {
+        if (!this.overlay) return;
+        
+        // Remove previous selection from both key and glyph elements
+        this.overlay.querySelectorAll('.nav-selected').forEach(el => {
+            el.classList.remove('nav-selected');
+        });
+        
+        if (this.navCol === null) return;
+        
+        if (this.displayMode === 'keyboard') {
+            // Keyboard mode: use row/col indices
+            const rows = this.overlay.querySelectorAll('.array-keyboard-row');
+            if (this.navRow === null || this.navRow >= rows.length) return;
+            
+            const rowKeys = rows[this.navRow].querySelectorAll('.array-keyboard-key');
+            if (this.navCol >= rowKeys.length) return;
+            
+            const keyEl = rowKeys[this.navCol];
+            keyEl.classList.add('nav-selected');
+            
+            // Show tooltip for the selected key's glyph
+            this._showNavTooltip(keyEl);
+        } else {
+            // Category mode: use flat index
+            const glyphs = this.overlay.querySelectorAll('.array-keyboard-glyph');
+            if (this.navCol >= glyphs.length) return;
+            
+            const glyphEl = glyphs[this.navCol];
+            glyphEl.classList.add('nav-selected');
+            
+            // Show tooltip for the selected glyph
+            const glyph = glyphEl.textContent.trim();
+            if (glyph && this.glyphDocs && this.glyphDocs[glyph]) {
+                this._showTooltip(glyph, glyphEl);
+            } else {
+                this._hideTooltip();
+            }
+        }
+    }
+    
+    /**
+     * Show tooltip for the currently navigated key
+     * @param {HTMLElement} keyEl - The key element
+     */
+    _showNavTooltip(keyEl) {
+        // Find glyphs in the key (try main symbol first, then shifted)
+        const symbolEl = keyEl.querySelector('.array-keyboard-symbol');
+        const shiftSymbolEl = keyEl.querySelector('.array-keyboard-shift-symbol');
+        const quadrantGlyphs = keyEl.querySelectorAll('.array-keyboard-quadrant-glyph');
+        
+        let glyph = null;
+        let targetEl = null;
+        
+        // Priority: main symbol > shifted symbol > first quadrant glyph
+        if (symbolEl && symbolEl.textContent.trim()) {
+            glyph = symbolEl.textContent.trim();
+            targetEl = symbolEl;
+        } else if (shiftSymbolEl && shiftSymbolEl.textContent.trim()) {
+            glyph = shiftSymbolEl.textContent.trim();
+            targetEl = shiftSymbolEl;
+        } else if (quadrantGlyphs.length > 0) {
+            // Find first non-empty quadrant glyph
+            for (const qg of quadrantGlyphs) {
+                if (qg.textContent.trim()) {
+                    glyph = qg.textContent.trim();
+                    targetEl = qg;
+                    break;
+                }
+            }
+        }
+        
+        if (glyph && targetEl && this.glyphDocs && this.glyphDocs[glyph]) {
+            this._showTooltip(glyph, targetEl);
+        } else {
+            this._hideTooltip();
+        }
+    }
+    
+    /**
+     * Clear navigation selection
+     */
+    _clearNavSelection() {
+        this.navActive = false;
+        this.navRow = null;
+        this.navCol = null;
+        
+        if (this.overlay) {
+            this.overlay.querySelectorAll('.nav-selected').forEach(el => {
+                el.classList.remove('nav-selected');
+            });
+        }
+        
+        this._hideTooltip();
     }
     
     /**
@@ -3097,8 +3415,9 @@ export class ArrayKeyboard {
         if (this.wrapper) {
             this.wrapper.classList.remove('show');
         }
-        // Also hide names and tooltip when hiding keyboard
+        // Also hide names, tooltip, and clear nav when hiding keyboard
         this.hideNames();
+        this._clearNavSelection();
         this._hideTooltip(true); // Reset position cache when keyboard is hidden
         
         // Show main app container when keyboard is hidden
