@@ -696,29 +696,35 @@ const defaultLayout = [
 
 // Default styles (can be overridden)
 const defaultStyles = `
-.array-keyboard-overlay {
+.array-keyboard-wrapper {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    z-index: 10000;
+    pointer-events: none;
+    max-width: 95vw;
+    max-height: 95vh;
+    overflow: visible;
+}
+
+.array-keyboard-wrapper.show {
+    display: flex;
+}
+
+.array-keyboard-overlay {
     background: #1f2937;
     border: 2px solid #4b5563;
     border-radius: 12px;
     padding: 16px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    z-index: 10000;
-    display: none;
     max-width: 95vw;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    transition: transform 0.25s ease-out;
-}
-
-.array-keyboard-overlay.show {
-    display: block;
-}
-
-.array-keyboard-overlay.has-tooltip {
-    transform: translate(calc(-50% - 170px), -50%);
+    pointer-events: auto;
 }
 
 .array-keyboard-header {
@@ -1226,13 +1232,11 @@ const defaultStyles = `
 
 /* Hover tooltip styles */
 .array-keyboard-tooltip {
-    position: fixed;
     background: #1f2937;
     border: 1px solid #4b5563;
     border-radius: 8px;
     padding: 12px 14px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-    z-index: 10001;
     width: 320px;
     max-width: 320px;
     max-height: 60vh;
@@ -1243,12 +1247,15 @@ const defaultStyles = `
     transform: translateX(20px);
     transition: opacity 0.2s ease-out, visibility 0.2s ease-out, transform 0.25s ease-out;
     font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+    display: none;
 }
 
 .array-keyboard-tooltip.show {
     opacity: 1;
     visibility: visible;
     transform: translateX(0);
+    display: block;
 }
 
 .array-keyboard-tooltip-header {
@@ -1403,6 +1410,7 @@ export class ArrayKeyboard {
         this.logoPath = options.logoPath || null;
         this.glyphDocs = options.glyphDocs || null;
         
+        this.wrapper = null;
         this.overlay = null;
         this.namesOverlay = null;
         this.namesVisible = false;
@@ -1418,6 +1426,7 @@ export class ArrayKeyboard {
         this.tooltipLeftPos = null;
         
         this._injectStyles();
+        this._createWrapper();
         this._createOverlay();
         this._createNamesOverlay();
         this._createTooltip();
@@ -1509,6 +1518,15 @@ export class ArrayKeyboard {
     }
     
     /**
+     * Create the wrapper container for keyboard and tooltip
+     */
+    _createWrapper() {
+        this.wrapper = document.createElement('div');
+        this.wrapper.className = 'array-keyboard-wrapper';
+        this.container.appendChild(this.wrapper);
+    }
+    
+    /**
      * Create the keyboard overlay element
      */
     _createOverlay() {
@@ -1597,7 +1615,7 @@ export class ArrayKeyboard {
             this._createKeyboardView();
         }
         
-        this.container.appendChild(this.overlay);
+        this.wrapper.appendChild(this.overlay);
     }
     
     /**
@@ -1963,8 +1981,10 @@ export class ArrayKeyboard {
         // Tooltip stays visible until hovering another glyph or closing keyboard
         // No mouseenter/mouseleave hiding needed
         
-        // Append to body for proper fixed positioning
-        document.body.appendChild(this.tooltip);
+        // Append to wrapper for flexbox positioning
+        if (this.wrapper) {
+            this.wrapper.appendChild(this.tooltip);
+        }
     }
     
     /**
@@ -2077,70 +2097,12 @@ export class ArrayKeyboard {
     }
     
     /**
-     * Position tooltip to the right of the keyboard overlay, centered vertically on page
+     * Position tooltip - now handled by flexbox wrapper, just ensure it's visible
      */
     _positionTooltip(targetEl) {
-        const padding = 16;
-        const slideAmount = 170;
-        const gap = 24;
-        
-        // Check if already slid
-        const alreadySlid = this.overlay.classList.contains('has-tooltip');
-        
-        // Only calculate horizontal position if we don't have a cached value
-        if (this.tooltipLeftPos === null) {
-            // Make sure we're measuring from un-slid state
-            if (alreadySlid) {
-                this.overlay.style.transition = 'none';
-                this.overlay.classList.remove('has-tooltip');
-                void this.overlay.offsetWidth; // Force reflow
-            }
-            
-            // Get keyboard position before sliding
-            const overlayRect = this.overlay.getBoundingClientRect();
-            
-            // Calculate tooltip position:
-            // After keyboard slides left by slideAmount, its right edge will be at: overlayRect.right - slideAmount
-            // Tooltip should start `gap` pixels to the right of that
-            this.tooltipLeftPos = overlayRect.right - slideAmount + gap;
-            
-            // Restore state
-            if (alreadySlid) {
-                this.overlay.classList.add('has-tooltip');
-                this.overlay.style.transition = '';
-            }
-        }
-        
-        // Get tooltip height for vertical centering
-        this.tooltip.style.visibility = 'hidden';
-        this.tooltip.style.opacity = '0';
-        this.tooltip.classList.add('show');
-        const tooltipHeight = this.tooltip.offsetHeight;
-        this.tooltip.classList.remove('show');
-        
-        // Center vertically on the page
-        let top = (window.innerHeight - tooltipHeight) / 2;
-        
-        // Keep within viewport vertically
-        if (top < padding) {
-            top = padding;
-        }
-        const maxTop = window.innerHeight - tooltipHeight - padding;
-        if (top > maxTop) {
-            top = maxTop;
-        }
-        
-        this.tooltip.style.top = `${top}px`;
-        this.tooltip.style.left = `${this.tooltipLeftPos}px`;
-        
-        // Reset styles for animation
-        this.tooltip.style.visibility = '';
-        this.tooltip.style.opacity = '';
-        
-        // Add class to overlay to trigger slide animation (if not already)
-        if (!alreadySlid) {
-            this.overlay.classList.add('has-tooltip');
-        }
+        // Positioning is now handled by flexbox wrapper
+        // The wrapper centers both elements together, and flexbox handles the gap
+        // No manual positioning needed - just show the tooltip
     }
     
     /**
@@ -2164,21 +2126,6 @@ export class ArrayKeyboard {
         if (resetPosition) {
             this.tooltipLeftPos = null;
         }
-        
-        // Remove slide class from overlay - do it without transition to avoid 
-        // leader lines being drawn at wrong position during animation
-        if (this.overlay && this.overlay.classList.contains('has-tooltip')) {
-            this.overlay.style.transition = 'none';
-            this.overlay.classList.remove('has-tooltip');
-            void this.overlay.offsetWidth; // Force reflow
-            this.overlay.style.transition = '';
-            
-            // Update leader lines after keyboard has snapped back
-            if (this.namesVisible) {
-                this._updateLeaderLines();
-            }
-        }
-        
     }
     
     /**
@@ -3085,15 +3032,15 @@ export class ArrayKeyboard {
      * Check if keyboard is visible
      */
     isVisible() {
-        return this.overlay && this.overlay.classList.contains('show');
+        return this.wrapper && this.wrapper.classList.contains('show');
     }
     
     /**
      * Show the keyboard
      */
     show() {
-        if (this.overlay) {
-            this.overlay.classList.add('show');
+        if (this.wrapper) {
+            this.wrapper.classList.add('show');
         }
         // Hide main app container when keyboard is shown
         const mainContainer = document.querySelector('.container');
@@ -3107,8 +3054,8 @@ export class ArrayKeyboard {
      * Hide the keyboard
      */
     hide() {
-        if (this.overlay) {
-            this.overlay.classList.remove('show');
+        if (this.wrapper) {
+            this.wrapper.classList.remove('show');
         }
         // Also hide names and tooltip when hiding keyboard
         this.hideNames();
