@@ -406,9 +406,9 @@
     <!-- Main application module -->
     <script type="module">
         // Import from modular files
-        import { createKeyboardHandler, bqnKeymap, aplKeymap, kapKeymap, uiuaGlyphs, jGlyphs } from './src/keymap.js?v=17';
-        import { syntaxRules, highlightCode, escapeHtml } from './src/syntax.js?v=17';
-        import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames, jGlyphNames, bqnGlyphDocs, uiuaGlyphDocs, jGlyphDocs, kapGlyphDocs } from './src/keyboard.js?v=17';
+        import { createKeyboardHandler, bqnKeymap, aplKeymap, kapKeymap, uiuaGlyphs, jGlyphs } from './src/keymap.js?v=18';
+        import { syntaxRules, highlightCode, escapeHtml } from './src/syntax.js?v=18';
+        import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames, jGlyphNames, bqnGlyphDocs, uiuaGlyphDocs, jGlyphDocs, kapGlyphDocs, aplGlyphDocs } from './src/keyboard.js?v=18';
         
         // Keyboard configurations for each language
         const keyboardConfigs = {
@@ -436,11 +436,12 @@
                 syntaxRules: syntaxRules.apl,
                 displayMode: 'keyboard',
                 glyphNames: aplGlyphNames,
+                glyphDocs: aplGlyphDocs,
                 logoPath: 'assets/apl.png',
                 docLinks: {
                     layout: 'https://dfns.dyalog.com/n_keyboards.htm',
-                    primitives: 'https://aplwiki.com/wiki/Dyalog_APL',
-                    syntax: 'https://aplwiki.com/wiki/APL_syntax#Syntactic_elements'
+                    primitives: 'https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/',
+                    syntax: 'https://docs.dyalog.com/20.0/language-reference-guide/other-syntax/'
                 }
             },
             kap: {
@@ -1190,6 +1191,7 @@
             fontFamily: aplConfig.fontFamily,
             syntaxRules: aplConfig.syntaxRules,
             glyphNames: aplConfig.glyphNames,
+            glyphDocs: aplConfig.glyphDocs,
             docLinks: aplConfig.docLinks,
             logoPath: aplConfig.logoPath
         });
