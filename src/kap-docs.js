@@ -7,8 +7,9 @@
  * 
  * LICENSE ATTRIBUTION:
  * The documentation content in this file is derived from the Kap project.
- * Copyright (c) DHS Developments
- * Repository: https://github.com/codereport/kap
+ * Copyright (c) 2020-2024 Elias Martenson
+ * Repository: https://codeberg.org/loke/array
+ * License: MIT License
  * See THIRD_PARTY_LICENSES.md for full license text.
  */
 
