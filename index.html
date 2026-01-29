@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Array Language Runner</title>
+    <title>ArrayBox</title>
+    <link rel="icon" id="favicon" href="assets/apl.png" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -149,7 +150,6 @@
 
         .code-input:focus {
             outline: none;
-            border-color: #22c55e;
         }
 
         .code-input:empty:before {
@@ -1700,6 +1700,14 @@
             currentLogo.src = langConfig.logo;
             currentLogo.alt = langConfig.name;
             
+            // Update favicon to match the current language
+            const favicon = document.getElementById('favicon');
+            if (favicon) {
+                favicon.href = langConfig.logo;
+                // Update MIME type based on file extension
+                favicon.type = langConfig.logo.endsWith('.svg') ? 'image/svg+xml' : 'image/png';
+            }
+            
             // Update input font class
             codeInput.className = `code-input ${langConfig.fontClass}`;
             
@@ -2268,11 +2276,13 @@
             const primitive = filteredPrimitives[index];
             const cursorPos = savedCursorPosition;
             
-            // Hide combo box first (this resets transform but doesn't insert anything yet)
+            // Hide combo box first
             primitiveCombobox.classList.remove('show');
             comboboxInput.value = '';
             filteredPrimitives = [];
-            container.style.transform = '';
+            
+            // Restore proper vertical centering based on output visibility
+            restoreVerticalCentering();
             
             // Focus code input and restore cursor position
             codeInput.focus();
@@ -2323,11 +2333,26 @@
             comboboxInput.value = '';
             filteredPrimitives = [];
             
-            // Reset vertical centering
-            container.style.transform = '';
+            // Restore vertical centering - if output is visible, center for output
+            restoreVerticalCentering();
             
             // Restore focus to code input
             codeInput.focus();
+        }
+        
+        // Restore proper vertical centering based on whether output is visible
+        function restoreVerticalCentering() {
+            if (output.classList.contains('show')) {
+                // Output is visible - center input+output
+                requestAnimationFrame(() => {
+                    const outputHeight = output.offsetHeight;
+                    const margin = 24; // margin-top of output (scaled 1.75x)
+                    container.style.transform = `translateY(-${(outputHeight + margin) / 2}px)`;
+                });
+            } else {
+                // No output - reset transform
+                container.style.transform = '';
+            }
         }
         
         // Check if combo box is visible

@@ -18,3 +18,12 @@
 - Multi lang solve (get multiple bars)
 - 🎯 Match on names across languages
 - add non-keyboard character set for APL, BQN, Kap
+- more syntax highlighting
+  - BQN / TinyAPL modifiers / functions
+
+- align equal signs
+- align comments
+- expand width of editor as needed
+
+### Fix 
+- ⦅⍳⍮…⦆5 for TinyAPL formats incorrectly
