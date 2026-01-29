@@ -37,7 +37,7 @@
             align-items: center;
             max-width: 875px;
             width: 100%;
-            transition: transform 0.2s ease-out;
+            transition: transform 0.2s ease-out, max-width 0.05s ease-out;
         }
 
         .language-selector {
@@ -142,8 +142,8 @@
             min-height: 98px;
             background: #1f2937;
             color: var(--text-color);
-            overflow-wrap: break-word;
-            white-space: pre-wrap;
+            white-space: pre;
+            overflow-x: auto;
             line-height: 1.5;
             caret-color: #10b981;
         }
@@ -1003,9 +1003,10 @@
     <!-- Main application module -->
     <script type="module">
         // Import from modular files
-        import { createKeyboardHandler, bqnKeymap, aplKeymap, kapKeymap, tinyaplKeymap, tinyaplKeyboard, tinyaplGlyphs, uiuaGlyphs, jGlyphs, insertText } from './src/keymap.js?v=24';
-        import { syntaxRules, highlightCode, escapeHtml } from './src/syntax.js?v=24';
-        import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames, jGlyphNames, tinyaplGlyphNames, bqnGlyphDocs, uiuaGlyphDocs, jGlyphDocs, kapGlyphDocs, aplGlyphDocs, tinyaplGlyphDocs } from './src/keyboard.js?v=24';
+        import { createKeyboardHandler, bqnKeymap, aplKeymap, kapKeymap, tinyaplKeymap, tinyaplKeyboard, tinyaplGlyphs, uiuaGlyphs, jGlyphs, insertText } from './src/keymap.js?v=25';
+        import { syntaxRules, highlightCode, escapeHtml } from './src/syntax.js?v=25';
+        import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames, jGlyphNames, tinyaplGlyphNames, bqnGlyphDocs, uiuaGlyphDocs, jGlyphDocs, kapGlyphDocs, aplGlyphDocs, tinyaplGlyphDocs } from './src/keyboard.js?v=25';
+        import { createEditorFeaturesManager } from './src/editor-features.js?v=1';
         
         // Keyboard configurations for each language
         const keyboardConfigs = {
@@ -1878,6 +1879,16 @@
             container.style.transform = '';
         }
 
+        // Initialize editor features (alignment, auto-expand)
+        const editorFeatures = createEditorFeaturesManager(
+            { container, inputContainer: document.querySelector('.input-container'), codeInput, output },
+            () => currentLanguage,
+            getInputText,
+            setInputText,
+            applySyntaxHighlighting
+        );
+        editorFeatures.init();
+        
         // Keyboard shortcuts for code input
         codeInput.addEventListener('keydown', (e) => {
             // Shift+Enter to insert newline
@@ -1885,9 +1896,10 @@
                 // Let the browser handle the newline insertion
                 return;
             }
-            // Enter to evaluate
+            // Enter to evaluate (auto-align first)
             if (e.key === 'Enter') {
                 e.preventDefault();
+                editorFeatures.alignAll();
                 evaluateCode();
             }
         });

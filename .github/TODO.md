@@ -21,9 +21,5 @@
 - more syntax highlighting
   - BQN / TinyAPL modifiers / functions
 
-- align equal signs
-- align comments
-- expand width of editor as needed
-
 ### Fix 
 - ⦅⍳⍮…⦆5 for TinyAPL formats incorrectly
