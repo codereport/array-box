@@ -622,8 +622,23 @@
             errorBuffer = '';
             
             try {
-                // Run code directly (no wrapping needed)
-                const result = await tinyaplModule.runCode(tinyaplContext, code);
+                // For multiline code, join lines with ⋄ (statement separator)
+                // Filter out empty lines and comment-only lines (⍝ comments out rest of line)
+                const lines = code.split('\n')
+                    .map(line => line.trim())
+                    .filter(line => line && !line.startsWith('⍝'))
+                    .map(line => {
+                        // Strip inline comments
+                        const commentIndex = line.indexOf('⍝');
+                        return commentIndex >= 0 ? line.substring(0, commentIndex).trim() : line;
+                    })
+                    .filter(line => line);
+                
+                const processedCode = lines.length > 1 ? lines.join(' ⋄ ') : (lines[0] || '');
+                console.log('[TinyAPL] Processing code:', processedCode);
+                
+                // Run code
+                const result = await tinyaplModule.runCode(tinyaplContext, processedCode);
                 console.log('[TinyAPL] Raw result:', result);
                 
                 // Handle different result formats
@@ -1401,10 +1416,11 @@
             hideOutput();
         }
 
-        // Get plain text from contenteditable div (single line only)
+        // Get plain text from contenteditable div (supports multiline)
         function getInputText() {
+            // Use innerText to properly handle line breaks from <br> elements
             // Normalize non-breaking spaces (U+00A0) to regular spaces
-            return (codeInput.textContent || '').replace(/\u00A0/g, ' ').replace(/\n/g, '');
+            return (codeInput.innerText || '').replace(/\u00A0/g, ' ');
         }
         
         // Set cursor position in contenteditable div
@@ -1544,6 +1560,11 @@
 
         // Keyboard shortcuts for code input
         codeInput.addEventListener('keydown', (e) => {
+            // Shift+Enter to insert newline
+            if (e.key === 'Enter' && e.shiftKey) {
+                // Let the browser handle the newline insertion
+                return;
+            }
             // Enter to evaluate
             if (e.key === 'Enter') {
                 e.preventDefault();

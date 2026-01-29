@@ -50,11 +50,37 @@ console.log(`Using APL executable: ${aplExecutable}`);
 
 function executeAPLCode(code) {
     return new Promise((resolve, reject) => {
-        // Use ⍎ (execute) to evaluate and ⎕← to display the result
-        // Escape single quotes in the code
-        const escapedCode = code.replace(/'/g, "''");
+        // For multiline code, we need to handle it specially in Dyalog APL
         // Enable boxing with min style (only boxes nested/enclosed arrays, not simple arrays)
-        const aplInput = `]boxing on -s=min\n⎕←⍎'${escapedCode}'\n`;
+        
+        // Filter out empty lines and comment-only lines (⍝ comments out the rest of the line)
+        const lines = code.split('\n')
+            .map(line => line.trim())
+            .filter(line => line && !line.startsWith('⍝'));
+        
+        // Also strip inline comments from lines (anything after ⍝)
+        const cleanedLines = lines.map(line => {
+            const commentIndex = line.indexOf('⍝');
+            return commentIndex >= 0 ? line.substring(0, commentIndex).trim() : line;
+        }).filter(line => line);  // Remove any lines that became empty after stripping comments
+        
+        // Build the APL input
+        let aplInput;
+        if (cleanedLines.length === 1 && !code.includes('\n')) {
+            // Single line - use the original ⍎ approach for compatibility
+            const escapedCode = cleanedLines[0].replace(/'/g, "''");
+            aplInput = `]boxing on -s=min\n⎕←⍎'${escapedCode}'\n`;
+        } else if (cleanedLines.length === 0) {
+            // Only comments - return empty
+            aplInput = `]boxing on -s=min\n⎕←''\n`;
+        } else {
+            // Multiline - wrap in a dfn and execute it
+            // The dfn runs each line and returns the last expression's result
+            // We use ⋄ (statement separator) to join lines within the dfn
+            const joinedCode = cleanedLines.join(' ⋄ ');
+            const escapedCode = joinedCode.replace(/'/g, "''");
+            aplInput = `]boxing on -s=min\n⎕←{${escapedCode}}⍬\n`;
+        }
         
         // Run in batch mode (-b) to get cleaner output
         const aplProcess = spawn(aplExecutable, ['-b'], {
@@ -97,6 +123,7 @@ function executeAPLCode(code) {
                     if (trimmed.includes('ANGLE')) return false;
                     if (trimmed.includes('glX')) return false;
                     if (trimmed.includes('⎕←⍎')) return false;
+                    if (trimmed.includes('⎕←{')) return false;  // Multiline dfn echo
                     if (trimmed.includes(']boxing')) return false;
                     return true;
                 })
@@ -106,7 +133,7 @@ function executeAPLCode(code) {
             if (cleanError) {
                 resolve(cleanError);
             } else {
-                // Return the stdout, filtering out ]boxing command output
+                // Return the stdout, filtering out ]boxing command output and input echo
                 const cleanOutput = stdout
                     .split('\n')
                     .filter(line => {
@@ -117,6 +144,10 @@ function executeAPLCode(code) {
                         if (trimmed.includes('-style=')) return false;
                         // Filter out user command status/error messages (start with *)
                         if (trimmed.startsWith('*')) return false;
+                        // Filter out input echo (our commands)
+                        if (trimmed.startsWith('⎕←⍎')) return false;
+                        if (trimmed.startsWith('⎕←{')) return false;
+                        if (trimmed.startsWith('⎕←\'\'')) return false;
                         return true;
                     })
                     .join('\n')
