@@ -1,6 +1,6 @@
 # Array Box
 
-<img width="1920" height="1080" alt="Image" src="https://github.com/user-attachments/assets/be0041c8-3edd-4364-9090-c008fc6ec76a" />
+<img width="2560" height="1440" alt="image" src="https://github.com/user-attachments/assets/9ecdee78-7cf6-4458-841f-f9f347043d02" />
 
 A code editor and runner for array programming languages: **BQN**, **APL**, **J**, **Uiua**, **Kap**, and **TinyAPL**.
 
