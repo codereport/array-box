@@ -594,12 +594,18 @@ export function createKeyboardHandler(inputElement, language) {
         }
         
         // Check if this is the prefix key
+        // For TinyAPL: if we're already in prefix mode and shift is pressed, 
+        // don't treat it as another prefix - treat it as a character lookup (for symPS/symPPS)
+        const shiftPressed = e.shiftKey || e.getModifierState('Shift');
         const isPrefixKey = (e.key === prefixKey || 
                             e.key === 'Backslash' && prefixKey === '\\' ||
                             (prefixKey === '\\' && e.code === 'Backslash') ||
                             (prefixKey === '`' && (e.code === 'Backquote' || e.key === '`')));
         
-        if (isPrefixKey) {
+        // Don't treat as prefix key if we're already in prefix mode and shift is pressed
+        const treatAsPrefix = isPrefixKey && !(prefixLevel > 0 && shiftPressed);
+        
+        if (treatAsPrefix) {
             if (isTinyapl) {
                 // TinyAPL: Allow up to 2 prefix levels
                 if (prefixLevel < 2) {
@@ -637,8 +643,7 @@ export function createKeyboardHandler(inputElement, language) {
             const currentPrefixLevel = prefixLevel;
             prefixLevel = 0;
             
-            // Use getModifierState for more reliable shift detection
-            const shiftPressed = e.shiftKey || e.getModifierState('Shift');
+            // shiftPressed already computed above
             const codeToKey = getCodeToKey(shiftPressed);
             
             // Get the logical key from the physical key code

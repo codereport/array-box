@@ -37,7 +37,7 @@
             align-items: center;
             max-width: 875px;
             width: 100%;
-            transition: transform 0.2s ease-out, max-width 0.05s ease-out;
+            transition: transform 0.2s ease-out, max-width 0.05s ease-out, margin-left 0.25s ease-out;
         }
 
         .language-selector {
@@ -203,6 +203,86 @@
             overflow-x: hidden;
             color: var(--text-color);
             line-height: 1.5;
+        }
+
+        /* TinyAPL fancy array tables */
+        .output table.tinyapl-vector,
+        .output table.tinyapl-matrix,
+        .output table.tinyapl-cube,
+        .output table.tinyapl-dictionary,
+        .output table.tinyapl-enclosure {
+            border-collapse: collapse;
+            display: inline-table;
+            vertical-align: middle;
+            margin: 4px;
+            white-space: pre;
+        }
+
+        .output table.tinyapl-vector td,
+        .output table.tinyapl-matrix td,
+        .output table.tinyapl-cube td:not(.filler),
+        .output table.tinyapl-dictionary td,
+        .output table.tinyapl-enclosure td {
+            border: 2px solid var(--text-color);
+            padding: 4px 8px;
+            text-align: right;
+        }
+
+        .output table table {
+            margin: 3px;
+        }
+
+        .output .tinyapl-marker {
+            position: relative;
+            width: 0;
+            height: 0;
+            display: block;
+        }
+        .output .tinyapl-vector-marker::before {
+            content: '→';
+            position: absolute;
+            top: -0.6em;
+            left: 0.15em;
+            font-size: 0.7em;
+            color: #888;
+        }
+        .output .tinyapl-matrix-marker::before {
+            content: '↓';
+            position: absolute;
+            left: -0.5em;
+            top: 0.1em;
+            font-size: 0.7em;
+            color: #888;
+        }
+        .output .tinyapl-cube-marker::before {
+            content: '↘';
+            position: absolute;
+            top: -0.6em;
+            left: -0.5em;
+            font-size: 0.7em;
+            color: #888;
+        }
+        .output .tinyapl-dictionary-marker::before {
+            content: ':';
+            position: absolute;
+            top: -0.7em;
+            font-size: 0.7em;
+            color: #888;
+        }
+        .output .tinyapl-enclosure-marker::before {
+            content: '⊂';
+            position: absolute;
+            top: -0.6em;
+            font-size: 0.7em;
+            color: #888;
+        }
+
+        .output .tinyapl-dictionary td:first-child {
+            text-align: right;
+        }
+
+        .output .tinyapl-cube td.filler {
+            border: none;
         }
 
         .output.bqn {
@@ -550,7 +630,7 @@
         
         /* When F1 tooltip is shown, shift container left */
         body.f1-doc-active .container {
-            transform: translateX(-300px);
+            margin-left: -600px;
         }
 
         .f1-doc-tooltip-header {
@@ -865,102 +945,164 @@
         let tinyaplLoading = false;
         let tinyaplLoadPromise = null;
         
-        // Format TinyAPL result object to readable table format
-        // Based on TinyAPL's fancyShow function
-        async function formatTinyaplResult(result, module) {
-            if (!result || typeof result !== 'object') {
-                return String(result);
+        // Format TinyAPL result object to HTML tables (like TinyAPL's fancyShow)
+        // Returns { isHtml: boolean, content: string }
+        async function formatTinyaplResult(result, module, depth = 0) {
+            // Helper to escape HTML
+            function escapeHtml(str) {
+                return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
             }
             
-            // Helper to show a scalar value
-            async function showScalar(v) {
+            // Helper to format a scalar value
+            async function formatScalar(v) {
                 if (Array.isArray(v)) {
                     // Complex number [real, imag]
                     const [re, im] = v;
-                    if (im === 0) return String(re);
-                    if (re === 0) return im === 1 ? 'ᴊ' : im === -1 ? '¯ᴊ' : `${im < 0 ? '¯' : ''}${Math.abs(im)}ᴊ`;
-                    return `${re < 0 ? '¯' : ''}${Math.abs(re)}${im < 0 ? '¯' : '+'}${Math.abs(im)}ᴊ`;
+                    if (im === 0) return { isHtml: false, content: String(re) };
+                    if (re === 0) {
+                        const imStr = im === 1 ? 'ᴊ' : im === -1 ? '¯ᴊ' : `${im < 0 ? '¯' : ''}${Math.abs(im)}ᴊ`;
+                        return { isHtml: false, content: imStr };
+                    }
+                    return { isHtml: false, content: `${re < 0 ? '¯' : ''}${Math.abs(re)}${im < 0 ? '¯' : '+'}${Math.abs(im)}ᴊ` };
                 }
-                if (typeof v === 'string') return JSON.stringify(v);
-                if (typeof v === 'object' && v.type) {
-                    // Nested array/function/etc
-                    return await formatTinyaplResult(v, module);
+                if (typeof v === 'string') {
+                    return { isHtml: false, content: v.length === 1 ? v : `"${v}"` };
                 }
-                return String(v);
+                if (typeof v === 'object' && v && v.type) {
+                    return await formatTinyaplResult(v, module, depth + 1);
+                }
+                return { isHtml: false, content: String(v) };
+            }
+            
+            if (!result || typeof result !== 'object') {
+                return { isHtml: false, content: String(result) };
+            }
+            
+            // Limit recursion depth
+            if (depth >= 6) {
+                try {
+                    return { isHtml: false, content: await module.show(result) };
+                } catch (e) {
+                    return { isHtml: false, content: JSON.stringify(result) };
+                }
             }
             
             if (result.type === 'array') {
                 const { shape, contents } = result;
                 
-                // Scalar
+                // Scalar - but check for enclosed arrays
                 if (shape.length === 0) {
-                    return await showScalar(contents[0]);
+                    const v = contents[0];
+                    // Check if this is an enclosed array (scalar containing array/dictionary)
+                    if (typeof v === 'object' && v && (v.type === 'array' || v.type === 'dictionary')) {
+                        const inner = await formatTinyaplResult(v, module, depth + 1);
+                        let html = '<table class="tinyapl-enclosure"><div class="tinyapl-marker tinyapl-enclosure-marker"></div><tbody><tr>';
+                        html += `<td>${inner.isHtml ? inner.content : escapeHtml(inner.content)}</td>`;
+                        html += '</tr></tbody></table>';
+                        return { isHtml: true, content: html };
+                    }
+                    return await formatScalar(v);
                 }
                 
                 // String (1D array of chars)
                 if (shape.length === 1 && contents.every(x => typeof x === 'string' && x.length === 1)) {
-                    return contents.join('');
+                    return { isHtml: false, content: contents.join('') };
                 }
                 
-                // Vector (1D)
-                if (shape.length === 1) {
-                    const cells = await Promise.all(contents.map(showScalar));
-                    const maxLen = Math.max(...cells.map(c => c.length));
-                    return cells.map(c => c.padStart(maxLen)).join(' ');
-                }
-                
-                // Matrix (2D)
-                if (shape.length === 2) {
-                    const [rows, cols] = shape;
-                    const cells = await Promise.all(contents.map(showScalar));
-                    // Find max width per column
-                    const colWidths = Array(cols).fill(0);
-                    for (let i = 0; i < cells.length; i++) {
-                        const col = i % cols;
-                        colWidths[col] = Math.max(colWidths[col], cells[i].length);
+                // Vector (1D) - render as HTML table
+                if (shape.length === 1 && contents.length > 0) {
+                    const cells = await Promise.all(contents.map(formatScalar));
+                    let html = '<table class="tinyapl-vector"><div class="tinyapl-marker tinyapl-vector-marker"></div><tbody><tr>';
+                    for (const cell of cells) {
+                        html += `<td>${cell.isHtml ? cell.content : escapeHtml(cell.content)}</td>`;
                     }
-                    // Format rows
-                    const lines = [];
+                    html += '</tr></tbody></table>';
+                    return { isHtml: true, content: html };
+                }
+                
+                // Matrix (2D) - render as HTML table
+                if (shape.length === 2 && contents.length > 0) {
+                    const [rows, cols] = shape;
+                    const cells = await Promise.all(contents.map(formatScalar));
+                    
+                    let html = '<table class="tinyapl-matrix"><div class="tinyapl-marker tinyapl-vector-marker"></div><div class="tinyapl-marker tinyapl-matrix-marker"></div><tbody>';
                     for (let r = 0; r < rows; r++) {
-                        const rowCells = [];
+                        html += '<tr>';
                         for (let c = 0; c < cols; c++) {
                             const idx = r * cols + c;
-                            rowCells.push(cells[idx].padStart(colWidths[c]));
+                            const cell = cells[idx];
+                            html += `<td>${cell.isHtml ? cell.content : escapeHtml(cell.content)}</td>`;
                         }
-                        lines.push(rowCells.join(' '));
+                        html += '</tr>';
                     }
-                    return lines.join('\n');
+                    html += '</tbody></table>';
+                    return { isHtml: true, content: html };
+                }
+                
+                // Cube (3D) - render as HTML table with offset
+                if (shape.length === 3 && contents.length > 0) {
+                    const [a, b, c] = shape;
+                    const cells = await Promise.all(contents.map(formatScalar));
+                    
+                    let html = '<table class="tinyapl-cube"><div class="tinyapl-marker tinyapl-vector-marker"></div><div class="tinyapl-marker tinyapl-matrix-marker"></div><div class="tinyapl-marker tinyapl-cube-marker"></div><tbody>';
+                    for (let y = 0; y < a * b; y++) {
+                        html += '<tr>';
+                        for (let x = 0; x < c + a - 1; x++) {
+                            const c0 = Math.floor(y / b);
+                            const c1 = y % b;
+                            const c2 = x - c0;
+                            if (0 <= c0 && c0 < a && 0 <= c1 && c1 < b && 0 <= c2 && c2 < c) {
+                                const idx = c0 * b * c + c1 * c + c2;
+                                const cell = cells[idx];
+                                html += `<td>${cell.isHtml ? cell.content : escapeHtml(cell.content)}</td>`;
+                            } else {
+                                html += '<td class="filler"></td>';
+                            }
+                        }
+                        html += '</tr>';
+                    }
+                    html += '</tbody></table>';
+                    return { isHtml: true, content: html };
                 }
                 
                 // Higher rank - fall back to show
                 try {
-                    return await module.show(result);
+                    return { isHtml: false, content: await module.show(result) };
                 } catch (e) {
-                    return JSON.stringify(result);
+                    return { isHtml: false, content: JSON.stringify(result) };
                 }
             }
             
             // Dictionary
             if (result.type === 'dictionary') {
-                const lines = [];
-                for (const [k, v] of result.entries) {
-                    const key = await showScalar(k);
-                    const val = await showScalar(v);
-                    lines.push(`${key}: ${val}`);
+                if (!result.entries || result.entries.length === 0) {
+                    return { isHtml: false, content: '⟨:⟩' };
                 }
-                return lines.join('\n');
+                let html = '<table class="tinyapl-dictionary"><div class="tinyapl-marker tinyapl-dictionary-marker"></div><tbody>';
+                for (const [k, v] of result.entries) {
+                    const key = await formatScalar(k);
+                    const val = await formatScalar(v);
+                    html += '<tr>';
+                    html += `<td>${key.isHtml ? key.content : escapeHtml(key.content)}</td>`;
+                    html += '<td>:</td>';
+                    html += `<td>${val.isHtml ? val.content : escapeHtml(val.content)}</td>`;
+                    html += '</tr>';
+                }
+                html += '</tbody></table>';
+                return { isHtml: true, content: html };
             }
             
             // Function/adverb/conjunction - use show
             if (result.type === 'function' || result.type === 'adverb' || result.type === 'conjunction') {
-                return result.repr || await module.show(result);
+                const repr = result.repr || await module.show(result);
+                return { isHtml: false, content: repr };
             }
             
             // Fallback
             try {
-                return await module.show(result);
+                return { isHtml: false, content: await module.show(result) };
             } catch (e) {
-                return JSON.stringify(result);
+                return { isHtml: false, content: JSON.stringify(result) };
             }
         }
         
@@ -1104,26 +1246,34 @@
                 
                 if (success) {
                     // Format the raw result value directly (like TinyAPL's fancyShow)
-                    let output;
+                    let formatted;
                     try {
-                        output = await formatTinyaplResult(value, tinyaplModule);
+                        formatted = await formatTinyaplResult(value, tinyaplModule);
                     } catch (e) {
                         console.error('[TinyAPL] Format error:', e);
                         try {
-                            output = await tinyaplModule.show(value);
+                            formatted = { isHtml: false, content: await tinyaplModule.show(value) };
                         } catch (e2) {
-                            output = String(value);
+                            formatted = { isHtml: false, content: String(value) };
                         }
                     }
                     
                     // Prepend any stdout output (from ⎕← in user code)
+                    let output = formatted.content || '';
+                    let outputHtml = formatted.isHtml ? formatted.content : null;
                     if (outputBuffer) {
-                        output = outputBuffer.replace(/\n$/, '') + '\n' + output;
+                        const prefix = outputBuffer.replace(/\n$/, '');
+                        if (outputHtml) {
+                            // For HTML output, escape and prepend stdout
+                            outputHtml = prefix.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') + '<br>' + outputHtml;
+                        }
+                        output = prefix + '\n' + output;
                     }
                     
                     return {
                         success: true,
-                        output: output || ''
+                        output: output,
+                        outputHtml: outputHtml
                     };
                 } else {
                     // Format the error
@@ -2018,7 +2168,12 @@
                 setInputText(result.formatted.trim());
             }
             
-            output.textContent = result.output;
+            // Use HTML rendering if available (TinyAPL fancy arrays), otherwise plain text
+            if (result.outputHtml) {
+                output.innerHTML = result.outputHtml;
+            } else {
+                output.textContent = result.output;
+            }
             output.className = `output show ${langConfig.fontClass} ${result.success ? '' : 'error'}`;
             
             // Dynamically adjust font size to fit content, then center
