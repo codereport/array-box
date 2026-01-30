@@ -65,21 +65,20 @@ function executeAPLCode(code) {
         }).filter(line => line);  // Remove any lines that became empty after stripping comments
         
         // Build the APL input
+        // Send code directly without ⍎ (execute) wrapper to avoid quote escaping issues
         let aplInput;
-        if (cleanedLines.length === 1 && !code.includes('\n')) {
-            // Single line - use the original ⍎ approach for compatibility
-            const escapedCode = cleanedLines[0].replace(/'/g, "''");
-            aplInput = `]boxing on -s=min\n⎕←⍎'${escapedCode}'\n`;
-        } else if (cleanedLines.length === 0) {
+        if (cleanedLines.length === 0) {
             // Only comments - return empty
             aplInput = `]boxing on -s=min\n⎕←''\n`;
+        } else if (cleanedLines.length === 1) {
+            // Single line - send directly with output
+            aplInput = `]boxing on -s=min\n⎕←${cleanedLines[0]}\n`;
         } else {
             // Multiline - wrap in a dfn and execute it
             // The dfn runs each line and returns the last expression's result
             // We use ⋄ (statement separator) to join lines within the dfn
             const joinedCode = cleanedLines.join(' ⋄ ');
-            const escapedCode = joinedCode.replace(/'/g, "''");
-            aplInput = `]boxing on -s=min\n⎕←{${escapedCode}}⍬\n`;
+            aplInput = `]boxing on -s=min\n⎕←{${joinedCode}}⍬\n`;
         }
         
         // Run in batch mode (-b) to get cleaner output
@@ -122,8 +121,7 @@ function executeAPLCode(code) {
                     if (trimmed.includes('ERR: Display.cpp')) return false;
                     if (trimmed.includes('ANGLE')) return false;
                     if (trimmed.includes('glX')) return false;
-                    if (trimmed.includes('⎕←⍎')) return false;
-                    if (trimmed.includes('⎕←{')) return false;  // Multiline dfn echo
+                    if (trimmed.startsWith('⎕←')) return false;  // Filter input echo
                     if (trimmed.includes(']boxing')) return false;
                     return true;
                 })
@@ -145,9 +143,7 @@ function executeAPLCode(code) {
                         // Filter out user command status/error messages (start with *)
                         if (trimmed.startsWith('*')) return false;
                         // Filter out input echo (our commands)
-                        if (trimmed.startsWith('⎕←⍎')) return false;
-                        if (trimmed.startsWith('⎕←{')) return false;
-                        if (trimmed.startsWith('⎕←\'\'')) return false;
+                        if (trimmed.startsWith('⎕←')) return false;
                         return true;
                     })
                     .join('\n')
