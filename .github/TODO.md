@@ -22,6 +22,8 @@
 - more syntax highlighting
   - BQN / TinyAPL modifiers / functions
 - 🎯 add to the combo list idioms / common inverse operations
+- rip apl cart / bqn crate
+- add shortcut to select and F1 (decided on select or cursor adjacent)
 
 ### Fix 
 - ⦅⍳⍮…⦆5 for TinyAPL formats incorrectly

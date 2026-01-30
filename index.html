@@ -2065,6 +2065,14 @@
             
             const rules = config.syntaxRules;
             
+            // Handle compound inverse glyphs for Uiua (°X and ⌝X patterns)
+            if (currentLanguage === 'uiua' && glyph.length > 1) {
+                const firstChar = glyph[0];
+                if (firstChar === '°' || firstChar === '⌝') {
+                    return 'syntax-dyadic';  // Modifiers are in dyadic category for Uiua
+                }
+            }
+            
             if (rules.comments && rules.comments.includes(glyph)) {
                 return 'syntax-comment';
             }
