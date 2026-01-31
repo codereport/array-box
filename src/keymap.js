@@ -267,7 +267,7 @@ export const tinyaplKeyboard = [
     { code: 'Slash', sym: '/', symS: '?', symP: '⌿', symPS: undefined, symPP: undefined, symPPS: '⍰' },
     
     // Space
-    { code: 'Space', sym: 'Space', symS: 'Space', symP: '‿', symPS: 'Prefix', symPP: undefined, symPPS: undefined }
+    { code: 'Space', sym: 'Space', symS: 'Space', symP: '‿', symPS: undefined, symPP: undefined, symPPS: undefined }
 ];
 
 /**
