@@ -68,8 +68,8 @@
     
     /* Other languages (APL, BQN, J, Kap, TinyAPL) */
     --syntax-function:         var(--dracula-cyan);
-    --syntax-modifier-monadic: var(--dracula-yellow);
-    --syntax-modifier-dyadic:  var(--dracula-green);
+    --syntax-modifier-monadic: var(--dracula-green);
+    --syntax-modifier-dyadic:  var(--dracula-yellow);
 }
 
 /* Syntax highlighting classes */
