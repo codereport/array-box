@@ -2503,9 +2503,13 @@
         });
         
         // Load state from URL permalink (if present)
-        loadFromPermalink().then(() => {
+        loadFromPermalink().then((loaded) => {
             // Apply initial syntax highlighting after loading
             applySyntaxHighlighting();
+            // If content was loaded, adjust container width for it
+            if (loaded) {
+                editorFeatures.handleAutoExpand();
+            }
         });
         
         // Show keyboard hint for 10 seconds
