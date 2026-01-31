@@ -13,7 +13,6 @@
 - 🎯 Set up a statistics aggregator (one public website is up)
   - number of submissions by language
   - % of correct submissions by language
-- 🎯 short permalinks
 
 ### Later
 - Multi lang solve (get multiple bars)
@@ -21,6 +20,8 @@
 - add non-keyboard character set for APL, BQN, Kap
 - rip apl cart / bqn crate
 - train tacit view
+- add shortcut for full docs
+
 
 ### Fix 
 - jumpiness of logo in top left of keyboard

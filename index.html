@@ -1928,6 +1928,13 @@
                 return;
             }
             
+            // Ctrl+L to create permalink
+            if (e.ctrlKey && e.key === 'l') {
+                e.preventDefault();
+                handleCreatePermalink();
+                return;
+            }
+            
             // Escape to close help screen if visible
             if (e.key === 'Escape' && isHelpScreenVisible()) {
                 e.preventDefault();
@@ -2073,6 +2080,159 @@
             
             // Clear output
             hideOutput();
+        }
+
+        // ========================================
+        // Permalink functionality (server-backed short codes)
+        // ========================================
+        
+        const PERMALINK_SERVER = 'http://localhost:8084';
+        
+        // Create a permalink via server API
+        async function createPermalink() {
+            const code = getInputText();
+            if (!code.trim()) return null;
+            
+            try {
+                const response = await fetch(`${PERMALINK_SERVER}/p`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lang: currentLanguage, code: code })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    return data.id;
+                }
+                console.warn('Failed to create permalink:', data.error);
+                return null;
+            } catch (e) {
+                console.warn('Permalink server unavailable:', e.message);
+                return null;
+            }
+        }
+        
+        // Look up a permalink code via server API
+        async function lookupPermalink(shortCode) {
+            if (!shortCode || shortCode.length < 4) return null;
+            
+            try {
+                const response = await fetch(`${PERMALINK_SERVER}/p/${shortCode}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    return { lang: data.lang, code: data.code };
+                }
+                return null;
+            } catch (e) {
+                console.warn('Permalink server unavailable:', e.message);
+                return null;
+            }
+        }
+        
+        // Handle Ctrl+L to generate permalink
+        async function handleCreatePermalink() {
+            const code = getInputText();
+            if (!code.trim()) return;
+            
+            const shortCode = await createPermalink();
+            if (shortCode) {
+                // Update URL
+                history.replaceState(null, '', '#' + shortCode);
+                
+                // Copy full URL to clipboard
+                const fullUrl = window.location.href;
+                navigator.clipboard.writeText(fullUrl).then(() => {
+                    // Show brief feedback
+                    showPermalinkFeedback(shortCode);
+                }).catch(() => {
+                    // Fallback: just show the code
+                    showPermalinkFeedback(shortCode);
+                });
+            } else {
+                showPermalinkError();
+            }
+        }
+        
+        // Show error when permalink server is unavailable
+        function showPermalinkError() {
+            let feedback = document.getElementById('permalinkFeedback');
+            if (!feedback) {
+                feedback = document.createElement('div');
+                feedback.id = 'permalinkFeedback';
+                feedback.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #ef4444;
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: 500;
+                    z-index: 10000;
+                    opacity: 0;
+                    transition: opacity 0.2s;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                `;
+                document.body.appendChild(feedback);
+            }
+            
+            feedback.textContent = 'Permalink server unavailable';
+            feedback.style.background = '#ef4444';
+            feedback.style.opacity = '1';
+            
+            setTimeout(() => {
+                feedback.style.opacity = '0';
+            }, 2000);
+        }
+        
+        // Show brief feedback when permalink is created
+        function showPermalinkFeedback(code) {
+            // Create or reuse feedback element
+            let feedback = document.getElementById('permalinkFeedback');
+            if (!feedback) {
+                feedback = document.createElement('div');
+                feedback.id = 'permalinkFeedback';
+                feedback.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #10b981;
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: 500;
+                    z-index: 10000;
+                    opacity: 0;
+                    transition: opacity 0.2s;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                `;
+                document.body.appendChild(feedback);
+            }
+            
+            feedback.textContent = `Permalink copied! #${code}`;
+            feedback.style.opacity = '1';
+            
+            setTimeout(() => {
+                feedback.style.opacity = '0';
+            }, 2000);
+        }
+        
+        // Load state from URL hash on page load
+        async function loadFromPermalink() {
+            const hash = window.location.hash.slice(1); // Remove leading #
+            if (!hash) return false;
+            
+            const state = await lookupPermalink(hash);
+            if (!state) return false;
+            
+            // Switch language and set code
+            switchLanguage(state.lang);
+            setInputText(state.code);
+            applySyntaxHighlighting();
+            return true;
         }
 
         // Get plain text from contenteditable div (supports multiline)
@@ -2342,8 +2502,11 @@
             logoPath: aplConfig.logoPath
         });
         
-        // Apply initial syntax highlighting
-        applySyntaxHighlighting();
+        // Load state from URL permalink (if present)
+        loadFromPermalink().then(() => {
+            // Apply initial syntax highlighting after loading
+            applySyntaxHighlighting();
+        });
         
         // Show keyboard hint for 10 seconds
         const keyboardHint = document.getElementById('keyboardHint');

@@ -128,6 +128,20 @@ const servers = {
         lastRequest: null,
         startTime: null,
         executable: null
+    },
+    permalink: {
+        name: 'Permalink',
+        script: 'permalink-server.cjs',
+        port: 8084,
+        color: ansi.white,
+        symbol: 'LNK',
+        process: null,
+        status: 'stopped',
+        requests: 0,
+        errors: 0,
+        lastRequest: null,
+        startTime: null,
+        executable: 'JSON file'
     }
 };
 
@@ -650,6 +664,34 @@ async function main() {
     });
     kapProc.stderr.on('data', () => {});
     kapProc.on('close', () => { servers.kap.status = 'stopped'; servers.kap.process = null; renderDashboard(); });
+    
+    // Start Permalink server
+    const permalinkPort = 8084;
+    servers.permalink.port = permalinkPort;
+    const permalinkScriptPath = path.join(__dirname, 'permalink-server.cjs');
+    const permalinkProc = spawn('node', [permalinkScriptPath, String(permalinkPort)], {
+        stdio: ['ignore', 'pipe', 'pipe'],
+        cwd: __dirname
+    });
+    servers.permalink.process = permalinkProc;
+    servers.permalink.status = 'starting';
+    
+    permalinkProc.stdout.on('data', (data) => {
+        const text = data.toString();
+        const portMatch = text.match(/Permalink server running on http:\/\/localhost:(\d+)/);
+        if (portMatch) {
+            servers.permalink.status = 'running';
+            servers.permalink.startTime = Date.now();
+            renderDashboard();
+        }
+        const loadedMatch = text.match(/Loaded (\d+) permalinks/);
+        if (loadedMatch) {
+            servers.permalink.requests = parseInt(loadedMatch[1]);
+            renderDashboard();
+        }
+    });
+    permalinkProc.stderr.on('data', () => {});
+    permalinkProc.on('close', () => { servers.permalink.status = 'stopped'; servers.permalink.process = null; renderDashboard(); });
     
     // Create log server for client-side languages (BQN)
     const http = require('http');

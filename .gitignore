@@ -10,3 +10,6 @@ wasm/.gitignore
 
 # Dyalog APL crash dumps
 aplcore
+
+# Permalink storage (user data)
+storage/*.json
