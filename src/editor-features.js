@@ -109,6 +109,7 @@ function findCommentStart(line, language) {
 /**
  * Align assignment operators across multiple lines
  * Ensures one space on each side of the assignment operator
+ * Groups are separated by empty lines - each group is aligned independently
  * @param {string} text - The full text content
  * @param {string} language - The language identifier
  * @returns {string} - Text with aligned assignment operators
@@ -116,56 +117,89 @@ function findCommentStart(line, language) {
 export function alignAssignments(text, language) {
     const lines = text.split('\n');
     
-    // Find assignment positions and the maximum position
+    // Find assignment positions for all lines
     const assignments = lines.map(line => findAssignmentOperator(line, language));
     
-    // Only align lines that have assignments
-    const linesWithAssignments = assignments.map((a, i) => a ? i : -1).filter(i => i >= 0);
+    // Group consecutive lines (empty lines start a new group)
+    const groups = [];
+    let currentGroup = [];
     
-    if (linesWithAssignments.length < 2) {
-        // Still normalize spacing even for single assignment
-        if (linesWithAssignments.length === 1) {
-            const i = linesWithAssignments[0];
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const isEmpty = line.trim() === '';
+        
+        if (isEmpty) {
+            // End current group if it has content
+            if (currentGroup.length > 0) {
+                groups.push(currentGroup);
+                currentGroup = [];
+            }
+            // Add empty line as its own "group" to preserve it
+            groups.push([{ index: i, isEmpty: true }]);
+        } else {
+            currentGroup.push({ index: i, isEmpty: false });
+        }
+    }
+    // Don't forget the last group
+    if (currentGroup.length > 0) {
+        groups.push(currentGroup);
+    }
+    
+    // Process each group independently
+    const resultLines = [...lines];
+    
+    for (const group of groups) {
+        // Skip empty line groups
+        if (group.length === 1 && group[0].isEmpty) continue;
+        
+        // Find lines with assignments in this group
+        const groupLinesWithAssignments = group.filter(item => assignments[item.index] !== null);
+        
+        if (groupLinesWithAssignments.length < 2) {
+            // Still normalize spacing even for single assignment
+            if (groupLinesWithAssignments.length === 1) {
+                const i = groupLinesWithAssignments[0].index;
+                const line = lines[i];
+                const assignment = assignments[i];
+                const before = line.substring(0, assignment.index).trimEnd();
+                const after = line.substring(assignment.index + assignment.operator.length).trimStart();
+                resultLines[i] = before + ' ' + assignment.operator + ' ' + after;
+            }
+            continue;
+        }
+        
+        // First pass: normalize and calculate max code length for this group
+        let maxCodeLength = 0;
+        const normalizedParts = {};
+        
+        for (const item of groupLinesWithAssignments) {
+            const i = item.index;
             const line = lines[i];
             const assignment = assignments[i];
             const before = line.substring(0, assignment.index).trimEnd();
             const after = line.substring(assignment.index + assignment.operator.length).trimStart();
-            lines[i] = before + ' ' + assignment.operator + ' ' + after;
+            normalizedParts[i] = { before, after, operator: assignment.operator };
+            maxCodeLength = Math.max(maxCodeLength, before.length);
         }
-        return lines.join('\n');
+        
+        // Second pass: align assignments in this group
+        for (const item of groupLinesWithAssignments) {
+            const i = item.index;
+            const { before, after, operator } = normalizedParts[i];
+            const padding = maxCodeLength - before.length;
+            
+            // One space before operator, operator, one space after
+            resultLines[i] = before + ' '.repeat(padding) + ' ' + operator + ' ' + after;
+        }
     }
     
-    // First pass: normalize all lines to have clean spacing around assignments
-    // and calculate the max code length before assignment
-    let maxCodeLength = 0;
-    const normalizedParts = [];
-    
-    for (const i of linesWithAssignments) {
-        const line = lines[i];
-        const assignment = assignments[i];
-        const before = line.substring(0, assignment.index).trimEnd();
-        const after = line.substring(assignment.index + assignment.operator.length).trimStart();
-        normalizedParts[i] = { before, after, operator: assignment.operator };
-        maxCodeLength = Math.max(maxCodeLength, before.length);
-    }
-    
-    // Second pass: align all assignments to the same column
-    const alignedLines = lines.map((line, i) => {
-        if (!normalizedParts[i]) return line;
-        
-        const { before, after, operator } = normalizedParts[i];
-        const padding = maxCodeLength - before.length;
-        
-        // One space before operator, operator, one space after
-        return before + ' '.repeat(padding) + ' ' + operator + ' ' + after;
-    });
-    
-    return alignedLines.join('\n');
+    return resultLines.join('\n');
 }
 
 /**
  * Align comments across multiple lines
  * Ensures at least one space before the comment token
+ * Groups are separated by empty lines - each group is aligned independently
  * @param {string} text - The full text content
  * @param {string} language - The language identifier
  * @returns {string} - Text with aligned comments
@@ -179,54 +213,80 @@ export function alignComments(text, language) {
     // Find comment positions
     const commentPositions = lines.map(line => findCommentStart(line, language));
     
-    // Find lines with comments that have code before them (inline comments)
-    const inlineCommentLines = [];
+    // Group consecutive lines (empty lines start a new group)
+    const groups = [];
+    let currentGroup = [];
+    
     for (let i = 0; i < lines.length; i++) {
-        const pos = commentPositions[i];
-        if (pos > 0) {
-            // Has code before the comment
-            const beforeComment = lines[i].substring(0, pos).trim();
-            if (beforeComment.length > 0) {
-                inlineCommentLines.push(i);
+        const line = lines[i];
+        const isEmpty = line.trim() === '';
+        
+        if (isEmpty) {
+            if (currentGroup.length > 0) {
+                groups.push(currentGroup);
+                currentGroup = [];
             }
+            groups.push([{ index: i, isEmpty: true }]);
+        } else {
+            currentGroup.push({ index: i, isEmpty: false });
         }
     }
+    if (currentGroup.length > 0) {
+        groups.push(currentGroup);
+    }
     
-    if (inlineCommentLines.length < 2) {
-        // Still ensure at least one space before comment for single line
-        if (inlineCommentLines.length === 1) {
-            const i = inlineCommentLines[0];
+    const resultLines = [...lines];
+    
+    for (const group of groups) {
+        // Skip empty line groups
+        if (group.length === 1 && group[0].isEmpty) continue;
+        
+        // Find lines with inline comments in this group
+        const groupInlineCommentLines = [];
+        for (const item of group) {
+            const i = item.index;
+            const pos = commentPositions[i];
+            if (pos > 0) {
+                const beforeComment = lines[i].substring(0, pos).trim();
+                if (beforeComment.length > 0) {
+                    groupInlineCommentLines.push(i);
+                }
+            }
+        }
+        
+        if (groupInlineCommentLines.length < 2) {
+            // Still ensure at least one space before comment for single line
+            if (groupInlineCommentLines.length === 1) {
+                const i = groupInlineCommentLines[0];
+                const pos = commentPositions[i];
+                const codePart = lines[i].substring(0, pos).trimEnd();
+                const commentPart = lines[i].substring(pos);
+                resultLines[i] = codePart + ' ' + commentPart;
+            }
+            continue;
+        }
+        
+        // Find the maximum code length before comments in this group
+        // Use [...str].length to count Unicode code points, not code units
+        // (BQN uses characters like 𝔽 and 𝕩 which are surrogate pairs)
+        let maxCodeLength = 0;
+        for (const i of groupInlineCommentLines) {
+            const pos = commentPositions[i];
+            const codePart = lines[i].substring(0, pos).trimEnd();
+            maxCodeLength = Math.max(maxCodeLength, [...codePart].length);
+        }
+        
+        // Align each line in this group (at least 1 space before comment)
+        for (const i of groupInlineCommentLines) {
             const pos = commentPositions[i];
             const codePart = lines[i].substring(0, pos).trimEnd();
             const commentPart = lines[i].substring(pos);
-            lines[i] = codePart + ' ' + commentPart;
+            const padding = Math.max(1, maxCodeLength - [...codePart].length + 1);
+            resultLines[i] = codePart + ' '.repeat(padding) + commentPart;
         }
-        return lines.join('\n');
     }
     
-    // Find the maximum code length before comments
-    // Use [...str].length to count Unicode code points, not code units
-    // (BQN uses characters like 𝔽 and 𝕩 which are surrogate pairs)
-    let maxCodeLength = 0;
-    for (const i of inlineCommentLines) {
-        const pos = commentPositions[i];
-        const codePart = lines[i].substring(0, pos).trimEnd();
-        maxCodeLength = Math.max(maxCodeLength, [...codePart].length);
-    }
-    
-    // Align each line (at least 1 space before comment)
-    const alignedLines = lines.map((line, i) => {
-        const pos = commentPositions[i];
-        if (pos <= 0 || !inlineCommentLines.includes(i)) return line;
-        
-        const codePart = line.substring(0, pos).trimEnd();
-        const commentPart = line.substring(pos);
-        const padding = Math.max(1, maxCodeLength - [...codePart].length + 1);
-        
-        return codePart + ' '.repeat(padding) + commentPart;
-    });
-    
-    return alignedLines.join('\n');
+    return resultLines.join('\n');
 }
 
 /**
