@@ -130,11 +130,6 @@ const dashboardHTML = `<!DOCTYPE html>
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
         }
         
-        .stat-card .icon {
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
-        
         .stat-card .value {
             font-size: 2.5rem;
             font-weight: bold;
@@ -149,10 +144,7 @@ const dashboardHTML = `<!DOCTYPE html>
             letter-spacing: 1px;
         }
         
-        .stat-card.visitors .value { color: var(--accent-blue); }
-        .stat-card.evaluations .value { color: var(--accent-green); }
-        .stat-card.permalinks .value { color: var(--accent-purple); }
-        .stat-card.active .value { color: var(--accent-cyan); }
+        .stat-card .value { color: var(--text-primary); }
         
         .section {
             background: var(--bg-secondary);
@@ -186,8 +178,8 @@ const dashboardHTML = `<!DOCTYPE html>
         }
         
         .language-card .logo {
-            width: 48px;
-            height: 48px;
+            width: 64px;
+            height: 64px;
             flex-shrink: 0;
         }
         
@@ -445,7 +437,7 @@ const dashboardHTML = `<!DOCTYPE html>
 </head>
 <body>
     <div class="header">
-        <h1>📦 Array Box Dashboard</h1>
+        <h1>Array Box Dashboard</h1>
         <p class="subtitle">Real-time usage statistics</p>
         <div id="connectionStatus" class="connection-status disconnected">
             <span class="dot"></span>
@@ -455,22 +447,18 @@ const dashboardHTML = `<!DOCTYPE html>
     
     <div class="stats-grid">
         <div class="stat-card visitors">
-            <div class="icon">👥</div>
             <div class="value" id="totalVisitors">0</div>
             <div class="label">Total Visitors</div>
         </div>
         <div class="stat-card evaluations">
-            <div class="icon">⚡</div>
             <div class="value" id="totalEvaluations">0</div>
             <div class="label">Code Evaluations</div>
         </div>
         <div class="stat-card permalinks">
-            <div class="icon">🔗</div>
             <div class="value" id="totalPermalinks">0</div>
             <div class="label">Shareable Links</div>
         </div>
         <div class="stat-card active">
-            <div class="icon">🟢</div>
             <div class="value" id="activeVisitors">0</div>
             <div class="label">Active (24h)</div>
         </div>
@@ -480,7 +468,7 @@ const dashboardHTML = `<!DOCTYPE html>
         <div class="charts-row">
             <div class="activity-chart-section">
                 <div class="section-header">
-                    <h2>📈 Activity</h2>
+                    <h2>Activity</h2>
                     <select id="timeRange" class="time-range-select">
                         <option value="1h" selected>Last 1 Hour</option>
                         <option value="12h">Last 12 Hours</option>
@@ -522,7 +510,7 @@ const dashboardHTML = `<!DOCTYPE html>
                 </div>
             </div>
             <div class="pie-section">
-                <h2 style="margin-bottom: 15px; color: var(--text-secondary); font-size: 1.1rem;">🥧 By Language</h2>
+                <h2 style="margin-bottom: 15px; color: var(--text-secondary); font-size: 1.1rem;">By Language</h2>
                 <div class="pie-container">
                     <canvas id="pieChart"></canvas>
                     <div class="pie-center-text">
@@ -538,7 +526,7 @@ const dashboardHTML = `<!DOCTYPE html>
     </div>
     
     <div class="section">
-        <h2>🌐 Requests by Language</h2>
+        <h2>Requests by Language</h2>
         <div class="languages-grid" id="languagesGrid">
             <!-- Populated by JS -->
         </div>
@@ -901,7 +889,7 @@ const dashboardHTML = `<!DOCTYPE html>
                     
                     ctx.closePath();
                     ctx.fillStyle = langColors[lang];
-                    ctx.globalAlpha = 0.7;
+                    ctx.globalAlpha = lang === 'kap' ? 1 : 0.7;
                     ctx.fill();
                     ctx.globalAlpha = 1;
                 }
