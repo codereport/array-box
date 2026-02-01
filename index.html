@@ -1248,7 +1248,17 @@
                     value = result;
                 }
                 
-                if (success) {
+                // TinyAPL error patterns to detect in output
+                const TINYAPL_ERROR_PATTERNS = [
+                    /^(?:Syntax|Parse|Value|Domain|Rank|Length|Index|NYI|Internal|Invalid|Assertion) error:/im,
+                    /does not exist$/im,
+                    /not assigned$/im
+                ];
+                
+                // Check errorBuffer for errors (errors from ⎕ERR go here)
+                const hasErrorInBuffer = errorBuffer && TINYAPL_ERROR_PATTERNS.some(p => p.test(errorBuffer));
+                
+                if (success && !hasErrorInBuffer) {
                     // Format the raw result value directly (like TinyAPL's fancyShow)
                     let formatted;
                     try {
@@ -1283,6 +1293,15 @@
                             outputHtml = prefix.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') + '<br>' + outputHtml;
                         }
                         output = prefix + '\n' + output;
+                    }
+                    
+                    // Final check: look for error patterns in the formatted output
+                    const hasErrorInOutput = TINYAPL_ERROR_PATTERNS.some(p => p.test(output));
+                    if (hasErrorInOutput) {
+                        return {
+                            success: false,
+                            output: output
+                        };
                     }
                     
                     return {

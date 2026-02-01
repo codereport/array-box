@@ -89,7 +89,7 @@ async function executeJCodeSandbox(code) {
         if (e.message === 'SANDBOX_UNAVAILABLE') {
             // Fall back to direct execution
             sandboxMode = false;
-            return { success: true, output: await executeJCodeDirect(code) };
+            return executeJCodeDirect(code);  // Now returns {success, output} object
         }
         throw e;
     }
@@ -134,10 +134,30 @@ function executeJCodeDirect(code) {
             // Remove the "exit 0" echo if present
             output = output.replace(/\s*exit 0\s*$/, '').trim();
             
+            // J errors start with | followed by error type (e.g., |domain error, |syntax error)
+            const J_ERROR_REGEX = /^\|(?:domain|syntax|value|index|rank|length|limit|control|stack|nonce|spelling|open|locative|interface|assertion|parse|locale) error/im;
+            
+            // Check for errors in stderr or stdout
+            const hasStderrError = stderr.trim() && J_ERROR_REGEX.test(stderr);
+            const hasStdoutError = J_ERROR_REGEX.test(output);
+            
             if (stderr.trim()) {
-                resolve(stderr.trim());
+                // Stderr contains error messages
+                resolve({ 
+                    success: !hasStderrError, 
+                    output: stderr.trim() 
+                });
+            } else if (hasStdoutError) {
+                // Error in stdout (some J versions output errors to stdout)
+                resolve({ 
+                    success: false, 
+                    output: output 
+                });
             } else {
-                resolve(output);
+                resolve({ 
+                    success: true, 
+                    output: output 
+                });
             }
         });
 

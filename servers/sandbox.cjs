@@ -555,6 +555,20 @@ async function executeWithWarmContainer(language, code, options = {}) {
                     if (result.endsWith('\n"')) {
                         result = result.slice(0, -2).trim();
                     }
+                    
+                    // Check for Kap errors
+                    const isKapError = result.includes('Error at:') || 
+                                      result.includes('Error:') ||
+                                      stderrOutput.includes('Error');
+                    if (isKapError) {
+                        resolve({
+                            success: false,
+                            output: result || stderrOutput.trim(),
+                            warm: true
+                        });
+                        cleanup();
+                        return;
+                    }
                 } else if (language === 'apl') {
                     // Filter echoed input from the END (preserves result if it matches input)
                     let lines = result.split('\n');
@@ -585,6 +599,18 @@ async function executeWithWarmContainer(language, code, options = {}) {
                 } else if (language === 'j') {
                     // Remove input echo and exit command
                     result = result.replace(/\s*NB\..*$/gm, '').trim();
+                    
+                    // Check for J errors (format: |error type)
+                    const J_ERROR_REGEX = /^\|(?:domain|syntax|value|index|rank|length|limit|control|stack|nonce|spelling|open|locative|interface|assertion|parse|locale) error/im;
+                    if (J_ERROR_REGEX.test(result) || J_ERROR_REGEX.test(stderrOutput)) {
+                        resolve({
+                            success: false,
+                            output: result || stderrOutput.trim(),
+                            warm: true
+                        });
+                        cleanup();
+                        return;
+                    }
                 }
                 
                 resolve({

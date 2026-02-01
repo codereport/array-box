@@ -8,9 +8,7 @@
 - contest
 
 ## ArrayBox
-- Add k6
-- 🎯 word prefix complete
-  - % of correct submissions by language
+- Add k6?
 
 ### Later
 - Multi lang solve (get multiple bars)
@@ -43,6 +41,3 @@ Del   ← -_C⌺                   ⍝ Deltas
 ⎕ ← +/⍳5                   ⍝ Plus reduce Iota 5
 "cat" |_B1_-_Psi_≢ "mouse" ⍝ Length abs diff
 ```
-
-### Web Dashboard
-- errors aren't really handled correctly
