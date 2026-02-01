@@ -147,7 +147,8 @@ function executeAPLCode(code) {
                         return true;
                     })
                     .join('\n')
-                    .trim();
+                    .replace(/^\n+/, '')  // Remove leading blank lines only
+                    .trimEnd();           // Only trim trailing whitespace to preserve column alignment
                 resolve(cleanOutput);
             }
         });

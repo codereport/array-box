@@ -274,6 +274,12 @@ function parseHtmlTableToSatori(html) {
     const numCols = rows[0].length;
     const numRows = rows.length;
     
+    // If table would be too wide (more than ~800px), return null to fall back to text
+    const estimatedWidth = numCols * cellWidth;
+    if (estimatedWidth > 800) {
+        return null;
+    }
+    
     // Build Satori table structure
     const tableRows = rows.map((row, rowIdx) => ({
         type: 'div',
@@ -397,8 +403,8 @@ async function generateOGImage(code, lang, result = null, resultHtml = null) {
     const tableInfo = resultHtml ? parseHtmlTableToSatori(resultHtml) : null;
     const tableElement = tableInfo ? tableInfo.element : null;
     
-    // Use full result - image will size dynamically
-    const displayResult = (!tableElement && result) ? result : null;
+    // Use full result - image will size dynamically, trim trailing whitespace for centering
+    const displayResult = (!tableElement && result) ? trimTrailingWhitespace(result) : null;
     
     // Create colored code elements
     const codeElements = createColoredTextElements(displayCode, lang);
@@ -407,6 +413,7 @@ async function generateOGImage(code, lang, result = null, resultHtml = null) {
     const codeFontSize = 48;
     const resultFontSize = 32;
     const boxPadding = 30;
+    const boxBorder = 3;  // Border width on boxes
     const gap = 20;
     
     // Header dimensions (logo 80px + gap + text)
@@ -414,31 +421,31 @@ async function generateOGImage(code, lang, result = null, resultHtml = null) {
     const headerTextWidth = 'ArrayBox'.length * 22; // ~22px per char at 36px font
     const headerWidth = 80 + 20 + headerTextWidth; // logo + gap + text
     
-    // Code box dimensions
+    // Code box dimensions (content + padding + border)
     const codeCharWidth = 29; // ~29px per char at 48px
     const codeMaxLineLen = displayCode.split('\n').reduce((max, line) => Math.max(max, line.length), 0);
     const codeLineCount = displayCode.split('\n').length;
     const codeContentWidth = codeMaxLineLen * codeCharWidth;
     const codeContentHeight = codeLineCount * (codeFontSize * 1.2);
-    const codeBoxWidth = codeContentWidth + boxPadding * 2;
-    const codeBoxHeight = codeContentHeight + boxPadding * 2;
+    const codeBoxWidth = codeContentWidth + boxPadding * 2 + boxBorder * 2;
+    const codeBoxHeight = codeContentHeight + boxPadding * 2 + boxBorder * 2;
     
-    // Result dimensions
+    // Result dimensions (content + padding + border)
     let resultBoxWidth = 0;
     let resultBoxHeight = 0;
     
     if (tableInfo) {
         // Table dimensions
-        resultBoxWidth = tableInfo.width + boxPadding * 2;
-        resultBoxHeight = tableInfo.height + boxPadding * 2;
+        resultBoxWidth = tableInfo.width + boxPadding * 2 + boxBorder * 2;
+        resultBoxHeight = tableInfo.height + boxPadding * 2 + boxBorder * 2;
     } else if (displayResult) {
         const resultCharWidth = 19; // ~19px per char at 32px
         const resultMaxLineLen = displayResult.split('\n').reduce((max, line) => Math.max(max, line.length), 0);
         const resultLineCount = displayResult.split('\n').length;
         const resultContentWidth = resultMaxLineLen * resultCharWidth;
         const resultContentHeight = resultLineCount * (resultFontSize * 1.2);
-        resultBoxWidth = resultContentWidth + boxPadding * 2;
-        resultBoxHeight = resultContentHeight + boxPadding * 2;
+        resultBoxWidth = resultContentWidth + boxPadding * 2 + boxBorder * 2;
+        resultBoxHeight = resultContentHeight + boxPadding * 2 + boxBorder * 2;
     }
     
     const hasResult = tableElement || displayResult;
@@ -678,6 +685,15 @@ async function generateOGImage(code, lang, result = null, resultHtml = null) {
 }
 
 /**
+ * Trim trailing whitespace from each line of text.
+ * This ensures proper visual centering in boxes.
+ */
+function trimTrailingWhitespace(text) {
+    if (!text) return text;
+    return text.split('\n').map(line => line.trimEnd()).join('\n');
+}
+
+/**
  * Generate a vertical layout image (for clipboard copy)
  * No forced aspect ratio - just wraps content with padding
  * @param {string} code - The code snippet
@@ -693,7 +709,8 @@ async function generateVerticalImage(code, lang, result = null, resultHtml = nul
     const displayCode = code;
     const tableInfo = resultHtml ? parseHtmlTableToSatori(resultHtml) : null;
     const tableElement = tableInfo ? tableInfo.element : null;
-    const displayResult = (!tableElement && result) ? result : null;
+    // Trim trailing whitespace from result for proper centering
+    const displayResult = (!tableElement && result) ? trimTrailingWhitespace(result) : null;
     
     // Create colored code elements
     const codeElements = createColoredTextElements(displayCode, lang);
@@ -702,47 +719,52 @@ async function generateVerticalImage(code, lang, result = null, resultHtml = nul
     const codeFontSize = 48;
     const resultFontSize = 32;
     const boxPadding = 30;
+    const boxBorder = 3;  // Border width on boxes
     const gap = 20;
     
-    // Header dimensions
-    const headerHeight = 70;
+    // Header dimensions - logo 60px, text ~28px fits within logo height
+    const logoSize = 60;
+    const headerHeight = logoSize;
     
-    // Code box dimensions
+    // Code box dimensions (content + padding + border)
     const codeCharWidth = 29;
     const codeMaxLineLen = displayCode.split('\n').reduce((max, line) => Math.max(max, line.length), 0);
     const codeLineCount = displayCode.split('\n').length;
     const codeContentWidth = codeMaxLineLen * codeCharWidth;
     const codeContentHeight = codeLineCount * (codeFontSize * 1.2);
-    const codeBoxWidth = codeContentWidth + boxPadding * 2;
-    const codeBoxHeight = codeContentHeight + boxPadding * 2;
+    const codeBoxWidth = codeContentWidth + boxPadding * 2 + boxBorder * 2;
+    const codeBoxHeight = codeContentHeight + boxPadding * 2 + boxBorder * 2;
     
-    // Result dimensions
+    // Result dimensions (content + padding + border)
     let resultBoxWidth = 0;
     let resultBoxHeight = 0;
     
     if (tableInfo) {
-        resultBoxWidth = tableInfo.width + boxPadding * 2;
-        resultBoxHeight = tableInfo.height + boxPadding * 2;
+        resultBoxWidth = tableInfo.width + boxPadding * 2 + boxBorder * 2;
+        resultBoxHeight = tableInfo.height + boxPadding * 2 + boxBorder * 2;
     } else if (displayResult) {
         const resultCharWidth = 19;
         const resultMaxLineLen = displayResult.split('\n').reduce((max, line) => Math.max(max, line.length), 0);
         const resultLineCount = displayResult.split('\n').length;
         const resultContentWidth = resultMaxLineLen * resultCharWidth;
         const resultContentHeight = resultLineCount * (resultFontSize * 1.2);
-        resultBoxWidth = resultContentWidth + boxPadding * 2;
-        resultBoxHeight = resultContentHeight + boxPadding * 2;
+        resultBoxWidth = resultContentWidth + boxPadding * 2 + boxBorder * 2;
+        resultBoxHeight = resultContentHeight + boxPadding * 2 + boxBorder * 2;
     }
     
     const hasResult = tableElement || displayResult;
     
-    // Vertical layout: stack everything
-    const contentWidth = Math.max(codeBoxWidth, resultBoxWidth, 200);
+    // Make both boxes the same width (max of the two) for visual consistency
+    const unifiedBoxWidth = Math.max(codeBoxWidth, resultBoxWidth, 200);
+    
+    // Vertical layout: stack everything with consistent PADDING on all sides
+    const contentWidth = unifiedBoxWidth;
     let contentHeight = headerHeight + gap + codeBoxHeight;
     if (hasResult) {
         contentHeight += gap + resultBoxHeight;
     }
     
-    // Add padding
+    // Use PADDING consistently on all four sides
     const WIDTH = contentWidth + PADDING * 2;
     const HEIGHT = contentHeight + PADDING * 2;
     
@@ -755,15 +777,15 @@ async function generateVerticalImage(code, lang, result = null, resultHtml = nul
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '16px',
-                marginBottom: `${gap}px`,
+                height: `${headerHeight}px`,
             },
             children: [
                 logoDataUri ? {
                     type: 'img',
                     props: {
                         src: logoDataUri,
-                        width: 60,
-                        height: 60,
+                        width: logoSize,
+                        height: logoSize,
                         style: { objectFit: 'contain' },
                     },
                 } : null,
@@ -782,11 +804,12 @@ async function generateVerticalImage(code, lang, result = null, resultHtml = nul
         },
     };
     
-    // Build code box
+    // Build code box (use unified width for consistent appearance)
     const codeBox = {
         type: 'div',
         props: {
             style: {
+                width: `${unifiedBoxWidth}px`,
                 background: COLORS.inputBg,
                 border: `3px solid ${COLORS.border}`,
                 borderRadius: '16px',
@@ -794,6 +817,7 @@ async function generateVerticalImage(code, lang, result = null, resultHtml = nul
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                boxSizing: 'border-box',
             },
             children: {
                 type: 'div',
@@ -801,6 +825,7 @@ async function generateVerticalImage(code, lang, result = null, resultHtml = nul
                     style: {
                         fontSize: `${codeFontSize}px`,
                         fontFamily: 'ArrayLang',
+                        lineHeight: 1.2,
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'flex-start',
@@ -811,50 +836,67 @@ async function generateVerticalImage(code, lang, result = null, resultHtml = nul
         },
     };
     
-    // Build result box if needed
+    // Build result box if needed (use unified width for consistent appearance)
     let resultBox = null;
     if (tableElement) {
         resultBox = {
             type: 'div',
             props: {
                 style: {
+                    width: `${unifiedBoxWidth}px`,
                     background: COLORS.inputBg,
                     border: `3px solid ${COLORS.border}`,
                     borderRadius: '16px',
                     padding: `${boxPadding}px`,
-                    marginTop: `${gap}px`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    boxSizing: 'border-box',
                 },
                 children: tableElement,
             },
         };
     } else if (displayResult) {
+        // Split result into lines and render each as a separate div for precise centering
+        const resultLines = displayResult.split('\n');
+        const resultLineElements = resultLines.map((line, idx) => ({
+            type: 'div',
+            props: {
+                key: idx,
+                style: {
+                    whiteSpace: 'pre',
+                },
+                children: line,
+            },
+        }));
+        
         resultBox = {
             type: 'div',
             props: {
                 style: {
+                    width: `${unifiedBoxWidth}px`,
                     background: COLORS.inputBg,
                     border: `3px solid ${COLORS.border}`,
                     borderRadius: '16px',
                     padding: `${boxPadding}px`,
-                    marginTop: `${gap}px`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    boxSizing: 'border-box',
                 },
                 children: {
                     type: 'div',
                     props: {
-                        style: {
-                            fontSize: `${resultFontSize}px`,
-                            color: COLORS.fg,
-                            fontFamily: 'ArrayLang',
-                            whiteSpace: 'pre',
-                            textAlign: 'left',
-                        },
-                        children: displayResult,
+                    style: {
+                        fontSize: `${resultFontSize}px`,
+                        color: COLORS.fg,
+                        fontFamily: 'ArrayLang',
+                        lineHeight: 1.2,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',  // Keep lines left-aligned relative to each other
+                    },
+                        children: resultLineElements,
                     },
                 },
             },
@@ -869,20 +911,19 @@ async function generateVerticalImage(code, lang, result = null, resultHtml = nul
             props: {
                 style: {
                     width: '100%',
-                    height: '100%',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    justifyContent: 'center',
+                    justifyContent: 'flex-start',
                     background: `linear-gradient(135deg, ${COLORS.bgGradientStart} 0%, ${COLORS.bgGradientMid} 50%, ${COLORS.bgGradientEnd} 100%)`,
                     padding: `${PADDING}px`,
+                    gap: `${gap}px`,
                 },
                 children: [header, codeBox, resultBox].filter(Boolean),
             },
         },
         {
             width: WIDTH,
-            height: HEIGHT,
             fonts: [
                 {
                     name: 'ArrayLang',

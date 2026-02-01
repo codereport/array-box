@@ -27,6 +27,9 @@
 - jumpiness of logo in top left of keyboard
 - syntax highlighting is a little slow on larger inputs
 
+code editor doesn't shrink when it should
+image gen for ⊂◡(⌽5‿3)⍴⍳15
+
 #### Test Formatting Program
 ```
 ⍝ These are some combinators
