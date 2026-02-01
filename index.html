@@ -2142,6 +2142,12 @@
                 
                 const data = await response.json();
                 if (data.success) {
+                    // Track permalink creation for dashboard stats
+                    fetch('http://localhost:8082/permalink', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: '{}'
+                    }).catch(() => {});
                     return data.id;
                 }
                 console.warn('Failed to create permalink:', data.error);
@@ -2677,6 +2683,20 @@
                 editorFeatures.handleAutoExpand();
             }
         });
+        
+        // Track visitor (for dashboard stats)
+        (function trackVisitor() {
+            let sessionId = localStorage.getItem('arraybox_session');
+            if (!sessionId) {
+                sessionId = Math.random().toString(36).substring(2) + Date.now().toString(36);
+                localStorage.setItem('arraybox_session', sessionId);
+            }
+            fetch('http://localhost:8082/visitor', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId })
+            }).catch(() => {}); // Ignore if server not running
+        })();
         
         // Show keyboard hint for 10 seconds
         const keyboardHint = document.getElementById('keyboardHint');

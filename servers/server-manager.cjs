@@ -9,6 +9,7 @@
 const { spawn } = require('child_process');
 const path = require('path');
 const readline = require('readline');
+const stats = require('./stats.cjs');
 
 // ANSI escape codes for styling
 const ansi = {
@@ -206,6 +207,11 @@ function logRequest(serverKey, type, code, success, duration) {
     servers[serverKey].lastRequest = entry.time;
     if (!success) {
         servers[serverKey].errors++;
+    }
+    
+    // Record to persistent stats for web dashboard
+    if (type === 'eval') {
+        stats.recordEvaluation(serverKey, success);
     }
     
     renderDashboard();
@@ -564,6 +570,44 @@ async function main() {
     process.stdout.write(ansi.hideCursor);
     renderDashboard();
     
+    // Start the web dashboard server
+    const dashboardPort = 8085;
+    const dashboardScriptPath = path.join(__dirname, 'dashboard-server.cjs');
+    const dashboardProc = spawn('node', [dashboardScriptPath, String(dashboardPort), '0.0.0.0'], {
+        stdio: ['ignore', 'pipe', 'pipe'],
+        cwd: __dirname
+    });
+    
+    dashboardProc.stdout.on('data', (data) => {
+        const text = data.toString();
+        // Extract dashboard URL for display
+        const match = text.match(/Local network: (http:\/\/[\d.]+:\d+)/);
+        if (match) {
+            servers.dashboard = servers.dashboard || {
+                name: 'Dashboard',
+                port: dashboardPort,
+                color: ansi.white,
+                symbol: 'WEB',
+                process: dashboardProc,
+                status: 'running',
+                requests: 0,
+                errors: 0,
+                lastRequest: null,
+                startTime: Date.now(),
+                executable: match[1]
+            };
+            renderDashboard();
+        }
+    });
+    dashboardProc.stderr.on('data', () => {});
+    dashboardProc.on('close', () => {
+        if (servers.dashboard) {
+            servers.dashboard.status = 'stopped';
+            servers.dashboard.process = null;
+            renderDashboard();
+        }
+    });
+    
     // Servers run on internal ports, proxies on external ports
     const jInternalPort = 8180;
     const aplInternalPort = 8181;
@@ -693,7 +737,7 @@ async function main() {
     permalinkProc.stderr.on('data', () => {});
     permalinkProc.on('close', () => { servers.permalink.status = 'stopped'; servers.permalink.process = null; renderDashboard(); });
     
-    // Create log server for client-side languages (BQN)
+    // Create log server for client-side languages (BQN, Uiua, TinyAPL) and visitor tracking
     const http = require('http');
     const logServer = http.createServer((req, res) => {
         // CORS headers
@@ -726,11 +770,35 @@ async function main() {
                     res.end(JSON.stringify({ error: 'Invalid request' }));
                 }
             });
+        } else if (req.method === 'POST' && req.url === '/visitor') {
+            // Track visitor
+            let body = '';
+            req.on('data', chunk => body += chunk.toString());
+            req.on('end', () => {
+                try {
+                    const data = JSON.parse(body);
+                    stats.recordVisitor(data.sessionId || generateSessionId());
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ ok: true }));
+                } catch (e) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Invalid request' }));
+                }
+            });
+        } else if (req.method === 'POST' && req.url === '/permalink') {
+            // Track permalink creation
+            stats.recordPermalink();
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: true }));
         } else {
             res.writeHead(404);
             res.end();
         }
     });
+    
+    function generateSessionId() {
+        return Math.random().toString(36).substring(2) + Date.now().toString(36);
+    }
     
     logServer.on('error', () => {}); // Silently handle errors
     logServer.listen(LOG_SERVER_PORT, () => {

@@ -16,7 +16,7 @@ A code editor and runner for array programming languages: **BQN**, **APL**, **J*
 ## Running the Demo
 
 ```bash
-# Start the server manager (handles J, APL, and Kap backends)
+# Start the server manager (handles J, APL, Kap backends + web dashboard)
 node servers/server-manager.cjs
 
 # Open index.html in a browser
@@ -26,6 +26,19 @@ node servers/server-manager.cjs
 - **BQN**, **Uiua**, and **TinyAPL** run entirely in the browser (no server required)
 - **J** and **APL** require local installations and are managed by the server manager
 - **Kap** requires a local Kap installation and is managed by the server manager
+
+## Real-time Dashboard
+
+The server manager includes a web-based dashboard that shows usage statistics in real-time:
+- Total visitors, code evaluations, and shareable links
+- Requests by language with success/failure breakdown
+- Activity graph (last 24 hours)
+
+**Access the dashboard:**
+- From your local machine: `http://localhost:8085`
+- From another device on your network: `http://<your-ip>:8085`
+
+The dashboard automatically updates as users interact with Array Box.
 
 ## Using as a Library
 
