@@ -197,6 +197,8 @@ function filterAplErrorOutput(stdout, stderr, code, markers = null) {
         if (trimmed.startsWith('+---')) return false;
         if (trimmed.startsWith('|')) return false;
         if (trimmed.startsWith('⎕←')) return false;
+        if (trimmed.startsWith(']boxing')) return false;
+        if (trimmed.startsWith('Was ')) return false;
         if (trimmed === 'clear ws') return false;
         if (trimmed === ')SIC') return false;
         if (trimmed === ')CLEAR') return false;
@@ -523,6 +525,8 @@ async function executeWithWarmContainer(language, code, options = {}) {
                         if (trimmed.startsWith('Copyright')) return false;
                         if (trimmed.startsWith('+---')) return false;
                         if (trimmed.startsWith('|')) return false;
+                        if (trimmed.startsWith(']boxing')) return false;
+                        if (trimmed.startsWith('Was ')) return false;
                         if (trimmed === 'clear ws') return false;
                         if (trimmed === ')CLEAR') return false;
                         if (trimmed === '') return false;
@@ -606,6 +610,8 @@ async function executeWithWarmContainer(language, code, options = {}) {
                             if (trimmed.startsWith('Copyright')) return false;
                             if (trimmed.startsWith('+---')) return false;
                             if (trimmed.startsWith('|')) return false;
+                            if (trimmed.startsWith(']boxing')) return false;
+                            if (trimmed.startsWith('Was ')) return false;
                             if (trimmed === 'clear ws') return false;
                             if (trimmed === ')CLEAR') return false;
                             if (trimmed === '') return false;
@@ -675,10 +681,11 @@ async function executeWithWarmContainer(language, code, options = {}) {
         } else if (language === 'apl') {
             aplMarkers = createAplMarkers();
             // Run code
+            // Enable boxing with min style (only boxes nested/enclosed arrays, not simple arrays)
             // Then send )SIC to exit ALL suspended states (safer than →)
             // Then print end marker
             // Then clear vars and print reset marker
-            input = `)SIC\n⎕←'${aplMarkers.start}'\n${code}\n)SIC\n⎕←'${aplMarkers.end}'\n⎕EX ⎕NL ¯1\n⎕←'${aplMarkers.reset}'\n`;
+            input = `]boxing on -s=min\n)SIC\n⎕←'${aplMarkers.start}'\n${code}\n)SIC\n⎕←'${aplMarkers.end}'\n⎕EX ⎕NL ¯1\n⎕←'${aplMarkers.reset}'\n`;
         }
         
         // Set timeout
@@ -701,10 +708,12 @@ async function executeWithWarmContainer(language, code, options = {}) {
                     if (trimmed.startsWith('Copyright')) return false;
                     if (trimmed.startsWith('+---')) return false;
                     if (trimmed.startsWith('|')) return false;
-                        if (trimmed.startsWith('⎕←')) return false;
-                        if (trimmed === 'clear ws') return false;
-                        if (trimmed === ')SIC') return false;
-                        if (trimmed === ')CLEAR') return false;
+                    if (trimmed.startsWith('⎕←')) return false;
+                    if (trimmed.startsWith(']boxing')) return false;
+                    if (trimmed.startsWith('Was ')) return false;
+                    if (trimmed === 'clear ws') return false;
+                    if (trimmed === ')SIC') return false;
+                    if (trimmed === ')CLEAR') return false;
                     if (trimmed === '') return false;
                     return true;
                 });
@@ -917,7 +926,7 @@ function executeInSandbox(language, code, options = {}) {
             input = `${code}\nexit 0\n`;
         } else if (language === 'apl') {
             // APL-specific preprocessing for mapl (batch mode)
-            // mapl doesn't support ]user commands, so just send code directly
+            // Enable boxing with min style (only boxes nested/enclosed arrays, not simple arrays)
             const lines = code.split('\n')
                 .map(line => line.trim())
                 .filter(line => line && !line.startsWith('⍝'));
@@ -927,12 +936,12 @@ function executeInSandbox(language, code, options = {}) {
             }).filter(line => line);
             
             if (cleanedLines.length === 0) {
-                input = `''\n`;
+                input = `]boxing on -s=min\n''\n`;
             } else if (cleanedLines.length === 1) {
-                input = `${cleanedLines[0]}\n`;
+                input = `]boxing on -s=min\n${cleanedLines[0]}\n`;
             } else {
                 // For multiline, execute each line
-                input = cleanedLines.join('\n') + '\n';
+                input = `]boxing on -s=min\n` + cleanedLines.join('\n') + '\n';
             }
         } else if (language === 'kap') {
             input = code + '\n';
