@@ -217,15 +217,37 @@ const dashboardHTML = `<!DOCTYPE html>
             display: flex;
             justify-content: center;
             gap: 15px;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
+            font-weight: 600;
         }
         
         .language-card .success {
-            color: var(--accent-green);
+            color: #4ade80;  /* Soft green */
+            text-shadow: 0 0 8px rgba(74, 222, 128, 0.3);
         }
         
         .language-card .failure {
-            color: var(--accent-red);
+            color: #ff4444;  /* Bright red */
+            text-shadow: 0 0 8px rgba(255, 68, 68, 0.3);
+        }
+        
+        .language-card .percentage {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #4ade80;  /* Soft green */
+            text-shadow: 0 0 10px rgba(74, 222, 128, 0.4);
+            min-width: 70px;
+            text-align: right;
+        }
+        
+        .language-card .percentage.low {
+            color: #ffaa00;  /* Orange for 50-80% */
+            text-shadow: 0 0 10px rgba(255, 170, 0, 0.4);
+        }
+        
+        .language-card .percentage.critical {
+            color: #ff4444;  /* Red for <50% */
+            text-shadow: 0 0 10px rgba(255, 68, 68, 0.4);
         }
         
         .chart-container {
@@ -568,7 +590,7 @@ const dashboardHTML = `<!DOCTYPE html>
             
             // Update languages
             const languagesGrid = document.getElementById('languagesGrid');
-            const languages = ['bqn', 'apl', 'j', 'uiua', 'kap', 'tinyapl'];
+            const allLanguages = ['bqn', 'apl', 'j', 'uiua', 'kap', 'tinyapl'];
             const langNames = { bqn: 'BQN', apl: 'APL', j: 'J', uiua: 'Uiua', kap: 'Kap', tinyapl: 'TinyAPL' };
             const langLogos = { 
                 bqn: '/assets/bqn.svg', 
@@ -579,8 +601,19 @@ const dashboardHTML = `<!DOCTYPE html>
                 tinyapl: '/assets/tinyapl.svg' 
             };
             
+            // Sort languages by total requests (most to least)
+            const languages = allLanguages.sort((a, b) => {
+                const aEvals = (data.languages[a] || {}).evaluations || 0;
+                const bEvals = (data.languages[b] || {}).evaluations || 0;
+                return bEvals - aEvals;
+            });
+            
             languagesGrid.innerHTML = languages.map(lang => {
                 const langData = data.languages[lang] || { evaluations: 0, successes: 0, failures: 0 };
+                const total = langData.evaluations || 0;
+                const successes = langData.successes || 0;
+                const percentage = total > 0 ? Math.round((successes / total) * 100) : 0;
+                const percentClass = percentage < 50 ? 'critical' : (percentage < 80 ? 'low' : '');
                 return \`
                     <div class="language-card">
                         <div class="logo">
@@ -594,6 +627,7 @@ const dashboardHTML = `<!DOCTYPE html>
                                 <span class="failure">✗ \${formatNumber(langData.failures)}</span>
                             </div>
                         </div>
+                        <div class="percentage \${percentClass}">\${percentage}%</div>
                     </div>
                 \`;
             }).join('');
