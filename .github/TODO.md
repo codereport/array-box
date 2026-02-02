@@ -24,9 +24,6 @@
 - jumpiness of logo in top left of keyboard
 - syntax highlighting is a little slow on larger inputs
 
-### Web Dashboard
-- expose it?
-
 #### Test Formatting Program
 ```
 ⍝ These are some combinators
