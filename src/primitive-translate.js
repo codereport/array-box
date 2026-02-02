@@ -191,26 +191,6 @@ export const primitiveGroups = {
         tinyapl: '⍒'
     },
     
-    // Identity / Same (monadic: returns argument unchanged)
-    identity: {
-        apl: '⊢',
-        bqn: '⊢',
-        uiua: '∘',
-        j: ']',
-        kap: '⊢',
-        tinyapl: '⊢'
-    },
-    
-    // Depth (monadic: nesting level)
-    depth: {
-        apl: '≡',
-        bqn: '≡',
-        uiua: null,     // No direct equivalent
-        j: 'L.',
-        kap: '≡',
-        tinyapl: '≡'
-    },
-    
     // Ravel (monadic: flatten to vector)
     ravel: {
         apl: ',',
@@ -219,16 +199,6 @@ export const primitiveGroups = {
         j: ',',
         kap: ',',
         tinyapl: ','
-    },
-    
-    // Enlist (monadic: flatten nested to atoms)
-    enlist: {
-        apl: '∊',
-        bqn: null,      // Different meaning in BQN
-        uiua: null,
-        j: ';',
-        kap: '∊',
-        tinyapl: '∊'
     },
     
     // ========== ARITHMETIC ==========
@@ -263,16 +233,6 @@ export const primitiveGroups = {
         j: '\\',
         kap: '\\',
         tinyapl: '\\'
-    },
-    
-    // Each (modifier: apply to each element)
-    each: {
-        apl: '¨',
-        bqn: '¨',
-        uiua: null,     // Uiua uses ≡ (rows) which is different
-        j: null,        // Uses rank "0 - different paradigm
-        kap: '¨',
-        tinyapl: '¨'
     },
     
     // Table / Outer Product (modifier: all combinations)
@@ -360,44 +320,14 @@ export function translatePrimitives(code, fromLang, toLang) {
     // Sort by length descending to handle multi-char sequences first (e.g., ∘. before ∘)
     const sortedGlyphs = [...forward.keys()].sort((a, b) => b.length - a.length);
     
-    // Debug: log the mappings being used
-    console.log(`Translation ${fromLang} → ${toLang}:`);
-    console.log('Sorted glyphs (by length desc):', sortedGlyphs.map(g => `"${g}" (len=${g.length})`));
+    // Build a regex that matches any source glyph (escaped for regex special chars)
+    const escapedGlyphs = sortedGlyphs.map(g => g.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    const pattern = new RegExp(escapedGlyphs.join('|'), 'g');
     
-    let result = code;
-    console.log('Input code length:', code.length, 'chars:', [...code].map(c => c.charCodeAt(0).toString(16)));
+    // Single-pass replacement: only looks at the ORIGINAL code, no cascading
+    // Each match is looked up in the forward map and replaced once
+    const result = code.replace(pattern, (match) => forward.get(match) || match);
     
-    // Special handling for J's NB. comments
-    if (fromLang === 'j' && forward.has('NB.')) {
-        const commentChar = forward.get('NB.');
-        // Replace NB. with the target comment character
-        result = result.replace(/NB\./g, commentChar);
-    } else if (toLang === 'j') {
-        // Find the comment char for the source language
-        const fromComment = primitiveGroups.comment[fromLang];
-        if (fromComment && fromComment !== 'NB.') {
-            // Replace source comment char with NB.
-            result = result.split(fromComment).join('NB.');
-        }
-    }
-    
-    // Apply all other translations
-    for (const sourceGlyph of sortedGlyphs) {
-        // Skip NB. as it's handled specially above
-        if (sourceGlyph === 'NB.') continue;
-        
-        const targetGlyph = forward.get(sourceGlyph);
-        
-        // Check if this glyph exists in the result before replacing
-        if (result.includes(sourceGlyph)) {
-            const oldResult = result;
-            result = result.split(sourceGlyph).join(targetGlyph);
-            console.log(`  Replaced "${sourceGlyph}" (len=${sourceGlyph.length}) → "${targetGlyph}" (len=${targetGlyph.length})`);
-            console.log(`    Before: ${oldResult.length} chars, After: ${result.length} chars`);
-        }
-    }
-    
-    console.log('Output code length:', result.length);
     return result;
 }
 

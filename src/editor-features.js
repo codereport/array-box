@@ -71,6 +71,23 @@ function findAssignmentOperator(line, language) {
 }
 
 /**
+ * Ensure there is exactly one space after the comment token
+ * @param {string} commentPart - The comment part of the line (starting with comment token)
+ * @param {string} commentToken - The comment token for the language
+ * @returns {string} - Comment with exactly one space after token
+ */
+function ensureSpaceAfterCommentToken(commentPart, commentToken) {
+    // Get the content after the comment token
+    const afterToken = commentPart.substring(commentToken.length);
+    // If the comment is just the token (no content), return as-is
+    if (afterToken.trim() === '') {
+        return commentToken;
+    }
+    // Ensure exactly one space between token and comment content
+    return commentToken + ' ' + afterToken.trimStart();
+}
+
+/**
  * Find the position of a comment token in a line
  * @param {string} line - The line to search
  * @param {string} language - The language identifier
@@ -251,6 +268,10 @@ export function alignComments(text, language) {
                 if (beforeComment.length > 0) {
                     groupInlineCommentLines.push(i);
                 }
+            } else if (pos === 0) {
+                // Full-line comment - ensure space after comment token
+                const commentPart = ensureSpaceAfterCommentToken(lines[i], commentToken);
+                resultLines[i] = commentPart;
             }
         }
         
@@ -260,7 +281,9 @@ export function alignComments(text, language) {
                 const i = groupInlineCommentLines[0];
                 const pos = commentPositions[i];
                 const codePart = lines[i].substring(0, pos).trimEnd();
-                const commentPart = lines[i].substring(pos);
+                let commentPart = lines[i].substring(pos);
+                // Ensure one space after comment token
+                commentPart = ensureSpaceAfterCommentToken(commentPart, commentToken);
                 resultLines[i] = codePart + ' ' + commentPart;
             }
             continue;
@@ -280,7 +303,9 @@ export function alignComments(text, language) {
         for (const i of groupInlineCommentLines) {
             const pos = commentPositions[i];
             const codePart = lines[i].substring(0, pos).trimEnd();
-            const commentPart = lines[i].substring(pos);
+            let commentPart = lines[i].substring(pos);
+            // Ensure one space after comment token
+            commentPart = ensureSpaceAfterCommentToken(commentPart, commentToken);
             const padding = Math.max(1, maxCodeLength - [...codePart].length + 1);
             resultLines[i] = codePart + ' '.repeat(padding) + commentPart;
         }
@@ -476,6 +501,145 @@ export function createEditorFeaturesManager(elements, getLanguage, getInputText,
     };
 }
 
+/**
+ * Toggle comment on selected lines
+ * @param {string} text - The full text content
+ * @param {string} language - The language identifier
+ * @param {number} selStart - Selection start position (character offset)
+ * @param {number} selEnd - Selection end position (character offset)
+ * @returns {object} - { text, selStart, selEnd } with updated values
+ */
+export function toggleComment(text, language, selStart, selEnd) {
+    const commentToken = commentTokens[language];
+    if (!commentToken) return { text, selStart, selEnd };
+    
+    const lines = text.split('\n');
+    
+    // Find which lines are selected
+    let charCount = 0;
+    let startLineIndex = 0;
+    let endLineIndex = 0;
+    
+    for (let i = 0; i < lines.length; i++) {
+        const lineLength = lines[i].length + 1; // +1 for newline
+        if (charCount + lineLength > selStart && startLineIndex === 0) {
+            startLineIndex = i;
+        }
+        if (charCount + lineLength > selEnd || i === lines.length - 1) {
+            endLineIndex = i;
+            break;
+        }
+        charCount += lineLength;
+    }
+    
+    // Get the selected lines
+    const selectedLines = lines.slice(startLineIndex, endLineIndex + 1);
+    
+    // Check if all selected lines are commented
+    const allCommented = selectedLines.every(line => {
+        const trimmed = line.trimStart();
+        return trimmed === '' || trimmed.startsWith(commentToken);
+    });
+    
+    // Toggle comments
+    let selDelta = 0;
+    for (let i = startLineIndex; i <= endLineIndex; i++) {
+        const line = lines[i];
+        const trimmed = line.trimStart();
+        const leadingSpaces = line.length - trimmed.length;
+        
+        if (allCommented) {
+            // Uncomment: remove comment token (and one space after it if present)
+            if (trimmed.startsWith(commentToken)) {
+                const afterToken = trimmed.substring(commentToken.length);
+                const newContent = afterToken.startsWith(' ') ? afterToken.substring(1) : afterToken;
+                lines[i] = ' '.repeat(leadingSpaces) + newContent;
+                // Track delta for cursor position
+                const removed = line.length - lines[i].length;
+                if (i === startLineIndex) selDelta -= removed;
+            }
+        } else {
+            // Comment: add comment token with space
+            if (trimmed !== '') {
+                lines[i] = ' '.repeat(leadingSpaces) + commentToken + ' ' + trimmed;
+                const added = commentToken.length + 1;
+                if (i === startLineIndex) selDelta += added;
+            }
+        }
+    }
+    
+    const newText = lines.join('\n');
+    return {
+        text: newText,
+        selStart: Math.max(0, selStart + selDelta),
+        selEnd: selEnd + selDelta + (newText.length - text.length)
+    };
+}
+
+/**
+ * Move selected lines up or down
+ * @param {string} text - The full text content
+ * @param {number} selStart - Selection start position (character offset)
+ * @param {number} selEnd - Selection end position (character offset)
+ * @param {string} direction - 'up' or 'down'
+ * @returns {object} - { text, selStart, selEnd } with updated values
+ */
+export function moveLines(text, selStart, selEnd, direction) {
+    const lines = text.split('\n');
+    
+    // Find which lines are selected
+    let charCount = 0;
+    let startLineIndex = 0;
+    let endLineIndex = 0;
+    let startLineOffset = 0;
+    
+    for (let i = 0; i < lines.length; i++) {
+        const lineLength = lines[i].length + (i < lines.length - 1 ? 1 : 0); // +1 for newline except last
+        if (charCount <= selStart && charCount + lineLength > selStart) {
+            startLineIndex = i;
+            startLineOffset = selStart - charCount;
+        }
+        if (charCount + lineLength >= selEnd || i === lines.length - 1) {
+            endLineIndex = i;
+            break;
+        }
+        charCount += lines[i].length + 1;
+    }
+    
+    // Check bounds
+    if (direction === 'up' && startLineIndex === 0) {
+        return { text, selStart, selEnd };
+    }
+    if (direction === 'down' && endLineIndex === lines.length - 1) {
+        return { text, selStart, selEnd };
+    }
+    
+    // Extract the lines to move
+    const linesToMove = lines.splice(startLineIndex, endLineIndex - startLineIndex + 1);
+    
+    // Insert at new position
+    const newIndex = direction === 'up' ? startLineIndex - 1 : startLineIndex + 1;
+    lines.splice(newIndex, 0, ...linesToMove);
+    
+    const newText = lines.join('\n');
+    
+    // Calculate new selection positions
+    // Find the character offset of the new start line
+    let newCharCount = 0;
+    for (let i = 0; i < newIndex; i++) {
+        newCharCount += lines[i].length + 1;
+    }
+    
+    const newSelStart = newCharCount + startLineOffset;
+    const selLength = selEnd - selStart;
+    
+    return {
+        text: newText,
+        selStart: newSelStart,
+        selEnd: newSelStart + selLength
+    };
+}
+
 export default {
     assignmentOperators,
     commentTokens,
@@ -483,5 +647,7 @@ export default {
     alignComments,
     calculateContentWidth,
     autoExpandWidth,
-    createEditorFeaturesManager
+    createEditorFeaturesManager,
+    toggleComment,
+    moveLines
 };

@@ -857,6 +857,14 @@
                     <span class="help-key">ctrl + l</span>
                     <span class="help-desc">create permalink (copy URL)</span>
                 </div>
+                <div class="help-row">
+                    <span class="help-key">ctrl + f</span>
+                    <span class="help-desc">format code (no evaluation)</span>
+                </div>
+                <div class="help-row">
+                    <span class="help-key">ctrl + /</span>
+                    <span class="help-desc">toggle comment</span>
+                </div>
             </div>
 
             <div class="help-section">
@@ -1350,7 +1358,7 @@
         import { createKeyboardHandler, bqnKeymap, aplKeymap, kapKeymap, tinyaplKeymap, tinyaplKeyboard, tinyaplGlyphs, uiuaGlyphs, jGlyphs, insertText } from './src/keymap.js?v=26';
         import { syntaxRules, highlightCode, escapeHtml, getSyntaxClass } from './src/syntax.js?v=26';
         import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames, jGlyphNames, tinyaplGlyphNames, bqnGlyphDocs, uiuaGlyphDocs, jGlyphDocs, kapGlyphDocs, aplGlyphDocs, tinyaplGlyphDocs } from './src/keyboard.js?v=26';
-        import { createEditorFeaturesManager } from './src/editor-features.js?v=1';
+        import { createEditorFeaturesManager, toggleComment, commentTokens } from './src/editor-features.js?v=2';
         import { translatePrimitives, clearTranslationCache } from './src/primitive-translate.js?v=2';
         
         // Glyph documentation by language
@@ -2644,6 +2652,42 @@
                 editorFeatures.alignAll();
                 evaluateCode();
             }
+            
+            // Ctrl+F to format only (no evaluation)
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                editorFeatures.alignAll();
+                hideOutput();
+                return;
+            }
+            
+            // Ctrl+/ to toggle comment
+            if (e.ctrlKey && e.key === '/') {
+                e.preventDefault();
+                const text = getInputText();
+                const selStart = getCursorOffset();
+                const sel = window.getSelection();
+                let selEnd = selStart;
+                if (sel.rangeCount > 0) {
+                    const range = sel.getRangeAt(0);
+                    const endRange = range.cloneRange();
+                    endRange.selectNodeContents(codeInput);
+                    endRange.setEnd(range.endContainer, range.endOffset);
+                    selEnd = endRange.toString().length;
+                }
+                
+                const result = toggleComment(text, currentLanguage, selStart, selEnd);
+                if (result.text !== text) {
+                    codeInput.textContent = result.text;
+                    applySyntaxHighlighting();
+                    // Set cursor after syntax highlighting completes (50ms debounce + buffer)
+                    setTimeout(() => {
+                        setCursorOffset(result.selStart);
+                    }, 60);
+                }
+                return;
+            }
+            
         });
 
         // Handle input changes - apply syntax highlighting (output persists until next eval)

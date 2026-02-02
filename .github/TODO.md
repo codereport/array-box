@@ -25,6 +25,9 @@
 code editor doesn't shrink when it should
 image gen for ⊂◡(⌽5‿3)⍴⍳15
 
+### Web Dashboard
+- time window vs all time
+
 #### Test Formatting Program
 ```
 ⍝ These are some combinators
@@ -40,3 +43,13 @@ Del   ← -_C⌺                   ⍝ Deltas
 ⎕ ← +/⍳5                   ⍝ Plus reduce Iota 5
 "cat" |_B1_-_Psi_≢ "mouse" ⍝ Length abs diff
 ```
+
+* add ctrl + shift + up/down for multi-line cursor for multi-line editing
+* add alt + up/down 
+* remove certain translation like < (BQN)
+* image of doublestruck letters doesn't work for BQN
+* can't type sepearat in tinyapl
+* TinyAPL strings should not be yellow (in image)
+
+## Fix
+- comment bug in bqn to something (and comma)
