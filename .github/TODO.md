@@ -20,7 +20,6 @@
 
 ### Web Dashboard
 - true white for kap
-- reorder by color activity graph stack line
 
 
 ### Fix 

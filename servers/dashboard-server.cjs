@@ -523,6 +523,10 @@ const dashboardHTML = `<!DOCTYPE html>
                         <span class="dot"></span>
                         <span>APL</span>
                     </div>
+                    <div class="item lang-tinyapl">
+                        <span class="dot"></span>
+                        <span>TinyAPL</span>
+                    </div>
                     <div class="item lang-j">
                         <span class="dot"></span>
                         <span>J</span>
@@ -534,10 +538,6 @@ const dashboardHTML = `<!DOCTYPE html>
                     <div class="item lang-kap">
                         <span class="dot"></span>
                         <span>Kap</span>
-                    </div>
-                    <div class="item lang-tinyapl">
-                        <span class="dot"></span>
-                        <span>TinyAPL</span>
                     </div>
                 </div>
             </div>
@@ -685,7 +685,7 @@ const dashboardHTML = `<!DOCTYPE html>
             };
             
             const langNames = { bqn: 'BQN', apl: 'APL', j: 'J', uiua: 'Uiua', kap: 'Kap', tinyapl: 'TinyAPL' };
-            const langOrder = ['bqn', 'apl', 'j', 'uiua', 'kap', 'tinyapl'];
+            const langOrder = ['bqn', 'apl', 'tinyapl', 'j', 'uiua', 'kap'];
             
             // Calculate total and prepare data
             let total = 0;
@@ -812,7 +812,7 @@ const dashboardHTML = `<!DOCTYPE html>
             kap: '#ffffff',
             tinyapl: '#94e044'
         };
-        const langOrder = ['bqn', 'apl', 'j', 'uiua', 'kap', 'tinyapl'];
+        const langOrder = ['bqn', 'apl', 'tinyapl', 'j', 'uiua', 'kap'];
         
         // Draw the activity chart
         function drawChart() {
