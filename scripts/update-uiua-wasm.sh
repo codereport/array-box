@@ -24,7 +24,18 @@ echo ""
 
 # Check for required tools
 if ! command -v cargo &> /dev/null; then
-    echo "Error: cargo not found. Please install Rust: https://rustup.rs/"
+    echo "Error: cargo not found. Please install Rust first:"
+    echo ""
+    if command -v curl &> /dev/null; then
+        echo "  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+    elif command -v wget &> /dev/null; then
+        echo "  wget -qO- https://sh.rustup.rs | sh"
+    else
+        echo "  # First install curl or wget, then:"
+        echo "  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+    fi
+    echo ""
+    echo "Then restart your shell or run: source ~/.cargo/env"
     exit 1
 fi
 

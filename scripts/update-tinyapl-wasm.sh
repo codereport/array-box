@@ -23,13 +23,13 @@ mkdir -p "$WASM_DIR"
 
 # Download the three required files
 echo "Downloading tinyapl.js..."
-curl -sL "$BASE_URL/tinyapl.js" -o "$WASM_DIR/tinyapl.js"
+wget -q "$BASE_URL/tinyapl.js" -O "$WASM_DIR/tinyapl.js"
 
 echo "Downloading ghc_wasm_jsffi.js..."
-curl -sL "$BASE_URL/ghc_wasm_jsffi.js" -o "$WASM_DIR/ghc_wasm_jsffi.js"
+wget -q "$BASE_URL/ghc_wasm_jsffi.js" -O "$WASM_DIR/ghc_wasm_jsffi.js"
 
 echo "Downloading tinyapl-js.wasm (~10MB, may take a moment)..."
-curl -sL "$BASE_URL/tinyapl-js.wasm" -o "$WASM_DIR/tinyapl-js.wasm"
+wget -q "$BASE_URL/tinyapl-js.wasm" -O "$WASM_DIR/tinyapl-js.wasm"
 
 echo ""
 echo "Done! Downloaded files:"
