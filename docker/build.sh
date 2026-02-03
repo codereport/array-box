@@ -30,6 +30,47 @@ check_cmd() {
     command -v "$1" &> /dev/null
 }
 
+# Function to ensure Docker is set up and running
+ensure_docker_ready() {
+    echo "Checking Docker setup..."
+    
+    # Check if Docker is installed
+    if ! check_cmd docker; then
+        echo -e "${YELLOW}Docker is not installed. Installing...${NC}"
+        sudo apt-get update
+        sudo apt-get install -y docker.io
+    fi
+    
+    # Check if Docker daemon is running
+    if ! sudo docker info > /dev/null 2>&1; then
+        echo -e "${YELLOW}Starting Docker daemon...${NC}"
+        sudo systemctl start docker
+        # Wait for Docker to be ready
+        sleep 2
+    fi
+    
+    # Check if user is in docker group
+    if ! groups | grep -q '\bdocker\b'; then
+        echo -e "${YELLOW}Adding $USER to docker group...${NC}"
+        sudo usermod -aG docker "$USER"
+        echo -e "${GREEN}Added to docker group.${NC}"
+        
+        # Use sg to run the rest of the script with the new group
+        # This avoids requiring logout/login
+        echo -e "${YELLOW}Activating docker group for this session...${NC}"
+        exec sg docker "$0 $*"
+    fi
+    
+    # Final check - can we access Docker without sudo?
+    if ! docker info > /dev/null 2>&1; then
+        echo -e "${RED}Still can't access Docker. Try logging out and back in, then run this script again.${NC}"
+        exit 1
+    fi
+    
+    echo -e "${GREEN}✓ Docker is ready${NC}"
+    echo ""
+}
+
 # Function to print dependency status
 print_status() {
     local name="$1"
@@ -290,16 +331,17 @@ build_wasm() {
     echo ""
 }
 
-# Check if Docker is running (only if we need to build Docker images)
+# Ensure Docker is set up and running (only if we need to build Docker images)
 if [ -z "$LANG_ARG" ] || [ "$LANG_ARG" != "" ]; then
-    if ! docker info > /dev/null 2>&1; then
-        if [ "$BUILD_WASM" = true ] && [ -z "$LANG_ARG" ]; then
-            echo "Warning: Docker is not running. Skipping Docker builds."
+    if [ "$BUILD_WASM" = true ] && [ -z "$LANG_ARG" ]; then
+        # WASM-only build, Docker is optional
+        if ! docker info > /dev/null 2>&1; then
+            echo "Warning: Docker is not available. Skipping Docker builds."
             echo ""
-        elif [ "$BUILD_WASM" = false ]; then
-            echo "Error: Docker is not running. Please start Docker first."
-            exit 1
         fi
+    else
+        # Docker builds requested - ensure Docker is ready
+        ensure_docker_ready
     fi
 fi
 

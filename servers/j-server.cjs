@@ -56,14 +56,19 @@ function findJExecutable() {
 
 const jExecutable = findJExecutable();
 
-if (!jExecutable) {
+// In sandbox mode, we don't need a local J installation
+if (!jExecutable && !USE_SANDBOX) {
     console.error('Error: J interpreter not found.');
     console.error('Tried: jconsole, ~/j9.6/bin/jconsole, and standard locations');
-    console.error('Please ensure J is installed.');
+    console.error('Please ensure J is installed, or use --sandbox mode.');
     process.exit(1);
 }
 
-console.log(`Using J executable: ${jExecutable}`);
+if (jExecutable) {
+    console.log(`Using J executable: ${jExecutable}`);
+} else {
+    console.log('No local J installation found - using Docker sandbox');
+}
 
 // Check sandbox availability on startup
 (async () => {
@@ -71,9 +76,12 @@ console.log(`Using J executable: ${jExecutable}`);
         const available = await sandbox.isSandboxAvailable('j');
         if (available) {
             console.log('[J Server] Sandbox mode ENABLED - code runs in isolated Docker container');
-        } else {
+        } else if (jExecutable) {
             console.log('[J Server] Sandbox requested but unavailable - falling back to direct execution');
             sandboxMode = false;
+        } else {
+            console.error('[J Server] Sandbox unavailable and no local J installation - cannot start');
+            process.exit(1);
         }
     } else {
         console.log('[J Server] Running in direct execution mode (use --sandbox for isolation)');
@@ -87,9 +95,12 @@ async function executeJCodeSandbox(code) {
         return result;  // Return full result with success flag
     } catch (e) {
         if (e.message === 'SANDBOX_UNAVAILABLE') {
-            // Fall back to direct execution
-            sandboxMode = false;
-            return executeJCodeDirect(code);  // Now returns {success, output} object
+            // Only fall back to direct execution if we have a local J
+            if (jExecutable) {
+                sandboxMode = false;
+                return executeJCodeDirect(code);
+            }
+            throw new Error('Sandbox unavailable and no local J installation');
         }
         throw e;
     }

@@ -51,14 +51,19 @@ function findKapExecutable() {
 
 const kapExecutable = findKapExecutable();
 
-if (!kapExecutable) {
+// In sandbox mode, we don't need a local Kap installation
+if (!kapExecutable && !USE_SANDBOX) {
     console.error('Error: Kap interpreter not found.');
     console.error('Tried: kap-jvm, ~/Downloads/gui/bin/kap-jvm, ~/Downloads/kap-jvm-build-linux/gui/bin/kap-jvm, and standard locations');
-    console.error('Please ensure Kap JVM is installed.');
+    console.error('Please ensure Kap JVM is installed, or use --sandbox mode.');
     process.exit(1);
 }
 
-console.log(`Using Kap executable: ${kapExecutable}`);
+if (kapExecutable) {
+    console.log(`Using Kap executable: ${kapExecutable}`);
+} else {
+    console.log('No local Kap installation found - using Docker sandbox');
+}
 
 // Check sandbox availability on startup
 (async () => {
@@ -66,9 +71,12 @@ console.log(`Using Kap executable: ${kapExecutable}`);
         const available = await sandbox.isSandboxAvailable('kap');
         if (available) {
             console.log('[Kap Server] Sandbox mode ENABLED - code runs in isolated Docker container');
-        } else {
+        } else if (kapExecutable) {
             console.log('[Kap Server] Sandbox requested but unavailable - falling back to direct execution');
             sandboxMode = false;
+        } else {
+            console.error('[Kap Server] Sandbox unavailable and no local Kap installation - cannot start');
+            process.exit(1);
         }
     } else {
         console.log('[Kap Server] Running in direct execution mode (use --sandbox for isolation)');
@@ -82,9 +90,12 @@ async function executeKapCodeSandbox(code) {
         return { success: result.success, output: result.output };
     } catch (e) {
         if (e.message === 'SANDBOX_UNAVAILABLE') {
-            // Fall back to direct execution
-            sandboxMode = false;
-            return executeKapCodeDirect(code);
+            // Only fall back to direct execution if we have a local Kap
+            if (kapExecutable) {
+                sandboxMode = false;
+                return executeKapCodeDirect(code);
+            }
+            throw new Error('Sandbox unavailable and no local Kap installation');
         }
         throw e;
     }
