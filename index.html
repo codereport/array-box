@@ -2744,9 +2744,10 @@
         loadFromPermalink().then((loaded) => {
             // Apply initial syntax highlighting after loading
             applySyntaxHighlighting();
-            // If content was loaded, adjust container width for it
+            // If content was loaded, adjust container width for it and auto-evaluate
             if (loaded) {
                 editorFeatures.handleAutoExpand();
+                evaluateCode();
             }
         });
         
