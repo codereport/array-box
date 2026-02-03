@@ -55,6 +55,13 @@ rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 cd "$BUILD_DIR"
 
+# Create .cargo/config.toml for WASM configuration
+mkdir -p .cargo
+cat > .cargo/config.toml << 'CONFIG_EOF'
+[target.wasm32-unknown-unknown]
+rustflags = ['--cfg', 'getrandom_backend="wasm_js"']
+CONFIG_EOF
+
 # Create Cargo.toml for the WASM wrapper
 cat > Cargo.toml << 'CARGO_EOF'
 [package]
@@ -66,12 +73,12 @@ edition = "2024"
 crate-type = ["cdylib"]
 
 [dependencies]
-uiua = { version = "0.17", default-features = false, features = ["batteries", "web"] }
+uiua = { git = "https://github.com/uiua-lang/uiua", default-features = false, features = ["batteries", "web"] }
 wasm-bindgen = "0.2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-# Required for WASM random number generation
-getrandom = { version = "0.2", features = ["js"] }
+# Required for WASM random number generation (0.3+ uses wasm_js cfg flag set in .cargo/config.toml)
+getrandom = { version = "0.3", features = ["wasm_js"] }
 # web-sys with features needed by uiua
 web-sys = { version = "0.3", features = ["Performance", "Window"] }
 
@@ -95,6 +102,8 @@ struct EvalResult {
     error: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     stack: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    formatted: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -118,7 +127,15 @@ fn format_error(error: &UiuaError) -> String {
 pub fn eval_uiua(code: &str) -> String {
     let mut env = Uiua::with_safe_sys();
     
-    let result = match env.run_str(code) {
+    // Try to format the code (converts keyboard prefixes to symbols)
+    let formatted = uiua::format::format_str(code, &Default::default())
+        .ok()
+        .map(|f| f.output);
+    
+    // Use formatted code for evaluation if available, otherwise original
+    let code_to_run = formatted.as_deref().unwrap_or(code);
+    
+    let result = match env.run_str(code_to_run) {
         Ok(_) => {
             let stack: Vec<String> = env.stack().iter().map(value_to_string).collect();
             let output = if stack.is_empty() {
@@ -131,6 +148,7 @@ pub fn eval_uiua(code: &str) -> String {
                 output,
                 error: None,
                 stack: Some(stack),
+                formatted,
             }
         }
         Err(e) => {
@@ -154,6 +172,7 @@ pub fn eval_uiua(code: &str) -> String {
                 output,
                 error: Some(error_msg),
                 stack: if stack.is_empty() { None } else { Some(stack) },
+                formatted,
             }
         }
     };

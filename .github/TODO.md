@@ -44,3 +44,7 @@ Del   ← -_C⌺                   ⍝ Deltas
 * image of doublestruck letters doesn't work for BQN
 * TinyAPL strings should not be yellow (in image)
 * image gen for ⊂◡(⌽5‿3)⍴⍳15
+
+
+* move f1 to bottom
+* when you load from a permalink evaluate
