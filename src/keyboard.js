@@ -1838,6 +1838,7 @@ export class ArrayKeyboard {
         this.tooltip = null;
         this.tooltipTimeout = null;
         this.currentTooltipGlyph = null;
+        this.currentTooltipDocUrl = null;
         this.tooltipLeftPos = null;
         
         // Arrow navigation state
@@ -2649,6 +2650,7 @@ export class ArrayKeyboard {
             return;
         }
         this.currentTooltipGlyph = tooltipKey;
+        this.currentTooltipDocUrl = doc.docUrl || null;
         
         // Build tooltip content
         let html = '<div class="array-keyboard-tooltip-header">';
@@ -2775,6 +2777,7 @@ export class ArrayKeyboard {
         this.tooltip.classList.remove('show');
         this.tooltip.style.pointerEvents = 'none';
         this.currentTooltipGlyph = null;
+        this.currentTooltipDocUrl = null;
         
         // Only reset position cache when explicitly requested (e.g., keyboard hidden)
         if (resetPosition) {
@@ -3835,6 +3838,14 @@ export class ArrayKeyboard {
             
             // Only handle remaining shortcuts if keyboard is visible
             if (!this.isVisible()) return;
+            
+            // F1 to open full docs for current tooltip
+            if (e.key === 'F1' && this.currentTooltipDocUrl) {
+                e.preventDefault();
+                e.stopPropagation();
+                window.open(this.currentTooltipDocUrl, '_blank', 'noopener');
+                return;
+            }
             
             // Ctrl+K to hide everything (keyboard, search, names, tooltip)
             if (e.ctrlKey && (e.key === 'k' || e.key === 'K')) {

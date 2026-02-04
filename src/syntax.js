@@ -266,6 +266,11 @@ export const syntaxRules = {
         comments: [
             '⍝'
         ],
+        // Block comments (grey) - inline comments with start/end delimiters
+        blockComment: {
+            start: '⟃',
+            end: '⟄'
+        },
         // Syntax elements (not highlighted - left as default)
         // '←', '→', '⍺', '⍵', '⍶', '⍹', '∇', '⋄', ':', '■', '⟨', '⟩', '⦅', '⦆', '⎕', '⍞', '⏨', 'ᴊ'
         // Numbers pattern (TinyAPL uses ¯ for negative, ∞ for infinity, ⏨ for exponent, ᴊ for complex)
@@ -360,6 +365,18 @@ export function highlightCode(text, language) {
         if (language === 'uiua' && rules.subscripts && rules.subscripts.includes(char)) {
             tokens.push({ type: lastGlyphType, value: char });
             i++;
+            continue;
+        }
+        
+        // Check for block comments (TinyAPL ⟃...⟄)
+        // Everything from start to end delimiter (or end of text) is a comment
+        if (rules.blockComment && char === rules.blockComment.start) {
+            const endPos = text.indexOf(rules.blockComment.end, i + 1);
+            const commentEnd = endPos === -1 ? text.length : endPos + 1;
+            const commentText = text.substring(i, commentEnd);
+            tokens.push({ type: 'comment', value: commentText });
+            lastGlyphType = 'comment';
+            i = commentEnd;
             continue;
         }
         
@@ -511,6 +528,10 @@ export function getSyntaxClass(symbol, language) {
     
     // Shared classifications
     if (rules.comments && rules.comments.includes(symbol)) {
+        return 'syntax-comment';
+    }
+    // Block comment delimiters (TinyAPL ⟃ ⟄)
+    if (rules.blockComment && (symbol === rules.blockComment.start || symbol === rules.blockComment.end)) {
         return 'syntax-comment';
     }
     if (rules.constants && rules.constants.includes(symbol)) {
