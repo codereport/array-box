@@ -2882,7 +2882,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Catch",
-                            "description": "Run \\[x\\]F y. If it succeeds, r is its result; otherwise r is \\[x\\]G y.",
+                            "description": "Run [x]F y. If it succeeds, r is its result; otherwise r is [x]G y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/catch",
                             "valence": "dyad"
@@ -2890,7 +2890,7 @@ export const tinyaplGlyphDocs = {
             ],
             "dyad": {
                     "name": "Catch",
-                    "description": "Run \\[x\\]F y. If it succeeds, r is its result; otherwise r is \\[x\\]G y.",
+                    "description": "Run [x]F y. If it succeeds, r is its result; otherwise r is [x]G y.",
                     "example": ""
             }
     },

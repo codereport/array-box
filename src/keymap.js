@@ -248,7 +248,7 @@ export const tinyaplKeyboard = [
     { code: 'KeyG', sym: 'g', symS: 'G', symP: '∇', symPS: '⍢', symPP: '⫇', symPPS: undefined },
     { code: 'KeyH', sym: 'h', symS: 'H', symP: '∆', symPS: '⍙', symPP: '⊸', symPPS: '⟜' },
     { code: 'KeyJ', sym: 'j', symS: 'J', symP: '∘', symPS: '⍤', symPP: 'ᴊ', symPPS: undefined },
-    { code: 'KeyK', sym: 'k', symS: 'K', symP: undefined, symPS: '⌸', symPP: undefined, symPPS: undefined },
+    { code: 'KeyK', sym: 'k', symS: 'K', symP: '⎊', symPS: '⌸', symPP: undefined, symPPS: undefined },
     { code: 'KeyL', sym: 'l', symS: 'L', symP: '⎕', symPS: '⌷', symPP: undefined, symPPS: undefined },
     { code: 'Semicolon', sym: ';', symS: ':', symP: '⍎', symPS: '≡', symPP: '⍮', symPPS: '⍠' },
     { code: 'Quote', sym: "'", symS: '"', symP: '⍕', symPS: '≢', symPP: '⍘', symPPS: '⍞' },
