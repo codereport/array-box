@@ -1870,6 +1870,52 @@
         const output = document.getElementById('output');
         const container = document.querySelector('.container');
         
+        // Generate favicon with hexagon subscript badge
+        function generateHexagonFavicon(logoSrc) {
+            const canvas = document.createElement('canvas');
+            const size = 64;
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            // Load and draw logo first
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => {
+                // Draw logo (main element, slightly offset to top-left)
+                const logoSize = size * 0.75;
+                ctx.drawImage(img, 0, 0, logoSize, logoSize);
+                
+                // Draw white hexagon subscript in bottom-right
+                const hexRadius = 12;
+                const hexCenterX = size - hexRadius - 2;
+                const hexCenterY = size - hexRadius - 2;
+                
+                ctx.beginPath();
+                for (let i = 0; i < 6; i++) {
+                    const angle = (Math.PI / 3) * i - Math.PI / 2;
+                    const x = hexCenterX + hexRadius * Math.cos(angle);
+                    const y = hexCenterY + hexRadius * Math.sin(angle);
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.closePath();
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
+                
+                // Update favicon
+                const favicon = document.getElementById('favicon');
+                if (favicon) {
+                    favicon.href = canvas.toDataURL('image/png');
+                    favicon.type = 'image/png';
+                }
+            };
+            img.src = logoSrc;
+        }
+        
         // Help screen
         const helpScreen = document.getElementById('helpScreen');
         
@@ -2040,13 +2086,8 @@
             currentLogo.src = langConfig.logo;
             currentLogo.alt = langConfig.name;
             
-            // Update favicon to match the current language
-            const favicon = document.getElementById('favicon');
-            if (favicon) {
-                favicon.href = langConfig.logo;
-                // Update MIME type based on file extension
-                favicon.type = langConfig.logo.endsWith('.svg') ? 'image/svg+xml' : 'image/png';
-            }
+            // Update favicon to match the current language (with hexagon background)
+            generateHexagonFavicon(langConfig.logo);
             
             // Update input font class
             codeInput.className = `code-input ${langConfig.fontClass}`;
@@ -2665,6 +2706,9 @@
 
         // Initialize keyboard handler for default language (APL)
         currentKeyboardCleanup = createKeyboardHandler(codeInput, 'apl');
+        
+        // Initialize favicon with hexagon background for default language (APL)
+        generateHexagonFavicon(languages.apl.logo);
         
         // Initialize visual keyboard for default language (APL)
         const aplConfig = keyboardConfigs.apl;
