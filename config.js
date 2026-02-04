@@ -15,7 +15,7 @@
 const ArrayBoxConfig = {
     // Set this to your tunnel URL when deploying to GitHub Pages
     // Leave as null for local development
-    BACKEND_URL: 'https://patent-scholars-shareholders-august.trycloudflare.com',
+    BACKEND_URL: 'https://penetration-dedicated-several-choice.trycloudflare.com',
     
     // Example configurations:
     // BACKEND_URL: 'https://arraybox.your-domain.com',     // Custom domain with Cloudflare Tunnel
