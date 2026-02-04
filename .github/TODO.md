@@ -51,6 +51,4 @@ TinyAPL Test
 * •listSys formatting in BQN
 * string formatting
 
-Fix all of Madelines issues she pointed out
-
 Update README for contributing
