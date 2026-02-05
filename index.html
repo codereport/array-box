@@ -1953,7 +1953,9 @@
                 const logoSize = size * 0.75;
                 ctx.drawImage(img, 0, 0, logoSize, logoSize);
                 
-                // Draw white hexagon subscript in bottom-right
+                // Draw hexagon subscript in bottom-right
+                // Red when running locally, white in production
+                const isLocal = ['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname);
                 const hexRadius = 12;
                 const hexCenterX = size - hexRadius - 2;
                 const hexCenterY = size - hexRadius - 2;
@@ -1970,7 +1972,7 @@
                     }
                 }
                 ctx.closePath();
-                ctx.fillStyle = '#ffffff';
+                ctx.fillStyle = isLocal ? '#e53e3e' : '#ffffff';
                 ctx.fill();
                 
                 // Update favicon
