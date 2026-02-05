@@ -201,7 +201,8 @@
             white-space: pre;
             word-wrap: break-word;
             display: none;
-            max-height: 919px;
+            /* Dynamic max-height: viewport height minus space for input area (~300px) */
+            max-height: calc(100vh - 300px);
             overflow-y: auto;
             overflow-x: hidden;
             color: var(--text-color);
