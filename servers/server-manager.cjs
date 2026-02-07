@@ -94,26 +94,26 @@ const servers = {
         startTime: null,
         executable: 'WASM'
     },
+    j: {
+        name: 'J (client)',
+        script: null,  // Runs in browser via WASM
+        port: null,
+        color: ansi.cyan,
+        symbol: 'J',
+        process: null,
+        status: 'browser',  // Always running in browser
+        requests: 0,
+        errors: 0,
+        lastRequest: null,
+        startTime: null,
+        executable: 'WASM'
+    },
     kap: {
         name: 'Kap Server',
         script: 'kap-server.cjs',
         port: 8083,
         color: ansi.blue,
         symbol: 'KAP',
-        process: null,
-        status: 'stopped',
-        requests: 0,
-        errors: 0,
-        lastRequest: null,
-        startTime: null,
-        executable: null
-    },
-    j: {
-        name: 'J Server',
-        script: 'j-server.cjs',
-        port: 8080,
-        color: ansi.cyan,
-        symbol: 'J',
         process: null,
         status: 'stopped',
         requests: 0,
@@ -615,43 +615,10 @@ async function main() {
     });
     
     // Servers run on internal ports, proxies on external ports
-    const jInternalPort = 8180;
     const aplInternalPort = 8181;
-    const jExternalPort = 8080;
     const aplExternalPort = 8081;
     
-    // Start J server
-    servers.j.port = jExternalPort;
-    const jScriptPath = path.join(__dirname, 'j-server.cjs');
-    const jArgs = [jScriptPath, String(jInternalPort)];
-    if (SANDBOX_MODE) jArgs.push('--sandbox');
-    const jProc = spawn('node', jArgs, {
-        stdio: ['ignore', 'pipe', 'pipe'],
-        cwd: __dirname
-    });
-    servers.j.process = jProc;
-    servers.j.status = 'starting';
-    
-    jProc.stdout.on('data', (data) => {
-        const text = data.toString();
-        const execMatch = text.match(/Using J executable: (.+)/);
-        if (execMatch) servers.j.executable = execMatch[1].trim();
-        
-        const portMatch = text.match(/Server running on http:\/\/localhost:(\d+)/);
-        if (portMatch) {
-            servers.j.actualPort = parseInt(portMatch[1]);
-            servers.j.status = 'running';
-            servers.j.startTime = Date.now();
-            
-            // Create J proxy immediately when server is ready
-            if (!servers.j.proxyActive && !servers.j.proxyError) {
-                createLoggerProxy('j', jInternalPort, jExternalPort);
-            }
-            renderDashboard();
-        }
-    });
-    jProc.stderr.on('data', () => {});
-    jProc.on('close', () => { servers.j.status = 'stopped'; servers.j.process = null; renderDashboard(); });
+    // J is client-side only (WASM) - no server to start
     
     // Start APL server
     servers.apl.port = aplExternalPort;

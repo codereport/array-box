@@ -29,16 +29,16 @@ A code editor and runner for array programming languages: **BQN**, **APL**, **J*
 ## Running the Demo
 
 ```bash
-# Start the server manager (handles J, APL, Kap backends + web dashboard)
+# Start the server manager (handles APL, Kap backends + web dashboard)
 node servers/server-manager.cjs
 
 # Open index.html in a browser
 ```
 
 **Note:** 
-- **BQN**, **Uiua**, and **TinyAPL** run entirely in the browser (no server required)
-- **J** and **APL** require local installations and are managed by the server manager
-- **Kap** requires a local Kap installation and is managed by the server manager
+- **BQN**, **Uiua**, **TinyAPL**, and **J** run entirely in the browser (no server required)
+  - J uses WASM for client-side execution (J 9.03)
+- **APL** and **Kap** require local installations and are managed by the server manager
 
 ## Real-time Dashboard
 
@@ -176,10 +176,10 @@ array-box/
 ├── assets/            # Language logos
 ├── wasm/              # WASM builds
 │   ├── tinyapl/       # TinyAPL WASM build
-│   └── uiua/          # Uiua WASM build
+│   ├── uiua/          # Uiua WASM build
+│   └── j/             # J WASM build (client-side)
 ├── servers/           # Backend server files
-│   ├── server-manager.cjs  # Server manager (J, APL, Kap)
-│   ├── j-server.cjs        # J language server
+│   ├── server-manager.cjs  # Server manager (APL, Kap)
 │   ├── apl-server.cjs      # APL language server
 │   └── kap-server.cjs      # Kap language server
 ├── scripts/           # Documentation scraping scripts

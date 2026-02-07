@@ -232,11 +232,11 @@ while [[ $# -gt 0 ]]; do
             echo "  --check   Check dependencies without building"
             echo "  -h        Show this help"
             echo ""
-            echo "Languages: j, kap, apl"
+            echo "Languages: kap, apl"
             echo ""
             echo "Examples:"
             echo "  ./build.sh           # Build all Docker images"
-            echo "  ./build.sh j         # Build only J image"
+            echo "  ./build.sh kap       # Build only Kap image"
             echo "  ./build.sh --wasm    # Build Docker images + WASM modules"
             echo "  ./build.sh --check   # Check what dependencies are installed"
             exit 0
@@ -284,6 +284,7 @@ build_wasm() {
     local wasm_success=true
     local tinyapl_ok=false
     local uiua_ok=false
+    local j_ok=false
     
     # TinyAPL - download pre-built files
     echo "Downloading TinyAPL WASM..."
@@ -314,6 +315,21 @@ build_wasm() {
     fi
     echo ""
     
+    # J - download pre-built files
+    echo "Downloading J WASM..."
+    if [ -x "$PROJECT_DIR/scripts/update-j-wasm.sh" ]; then
+        if "$PROJECT_DIR/scripts/update-j-wasm.sh"; then
+            j_ok=true
+        else
+            echo -e "${RED}Failed to download J WASM${NC}"
+            wasm_success=false
+        fi
+    else
+        echo "Warning: update-j-wasm.sh not found or not executable"
+        wasm_success=false
+    fi
+    echo ""
+    
     # Summary
     echo "=========================================="
     echo "WASM build summary:"
@@ -326,6 +342,11 @@ build_wasm() {
         echo -e "  ${GREEN}✓${NC} Uiua WASM built"
     else
         echo -e "  ${YELLOW}○${NC} Uiua WASM skipped (needs Rust)"
+    fi
+    if [ "$j_ok" = true ]; then
+        echo -e "  ${GREEN}✓${NC} J WASM downloaded"
+    else
+        echo -e "  ${RED}✗${NC} J WASM failed"
     fi
     echo "=========================================="
     echo ""
@@ -359,9 +380,6 @@ if docker info > /dev/null 2>&1; then
         # Build all images
         echo "Building all sandbox images..."
         echo ""
-        
-        # J is the most straightforward
-        build_image "j"
         
         # Kap requires JVM
         build_image "kap"

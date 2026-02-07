@@ -41,7 +41,6 @@ const ArrayBoxConfig = {
             // Note: image is special - the gateway route is /api/image but we call /image/vertical
             // So we return /api which becomes /api/image/vertical
             const routes = {
-                j: `${backendUrl}/api/j`,
                 apl: `${backendUrl}/api/apl`,
                 kap: `${backendUrl}/api/kap`,
                 log: `${backendUrl}/api/log`,
@@ -53,7 +52,6 @@ const ArrayBoxConfig = {
         
         // Local development: use direct ports
         const localPorts = {
-            j: 'http://localhost:8080',
             apl: 'http://localhost:8081',
             log: 'http://localhost:8082',
             kap: 'http://localhost:8083',

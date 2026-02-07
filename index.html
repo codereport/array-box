@@ -1331,6 +1331,177 @@
         loadTinyapl().catch(() => {});
     </script>
 
+    <!-- J WASM Loader -->
+    <script>
+        // Load J WASM module from CDN or local files
+        // Using IIFE to prevent global variable pollution
+        (function() {
+            let jReady = false;
+            let jLoadError = null;
+            let jModule = null;
+            let jLoading = false;
+            let jLoadPromise = null;
+            
+            // J WASM functions
+            let jdo1 = null;
+            let jsetstr = null;
+            
+            async function loadJ() {
+                if (jReady) return true;
+                if (jLoadError) return false;
+                if (jLoading) return jLoadPromise;
+                
+                jLoading = true;
+                jLoadPromise = (async () => {
+                    try {
+                        console.log('[J] Starting to load WASM module...');
+                        
+                        // Create an iframe to load emj.js in isolation
+                        const iframe = document.createElement('iframe');
+                        iframe.style.display = 'none';
+                        document.body.appendChild(iframe);
+                        
+                        return new Promise((resolve, reject) => {
+                            // Setup Module config in the iframe
+                            iframe.contentWindow.Module = {
+                                locateFile: function(path, prefix) {
+                                    return '/wasm/j/' + path;
+                                },
+                                onRuntimeInitialized: function() {
+                                    try {
+                                        console.log('[J] WASM runtime initialized');
+                                        const Module = iframe.contentWindow.Module;
+                                        
+                                        // Wrap C functions
+                                        jdo1 = Module.cwrap('em_jdo', 'string', ['string']);
+                                        jsetstr = Module.cwrap('em_jsetstr', 'void', ['string', 'string']);
+                                        
+                                        jModule = Module;
+                                        jReady = true;
+                                        jLoading = false;
+                                        console.log('[J] WASM loaded successfully!');
+                                        resolve(true);
+                                    } catch (error) {
+                                        console.error('[J] Error wrapping functions:', error);
+                                        jLoadError = error;
+                                        jLoading = false;
+                                        reject(error);
+                                    }
+                                },
+                                onAbort: function(what) {
+                                    console.error('[J] WASM initialization aborted:', what);
+                                    jLoadError = new Error(what || 'J WASM initialization aborted');
+                                    jLoading = false;
+                                    reject(jLoadError);
+                                },
+                                print: function(text) { console.log('[J]', text); },
+                                printErr: function(text) { console.warn('[J]', text); }
+                            };
+                            
+                            // Load the script
+                            const script = iframe.contentDocument.createElement('script');
+                            script.src = '/wasm/j/emj.js';
+                            script.onerror = function(e) {
+                                console.error('[J] Failed to load emj.js:', e);
+                                jLoadError = new Error('Failed to load J WASM script');
+                                jLoading = false;
+                                reject(jLoadError);
+                            };
+                            
+                            iframe.contentDocument.head.appendChild(script);
+                        });
+                    } catch (error) {
+                        console.error('[J] WASM loading failed:', error);
+                        jLoadError = error;
+                        jLoading = false;
+                        return false;
+                    }
+                })();
+                
+                return jLoadPromise;
+            }
+            
+            async function evalJ(code) {
+                if (!jReady) {
+                    // Try to load if not started
+                    if (!jLoading && !jLoadError) {
+                         loadJ().catch(() => {});
+                    }
+                    
+                    if (jLoadError) {
+                        return {
+                            success: false,
+                            output: `J failed to load: ${jLoadError.message}\n\nCheck browser console (F12) for details.`
+                        };
+                    }
+                    
+                    // Wait for loading to complete
+                    const startWait = Date.now();
+                    const maxWait = 10000; // 10 second timeout
+                    
+                    while (!jReady && !jLoadError && (Date.now() - startWait) < maxWait) {
+                        await new Promise(r => setTimeout(r, 100));
+                    }
+                    
+                    if (!jReady) {
+                        if (jLoadError) {
+                            return {
+                                success: false,
+                                output: `J failed to load: ${jLoadError.message}`
+                            };
+                        }
+                        return {
+                            success: false,
+                            output: 'J WASM loading...'
+                        };
+                    }
+                }
+                
+                try {
+                    // Execute code using J wrapped functions
+                    jsetstr('CODE_jrx_', code);
+                    let result = jdo1("(0!:101) CODE_jrx_");
+                    
+                    // Clean up output similar to test-j-wasm.html
+                    if (result.includes("output_jrx_\n")) {
+                        let n = result.indexOf("output_jrx_\n");
+                        result = result.slice(12 + n);
+                    } else {
+                        // Fallback cleanup if the wrapper didn't work as expected
+                        result = result.replace(code, "");
+                    }
+                    
+                    // Remove leading blank lines (lines containing only whitespace)
+                    result = result.replace(/^(?:[ \t]*\r?\n)+/, '');
+                    
+                    const isError = result.trimStart().startsWith('|');
+                    return {
+                        success: !isError,
+                        output: result
+                    };
+                } catch (error) {
+                    console.error('[J] Execution error:', error);
+                    return {
+                        success: false,
+                        output: `J execution error: ${error.message || String(error)}`
+                    };
+                }
+            }
+            
+            // Expose to global scope for use in main script
+            window.jWasm = {
+                load: loadJ,
+                isReady: () => jReady,
+                getError: () => jLoadError,
+                eval: evalJ,
+                version: () => jReady ? 'j9.5' : null
+            };
+            
+            // Pre-load J when page loads
+            loadJ().catch(() => {});
+        })();
+    </script>
+
     <!-- Main application module -->
     <script type="module">
         // Import from modular files
@@ -1755,6 +1926,33 @@
                 logo: 'assets/j_logo.png',
                 fontClass: 'j',
                 evaluate: async (code) => {
+                    const startTime = performance.now();
+                    
+                    // Try WASM first if available
+                    if (window.jWasm && window.jWasm.isReady()) {
+                        try {
+                            const result = await window.jWasm.eval(code);
+                            const duration = Math.round(performance.now() - startTime);
+                            
+                            // Log to server manager (fire and forget)
+                            fetch(`${ArrayBoxConfig.getServiceUrl('log')}/log`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    language: 'j',
+                                    code: code,
+                                    success: result.success,
+                                    duration: duration
+                                })
+                            }).catch(() => {});
+                            
+                            return result;
+                        } catch (error) {
+                            console.warn('[J] WASM execution failed, trying server fallback:', error);
+                        }
+                    }
+                    
+                    // Fall back to server-based execution
                     try {
                         // Connect to J server
                         const response = await fetch(`${ArrayBoxConfig.getServiceUrl('j')}/eval`, {
@@ -1776,6 +1974,16 @@
                         };
                     } catch (error) {
                         if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                            // If both WASM and server failed, show helpful message
+                            if (window.jWasm) {
+                                return window.jWasm.isReady() ? {
+                                    success: false,
+                                    output: error.message || String(error)
+                                } : {
+                                    success: false,
+                                    output: `J WASM is loading or unavailable, and cannot connect to J server.\n\nWASM error: ${window.jWasm.getError()?.message || 'Unknown'}\n\nServer: ${ArrayBoxConfig.getServiceUrl('j')}`
+                                };
+                            }
                             return { 
                                 success: false, 
                                 output: `Cannot connect to J server at ${ArrayBoxConfig.getServiceUrl('j')}. Please make sure the backend is running.` 
