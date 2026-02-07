@@ -2476,9 +2476,9 @@
                 // Update URL with hash (for local navigation)
                 history.replaceState(null, '', '#' + shortCode);
                 
-                // Copy shareable URL with /p/ path (works with social media previews)
+                // Copy shareable URL with hash format
                 const baseUrl = window.location.origin;
-                const shareUrl = `${baseUrl}/p/${shortCode}`;
+                const shareUrl = `${baseUrl}/#${shortCode}`;
                 navigator.clipboard.writeText(shareUrl).then(() => {
                     // Show brief feedback
                     showPermalinkFeedback(shortCode);
