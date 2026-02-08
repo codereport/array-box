@@ -109,18 +109,18 @@ const servers = {
         executable: 'WASM'
     },
     kap: {
-        name: 'Kap Server',
-        script: 'kap-server.cjs',
-        port: 8083,
+        name: 'Kap (client)',
+        script: null,  // Runs in browser via Kotlin/JS
+        port: null,
         color: ansi.blue,
         symbol: 'KAP',
         process: null,
-        status: 'stopped',
+        status: 'browser',  // Always running in browser
         requests: 0,
         errors: 0,
         lastRequest: null,
         startTime: null,
-        executable: null
+        executable: 'Kotlin/JS'
     },
     apl: {
         name: 'APL Server',
@@ -653,40 +653,7 @@ async function main() {
     aplProc.stderr.on('data', () => {});
     aplProc.on('close', () => { servers.apl.status = 'stopped'; servers.apl.process = null; renderDashboard(); });
     
-    // Start Kap server
-    const kapInternalPort = 8183;
-    const kapExternalPort = 8083;
-    servers.kap.port = kapExternalPort;
-    const kapScriptPath = path.join(__dirname, 'kap-server.cjs');
-    const kapArgs = [kapScriptPath, String(kapInternalPort)];
-    if (SANDBOX_MODE) kapArgs.push('--sandbox');
-    const kapProc = spawn('node', kapArgs, {
-        stdio: ['ignore', 'pipe', 'pipe'],
-        cwd: __dirname
-    });
-    servers.kap.process = kapProc;
-    servers.kap.status = 'starting';
-    
-    kapProc.stdout.on('data', (data) => {
-        const text = data.toString();
-        const execMatch = text.match(/Using Kap executable: (.+)/);
-        if (execMatch) servers.kap.executable = execMatch[1].trim();
-        
-        const portMatch = text.match(/Server running on http:\/\/localhost:(\d+)/);
-        if (portMatch) {
-            servers.kap.actualPort = parseInt(portMatch[1]);
-            servers.kap.status = 'running';
-            servers.kap.startTime = Date.now();
-            
-            // Create Kap proxy immediately when server is ready
-            if (!servers.kap.proxyActive && !servers.kap.proxyError) {
-                createLoggerProxy('kap', kapInternalPort, kapExternalPort);
-            }
-            renderDashboard();
-        }
-    });
-    kapProc.stderr.on('data', () => {});
-    kapProc.on('close', () => { servers.kap.status = 'stopped'; servers.kap.process = null; renderDashboard(); });
+    // Kap is client-side only (Kotlin/JS) - no server to start
     
     // Start Permalink server
     const permalinkPort = 8084;

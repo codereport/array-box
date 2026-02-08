@@ -1,0 +1,21 @@
+namespace("time")
+
+∇ measureTimeInternal (fn) {
+  startTime ← time:timeMillis 0
+  result ← ⍞fn 0
+  endTime ← time:timeMillis 0
+  io:println "Total time: ",(⍕(endTime - startTime)÷1000.0)
+  result
+}
+
+⍝ This name is kept for now, in case it's in use
+defsyntax measureTime (:nfunction fn) {
+  measureTimeInternal fn
+}
+
+defsyntax runtime (:nfunction fn) {
+  measureTimeInternal fn
+}
+
+declare(:export measureTime)
+declare(:export runtime)

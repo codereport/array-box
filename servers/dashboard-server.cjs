@@ -679,10 +679,6 @@ const dashboardHTML = `<!DOCTYPE html>
                     <span class="srv-dot"></span>
                     <span>APL</span>
                 </div>
-                <div class="server-indicator" id="srv-kap" title="Kap Server (port 8083)">
-                    <span class="srv-dot"></span>
-                    <span>Kap</span>
-                </div>
                 <div class="server-indicator" id="srv-permalink" title="Permalink Server (port 8084)">
                     <span class="srv-dot"></span>
                     <span>Link</span>
@@ -1343,7 +1339,7 @@ const dashboardHTML = `<!DOCTYPE html>
                 })
                 .catch(() => {
                     // If we can't reach the dashboard server itself, mark all as unknown
-                    for (const key of ['apl', 'kap', 'permalink']) {
+                    for (const key of ['apl', 'permalink']) {
                         const el = document.getElementById('srv-' + key);
                         if (el) {
                             el.className = 'server-indicator';
@@ -1664,7 +1660,6 @@ const server = http.createServer((req, res) => {
     if (req.method === 'GET' && req.url === '/servers') {
         const serverChecks = [
             { name: 'APL', key: 'apl', port: 8081 },
-            { name: 'Kap', key: 'kap', port: 8083 },
             { name: 'Permalink', key: 'permalink', port: 8084 }
         ];
         

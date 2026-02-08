@@ -1,0 +1,11 @@
+namespace("man")
+
+fhelpFn ← null
+fhelpCmd ⇐ {
+    if (null≡fhelpFn) {
+        fhelpFn ← io:load int:resolveLibFile "fhelp-impl.kap"
+    }
+    ⍞fhelpFn ⍵
+}
+
+int:registerCmd⟦"man"; "Help for a specific function"; λfhelpCmd⟧

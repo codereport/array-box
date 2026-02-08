@@ -1,0 +1,18 @@
+namespace("kap")
+ 	
+∇ (keys) ⌸ (values) {
+	a ← ∪keys
+	a ,[0.5] {values /⍨ keys≡¨⊂⍵}¨ a
+}
+
+declare(:export ⌸)
+
+⎕p ⇐ (⊣ io:print)
+⎕pl ⇐ (⊣ io:println)
+
+⎕A ← @A…@Z
+⎕a ← @a…@z
+⎕d ← @0…@9
+
+declare(:export (⎕p ⎕pl ⎕A ⎕a ⎕d))
+declare(:const (⎕A ⎕a ⎕d))

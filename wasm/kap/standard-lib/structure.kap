@@ -1,0 +1,26 @@
+namespace("kap")
+
+defsyntax unwindProtect (:function statement :function handler) {
+  int:unwindProtect statement handler
+}
+
+declare(:export unwindProtect)
+
+defsyntaxsub whenInner (:nexprfunction cond :nfunction thenStatement :optional (:special :newline)) {
+  cond thenStatement
+}
+
+defsyntax when (:special :openBrace :optional (:special :newline) :repeat (entryList whenInner) :special :closeBrace) {
+  i ← 0
+  n ← ≢entryList
+  cont ← 1
+  res ← ⍬
+  while(i<n and cont) {
+    (cond fn) ← ↑entryList[i]
+    (⍞cond ⍬) and (res ← ⍞fn ⍬ ⋄ cont ← 0)
+    i ← 1+i
+  }
+  res
+}
+
+declare(:export when)

@@ -1,0 +1,28 @@
+namespace ("s")
+
+cols ⇐ { ⍉(⊂⍺ ⍳⍨ labels ⍵) ⌷ ⍉⍵ }
+col ⇐ ⊂⍛cols
+
+declare(:export (cols col))
+
+defsyntax filter (:value arg :function fn) {
+  declare (:local a)
+  if (1 ≠ ≢⍴arg) {
+    throw "Argument to filter is not a 1-dimensional array."
+  }
+  arg ← arg
+  ((toBoolean ⍞fn)¨ arg) / arg
+}
+
+declare(:export filter)
+
+trimLeft ⇐ (1⍳⍨@\s≠)⍛↓
+trimRight ⇐ trimLeft⍢⌽
+trim ⇐ trimRight trimLeft
+declare(:export (trimLeft trimRight trim))
+
+∇ x (fn replaceAt) y {
+  x % y (⍞fn¨ y)
+}
+
+declare(:export replaceAt)

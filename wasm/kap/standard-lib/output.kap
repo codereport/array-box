@@ -1,0 +1,118 @@
+namespace("output")
+
+∇ isArray (v) {
+  (typeof v) ≡ 'array
+}
+
+∇ isChar (v) {
+  (typeof v) ≡ 'char
+}
+
+∇ isAplString (v) {
+  if (1≢≢⍴v) { →0 }
+  ~0∊'char=typeof¨v
+}
+
+⍝ Convert a plain 1D string to a grapheme array
+∇ stringToGraphemes (s) {
+  {1 (↑⍴⍵) ⍴ ⍵} unicode:toGraphemes s
+}
+
+⍝ Return a grapheme array representing the given char
+∇ renderChar (v) {
+  stringToGraphemes ⊃ (@\s @\n @\r @\0 ⍳ v) ⌷ "@\\s" "@\\n" "@\\r" "@\\0" (@@,⍕v)
+}
+
+∇ renderString (v) {
+  stringToGraphemes @",v,@"
+}
+
+∇ wrapBox2 (strlist ; chars) {
+  (lt rt lb rb horiz vert horizArrow vertArrow) ← chars
+  (h w) ← ⍴ strlist
+  top ← lt , horizArrow , ((w-1) ⍴ horiz) , rt
+  bottom ← lb , (w ⍴ @─) , rb
+  leftSide ← ⍪ vertArrow , ((h-1) ⍴ vert)
+  rightSide ← ⍪ (h ⍴ vert)
+  {top,[0]⍵,[0]bottom} leftSide , strlist , rightSide
+}
+
+∇ wrapBox3 (strlist ; chars) {
+  (lt rt lb rb horiz vert horizArrow vertArrow) ← chars
+  s2 ← {¯1 (⊃¯1↑⍴⍵) ⍴ ⍵} strlist
+  (h w) ← ⍴ s2
+  top ← lt , horizArrow , ((w-1) ⍴ horiz) , rt
+  bottom ← lb , (w ⍴ @─) , rb
+  leftSide ← ⍪ vertArrow , ((h-1) ⍴ vert)
+  rightSide ← ⍪ (h ⍴ vert)
+  {top,[0]⍵,[0]bottom} leftSide , s2 , rightSide
+}
+
+∇ wrapBox (strlist ; horizSym ; vertSym) {
+  wrapBox2 (strlist ; "┌┐└┘─│" , horizSym , vertSym)
+}
+
+∇ dbg (title;data) {
+  io:println "=== begin:",title," ==="
+  io:println data
+  io:println "=== end:",title," ==="
+  data
+}
+
+∇ dbg1 (x) {
+  dbg ("Empty" ; x)
+}
+
+⍝ Given an array of grapheme arrays, return a new grapheme array where each cell is padded to
+⍝ ensure proper alignment with at least one space between each cell, and all content
+⍝ right-aligned.
+∇ render2d (v) {
+  ⍝ The width of each column is the maximum width of any cell
+  colWidths ← ⌈/[0] (↑↓⍴)¨v
+  ⍝ Pad each cell to the correct width
+  xAligned ← ((⍴v) ⍴ colWidths) {((↑⍴⍵) (⍺-↑↓⍴⍵) ⍴ @\s),⍵}¨ v
+
+  ⍝ Compute the height of each row in a similar way as the cols
+  rowHeights ← ⌈/[1] ≢¨xAligned
+  ⍝ Pad each row so that they are all the same height
+  yAligned ← (⍉ (⌽ ⍴ xAligned) ⍴ rowHeights) {⍵ ,[0] ((⍺-↑⍴⍵) (↑↓⍴⍵)) ⍴ @\s}¨ xAligned
+
+  vSeparated ← {⍺,@\s,⍵}/ yAligned
+
+⍝  wrapBox ⊃ ,[0]/ vSeparated
+  ⊃ ,[0]/ vSeparated
+}
+
+∇ render3d (v) {
+  v2d ← (¯1,↑¯1↑⍴)⍛⍴ v
+  v0 ← render2d v2d
+}
+
+∇ renderArray (v) {
+  w ← prettyPrintToChars¨ v
+  rank ← ≢⍴w
+  when {
+    (1≡rank) { wrapBox (render2d (1,≢w) ⍴ w ; "→" ; "│") }
+    (2≡rank) { wrapBox (render2d w ; "→" ; "↓") }
+    (3≡rank) { render3d v }
+    (1) { throw "No support for higher rank arrays" }
+  }
+}
+
+∇ prettyPrintToChars (v) {
+  when {
+    (isChar(v))      { renderChar v }
+    (isAplString(v)) { renderString v }
+    (isArray(v))     { renderArray v }
+    (1)              { stringToGraphemes ⍕v }
+  }
+}
+
+∇ prettyPrint (v) {
+  v←v
+  result ← prettyPrintToChars v
+  io:println¨,/result
+  0
+}
+
+declare(:export prettyPrint)

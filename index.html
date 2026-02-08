@@ -1502,6 +1502,172 @@
         })();
     </script>
 
+    <!-- Kap JS Loader -->
+    <script>
+        // Load Kap interpreter compiled from Kotlin/JS (standalonejs)
+        // Using IIFE to prevent global variable pollution
+        (function() {
+            let kapReady = false;
+            let kapLoadError = null;
+            let kapEngine = null;
+            let kapLoading = false;
+            let kapLoadPromise = null;
+            
+            async function loadKap() {
+                if (kapReady) return true;
+                if (kapLoadError) return false;
+                if (kapLoading) return kapLoadPromise;
+                
+                kapLoading = true;
+                kapLoadPromise = (async () => {
+                    try {
+                        console.log('[Kap] Starting to load JS module...');
+                        
+                        // Create an iframe that navigates to kap-loader.html
+                        // This ensures XHR requests for stdlib files resolve correctly
+                        // (relative to /wasm/kap/ where standard-lib/ lives)
+                        const iframe = document.createElement('iframe');
+                        iframe.style.display = 'none';
+                        
+                        return new Promise((resolve, reject) => {
+                            // Set a timeout for loading
+                            const timeout = setTimeout(() => {
+                                console.error('[Kap] Loading timed out after 60s');
+                                kapLoadError = new Error('Kap JS loading timed out');
+                                kapLoading = false;
+                                reject(kapLoadError);
+                            }, 60000);
+                            
+                            // Set onload BEFORE setting src and appending
+                            iframe.onload = function() {
+                                // Skip the initial about:blank load — standalonejs
+                                // won't exist until kap-loader.html has loaded the script
+                                const kapApi = iframe.contentWindow.standalonejs;
+                                if (!kapApi) return;
+                                
+                                try {
+                                    // Webpack production build flattens exports directly onto the module
+                                    const createEngine = kapApi.createEngine;
+                                    if (!createEngine) {
+                                        throw new Error('createEngine not found on Kap module. Available keys: ' + Object.keys(kapApi).join(', '));
+                                    }
+                                    console.log('[Kap] Script loaded, creating engine (loading stdlib)...');
+                                    
+                                    createEngine().then(function(engine) {
+                                        clearTimeout(timeout);
+                                        kapEngine = engine;
+                                        kapReady = true;
+                                        kapLoading = false;
+                                        console.log('[Kap] Engine ready!');
+                                        resolve(true);
+                                    }).catch(function(err) {
+                                        clearTimeout(timeout);
+                                        console.error('[Kap] Engine creation failed:', err);
+                                        kapLoadError = err;
+                                        kapLoading = false;
+                                        reject(err);
+                                    });
+                                } catch (error) {
+                                    clearTimeout(timeout);
+                                    console.error('[Kap] Error accessing Kap API:', error);
+                                    kapLoadError = error;
+                                    kapLoading = false;
+                                    reject(error);
+                                }
+                            };
+                            
+                            iframe.onerror = function(e) {
+                                clearTimeout(timeout);
+                                console.error('[Kap] Failed to load iframe:', e);
+                                kapLoadError = new Error('Failed to load Kap JS iframe');
+                                kapLoading = false;
+                                reject(kapLoadError);
+                            };
+                            
+                            // Navigate the iframe to kap-loader.html
+                            // (set src before appending to avoid about:blank onload race)
+                            iframe.src = '/wasm/kap/kap-loader.html';
+                            document.body.appendChild(iframe);
+                        });
+                    } catch (error) {
+                        console.error('[Kap] JS loading failed:', error);
+                        kapLoadError = error;
+                        kapLoading = false;
+                        return false;
+                    }
+                })();
+                
+                return kapLoadPromise;
+            }
+            
+            async function evalKap(code) {
+                if (!kapReady) {
+                    // Try to load if not started
+                    if (!kapLoading && !kapLoadError) {
+                        loadKap().catch(() => {});
+                    }
+                    
+                    if (kapLoadError) {
+                        return {
+                            success: false,
+                            output: `Kap JS failed to load: ${kapLoadError.message}\n\nCheck browser console (F12) for details.`
+                        };
+                    }
+                    
+                    // Wait for loading to complete
+                    const startWait = Date.now();
+                    const maxWait = 30000; // 30 second timeout (stdlib loading can take a moment)
+                    
+                    while (!kapReady && !kapLoadError && (Date.now() - startWait) < maxWait) {
+                        await new Promise(r => setTimeout(r, 100));
+                    }
+                    
+                    if (!kapReady) {
+                        if (kapLoadError) {
+                            return {
+                                success: false,
+                                output: `Kap JS failed to load: ${kapLoadError.message}`
+                            };
+                        }
+                        return {
+                            success: false,
+                            output: 'Kap JS is still loading...'
+                        };
+                    }
+                }
+                
+                try {
+                    const result = kapEngine.parseAndEvalWithFormat(code);
+                    // result.text is an Array<String> of formatted output lines
+                    // result.result is a JsKapValue
+                    const output = result.text.join('\n');
+                    return {
+                        success: true,
+                        output: output
+                    };
+                } catch (error) {
+                    // Kap throws exceptions for parse/eval errors
+                    const errorMsg = error.message || String(error);
+                    return {
+                        success: false,
+                        output: errorMsg
+                    };
+                }
+            }
+            
+            // Expose to global scope for use in main script
+            window.kapJs = {
+                load: loadKap,
+                isReady: () => kapReady,
+                getError: () => kapLoadError,
+                eval: evalKap
+            };
+            
+            // Pre-load Kap when page loads
+            loadKap().catch(() => {});
+        })();
+    </script>
+
     <!-- Main application module -->
     <script type="module">
         // Import from modular files
@@ -2039,35 +2205,48 @@
                 logo: 'assets/kap.png',
                 fontClass: 'kap',
                 evaluate: async (code) => {
-                    try {
-                        // Connect to Kap server
-                        const response = await fetch(`${ArrayBoxConfig.getServiceUrl('kap')}/eval`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ code: code })
-                        });
-                        
-                        if (!response.ok) {
-                            throw new Error(`Server error: ${response.status}`);
-                        }
-                        
-                        const data = await response.json();
-                        return { 
-                            success: data.success !== false, 
-                            output: data.output || data.result || data.error || '' 
-                        };
-                    } catch (error) {
-                        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                    const startTime = performance.now();
+                    
+                    // Check if Kap JS is available
+                    if (!window.kapJs || !window.kapJs.isReady()) {
+                        if (window.kapJs) {
+                            const loaded = await window.kapJs.load();
+                            if (!loaded) {
+                                const error = window.kapJs.getError();
+                                return { 
+                                    success: false, 
+                                    output: `Failed to load Kap JS: ${error?.message || 'Unknown error'}\n\nCheck browser console (F12) for details.`
+                                };
+                            }
+                        } else {
                             return { 
                                 success: false, 
-                                output: `Cannot connect to Kap server at ${ArrayBoxConfig.getServiceUrl('kap')}. Please make sure the backend is running.` 
+                                output: 'Kap JS module not available.\n\nThe Kap interpreter requires the client-side JS build.'
                             };
                         }
+                    }
+                    
+                    try {
+                        const result = await window.kapJs.eval(code);
+                        const duration = Math.round(performance.now() - startTime);
+                        
+                        // Log to server manager (fire and forget)
+                        fetch(`${ArrayBoxConfig.getServiceUrl('log')}/log`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                language: 'kap',
+                                code: code,
+                                success: result.success,
+                                duration: duration
+                            })
+                        }).catch(() => {});
+                        
+                        return result;
+                    } catch (error) {
                         return { 
                             success: false, 
-                            output: error.message || String(error) 
+                            output: `Kap execution error: ${error.message || String(error)}`
                         };
                     }
                 }

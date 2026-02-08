@@ -1,0 +1,13 @@
+namespace("math")
+
+use("math-kap.kap")
+
+pi ← 3.14159265358979323846
+declare(:const pi)
+declare(:export pi)
+
+inf ← ÷0.0
+ninf ← -inf
+nan ← inf÷inf
+declare(:const (inf ninf nan))
+declare(:export (inf ninf nan))

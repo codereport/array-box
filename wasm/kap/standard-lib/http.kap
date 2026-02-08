@@ -1,0 +1,26 @@
+namespace("http")
+
+import("io")
+
+∇ urlEscape (s) {
+  enc ⇐ { ,/ (@=,2 toHex)¨ encodeUtf8 ⍵ }
+  validChars ← "_-" , (@a+⍳26) , (@A+⍳26) , (@0+⍳10)
+  ,/ (s∊validChars) % (enc¨ s) s
+}
+
+declare(:export urlEscape)
+
+∇ mkParams (content) {
+  ((≢⍴content)≠2 or (↑↓⍴content)≠2) and throw "Form data has invalid dimensions"
+  ,/¯1↓,((⊂"="),(⊂"&"),urlEscape¨ content)[;2 0 3 1]
+}
+
+declare(:export mkParams)
+
+∇ getJSON (url) {
+  (code;data;headers) ← get url
+  code=200 or throw "HTTP error: ",⍕code
+  json:readString data
+}
+
+declare(:export getJSON)

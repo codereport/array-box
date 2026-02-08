@@ -1,0 +1,103 @@
+⍝ Implementation here:
+⍝ https://gitlab.com/n9n/apl/-/commit/af428f5713b2ddd5c928806168316b6fb3b79132
+
+namespace("kap")
+
+∇ norm (B) {
+  (B +∙× +B) * 0.5
+}
+
+∇ QR (B) {
+  n ← (⍴B)[1]
+  if (n ≤ 1) {
+    t ← norm ,B
+    (B÷t) (⍪t)
+  } else {
+    m ← ⌈n÷2
+    a0 ← ((1↑⍴B),m) ↑ B
+    a1 ← (0,m) ↓ B
+    (q0 r0) ← QR a0
+    c ← (+⍉q0) +∙× a1
+    (q1 r1) ← QR a1 - q0 +∙× c
+    (q0,q1) ((r0,c) ⍪ ((⌊n÷2),-n) ↑ r1)
+  }
+}
+
+∇ Rinv (B) {
+  n ← ↑⍴B
+  if (n = 1) {
+    ÷B
+  } else {
+    m ← ⌈n÷2
+    ai ← Rinv (m,m)↑B
+    di ← Rinv (m,m)↓B
+    b ← (m,m-n)↑B
+    bx ← -ai +∙× b +∙× di
+    (ai,bx) ⍪ ((⌊n÷2),-n) ↑ di
+  }
+}
+
+
+∇ (A) ⌹ (B) {
+  if (isLocallyBound('A)) {
+    (⌹B) +∙× A
+  } else {
+    rankB ← ↑⍴⍴B
+    if (0 = rankB) {
+      ÷B
+    } else {
+      if (1 = rankB) {
+        ,⌹⍪B
+      } else {
+        if ((2 ≠ rankB) or (0∊≥/⍴B)) {
+          throw "error"
+        }
+        (Q R) ← QR B
+        (Rinv R) +∙× +⍉Q
+      }
+    }
+  }
+}
+
+declare(:export ⌹)
+
+∇ (A) ⊥ (B) {
+  1≥≢⍴A or 'kap:InvalidDimensionsException int:throwNative "Left argument must have rank 0 or 1"
+  +⌿ (×⍀ ¯1↓1⍪(0×B) (+⍤¯1) ⌽A) × ⊖B
+}
+
+declare(:export ⊥)
+
+∇ (A) scalarEncode (B) {
+  B≥0 or 'kap:IllegalArgumentException int:throwNative "B must be positive"
+  res ← (0,⍴B)⍴B
+  while (∨/,0≠B) {
+    div←⌊B÷A
+    rem←B-div×A
+    res←rem⍪res
+    B←div
+  }
+  res
+}
+
+∇ (A) vectorEncode (B) {
+  res ← (0,⍴B)⍴B
+  while (0≠≢A) {
+    div←⌊B÷↑A
+    rem←B-div×↑A
+    res←rem⍪res
+    A←↓A
+    B←div
+  }
+  res
+}
+
+∇ (A) ⊤ (B) {
+  if (⍬≡⍴A) {
+    A scalarEncode B
+  } else {
+    (⌽A) vectorEncode B
+  }
+}
+
+declare(:export ⊤)

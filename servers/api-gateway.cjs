@@ -9,7 +9,6 @@
  *   /api/j/*     -> J server (8080)
  *   /api/apl/*   -> APL server (8081)
  *   /api/log/*   -> Log server (8082)
- *   /api/kap/*   -> Kap server (8083)
  *   /api/p/*     -> Permalink server (8084)
  *   /api/image/* -> OG image server (8084)
  * 
@@ -29,7 +28,6 @@ const SERVICES = {
     j: { port: 8080, path: '/api/j' },
     apl: { port: 8081, path: '/api/apl' },
     log: { port: 8082, path: '/api/log' },
-    kap: { port: 8083, path: '/api/kap' },
     permalink: { port: 8084, path: '/api/p' },
     image: { port: 8084, path: '/api/image' }
 };
@@ -142,13 +140,6 @@ function routeRequest(req, res) {
         return;
     }
     
-    // Kap server: /api/kap/eval -> localhost:8083/eval
-    if (pathname.startsWith('/api/kap/')) {
-        const targetPath = pathname.replace('/api/kap', '') + (parsedUrl.search || '');
-        proxyRequest(req, res, SERVICES.kap.port, targetPath || '/');
-        return;
-    }
-    
     // Permalink server: /api/p/* -> localhost:8084/p/*
     if (pathname.startsWith('/api/p')) {
         // Keep /p in the path for permalink server
@@ -169,7 +160,7 @@ function routeRequest(req, res) {
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ 
         error: 'Not found',
-        hint: 'Available routes: /api/j/*, /api/apl/*, /api/kap/*, /api/log/*, /api/p/*, /api/image/*'
+        hint: 'Available routes: /api/j/*, /api/apl/*, /api/log/*, /api/p/*, /api/image/*'
     }));
 }
 
@@ -187,7 +178,6 @@ server.listen(GATEWAY_PORT, '0.0.0.0', () => {
 ║  Routes:                                                      ║
 ║    /api/j/*     -> J server (${SERVICES.j.port})                          ║
 ║    /api/apl/*   -> APL server (${SERVICES.apl.port})                        ║
-║    /api/kap/*   -> Kap server (${SERVICES.kap.port})                        ║
 ║    /api/log/*   -> Log server (${SERVICES.log.port})                        ║
 ║    /api/p/*     -> Permalink server (${SERVICES.permalink.port})                    ║
 ║    /api/image/* -> OG image generator (${SERVICES.image.port})                  ║
