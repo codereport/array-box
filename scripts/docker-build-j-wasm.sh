@@ -1,6 +1,6 @@
 #!/bin/bash
 # Inner build script - runs INSIDE the emscripten Docker container
-# Builds J 9.6 as WebAssembly with Emscripten
+# Builds J (latest from jsource master) as WebAssembly with Emscripten
 #
 # Uses jsource's own build system (make2/build_libj.sh) which already
 # has a wasm/j32 target that handles all the right flags.
@@ -15,7 +15,7 @@ mkdir -p "$WORK" "$OUTPUT"
 cd "$WORK"
 
 echo "============================================"
-echo "  Building J 9.6 WASM with Emscripten"
+echo "  Building J WASM with Emscripten"
 echo "  Using $NPROC cores"
 echo "============================================"
 echo ""
@@ -25,7 +25,7 @@ echo ""
 # ============================================================
 echo "=== Step 1: Cloning jsource 9.6.2 ==="
 if [ ! -d jsource ]; then
-    git clone --depth 1 --branch 9.6.2 https://github.com/jsoftware/jsource.git
+    git clone --depth 1 --branch master https://github.com/jsoftware/jsource.git
 fi
 cd "$WORK/jsource"
 echo "J source ready at $(pwd)"
