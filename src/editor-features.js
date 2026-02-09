@@ -31,6 +31,41 @@ export const commentTokens = {
 };
 
 /**
+ * Count net brace depth change for a line (outside of strings)
+ * Returns positive for net opening braces, negative for net closing
+ * Used to detect multiline function bodies and skip alignment inside them
+ * @param {string} line - The line to analyze
+ * @returns {number} - Net brace depth change
+ */
+function countNetBraces(line) {
+    let depth = 0;
+    let inString = false;
+    let stringChar = null;
+    
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        
+        // Track string state
+        if ((char === '"' || char === "'") && (i === 0 || line[i-1] !== '\\')) {
+            if (!inString) {
+                inString = true;
+                stringChar = char;
+            } else if (char === stringChar) {
+                inString = false;
+                stringChar = null;
+            }
+        }
+        
+        if (!inString) {
+            if (char === '{') depth++;
+            else if (char === '}') depth--;
+        }
+    }
+    
+    return depth;
+}
+
+/**
  * Find the position of an assignment operator in a line
  * @param {string} line - The line to search
  * @param {string} language - The language identifier
@@ -137,9 +172,11 @@ export function alignAssignments(text, language) {
     // Find assignment positions for all lines
     const assignments = lines.map(line => findAssignmentOperator(line, language));
     
-    // Group consecutive lines (empty lines start a new group)
+    // Group consecutive lines (empty lines break groups, brace depth changes break groups
+    // so assignments inside multiline functions align independently from outer ones)
     const groups = [];
     let currentGroup = [];
+    let braceDepth = 0;
     
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
@@ -154,7 +191,19 @@ export function alignAssignments(text, language) {
             // Add empty line as its own "group" to preserve it
             groups.push([{ index: i, isEmpty: true }]);
         } else {
-            currentGroup.push({ index: i, isEmpty: false });
+            const prevDepth = braceDepth;
+            braceDepth += countNetBraces(line);
+            
+            if (prevDepth !== braceDepth) {
+                // Brace depth changed — this line opens or closes a block.
+                // Add it to the current group, then break the group so
+                // inner/outer assignments are aligned independently.
+                currentGroup.push({ index: i, isEmpty: false });
+                groups.push(currentGroup);
+                currentGroup = [];
+            } else {
+                currentGroup.push({ index: i, isEmpty: false });
+            }
         }
     }
     // Don't forget the last group
@@ -230,9 +279,11 @@ export function alignComments(text, language) {
     // Find comment positions
     const commentPositions = lines.map(line => findCommentStart(line, language));
     
-    // Group consecutive lines (empty lines start a new group)
+    // Group consecutive lines (empty lines break groups, brace depth changes break groups
+    // so comments inside multiline functions align independently from outer ones)
     const groups = [];
     let currentGroup = [];
+    let braceDepth = 0;
     
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
@@ -245,7 +296,16 @@ export function alignComments(text, language) {
             }
             groups.push([{ index: i, isEmpty: true }]);
         } else {
-            currentGroup.push({ index: i, isEmpty: false });
+            const prevDepth = braceDepth;
+            braceDepth += countNetBraces(line);
+            
+            if (prevDepth !== braceDepth) {
+                currentGroup.push({ index: i, isEmpty: false });
+                groups.push(currentGroup);
+                currentGroup = [];
+            } else {
+                currentGroup.push({ index: i, isEmpty: false });
+            }
         }
     }
     if (currentGroup.length > 0) {
