@@ -1362,11 +1362,23 @@
                         iframe.style.display = 'none';
                         document.body.appendChild(iframe);
                         
+                        // Absolute base URL so fetches resolve correctly from the iframe
+                        const wasmBaseUrl = new URL('/wasm/j/', window.location.href).href;
+                        
+                        // Use document.open/write/close to claim the iframe document.
+                        // Firefox asynchronously replaces the initial about:blank document,
+                        // which would wipe out any injected scripts. Writing explicitly
+                        // prevents that replacement.
+                        const iframeDoc = iframe.contentWindow.document;
+                        iframeDoc.open();
+                        iframeDoc.write('<!DOCTYPE html><html><head></head><body></body></html>');
+                        iframeDoc.close();
+                        
                         return new Promise((resolve, reject) => {
                             // Setup Module config in the iframe
                             iframe.contentWindow.Module = {
                                 locateFile: function(path, prefix) {
-                                    return '/wasm/j/' + path;
+                                    return wasmBaseUrl + path;
                                 },
                                 onRuntimeInitialized: function() {
                                     try {
@@ -1399,9 +1411,9 @@
                                 printErr: function(text) { console.warn('[J]', text); }
                             };
                             
-                            // Load the script
-                            const script = iframe.contentDocument.createElement('script');
-                            script.src = '/wasm/j/emj.js';
+                            // Load the script with absolute URL
+                            const script = iframeDoc.createElement('script');
+                            script.src = wasmBaseUrl + 'emj.js';
                             script.onerror = function(e) {
                                 console.error('[J] Failed to load emj.js:', e);
                                 jLoadError = new Error('Failed to load J WASM script');
@@ -1409,7 +1421,7 @@
                                 reject(jLoadError);
                             };
                             
-                            iframe.contentDocument.head.appendChild(script);
+                            iframeDoc.head.appendChild(script);
                         });
                     } catch (error) {
                         console.error('[J] WASM loading failed:', error);
