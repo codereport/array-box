@@ -661,8 +661,23 @@ async function executeWithWarmContainer(language, code, options = {}) {
                     
                     result = lines.join('\n').trim();
                 } else if (language === 'j') {
-                    // Remove input echo and exit command
+                    // Remove NB. comments
                     result = result.replace(/\s*NB\..*$/gm, '').trim();
+                    
+                    // Remove echoed input lines
+                    // J's jconsole echoes each input line with leading whitespace
+                    const codeLines = new Set(code.split('\n').map(l => l.trim()).filter(l => l));
+                    let lines = result.split('\n');
+                    lines = lines.filter(line => {
+                        const trimmed = line.trim();
+                        if (trimmed === '') return false;
+                        // J echoes input lines with leading spaces - remove them
+                        if (codeLines.has(trimmed)) return false;
+                        // Also remove the echo/clear commands we injected
+                        if (trimmed.startsWith("echo '") || trimmed === "clear''") return false;
+                        return true;
+                    });
+                    result = lines.join('\n').trim();
                     
                     // Check for J errors (format: |error type)
                     const J_ERROR_REGEX = /^\|(?:domain|syntax|value|index|rank|length|limit|control|stack|nonce|spelling|open|locative|interface|assertion|parse|locale) error/im;
@@ -977,6 +992,23 @@ function executeInSandbox(language, code, options = {}) {
                         exitCode
                     });
                     return;
+                }
+                
+                if (language === 'j') {
+                    // Remove echoed input lines
+                    // J's jconsole echoes each input line with leading whitespace
+                    const codeLines = new Set(code.split('\n').map(l => l.trim()).filter(l => l));
+                    let lines = output.split('\n');
+                    lines = lines.filter(line => {
+                        const trimmed = line.trim();
+                        if (trimmed === '') return false;
+                        // J echoes input lines with leading spaces - remove them
+                        if (codeLines.has(trimmed)) return false;
+                        // Also remove the exit command we injected
+                        if (trimmed === 'exit 0') return false;
+                        return true;
+                    });
+                    output = lines.join('\n').trim();
                 }
                 
                 if (language === 'apl') {

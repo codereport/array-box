@@ -1475,14 +1475,24 @@
                     jsetstr('CODE_jrx_', code);
                     let result = jdo1("(0!:101) CODE_jrx_");
                     
-                    // Clean up output similar to test-j-wasm.html
+                    // Clean up output: remove echoed input lines
+                    // J's (0!:101) echoes each input line with leading whitespace
                     if (result.includes("output_jrx_\n")) {
                         let n = result.indexOf("output_jrx_\n");
                         result = result.slice(12 + n);
-                    } else {
-                        // Fallback cleanup if the wrapper didn't work as expected
-                        result = result.replace(code, "");
                     }
+                    
+                    // Build set of trimmed code lines to identify echoed input
+                    const codeLines = new Set(code.split('\n').map(l => l.trim()).filter(l => l));
+                    let lines = result.split('\n');
+                    lines = lines.filter(line => {
+                        const trimmed = line.trim();
+                        if (trimmed === '') return false;
+                        // J echoes input lines with leading spaces - remove them
+                        if (codeLines.has(trimmed)) return false;
+                        return true;
+                    });
+                    result = lines.join('\n').trim();
                     
                     // Remove leading blank lines (lines containing only whitespace)
                     result = result.replace(/^(?:[ \t]*\r?\n)+/, '');
