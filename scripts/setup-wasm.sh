@@ -4,12 +4,13 @@
 # Usage: ./scripts/setup-wasm.sh
 #
 # This script sets up WASM modules for browser-based execution of:
+#   - BQN (CBQN compiled to WASM, requires Docker)
 #   - Uiua (built from source, requires Rust + wasm-pack)
 #   - TinyAPL (downloaded from GitHub)
 #   - J (downloaded from J Playground)
 #
 # After running this, the following should work in index.html:
-#   - BQN (uses CDN, always works)
+#   - BQN (uses local CBQN WASM)
 #   - Uiua (uses local WASM)
 #   - TinyAPL (uses local WASM)
 #   - J (uses local WASM)
@@ -19,6 +20,11 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "Setting up WASM modules for Array Box..."
+echo ""
+
+# BQN (CBQN) - build from source
+echo "=== BQN (CBQN) WASM ==="
+"$SCRIPT_DIR/build-cbqn-wasm.sh"
 echo ""
 
 # TinyAPL - download pre-built files

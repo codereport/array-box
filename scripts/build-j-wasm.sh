@@ -1,7 +1,7 @@
 #!/bin/bash
 # Build J WASM module for Array Box
 #
-# Usage: ./scripts/build-j96-wasm.sh
+# Usage: ./scripts/build-j-wasm.sh
 #
 # Prerequisites: Docker
 #

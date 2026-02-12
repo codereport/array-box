@@ -905,7 +905,7 @@
                 <div class="dropdown-item" data-lang="bqn">
                     <img src="assets/bqn.svg" alt="BQN">
                     <span class="lang-name">BQN</span>
-                    <span class="lang-version">bqn.js</span>
+                    <span class="lang-version">CBQN 0.11</span>
                 </div>
                 <div class="dropdown-item" data-lang="uiua">
                     <img src="assets/uiua.png" alt="Uiua">
@@ -1080,8 +1080,210 @@
         <a href="https://github.com/codereport/array-box/issues" target="_blank" class="bug-report">Report 🐞</a>
     </div>
 
-    <!-- BQN JavaScript implementation -->
-    <script src="https://cdn.jsdelivr.net/gh/mlochbaum/BQN@master/docs/bqn.js"></script>
+    <!-- CBQN WASM Loader -->
+    <script>
+        // Load CBQN WASM module (compiled from dzaima/CBQN with Emscripten)
+        // Uses cbqn_runLine for error handling and captures stdout/stderr output.
+        // Same iframe + Module pattern as J loader.
+        // Using IIFE to prevent global variable pollution
+        (function() {
+            let bqnReady = false;
+            let bqnLoadError = null;
+            let bqnLoading = false;
+            let bqnLoadPromise = null;
+            let bqnModule = null;
+            
+            // CBQN wrapped C functions
+            let cbqn_runLine = null;  // cbqn_runLine(char*, i64) - with error catching
+            
+            // Output capture buffers
+            let stdoutBuf = '';
+            let stderrBuf = '';
+            
+            async function loadBQN() {
+                if (bqnReady) return true;
+                if (bqnLoadError) return false;
+                if (bqnLoading) return bqnLoadPromise;
+                
+                bqnLoading = true;
+                bqnLoadPromise = (async () => {
+                    try {
+                        console.log('[BQN] Starting to load CBQN WASM module...');
+                        
+                        // Create an iframe to load cbqn.js in isolation
+                        const iframe = document.createElement('iframe');
+                        iframe.style.display = 'none';
+                        document.body.appendChild(iframe);
+                        
+                        // Absolute base URL so WASM fetches resolve correctly from the iframe
+                        const wasmBaseUrl = new URL('/wasm/bqn/', window.location.href).href;
+                        console.log('[BQN] WASM base URL:', wasmBaseUrl);
+                        
+                        // Use document.open/write/close to claim the iframe document.
+                        // Firefox asynchronously replaces the initial about:blank document,
+                        // which would wipe out any injected scripts. Writing explicitly
+                        // prevents that replacement.
+                        const iframeDoc = iframe.contentWindow.document;
+                        iframeDoc.open();
+                        iframeDoc.write('<!DOCTYPE html><html><head></head><body></body></html>');
+                        iframeDoc.close();
+                        
+                        return new Promise((resolve, reject) => {
+                            // Setup Module config in the iframe BEFORE loading the script
+                            // (same pattern as J loader)
+                            iframe.contentWindow.Module = {
+                                locateFile: function(path, prefix) {
+                                    return wasmBaseUrl + path;
+                                },
+                                onRuntimeInitialized: function() {
+                                    try {
+                                        console.log('[BQN] WASM runtime initialized');
+                                        const Module = iframe.contentWindow.Module;
+                                        
+                                        // Wrap C functions
+                                        cbqn_runLine = Module.cwrap('cbqn_runLine', null, ['string', 'number']);
+                                        
+                                        bqnModule = Module;
+                                        bqnReady = true;
+                                        bqnLoading = false;
+                                        console.log('[BQN] CBQN WASM loaded successfully!');
+                                        resolve(true);
+                                    } catch (error) {
+                                        console.error('[BQN] Error wrapping functions:', error);
+                                        bqnLoadError = error;
+                                        bqnLoading = false;
+                                        reject(error);
+                                    }
+                                },
+                                onAbort: function(what) {
+                                    console.error('[BQN] WASM initialization aborted:', what);
+                                    bqnLoadError = new Error(what || 'CBQN WASM initialization aborted');
+                                    bqnLoading = false;
+                                    reject(bqnLoadError);
+                                },
+                                // Capture stdout - cbqn_runLine sends formatted results here
+                                print: function(text) {
+                                    stdoutBuf += text + '\n';
+                                },
+                                // Capture stderr - cbqn_runLine sends error messages here
+                                printErr: function(text) {
+                                    stderrBuf += text + '\n';
+                                }
+                            };
+                            
+                            // Load the script with absolute URL
+                            const script = iframeDoc.createElement('script');
+                            script.src = wasmBaseUrl + 'BQN.js';
+                            script.onerror = function(e) {
+                                console.error('[BQN] Failed to load BQN.js:', e);
+                                bqnLoadError = new Error('Failed to load CBQN WASM script');
+                                bqnLoading = false;
+                                reject(bqnLoadError);
+                            };
+                            
+                            iframeDoc.head.appendChild(script);
+                        });
+                    } catch (error) {
+                        console.error('[BQN] WASM loading failed:', error);
+                        bqnLoadError = error;
+                        bqnLoading = false;
+                        return false;
+                    }
+                })();
+                
+                return bqnLoadPromise;
+            }
+            
+            async function evalBQN(code) {
+                if (!bqnReady) {
+                    if (!bqnLoading && !bqnLoadError) {
+                        loadBQN().catch(() => {});
+                    }
+                    
+                    if (bqnLoadError) {
+                        return {
+                            success: false,
+                            output: `CBQN failed to load: ${bqnLoadError.message}\n\nCheck browser console (F12) for details.`
+                        };
+                    }
+                    
+                    // Wait for loading to complete
+                    const startWait = Date.now();
+                    const maxWait = 15000; // 15 second timeout
+                    
+                    while (!bqnReady && !bqnLoadError && (Date.now() - startWait) < maxWait) {
+                        await new Promise(r => setTimeout(r, 100));
+                    }
+                    
+                    if (!bqnReady) {
+                        if (bqnLoadError) {
+                            return {
+                                success: false,
+                                output: `CBQN failed to load: ${bqnLoadError.message}`
+                            };
+                        }
+                        return {
+                            success: false,
+                            output: 'CBQN WASM loading...'
+                        };
+                    }
+                }
+                
+                // Clear output buffers
+                stdoutBuf = '';
+                stderrBuf = '';
+                
+                try {
+                    // Use cbqn_runLine which has built-in error catching via CATCH/setjmp.
+                    // It prints formatted results to stdout and errors to stderr.
+                    // cbqn_runLine expects the code string and its byte length.
+                    const encoder = new TextEncoder();
+                    const encoded = encoder.encode(code);
+                    cbqn_runLine(code, encoded.length);
+                    
+                    const stdout = stdoutBuf.replace(/\n$/, '');
+                    const stderr = stderrBuf.replace(/\n$/, '');
+                    
+                    if (stderr) {
+                        // Error output present - extract the error message
+                        // CBQN stderr format: "Error: <message>\n<stack trace>"
+                        let errMsg = stderr;
+                        // Remove the "Error: " prefix if present
+                        if (errMsg.startsWith('Error: ')) {
+                            errMsg = errMsg.slice(7);
+                        }
+                        return {
+                            success: false,
+                            output: errMsg
+                        };
+                    }
+                    
+                    return {
+                        success: true,
+                        output: stdout
+                    };
+                } catch (error) {
+                    // Shouldn't normally happen since cbqn_runLine catches errors internally
+                    let errMsg = error.message || String(error);
+                    return {
+                        success: false,
+                        output: errMsg
+                    };
+                }
+            }
+            
+            // Expose to global scope for use in main script
+            window.cbqnWasm = {
+                load: loadBQN,
+                isReady: () => bqnReady,
+                getError: () => bqnLoadError,
+                eval: evalBQN
+            };
+            
+            // Pre-load CBQN when page loads
+            loadBQN().catch(() => {});
+        })();
+    </script>
 
     <!-- Uiua WASM Loader -->
     <script type="module">
@@ -1968,105 +2170,53 @@
                 name: 'BQN',
                 logo: 'assets/bqn.svg',
                 fontClass: 'bqn',
-                evaluate: (code) => {
+                evaluate: async (code) => {
                     const startTime = performance.now();
-                    let result;
                     
-                    // Helper to check if value is a single character
-                    const isChar = (c) => typeof c === 'string' && c.length === 1;
-                    
-                    // Helper to check if value is a BQN character array (string)
-                    const isCharArray = (arr) => Array.isArray(arr) && arr.length > 0 &&
-                        arr.every(isChar);
-                    
-                    // Recursively find all character arrays (strings) in a nested structure
-                    const findCharArrays = (val) => {
-                        if (isCharArray(val)) return [val.join('')];
-                        if (Array.isArray(val)) {
-                            return val.flatMap(findCharArrays);
-                        }
-                        return [];
-                    };
-                    
-                    // Check if this looks like a BQN error (has position info + error message)
-                    const isBqnError = (val) => {
-                        if (!Array.isArray(val) || val.length < 2) return false;
-                        // BQN errors have structure like [posInfo, errorMsg] where errorMsg is char array
-                        const strings = findCharArrays(val);
-                        // If there's a string that looks like an error message, it's probably an error
-                        return strings.some(s => s.includes(':') && s.length > 5);
-                    };
-                    
-                    // Helper to format BQN output, handling character arrays as strings
-                    const formatBqnOutput = (val) => {
-                        if (typeof val === 'string') return val;
-                        if (isCharArray(val)) return val.join('');
-                        
-                        // For arrays, first try fmt() then check if result needs cleanup
-                        const fmtResult = fmt(val);
-                        const fmtStr = String(fmtResult);
-                        
-                        // If fmt output has box formatting with a quoted error message, extract it
-                        if (fmtStr.includes('┌') || fmtStr.includes('╵') || fmtStr.includes('·')) {
-                            const match = fmtStr.match(/"([^"]+)"/);
-                            if (match && match[1].includes(':')) {
-                                // It's an error message - return just the message
-                                return match[1];
-                            }
-                        }
-                        
-                        return fmtStr;
-                    };
-                    
-                    // Extract error message from BQN formatted output (box drawing)
-                    const extractFromBoxFormat = (str) => {
-                        // Look for quoted string in box format: "error message"
-                        const match = str.match(/"([^"]+)"/);
-                        if (match) return match[1];
-                        return str;
-                    };
+                    if (!window.cbqnWasm || !window.cbqnWasm.isReady()) {
+                        const error = window.cbqnWasm ? window.cbqnWasm.getError() : null;
+                        return {
+                            success: false,
+                            output: error ? `CBQN WASM failed to load: ${error.message || 'Unknown error'}` : 'CBQN WASM is still loading...'
+                        };
+                    }
                     
                     try {
-                        const output = bqn(code);
-                        result = { success: true, output: formatBqnOutput(output) };
+                        const result = await window.cbqnWasm.eval(code);
+                        const duration = Math.round(performance.now() - startTime);
+                        
+                        // Log to server manager (fire and forget)
+                        fetch(`${ArrayBoxConfig.getServiceUrl('log')}/log`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                language: 'bqn',
+                                code: code,
+                                success: result.success,
+                                duration: duration
+                            })
+                        }).catch(() => {}); // Ignore errors if server not running
+                        
+                        return result;
                     } catch (error) {
-                        // BQN errors may have message as array or pre-formatted string
-                        let errMsg = error.message || String(error);
-                        if (Array.isArray(error.message)) {
-                            errMsg = formatBqnOutput(error.message);
-                        } else if (typeof errMsg === 'string') {
-                            // Check if it's box-formatted output (has ┌ or ╵ characters)
-                            if (errMsg.includes('┌') || errMsg.includes('╵')) {
-                                errMsg = extractFromBoxFormat(errMsg);
-                            }
-                            // Check if it looks like comma-separated chars (e.g., "0,0,↕,𝕩,...")
-                            else {
-                                const parts = errMsg.split(',');
-                                if (parts.length > 5 && parts.slice(2).every(p => p.length <= 2)) {
-                                    const charStart = parts.findIndex(p => p.length === 1 && !/^\d+$/.test(p));
-                                    if (charStart !== -1) {
-                                        errMsg = parts.slice(charStart).join('');
-                                    }
-                                }
-                            }
-                        }
-                        result = { success: false, output: errMsg };
+                        const duration = Math.round(performance.now() - startTime);
+                        
+                        fetch(`${ArrayBoxConfig.getServiceUrl('log')}/log`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                language: 'bqn',
+                                code: code,
+                                success: false,
+                                duration: duration
+                            })
+                        }).catch(() => {});
+                        
+                        return {
+                            success: false,
+                            output: error.message || String(error)
+                        };
                     }
-                    const duration = Math.round(performance.now() - startTime);
-                    
-                    // Log to server manager (fire and forget)
-                    fetch(`${ArrayBoxConfig.getServiceUrl('log')}/log`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            language: 'bqn',
-                            code: code,
-                            success: result.success,
-                            duration: duration
-                        })
-                    }).catch(() => {}); // Ignore errors if server not running
-                    
-                    return result;
                 }
             },
             uiua: {

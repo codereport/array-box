@@ -4,14 +4,44 @@ This project includes interpreters, WASM runtimes, and documentation from the fo
 
 ---
 
-## BQN
+## BQN (CBQN)
 
-The BQN JavaScript interpreter (`bqn.js`) is loaded from CDN and runs entirely client-side. The primitive documentation in `src/bqn-docs.js` is derived from the BQN project.
+The BQN WASM interpreter in `wasm/bqn/` is built from source from the CBQN project (a BQN implementation in C by dzaima), compiled to WebAssembly using Emscripten. The primitive documentation in `src/bqn-docs.js` is derived from the BQN project by Marshall Lochbaum.
 
-**Interpreter:** https://cdn.jsdelivr.net/gh/mlochbaum/BQN@master/docs/bqn.js  
-**Documentation source:** https://mlochbaum.github.io/BQN/help/  
-**Repository:** https://github.com/mlochbaum/BQN  
-**License:** ISC License
+**Build script:** `scripts/build-cbqn-wasm.sh`  
+**CBQN repository:** https://github.com/dzaima/CBQN  
+**BQN documentation source:** https://mlochbaum.github.io/BQN/help/  
+**BQN specification repository:** https://github.com/mlochbaum/BQN  
+**CBQN license:** LGPLv3 or GPLv3 or MPL 2.0 (at your option)  
+**BQN documentation license:** ISC License
+
+### CBQN
+
+CBQN source code (excluding vendored components noted in its repository) may be used under any of the following licenses:
+
+- GNU Lesser General Public License v3.0 (LGPLv3)
+- GNU General Public License v3.0 (GPLv3)
+- Mozilla Public License 2.0 (MPL 2.0)
+
+```
+Copyright (C) 2021-2025 dzaima and contributors
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+```
+
+Full license texts: [LGPLv3](https://www.gnu.org/licenses/lgpl-3.0.txt) | [GPLv3](https://www.gnu.org/licenses/gpl-3.0.txt) | [MPL 2.0](https://mozilla.org/MPL/2.0/)
+
+### BQN documentation
 
 ```
 ISC License
@@ -72,7 +102,7 @@ SOFTWARE.
 
 The J WASM interpreter in `wasm/j/` is built from source from the J language (jsource) project by Jsoftware, compiled to WebAssembly using Emscripten. The primitive documentation in `src/j-docs.js` is derived from the J Wiki (NuVoc).
 
-**Build script:** `scripts/build-j96-wasm.sh`  
+**Build script:** `scripts/build-j-wasm.sh`  
 **Repository:** https://github.com/jsoftware/jsource  
 **Documentation source:** https://code.jsoftware.com/wiki/NuVoc  
 **Interpreter license:** GPL-3.0 License  

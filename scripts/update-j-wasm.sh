@@ -17,5 +17,5 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "Building J WASM (this delegates to build-j96-wasm.sh)..."
-exec "$SCRIPT_DIR/build-j96-wasm.sh"
+echo "Building J WASM (this delegates to build-j-wasm.sh)..."
+exec "$SCRIPT_DIR/build-j-wasm.sh"

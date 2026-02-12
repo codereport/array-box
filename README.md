@@ -71,6 +71,7 @@ node servers/server-manager.cjs
 
 **Note:** 
 - **BQN**, **Uiua**, **J**, **Kap**, and **TinyAPL** run entirely in the browser (no server required)
+  - BQN uses [CBQN](https://github.com/dzaima/CBQN) compiled to WASM for client-side execution
   - J uses WASM for client-side execution
   - Kap uses Kotlin/JS for client-side execution
   - TinyAPL and Uiua use WASM for client-side execution
@@ -194,6 +195,7 @@ array-box/
 ├── fonts/                     # Array language fonts (BQN, APL, Uiua, TinyAPL, Kap)
 ├── assets/                    # Language logos
 ├── wasm/
+│   ├── bqn/                   # CBQN WASM build
 │   ├── tinyapl/               # TinyAPL WASM build
 │   ├── kap/                   # Kap Kotlin/JS build
 │   ├── j/                     # J WASM build
