@@ -1332,7 +1332,7 @@ const defaultStyles = `
 
 /* Category view styles */
 .array-keyboard-overlay.category-view {
-    width: 1216px;
+    width: 1221px;
     max-width: 95vw;
 }
 

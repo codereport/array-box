@@ -90,33 +90,66 @@
         }
 
         .dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            margin-top: 7px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
             background: #1f2937;
             border: 3px solid #4b5563;
-            border-radius: 14px;
-            box-shadow: 0 7px 21px var(--shadow-color);
-            z-index: 1000;
-            min-width: 333px;
-            display: none;
+            border-radius: 18px;
+            box-shadow: 0 14px 42px rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            min-width: 400px;
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s ease-out, transform 0.15s ease-out, visibility 0s 0.15s;
         }
 
         .dropdown.show {
-            display: block;
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+            transform: translate(-50%, -50%) scale(1);
+            transition: opacity 0.15s ease-out, transform 0.15s ease-out, visibility 0s 0s;
+        }
+
+        .dropdown-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1999;
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s ease-out, visibility 0s 0.15s;
+        }
+
+        .dropdown-backdrop.show {
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+            transition: opacity 0.15s ease-out, visibility 0s 0s;
         }
 
         .dropdown-item {
-            padding: 18px 24px;
+            padding: 22px 30px;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 18px;
+            gap: 22px;
             transition: background-color 0.2s;
-            font-size: 23px;
+            font-size: 26px;
             color: var(--text-color);
             white-space: nowrap;
+        }
+
+        .dropdown-item:first-child {
+            border-radius: 15px 15px 0 0;
+        }
+
+        .dropdown-item:last-child {
+            border-radius: 0 0 15px 15px;
         }
 
         .dropdown-item:hover {
@@ -124,14 +157,14 @@
         }
 
         .dropdown-item img {
-            width: 42px;
-            height: 42px;
+            width: 52px;
+            height: 52px;
             object-fit: contain;
         }
 
         .dropdown-item svg {
-            width: 42px;
-            height: 42px;
+            width: 52px;
+            height: 52px;
         }
 
         .dropdown-item .lang-name {
@@ -140,7 +173,26 @@
 
         .dropdown-item .lang-version {
             color: #9CA3AF;
-            font-size: 19px;
+            font-size: 21px;
+        }
+
+        /* Hide everything else when language picker is open */
+        body.lang-picker-open .container {
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s ease-out, visibility 0s 0.15s;
+        }
+
+        body.lang-picker-open .keyboard-hint,
+        body.lang-picker-open .array-keyboard-wrapper,
+        body.lang-picker-open .f1-doc-tooltip,
+        body.lang-picker-open .help-screen,
+        body.lang-picker-open .fonts-screen {
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s ease-out, visibility 0s 0.15s;
         }
 
         .input-container {
@@ -891,43 +943,45 @@
     </style>
 </head>
 <body>
+    <div class="dropdown-backdrop" id="dropdownBackdrop"></div>
+    <div class="dropdown" id="dropdown">
+        <div class="dropdown-item" data-lang="apl">
+            <img src="assets/apl.png" alt="APL">
+            <span class="lang-name">APL</span>
+            <span class="lang-version">Dyalog v20.0</span>
+        </div>
+        <div class="dropdown-item" data-lang="bqn">
+            <img src="assets/bqn.svg" alt="BQN">
+            <span class="lang-name">BQN</span>
+            <span class="lang-version">CBQN 0.11</span>
+        </div>
+        <div class="dropdown-item" data-lang="uiua">
+            <img src="assets/uiua.png" alt="Uiua">
+            <span class="lang-name">Uiua</span>
+            <span class="lang-version" id="uiua-version">0.x</span>
+        </div>
+        <div class="dropdown-item" data-lang="j">
+            <img src="assets/j_logo.png" alt="J">
+            <span class="lang-name">J</span>
+            <span class="lang-version">J9.7.0-beta10</span>
+        </div>
+        <div class="dropdown-item" data-lang="kap">
+            <img src="assets/kap.png" alt="Kap">
+            <span class="lang-name">Kap</span>
+            <span class="lang-version">2026-02-08</span>
+        </div>
+        <div class="dropdown-item" data-lang="tinyapl">
+            <img src="assets/tinyapl.svg" alt="TinyAPL">
+            <span class="lang-name">TinyAPL</span>
+            <span class="lang-version" id="tinyapl-version">0.13-beta</span>
+        </div>
+    </div>
+
     <div class="container">
         <div class="language-selector">
             <button class="language-button" id="languageButton" tabindex="2">
                 <img id="currentLogo" src="assets/apl.png" alt="APL">
             </button>
-            <div class="dropdown" id="dropdown">
-                <div class="dropdown-item" data-lang="apl">
-                    <img src="assets/apl.png" alt="APL">
-                    <span class="lang-name">APL</span>
-                    <span class="lang-version">Dyalog v20.0</span>
-                </div>
-                <div class="dropdown-item" data-lang="bqn">
-                    <img src="assets/bqn.svg" alt="BQN">
-                    <span class="lang-name">BQN</span>
-                    <span class="lang-version">CBQN 0.11</span>
-                </div>
-                <div class="dropdown-item" data-lang="uiua">
-                    <img src="assets/uiua.png" alt="Uiua">
-                    <span class="lang-name">Uiua</span>
-                    <span class="lang-version" id="uiua-version">0.x</span>
-                </div>
-                <div class="dropdown-item" data-lang="j">
-                    <img src="assets/j_logo.png" alt="J">
-                    <span class="lang-name">J</span>
-                    <span class="lang-version">J9.7.0-beta10</span>
-                </div>
-                <div class="dropdown-item" data-lang="kap">
-                    <img src="assets/kap.png" alt="Kap">
-                    <span class="lang-name">Kap</span>
-                    <span class="lang-version">2026-02-08</span>
-                </div>
-                <div class="dropdown-item" data-lang="tinyapl">
-                    <img src="assets/tinyapl.svg" alt="TinyAPL">
-                    <span class="lang-name">TinyAPL</span>
-                    <span class="lang-version" id="tinyapl-version">0.13-beta</span>
-                </div>
-            </div>
         </div>
         <div class="input-container">
             <div 
@@ -2548,6 +2602,14 @@
         
         // Global keyboard shortcuts
         document.addEventListener('keydown', (e) => {
+            // Escape to close language picker
+            if (e.key === 'Escape' && dropdown.classList.contains('show')) {
+                e.preventDefault();
+                e.stopPropagation();
+                closeLangPicker();
+                return;
+            }
+
             // Ctrl+H to toggle help screen
             if (e.ctrlKey && e.key === 'h') {
                 e.preventDefault();
@@ -2653,14 +2715,36 @@
         });
 
         // Language selector functionality
+        const dropdownBackdrop = document.getElementById('dropdownBackdrop');
+
+        function openLangPicker() {
+            dropdown.classList.add('show');
+            dropdownBackdrop.classList.add('show');
+            document.body.classList.add('lang-picker-open');
+        }
+
+        function closeLangPicker() {
+            dropdown.classList.remove('show');
+            dropdownBackdrop.classList.remove('show');
+            document.body.classList.remove('lang-picker-open');
+        }
+
         languageButton.addEventListener('click', (e) => {
             e.stopPropagation();
-            dropdown.classList.toggle('show');
+            if (dropdown.classList.contains('show')) {
+                closeLangPicker();
+            } else {
+                openLangPicker();
+            }
+        });
+
+        dropdownBackdrop.addEventListener('click', () => {
+            closeLangPicker();
         });
 
         document.addEventListener('click', (e) => {
-            if (!languageButton.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.classList.remove('show');
+            if (!languageButton.contains(e.target) && !dropdown.contains(e.target) && !dropdownBackdrop.contains(e.target)) {
+                closeLangPicker();
             }
         });
 
@@ -2669,7 +2753,7 @@
             item.addEventListener('click', () => {
                 const lang = item.dataset.lang;
                 switchLanguage(lang);
-                dropdown.classList.remove('show');
+                closeLangPicker();
             });
         });
 
