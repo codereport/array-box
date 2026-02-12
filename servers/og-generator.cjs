@@ -416,6 +416,9 @@ async function generateOGImage(code, lang, result = null, resultHtml = null) {
     const boxBorder = 3;  // Border width on boxes
     const gap = 20;
     
+    // TinyAPL uses tighter line-height (matching .output.tinyapl CSS)
+    const resultLineHeight = lang === 'tinyapl' ? 0.85 : 1.2;
+    
     // Header dimensions (logo 80px + gap + text)
     const headerHeight = 80;
     const headerTextWidth = 'ArrayBox'.length * 22; // ~22px per char at 36px font
@@ -443,7 +446,7 @@ async function generateOGImage(code, lang, result = null, resultHtml = null) {
         const resultMaxLineLen = displayResult.split('\n').reduce((max, line) => Math.max(max, line.length), 0);
         const resultLineCount = displayResult.split('\n').length;
         const resultContentWidth = resultMaxLineLen * resultCharWidth;
-        const resultContentHeight = resultLineCount * (resultFontSize * 1.2);
+        const resultContentHeight = resultLineCount * (resultFontSize * resultLineHeight);
         resultBoxWidth = resultContentWidth + boxPadding * 2 + boxBorder * 2;
         resultBoxHeight = resultContentHeight + boxPadding * 2 + boxBorder * 2;
     }
@@ -612,6 +615,7 @@ async function generateOGImage(code, lang, result = null, resultHtml = null) {
                             fontSize: `${resultFontSize}px`,
                             color: COLORS.fg,
                             fontFamily: 'ArrayLang',
+                            lineHeight: resultLineHeight,
                             whiteSpace: 'pre',
                             textAlign: 'left',  // Left-align to preserve box-drawing structure
                         },
@@ -722,6 +726,9 @@ async function generateVerticalImage(code, lang, result = null, resultHtml = nul
     const boxBorder = 3;  // Border width on boxes
     const gap = 20;
     
+    // TinyAPL uses tighter line-height (matching .output.tinyapl CSS)
+    const resultLineHeight = lang === 'tinyapl' ? 0.85 : 1.2;
+    
     // Header dimensions - logo 60px, text ~28px fits within logo height
     const logoSize = 60;
     const headerHeight = logoSize;
@@ -747,7 +754,7 @@ async function generateVerticalImage(code, lang, result = null, resultHtml = nul
         const resultMaxLineLen = displayResult.split('\n').reduce((max, line) => Math.max(max, line.length), 0);
         const resultLineCount = displayResult.split('\n').length;
         const resultContentWidth = resultMaxLineLen * resultCharWidth;
-        const resultContentHeight = resultLineCount * (resultFontSize * 1.2);
+        const resultContentHeight = resultLineCount * (resultFontSize * resultLineHeight);
         resultBoxWidth = resultContentWidth + boxPadding * 2 + boxBorder * 2;
         resultBoxHeight = resultContentHeight + boxPadding * 2 + boxBorder * 2;
     }
@@ -891,7 +898,7 @@ async function generateVerticalImage(code, lang, result = null, resultHtml = nul
                         fontSize: `${resultFontSize}px`,
                         color: COLORS.fg,
                         fontFamily: 'ArrayLang',
-                        lineHeight: 1.2,
+                        lineHeight: resultLineHeight,
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'flex-start',  // Keep lines left-aligned relative to each other
