@@ -604,10 +604,11 @@ export function createKeyboardHandler(inputElement, language) {
         const shiftPressed = e.shiftKey || e.getModifierState('Shift');
         const isPrefixKey = (e.key === prefixKey || 
                             e.key === 'Backslash' && prefixKey === '\\' ||
-                            (prefixKey === '\\' && e.code === 'Backslash') ||
-                            (prefixKey === '`' && (e.code === 'Backquote' || e.key === '`')));
+                            (prefixKey === '\\' && e.code === 'Backslash' && !shiftPressed) ||
+                            (prefixKey === '`' && (e.code === 'Backquote' || e.key === '`') && !shiftPressed));
         
         // Don't treat as prefix key if we're already in prefix mode and shift is pressed
+        // (this handles the TinyAPL case where prefix+shift+key should look up symPS/symPPS)
         const treatAsPrefix = isPrefixKey && !(prefixLevel > 0 && shiftPressed);
         
         if (treatAsPrefix) {
@@ -631,9 +632,14 @@ export function createKeyboardHandler(inputElement, language) {
             } else {
                 // Other languages: Simple toggle
                 if (prefixLevel > 0) {
-                    // Double prefix key - insert the prefix character itself
+                    // Double prefix key - look up the prefix key in the keymap
+                    e.preventDefault();
                     prefixLevel = 0;
-                    return; // Let the default behavior happen
+                    const mapped = keymap[prefixKey];
+                    if (mapped && mapped !== '') {
+                        insertText(inputElement, mapped);
+                    }
+                    return;
                 }
                 e.preventDefault();
                 prefixLevel = 1;
