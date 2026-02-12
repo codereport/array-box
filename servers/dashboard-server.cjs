@@ -1114,7 +1114,7 @@ const dashboardHTML = `<!DOCTYPE html>
             const now = Date.now();
             switch (range) {
                 case '1h':
-                    return { start: now - 60 * 60 * 1000, bucketSize: 60 * 1000, format: 'minute' };
+                    return { start: now - 60 * 60 * 1000, bucketSize: 5 * 60 * 1000, format: 'minute' };
                 case '3h':
                     return { start: now - 3 * 60 * 60 * 1000, bucketSize: 5 * 60 * 1000, format: 'minute' };
                 case '6h':
