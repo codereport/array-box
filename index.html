@@ -3542,7 +3542,12 @@
             glyphNames: aplConfig.glyphNames,
             glyphDocs: aplConfig.glyphDocs,
             docLinks: aplConfig.docLinks,
-            logoPath: aplConfig.logoPath
+            logoPath: aplConfig.logoPath,
+            onGlyphClick: (glyph) => {
+                codeInput.focus();
+                insertText(codeInput, glyph);
+                applySyntaxHighlighting();
+            }
         });
         
         // Load state from URL permalink (if present)

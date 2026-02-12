@@ -1804,6 +1804,7 @@ export class ArrayKeyboard {
      * @param {string} options.logoPath - Path to logo image to display instead of text title (optional)
      * @param {Object} options.glyphDocs - Glyph documentation for hover tooltips { '⥊': { monadic: '...', ... }, ... }
      * @param {Array} options.tinyaplKeyboard - TinyAPL keyboard data with 4 prefix levels (optional)
+     * @param {Function} options.onGlyphClick - Callback when a glyph is clicked: (glyph) => void (optional)
      */
     constructor(options = {}) {
         this.keymap = options.keymap || {};
@@ -1824,6 +1825,7 @@ export class ArrayKeyboard {
         this.logoPath = options.logoPath || null;
         this.glyphDocs = options.glyphDocs || null;
         this.tinyaplKeyboard = options.tinyaplKeyboard || null;
+        this.onGlyphClick = options.onGlyphClick || null;
         
         this.wrapper = null;
         this.overlay = null;
@@ -2146,14 +2148,20 @@ export class ArrayKeyboard {
                     shiftSymbolSpan.className = `array-keyboard-shift-symbol ${shiftedSyntaxClass}`;
                     shiftSymbolSpan.style.fontFamily = this.fontFamily;
                     shiftSymbolSpan.textContent = shiftedSymbol || '';
-                    if (shiftedSymbol) this._addHoverHandlers(shiftSymbolSpan, shiftedSymbol);
+                    if (shiftedSymbol) {
+                        this._addHoverHandlers(shiftSymbolSpan, shiftedSymbol);
+                        this._addClickHandler(shiftSymbolSpan, shiftedSymbol);
+                    }
                     
                     // Main symbol
                     const symbolSpan = document.createElement('span');
                     symbolSpan.className = `array-keyboard-symbol ${symbolSyntaxClass}`;
                     symbolSpan.style.fontFamily = this.fontFamily;
                     symbolSpan.textContent = symbol || '';
-                    if (symbol) this._addHoverHandlers(symbolSpan, symbol);
+                    if (symbol) {
+                        this._addHoverHandlers(symbolSpan, symbol);
+                        this._addClickHandler(symbolSpan, symbol);
+                    }
                     
                     // Key label
                     const labelSpan = document.createElement('span');
@@ -2260,6 +2268,7 @@ export class ArrayKeyboard {
             span.textContent = g.char;
             span.dataset.type = g.type;
             this._addHoverHandlers(span, g.char);
+            this._addClickHandler(span, g.char);
             keyDiv.appendChild(span);
         });
         
@@ -2380,6 +2389,7 @@ export class ArrayKeyboard {
                         span.textContent = g.char;
                         span.dataset.type = g.type;
                         this._addHoverHandlers(span, g.char);
+                        this._addClickHandler(span, g.char);
                         keyDiv.appendChild(span);
                     });
                     
@@ -2419,6 +2429,7 @@ export class ArrayKeyboard {
                         span.textContent = g.char;
                         span.dataset.type = g.type;
                         this._addHoverHandlers(span, g.char);
+                        this._addClickHandler(span, g.char);
                         keyDiv.appendChild(span);
                     });
                     
@@ -2513,6 +2524,7 @@ export class ArrayKeyboard {
                 glyphDiv.style.fontFamily = this.fontFamily;
                 glyphDiv.textContent = glyph;
                 this._addHoverHandlers(glyphDiv, glyph);
+                this._addClickHandler(glyphDiv, glyph);
                 glyphGrid.appendChild(glyphDiv);
             }
             
@@ -2553,6 +2565,7 @@ export class ArrayKeyboard {
                 glyphDiv.style.fontFamily = this.fontFamily;
                 glyphDiv.textContent = glyph;
                 this._addHoverHandlers(glyphDiv, glyph);
+                this._addClickHandler(glyphDiv, glyph);
                 glyphRow.appendChild(glyphDiv);
             }
             
@@ -3004,6 +3017,23 @@ export class ArrayKeyboard {
         
         // Note: We don't hide on mouseleave - tooltip stays until hovering another glyph
         // This provides a better UX for reading documentation
+    }
+    
+    /**
+     * Add click handler to a glyph element for typing the glyph
+     * Calls onGlyphClick callback, hides keyboard, and focuses back to editor
+     */
+    _addClickHandler(element, glyph) {
+        if (!this.onGlyphClick) return;
+        
+        element.style.cursor = 'pointer';
+        
+        element.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.onGlyphClick(glyph);
+            this.hide();
+        });
     }
     
     /**
