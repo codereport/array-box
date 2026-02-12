@@ -677,7 +677,7 @@
 
         .help-screen .help-header {
             color: #6b7280;
-            font-size: 14px;
+            font-size: 18px;
             margin-bottom: 50px;
             letter-spacing: 0.5px;
         }
@@ -692,7 +692,7 @@
 
         .help-screen .help-section-title {
             color: #6b7280;
-            font-size: 12px;
+            font-size: 15px;
             text-transform: lowercase;
             letter-spacing: 1px;
             margin-bottom: 16px;
@@ -703,12 +703,12 @@
             align-items: baseline;
             margin-bottom: 10px;
             gap: 20px;
-            font-size: 14px;
+            font-size: 18px;
             color: var(--text-color);
         }
 
         .help-screen .help-key {
-            min-width: 160px;
+            min-width: 220px;
             color: #9CA3AF;
         }
 
@@ -721,7 +721,7 @@
             bottom: 40px;
             left: 80px;
             color: #4b5563;
-            font-size: 12px;
+            font-size: 15px;
         }
 
         /* Fonts screen */
@@ -748,7 +748,7 @@
 
         .fonts-screen .fonts-header {
             color: #6b7280;
-            font-size: 14px;
+            font-size: 18px;
             margin-bottom: 50px;
             letter-spacing: 0.5px;
         }
@@ -759,7 +759,7 @@
 
         .fonts-screen .fonts-title {
             color: #6b7280;
-            font-size: 12px;
+            font-size: 15px;
             text-transform: lowercase;
             letter-spacing: 1px;
             margin-bottom: 24px;
@@ -769,7 +769,7 @@
             display: flex;
             align-items: baseline;
             margin-bottom: 14px;
-            font-size: 14px;
+            font-size: 18px;
         }
 
         .fonts-screen .font-lang {
@@ -786,7 +786,7 @@
             bottom: 40px;
             left: 80px;
             color: #4b5563;
-            font-size: 12px;
+            font-size: 15px;
         }
 
         /* F1 Documentation Tooltip - fixed position to right of editor */
@@ -1102,7 +1102,7 @@
                 <div class="fonts-title">fonts</div>
                 <div class="font-row">
                     <span class="font-lang">APL</span>
-                    <span class="font-name">APL385</span>
+                    <span class="font-name">APL387</span>
                 </div>
                 <div class="font-row">
                     <span class="font-lang">BQN</span>
@@ -1125,7 +1125,7 @@
                     <span class="font-name">APL387</span>
                 </div>
             </div>
-            <div class="fonts-footer">array box</div>
+            <div class="fonts-footer">⬢ arraybox</div>
         </div>
     </div>
     
@@ -2657,6 +2657,17 @@
             
             // Don't process other shortcuts if help or fonts screen is visible
             if (isHelpScreenVisible() || isFontsScreenVisible()) {
+                return;
+            }
+            
+            // Ctrl+Left to toggle the language picker dropdown
+            if (e.ctrlKey && !e.shiftKey && e.key === 'ArrowLeft') {
+                e.preventDefault();
+                if (dropdown.classList.contains('show')) {
+                    closeLangPicker();
+                } else {
+                    openLangPicker();
+                }
                 return;
             }
             
