@@ -4380,6 +4380,20 @@
                 hideF1Tooltip();
             }
         });
+
+        // URL param handling
+        const urlParams = new URLSearchParams(window.location.search);
+
+        const langParam = urlParams.get('lang');
+        if(languages[langParam]) {
+            currentLanguage = langParam;
+            switchLanguage(currentLanguage);
+        }
+
+        const overlayParam = urlParams.get('keyboard_overlay');
+        if (overlayParam && visualKeyboard) {
+            visualKeyboard.show();
+        }
     </script>
 </body>
 </html>
