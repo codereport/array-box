@@ -1033,7 +1033,15 @@
                 </div>
                 <div class="help-row">
                     <span class="help-key">shift + enter</span>
-                    <span class="help-desc">evaluate highlighted text (or insert newline)</span>
+                    <span class="help-desc">evaluate selection</span>
+                </div>
+                <div class="help-row">
+                    <span class="help-key">shift + enter</span>
+                    <span class="help-desc">insert newline</span>
+                </div>
+                <div class="help-row">
+                    <span class="help-key">ctrl + p</span>
+                    <span class="help-desc">show language picker</span>
                 </div>
                 <div class="help-row">
                     <span class="help-key">ctrl + ↑ ↓</span>
@@ -2662,8 +2670,8 @@
                 return;
             }
             
-            // Ctrl+Left to toggle the language picker dropdown
-            if (e.ctrlKey && !e.shiftKey && e.key === 'ArrowLeft') {
+            // Ctrl+P to toggle the language picker dropdown
+            if (e.ctrlKey && !e.shiftKey && e.key === 'p') {
                 e.preventDefault();
                 if (dropdown.classList.contains('show')) {
                     closeLangPicker();
@@ -3277,10 +3285,13 @@
             // Use HTML rendering if available (TinyAPL fancy arrays), or APL train tree glyph highlighting
             if (result.outputHtml) {
                 output.innerHTML = result.outputHtml;
+                output.style.textAlign = '';
             } else if (currentLanguage === 'apl' && isAplTrainTree(result.output)) {
-                output.innerHTML = highlightTrainTreeGlyphs(result.output);
+                output.innerHTML = `<span style="display:inline-block;text-align:left">${highlightTrainTreeGlyphs(result.output)}</span>`;
+                output.style.textAlign = 'center';
             } else {
                 output.textContent = result.output;
+                output.style.textAlign = '';
             }
             output.className = `output show ${langConfig.fontClass} ${result.success ? '' : 'error'}`;
             
@@ -3396,6 +3407,7 @@
             loadingIndicator.classList.remove('show');
             container.style.transform = '';
             output.style.overflowX = 'hidden'; // Reset overflow when hiding
+            output.style.textAlign = ''; // Reset centering (train trees)
             lastResult = null;
             lastEvaluatedCode = null;
             // Recalculate width based on code only (no result)
