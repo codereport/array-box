@@ -697,6 +697,12 @@ function trimTrailingWhitespace(text) {
     return text.split('\n').map(line => line.trimEnd()).join('\n');
 }
 
+/** Detect APL train tree output (box-drawing from ]boxing -trains=tree) */
+function isAplTrainTree(text) {
+    if (!text || typeof text !== 'string') return false;
+    return /[┌┐└┘─┼│├┤┬┴]/.test(text);
+}
+
 /**
  * Generate a vertical layout image (for clipboard copy)
  * No forced aspect ratio - just wraps content with padding
@@ -864,19 +870,19 @@ async function generateVerticalImage(code, lang, result = null, resultHtml = nul
             },
         };
     } else if (displayResult) {
-        // Split result into lines and render each as a separate div for precise centering
-        const resultLines = displayResult.split('\n');
-        const resultLineElements = resultLines.map((line, idx) => ({
-            type: 'div',
-            props: {
-                key: idx,
-                style: {
-                    whiteSpace: 'pre',
+        // APL train tree: use syntax-colored glyphs (same as in-browser); otherwise plain lines
+        const useColoredResult = lang === 'apl' && isAplTrainTree(displayResult);
+        const resultLineElements = useColoredResult
+            ? createColoredTextElements(displayResult, 'apl')
+            : displayResult.split('\n').map((line, idx) => ({
+                type: 'div',
+                props: {
+                    key: idx,
+                    style: { whiteSpace: 'pre' },
+                    children: line,
                 },
-                children: line,
-            },
-        }));
-        
+            }));
+
         resultBox = {
             type: 'div',
             props: {
@@ -894,15 +900,15 @@ async function generateVerticalImage(code, lang, result = null, resultHtml = nul
                 children: {
                     type: 'div',
                     props: {
-                    style: {
-                        fontSize: `${resultFontSize}px`,
-                        color: COLORS.fg,
-                        fontFamily: 'ArrayLang',
-                        lineHeight: resultLineHeight,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'flex-start',  // Keep lines left-aligned relative to each other
-                    },
+                        style: {
+                            fontSize: `${resultFontSize}px`,
+                            color: COLORS.fg,
+                            fontFamily: 'ArrayLang',
+                            lineHeight: resultLineHeight,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'flex-start',
+                        },
                         children: resultLineElements,
                     },
                 },

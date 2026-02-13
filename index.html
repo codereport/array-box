@@ -1031,7 +1031,7 @@
                 </div>
                 <div class="help-row">
                     <span class="help-key">shift + enter</span>
-                    <span class="help-desc">insert newline</span>
+                    <span class="help-desc">evaluate highlighted text (or insert newline)</span>
                 </div>
                 <div class="help-row">
                     <span class="help-key">ctrl + ↑ ↓</span>
@@ -1965,7 +1965,7 @@
     <script type="module">
         // Import from modular files
         import { createKeyboardHandler, bqnKeymap, aplKeymap, kapKeymap, tinyaplKeymap, tinyaplKeyboard, tinyaplGlyphs, uiuaGlyphs, jGlyphs, insertText } from './src/keymap.js?v=26';
-        import { syntaxRules, highlightCode, escapeHtml, getSyntaxClass } from './src/syntax.js?v=26';
+        import { syntaxRules, highlightCode, escapeHtml, getSyntaxClass, isAplTrainTree, highlightTrainTreeGlyphs } from './src/syntax.js?v=26';
         import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames, jGlyphNames, tinyaplGlyphNames, bqnGlyphDocs, uiuaGlyphDocs, jGlyphDocs, kapGlyphDocs, aplGlyphDocs, tinyaplGlyphDocs } from './src/keyboard.js?v=26';
         import { createEditorFeaturesManager, toggleComment, commentTokens, autoExpandWidthForCodeAndResult } from './src/editor-features.js?v=2';
         import { translatePrimitives, translateArrayLiterals, clearTranslationCache } from './src/primitive-translate.js?v=3';
@@ -3232,9 +3232,9 @@
             }, 50);
         }
 
-        // Evaluation function
-        async function evaluateCode() {
-            const code = getInputText().trim();
+        // Evaluation function (optional code = evaluate that string, e.g. selected text; else full input)
+        async function evaluateCode(optionalCode) {
+            const code = (optionalCode != null ? optionalCode : getInputText()).trim();
             if (!code) {
                 hideOutput();
                 lastResult = null;
@@ -3272,9 +3272,11 @@
                 setInputText(result.formatted.trim());
             }
             
-            // Use HTML rendering if available (TinyAPL fancy arrays), otherwise plain text
+            // Use HTML rendering if available (TinyAPL fancy arrays), or APL train tree glyph highlighting
             if (result.outputHtml) {
                 output.innerHTML = result.outputHtml;
+            } else if (currentLanguage === 'apl' && isAplTrainTree(result.output)) {
+                output.innerHTML = highlightTrainTreeGlyphs(result.output);
             } else {
                 output.textContent = result.output;
             }
@@ -3411,9 +3413,18 @@
         
         // Keyboard shortcuts for code input
         codeInput.addEventListener('keydown', (e) => {
-            // Shift+Enter to insert newline
+            // Shift+Enter: evaluate highlighted text, or insert newline if no selection
             if (e.key === 'Enter' && e.shiftKey) {
-                // Let the browser handle the newline insertion
+                const sel = window.getSelection();
+                const selectedText = sel.toString().trim();
+                const selectionInInput = sel.rangeCount > 0 && codeInput.contains(sel.anchorNode);
+                if (selectedText && selectionInInput) {
+                    e.preventDefault();
+                    editorFeatures.alignAll();
+                    evaluateCode(selectedText);
+                    return;
+                }
+                // No selection: let the browser insert newline
                 return;
             }
             // Enter to evaluate (auto-align first)

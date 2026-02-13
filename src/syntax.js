@@ -709,10 +709,38 @@ export function getSyntaxClass(symbol, language) {
     return 'syntax-default';
 }
 
+/**
+ * Detect if output looks like an APL train tree (box-drawing from ]boxing -trains=tree)
+ */
+export function isAplTrainTree(text) {
+    if (!text || typeof text !== 'string') return false;
+    return /[┌┐└┘─┼│├┤┬┴]/.test(text);
+}
+
+/**
+ * Highlight only APL glyphs in text (for train tree output). Box-drawing and other chars stay plain.
+ */
+export function highlightTrainTreeGlyphs(text) {
+    if (!text || typeof text !== 'string') return '';
+    const parts = [];
+    for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        const cls = getSyntaxClass(c, 'apl');
+        if (cls !== 'syntax-default') {
+            parts.push(`<span class="${cls}">${escapeHtml(c)}</span>`);
+        } else {
+            parts.push(escapeHtml(c));
+        }
+    }
+    return parts.join('');
+}
+
 // Default export for convenience
 export default {
     syntaxRules,
     highlightCode,
     escapeHtml,
-    getSyntaxClass
+    getSyntaxClass,
+    isAplTrainTree,
+    highlightTrainTreeGlyphs
 };

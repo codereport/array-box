@@ -577,7 +577,8 @@ async function executeWithWarmContainer(language, code, options = {}) {
             if (endIdx !== -1) {
                 section = section.slice(0, endIdx);
             }
-            return section.trim();
+            // Preserve leading/trailing spaces for box-drawing; only strip newlines at edges
+            return section.replace(/^\n+|\n+$/g, '');
         };
         
         onStderr = (data) => {
@@ -640,14 +641,19 @@ async function executeWithWarmContainer(language, code, options = {}) {
                     // Use the wrapped code lines for filtering (not raw code, to avoid filtering results)
                     const codeLines = aplCodeLines || new Set(code.split('\n').map(l => l.trim()).filter(l => l));
                     
-                    // First pass: filter indented lines and system responses
+                    // First pass: filter echoed commands and system responses (keep indented train-tree/box-drawing)
+                    const looksLikeEcho = (trimmed) =>
+                        trimmed.startsWith(']') || trimmed.startsWith('⎕←') || trimmed.startsWith(')') ||
+                        trimmed.startsWith(':') || /^Safe3\.Exec/.test(trimmed);
+                    const hasBoxDrawing = (s) => /[┌┐└┘─┼│├┤┬┴]/.test(s);
                     lines = lines.filter(line => {
                         const trimmed = line.trim();
-                        if (line.startsWith(' ')) return false;  // Indented = echoed
                         if (trimmed === '') return false;
                         if (trimmed === 'clear ws') return false;
                         if (trimmed === ')SIC') return false;
                         if (trimmed === aplMarkers.start || trimmed === aplMarkers.end || trimmed === aplMarkers.reset) return false;
+                        // Drop indented lines only if they look like echoed commands, not train-tree/box-drawing
+                        if (line.startsWith(' ') && looksLikeEcho(trimmed) && !hasBoxDrawing(line)) return false;
                         return true;
                     });
                     
@@ -661,7 +667,8 @@ async function executeWithWarmContainer(language, code, options = {}) {
                         }
                     }
                     
-                    result = lines.join('\n').trim();
+                    // Preserve leading/trailing spaces (box-drawing alignment); only strip newlines at edges; normalize \r
+                    result = lines.map(l => l.replace(/\r/g, '')).join('\n').replace(/^\n+|\n+$/g, '');
                     
                     // Result may be an error message (e.g. "ERROR 206: Undefined name") from stdout
                     resolve({
@@ -699,7 +706,7 @@ async function executeWithWarmContainer(language, code, options = {}) {
             
             // Build Safe3.Exec call wrapped in :Trap to catch security errors
             // Without :Trap, ⎕SIGNAL from Safe3 would prevent end markers from printing
-            input = `]boxing on -s=min\n)SIC\n⎕←'${aplMarkers.start}'\n:Trap 0 ⋄ ⎕←Safe3.Exec '${escapedCode}' ⋄ :Else ⋄ ⎕←⎕DMX.EM,': ',⎕DMX.Message ⋄ :EndTrap\n)SIC\n⎕←'${aplMarkers.end}'\n⎕←'${aplMarkers.reset}'\n`;
+            input = `]boxing on -s=min -trains=tree\n)SIC\n⎕←'${aplMarkers.start}'\n:Trap 0 ⋄ ⎕←Safe3.Exec '${escapedCode}' ⋄ :Else ⋄ ⎕←⎕DMX.EM,': ',⎕DMX.Message ⋄ :EndTrap\n)SIC\n⎕←'${aplMarkers.end}'\n⎕←'${aplMarkers.reset}'\n`;
         }
         
         // Set timeout
@@ -907,7 +914,7 @@ function executeInSandbox(language, code, options = {}) {
         
         // Load Safe3, configure timeout, enable boxing, execute safely
         // Wrap in :Trap to catch security errors and still produce output
-        let input = `⎕FIX 'file:///opt/Safe3.dyalog'\nSafe3.DefaultTimeout←${timeoutSeconds}\n]boxing on -s=min\n:Trap 0 ⋄ ⎕←Safe3.Exec '${escapedCode}' ⋄ :Else ⋄ ⎕←⎕DMX.EM,': ',⎕DMX.Message ⋄ :EndTrap\n`;
+        let input = `⎕FIX 'file:///opt/Safe3.dyalog'\nSafe3.DefaultTimeout←${timeoutSeconds}\n]boxing on -s=min -trains=tree\n:Trap 0 ⋄ ⎕←Safe3.Exec '${escapedCode}' ⋄ :Else ⋄ ⎕←⎕DMX.EM,': ',⎕DMX.Message ⋄ :EndTrap\n`;
         
         container.stdin.write(input);
         container.stdin.end();

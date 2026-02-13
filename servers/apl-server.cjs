@@ -123,7 +123,7 @@ async function executeAPLCodeSandbox(code) {
 function executeAPLCodeDirect(code) {
     return new Promise((resolve, reject) => {
         // For multiline code, we need to handle it specially in Dyalog APL
-        // Enable boxing with min style (only boxes nested/enclosed arrays, not simple arrays)
+        // Enable boxing with min style and train tree view (trains like (+/÷≢) display as tree)
         
         // Filter out empty lines and comment-only lines (⍝ comments out the rest of the line)
         const lines = code.split('\n')
@@ -141,16 +141,16 @@ function executeAPLCodeDirect(code) {
         let aplInput;
         if (cleanedLines.length === 0) {
             // Only comments - return empty
-            aplInput = `]boxing on -s=min\n⎕←''\n`;
+            aplInput = `]boxing on -s=min -trains=tree\n⎕←''\n`;
         } else if (cleanedLines.length === 1) {
             // Single line - send directly with output
-            aplInput = `]boxing on -s=min\n⎕←${cleanedLines[0]}\n`;
+            aplInput = `]boxing on -s=min -trains=tree\n⎕←${cleanedLines[0]}\n`;
         } else {
             // Multiline - wrap in a dfn and execute it
             // The dfn runs each line and returns the last expression's result
             // We use ⋄ (statement separator) to join lines within the dfn
             const joinedCode = cleanedLines.join(' ⋄ ');
-            aplInput = `]boxing on -s=min\n⎕←{${joinedCode}}⍬\n`;
+            aplInput = `]boxing on -s=min -trains=tree\n⎕←{${joinedCode}}⍬\n`;
         }
         
         // Run in batch mode (-b) to get cleaner output
@@ -224,8 +224,8 @@ function executeAPLCodeDirect(code) {
                         return true;
                     })
                     .join('\n')
-                    .replace(/^\n+/, '')  // Remove leading blank lines only
-                    .trimEnd();           // Only trim trailing whitespace to preserve column alignment
+                    .replace(/^\n+/, '')   // Remove leading newlines only
+                    .replace(/\n+$/, '');  // Remove trailing newlines only (preserve spaces for box-drawing)
                 // Runtime errors (e.g. ERROR 206: Undefined name) often appear on stdout in batch mode
                 const isError = aplErrorInOutput(cleanOutput);
                 resolve({ success: !isError, output: cleanOutput });
