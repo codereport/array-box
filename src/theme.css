@@ -66,6 +66,7 @@
     --dracula-red:     #FF5555;
     --dracula-comment: #6272A4;
     --dracula-fg:      #F8F8F2;
+    --dracula-selection: #ffffff;
     
     /* Syntax color assignments - SINGLE SOURCE OF TRUTH */
     /* Shared */
@@ -283,3 +284,13 @@
 .key-shift-symbol.syntax-function         { color: var(--syntax-function); }
 .key-shift-symbol.syntax-modifier-monadic { color: var(--syntax-modifier-monadic); }
 .key-shift-symbol.syntax-modifier-dyadic  { color: var(--syntax-modifier-dyadic); }
+
+/* Selection styling — preserve syntax highlighting with Dracula selection background */
+.code-input::selection,
+.code-input *::selection,
+.output::selection,
+.output *::selection {
+    background: var(--dracula-red);
+    color: #FFFFFF;
+}
+
