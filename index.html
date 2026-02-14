@@ -2906,7 +2906,23 @@
         // Handle Ctrl+L to generate permalink
         async function handleCreatePermalink() {
             const code = getInputText();
-            if (!code.trim()) return;
+            
+            // If editor is empty, generate a lightweight param-based link
+            if (!code.trim()) {
+                const baseUrl = window.location.origin;
+                // kb=<lang> implies both language + keyboard open; lang=<lang> is language only
+                const paramStr = (visualKeyboard && visualKeyboard.isVisible())
+                    ? `kb=${currentLanguage}`
+                    : `lang=${currentLanguage}`;
+                const shareUrl = `${baseUrl}/?${paramStr}`;
+                history.replaceState(null, '', `?${paramStr}`);
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    showFeedbackMessage('Link copied to clipboard', '#10b981', 'white');
+                }).catch(() => {
+                    showFeedbackMessage('Link copied to clipboard', '#10b981', 'white');
+                });
+                return;
+            }
             
             const shortCode = await createPermalink();
             if (shortCode) {
@@ -4404,6 +4420,11 @@
 
         const overlayParam = urlParams.get('kb');
         if (overlayParam && visualKeyboard) {
+            // kb=<lang> implies both language switch and keyboard open
+            if (languages[overlayParam]) {
+                currentLanguage = overlayParam;
+                switchLanguage(currentLanguage);
+            }
             visualKeyboard.show();
         }
     </script>
