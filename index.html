@@ -2592,6 +2592,10 @@
         const helpScreen = document.getElementById('helpScreen');
         
         function toggleHelpScreen() {
+            if (!helpScreen.classList.contains('show')) {
+                // Dismiss F1 tooltip when opening help screen
+                hideF1Tooltip();
+            }
             helpScreen.classList.toggle('show');
         }
         
@@ -2603,6 +2607,10 @@
         const fontsScreen = document.getElementById('fontsScreen');
         
         function toggleFontsScreen() {
+            if (!fontsScreen.classList.contains('show')) {
+                // Dismiss F1 tooltip when opening fonts screen
+                hideF1Tooltip();
+            }
             fontsScreen.classList.toggle('show');
         }
         
@@ -4413,7 +4421,7 @@
          * Check if F1 tooltip is visible
          */
         function isF1TooltipVisible() {
-            return f1TooltipVisible;
+            return f1DocTooltip.classList.contains('show');
         }
         
         // F1 key handler for code input

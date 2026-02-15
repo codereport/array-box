@@ -4402,6 +4402,12 @@ export class ArrayKeyboard {
             mainContainer.style.opacity = '0';
             mainContainer.style.pointerEvents = 'none';
         }
+        // Hide F1 documentation tooltip when switching to keyboard mode
+        document.body.classList.remove('f1-doc-active');
+        const f1Tooltip = document.getElementById('f1DocTooltip');
+        if (f1Tooltip) {
+            f1Tooltip.classList.remove('show');
+        }
     }
     
     /**
