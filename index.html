@@ -4228,10 +4228,76 @@
         /**
          * Build tooltip HTML content for a glyph
          */
+        /**
+         * Escape HTML and format inline code in description text for F1 tooltip.
+         * Detects r←... patterns and expressions with APL glyphs, wrapping them
+         * in <code> tags with the language font.
+         */
+        function escapeDescForF1(text, fontFamily) {
+            if (!text) return '';
+            
+            const codeGlyphs = '←→⊢⊣⍳⍸∊⍷⋷⋵⍴ϼ⍋⍒⌿⍪⊖⍉⊃⊇⌷⍎⍕↗⇂↾⍬∇⋄⍝⎕⍞⁖⍣∙⊞⍤◡◠⍥⌓⌸⌺⍢∵⎊⍨∘⍛⊸⟜⸚«»⇾⇽⫤⫣⊩¨ᐵᑈᑣᑒᓗᓚ⊕⊗∡ℜℑ⧺ⵧ⊥⊤⊲⊴⊵⊳∪∩§↑↓⊂⊆⫇√⸠⌹⍲⍱⩓⩔⨳…⍮‥߹∻⬚○';
+            const codeGlyphsRegex = new RegExp(`[${codeGlyphs}]`);
+            const codeStyle = `font-family: ${fontFamily}; background: rgba(128, 128, 128, 0.15); padding: 0.1em 0.25em; border-radius: 3px`;
+            
+            // Handle escaped brackets \[ and \] (from TinyAPL docs)
+            let processed = text.replace(/\\\[/g, '[').replace(/\\\]/g, ']');
+            
+            // Find code spans and protect them, then escape the rest
+            const codeSpans = [];
+            const MARKER = '\uE000'; // Private Use Area char as placeholder
+            
+            // Detect r←... assignment patterns
+            processed = processed.replace(/\br←[^\s.!?,;]+/g, (match) => {
+                const idx = codeSpans.length;
+                codeSpans.push(`<code style="${codeStyle}">${escapeHtml(match)}</code>`);
+                return MARKER + idx + MARKER;
+            });
+            
+            // Detect expressions with APL glyphs (only outside existing markers)
+            const textForGlyphCheck = processed.replace(new RegExp(MARKER + '\\d+' + MARKER, 'g'), '');
+            if (codeGlyphsRegex.test(textForGlyphCheck)) {
+                const exprPattern = new RegExp(
+                    `(?<![a-zA-Z])` +
+                    `([a-zA-Z0-9]?` +
+                    `[a-zA-Z0-9${codeGlyphs}×÷+\\-]+` +
+                    `[a-zA-Z0-9${codeGlyphs}])` +
+                    `(?![a-zA-Z])`,
+                    'g'
+                );
+                const markerPattern = new RegExp(`(${MARKER}\\d+${MARKER})`);
+                const parts = processed.split(markerPattern);
+                processed = parts.map(part => {
+                    if (part.startsWith(MARKER)) return part;
+                    return part.replace(exprPattern, (match, expr) => {
+                        if (expr.length >= 2 && codeGlyphsRegex.test(expr)) {
+                            const idx = codeSpans.length;
+                            codeSpans.push(`<code style="${codeStyle}">${escapeHtml(expr)}</code>`);
+                            return MARKER + idx + MARKER;
+                        }
+                        return match;
+                    });
+                }).join('');
+            }
+            
+            // HTML-escape the remaining text (non-code parts)
+            const markerSplitPattern = new RegExp(`(${MARKER}\\d+${MARKER})`);
+            const finalParts = processed.split(markerSplitPattern);
+            return finalParts.map(part => {
+                const markerMatch = part.match(new RegExp(`^${MARKER}(\\d+)${MARKER}$`));
+                if (markerMatch) {
+                    return codeSpans[parseInt(markerMatch[1])];
+                }
+                return escapeHtml(part);
+            }).join('');
+        }
+        
         function buildF1TooltipContent(glyph, doc) {
             // Use font family from keyboard config
             const kbConfig = keyboardConfigs[currentLanguage];
             const fontFamily = kbConfig?.fontFamily || "'Courier New', monospace";
+            
+            const escapeDesc = (text) => escapeDescForF1(text, fontFamily);
             
             // Get syntax class for glyph coloring
             const syntaxClass = getSyntaxClass(glyph, currentLanguage);
@@ -4251,7 +4317,7 @@
                     html += '<div class="f1-doc-tooltip-section">';
                     html += `<div class="f1-doc-tooltip-section-title">${escapeHtml(overload.name)}</div>`;
                     if (overload.description) {
-                        html += `<div class="f1-doc-tooltip-section-desc">${escapeHtml(overload.description)}</div>`;
+                        html += `<div class="f1-doc-tooltip-section-desc">${escapeDesc(overload.description)}</div>`;
                     }
                     if (overload.example) {
                         html += `<div class="f1-doc-tooltip-example" style="font-family: ${fontFamily}">${escapeHtml(overload.example)}</div>`;
@@ -4264,7 +4330,7 @@
                     html += '<div class="f1-doc-tooltip-section">';
                     html += `<div class="f1-doc-tooltip-section-title">${escapeHtml(doc.monad.name)}</div>`;
                     if (doc.monad.description) {
-                        html += `<div class="f1-doc-tooltip-section-desc">${escapeHtml(doc.monad.description)}</div>`;
+                        html += `<div class="f1-doc-tooltip-section-desc">${escapeDesc(doc.monad.description)}</div>`;
                     }
                     if (doc.monad.example) {
                         html += `<div class="f1-doc-tooltip-example" style="font-family: ${fontFamily}">${escapeHtml(doc.monad.example)}</div>`;
@@ -4275,7 +4341,7 @@
                     html += '<div class="f1-doc-tooltip-section">';
                     html += `<div class="f1-doc-tooltip-section-title">${escapeHtml(doc.dyad.name)}</div>`;
                     if (doc.dyad.description) {
-                        html += `<div class="f1-doc-tooltip-section-desc">${escapeHtml(doc.dyad.description)}</div>`;
+                        html += `<div class="f1-doc-tooltip-section-desc">${escapeDesc(doc.dyad.description)}</div>`;
                     }
                     if (doc.dyad.example) {
                         html += `<div class="f1-doc-tooltip-example" style="font-family: ${fontFamily}">${escapeHtml(doc.dyad.example)}</div>`;
@@ -4290,7 +4356,7 @@
                 if (doc.description) {
                     const shortDesc = doc.description.length > 300 ? 
                         doc.description.substring(0, 297) + '...' : doc.description;
-                    html += `<div class="f1-doc-tooltip-desc">${escapeHtml(shortDesc)}</div>`;
+                    html += `<div class="f1-doc-tooltip-desc">${escapeDesc(shortDesc)}</div>`;
                 }
                 if (doc.example) {
                     html += `<div class="f1-doc-tooltip-example" style="font-family: ${fontFamily}">${escapeHtml(doc.example)}</div>`;

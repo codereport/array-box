@@ -2907,33 +2907,39 @@ export class ArrayKeyboard {
         const codeStyle = `font-family: ${this.fontFamily}; background: rgba(128, 128, 128, 0.15); padding: 0.1em 0.25em; border-radius: 3px`;
         
         // Process assignment patterns: r←... (most common code pattern)
-        result = result.replace(/\br←[^\s.!?,;:]+/g, (match) => {
+        // Note: colon is allowed inside code (e.g. r←⟨x:y⟩, r←[x]F⦋"tolerance":[x]{Gm}⫤y⦌y)
+        // since the prose colon always appears before r←, not after it
+        result = result.replace(/\br←[^\s.!?,;]+/g, (match) => {
             return `<code style="${codeStyle}">${match}</code>`;
         });
         
         // Process any sequence containing APL glyphs that looks like code
         // Match: optional letter/number, then characters including glyphs, ending with letter/number/glyph
         // Must contain at least one code glyph to be treated as code
-        if (codeGlyphsRegex.test(result)) {
-            // Match expressions that contain code glyphs (like x⌿⍨~x∊y, ⌊y+0.5, a⊕○⸠b)
+        // Only apply to text OUTSIDE existing <code> tags to avoid nesting
+        const textOutsideCode = result.replace(/<code[^>]*>[^<]*<\/code>/g, '');
+        if (codeGlyphsRegex.test(textOutsideCode)) {
             const exprPattern = new RegExp(
-                `(?<!<code[^>]*>)` +  // Not already in a code tag
                 `(?<![a-zA-Z])` +      // Not preceded by letter (word boundary)
                 `([a-zA-Z0-9]?` +      // Optional starting letter/number
                 `[a-zA-Z0-9${codeGlyphs}×÷+\\-]+` +  // Characters including glyphs
                 `[a-zA-Z0-9${codeGlyphs}])` +  // Must end with letter/number/glyph
-                `(?![a-zA-Z])` +       // Not followed by letter (word boundary)
-                `(?!</code>)`,         // Not followed by closing code tag
+                `(?![a-zA-Z])`,        // Not followed by letter (word boundary)
                 'g'
             );
             
-            result = result.replace(exprPattern, (match, expr) => {
-                // Only wrap if it contains at least one code glyph and is 2+ chars
-                if (expr.length >= 2 && codeGlyphsRegex.test(expr)) {
-                    return `<code style="${codeStyle}">${expr}</code>`;
-                }
-                return match;
-            });
+            // Split by <code> tags, only process non-code segments
+            const codeTagPattern = /(<code style="[^"]*">[^<]*<\/code>)/g;
+            const parts = result.split(codeTagPattern);
+            result = parts.map(part => {
+                if (part.startsWith('<code ')) return part;
+                return part.replace(exprPattern, (match, expr) => {
+                    if (expr.length >= 2 && codeGlyphsRegex.test(expr)) {
+                        return `<code style="${codeStyle}">${expr}</code>`;
+                    }
+                    return match;
+                });
+            }).join('');
         }
         
         return result;
