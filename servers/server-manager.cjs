@@ -717,20 +717,11 @@ async function main() {
                 }
             });
         } else if (req.method === 'POST' && req.url === '/visitor') {
-            // Track visitor
-            let body = '';
-            req.on('data', chunk => body += chunk.toString());
-            req.on('end', () => {
-                try {
-                    const data = JSON.parse(body);
-                    stats.recordVisitor(data.sessionId || generateSessionId());
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ ok: true }));
-                } catch (e) {
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ error: 'Invalid request' }));
-                }
-            });
+            // Track visitor by IP address
+            const clientIP = stats.getClientIP(req);
+            stats.recordVisitor(clientIP);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: true }));
         } else if (req.method === 'POST' && req.url === '/permalink') {
             // Track permalink creation
             stats.recordPermalink();
@@ -741,10 +732,6 @@ async function main() {
             res.end();
         }
     });
-    
-    function generateSessionId() {
-        return Math.random().toString(36).substring(2) + Date.now().toString(36);
-    }
     
     logServer.on('error', () => {}); // Silently handle errors
     logServer.listen(LOG_SERVER_PORT, () => {

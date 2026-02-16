@@ -6,8 +6,33 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const STATS_FILE = path.join(__dirname, '..', 'storage', 'stats.json');
+
+// Hash an IP address so we don't store raw IPs on disk
+function hashIP(ip) {
+    return crypto.createHash('sha256').update(ip || 'unknown').digest('hex').substring(0, 16);
+}
+
+// Extract client IP from an HTTP request (handles proxies)
+function getClientIP(req) {
+    // X-Forwarded-For: client, proxy1, proxy2 — take the first (original client)
+    const forwarded = req.headers['x-forwarded-for'];
+    if (forwarded) {
+        return forwarded.split(',')[0].trim();
+    }
+    // X-Real-IP (nginx)
+    if (req.headers['x-real-ip']) {
+        return req.headers['x-real-ip'].trim();
+    }
+    // CF-Connecting-IP (Cloudflare)
+    if (req.headers['cf-connecting-ip']) {
+        return req.headers['cf-connecting-ip'].trim();
+    }
+    // Direct connection
+    return req.socket?.remoteAddress || req.connection?.remoteAddress || 'unknown';
+}
 
 // Max recent evaluations to keep
 const MAX_RECENT_EVALS = 50;
@@ -57,8 +82,11 @@ const defaultStats = {
         }
     },
     
-    // Session tracking (for unique visitors)
-    sessions: {},  // sessionId -> lastSeen timestamp
+    // IP-based unique visitor tracking (persistent, never pruned)
+    knownIPs: [],  // Array of IP address hashes seen all-time
+    
+    // Session tracking (for active visitors in last 24h)
+    sessions: {},  // IP -> lastSeen timestamp
     
     // Last updated
     lastUpdated: null
@@ -116,11 +144,16 @@ function loadStats() {
                 stats.sessions = {};
             }
             
-            // Clean old sessions (older than 24 hours)
+            // Ensure knownIPs exists (migrate from old session-based tracking)
+            if (!stats.knownIPs) {
+                stats.knownIPs = [];
+            }
+            
+            // Clean old sessions (older than 24 hours) — sessions are now IP-based for active tracking
             const cutoff = Date.now() - 24 * 60 * 60 * 1000;
-            for (const [sessionId, lastSeen] of Object.entries(stats.sessions)) {
+            for (const [key, lastSeen] of Object.entries(stats.sessions)) {
                 if (lastSeen < cutoff) {
-                    delete stats.sessions[sessionId];
+                    delete stats.sessions[key];
                 }
             }
             
@@ -289,21 +322,36 @@ function notifyListeners() {
     }
 }
 
-// Record a visitor
-function recordVisitor(sessionId) {
+// Record a visitor by IP address
+// - totalVisitors: incremented only for IPs never seen before (true unique count)
+// - sessions: tracks recent IPs for the "Active (24h)" metric
+// - Time series: records a data point whenever a new 24h session starts
+function recordVisitor(ip) {
     if (!stats) loadStats();
     
-    const isNew = !stats.sessions[sessionId];
-    stats.sessions[sessionId] = Date.now();
+    const ipHash = hashIP(ip);
     
-    if (isNew) {
+    // Check if this is an all-time new unique visitor
+    const isNewUnique = !stats.knownIPs.includes(ipHash);
+    if (isNewUnique) {
+        stats.knownIPs.push(ipHash);
         stats.totalVisitors++;
+    }
+    
+    // Track for "Active (24h)" — session keyed by IP hash
+    const isNewSession = !stats.sessions[ipHash];
+    stats.sessions[ipHash] = Date.now();
+    
+    if (isNewSession) {
         addToTimeSeries('visitors');
+    }
+    
+    if (isNewUnique || isNewSession) {
         saveStats();
         notifyListeners();
     }
     
-    return isNew;
+    return isNewUnique;
 }
 
 // Record an evaluation
@@ -459,5 +507,6 @@ module.exports = {
     getRecentEvaluations,
     getTimeSeriesForRange,
     subscribe,
-    loadStats
+    loadStats,
+    getClientIP
 };

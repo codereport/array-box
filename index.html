@@ -3621,19 +3621,12 @@
             }
         });
         
-        // Track visitor (for dashboard stats)
-        (function trackVisitor() {
-            let sessionId = localStorage.getItem('arraybox_session');
-            if (!sessionId) {
-                sessionId = Math.random().toString(36).substring(2) + Date.now().toString(36);
-                localStorage.setItem('arraybox_session', sessionId);
-            }
-            fetch(`${ArrayBoxConfig.getServiceUrl('log')}/visitor`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId })
-            }).catch(() => {}); // Ignore if server not running
-        })();
+        // Track visitor (server identifies unique visitors by IP)
+        fetch(`${ArrayBoxConfig.getServiceUrl('log')}/visitor`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        }).catch(() => {}); // Ignore if server not running
         
         // Show keyboard hint for 10 seconds
         const keyboardHint = document.getElementById('keyboardHint');

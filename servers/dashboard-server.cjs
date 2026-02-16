@@ -1744,21 +1744,12 @@ const server = http.createServer((req, res) => {
         return;
     }
 
-    // Record visitor (called from frontend)
+    // Record visitor by IP address
     if (req.method === 'POST' && req.url === '/visitor') {
-        let body = '';
-        req.on('data', chunk => body += chunk.toString());
-        req.on('end', () => {
-            try {
-                const data = JSON.parse(body);
-                const isNew = stats.recordVisitor(data.sessionId || generateSessionId());
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ ok: true, isNew }));
-            } catch (e) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: 'Invalid request' }));
-            }
-        });
+        const clientIP = stats.getClientIP(req);
+        const isNew = stats.recordVisitor(clientIP);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, isNew }));
         return;
     }
 
@@ -1792,10 +1783,6 @@ const server = http.createServer((req, res) => {
     res.writeHead(404);
     res.end('Not found');
 });
-
-function generateSessionId() {
-    return Math.random().toString(36).substring(2) + Date.now().toString(36);
-}
 
 server.listen(PORT, BIND_ADDRESS, () => {
     console.log(`Dashboard server running on http://${BIND_ADDRESS}:${PORT}`);
