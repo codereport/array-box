@@ -2228,6 +2228,23 @@
             visualKeyboard.updateFont(config.fontFamily);
         }
 
+        // Dyalog APL numeric error code → human-readable name
+        // Safe3.dyalog offsets error numbers by +200, so ERROR 202 = SYNTAX ERROR (2)
+        const APL_ERROR_NAMES = {
+            1:'WS FULL',2:'SYNTAX ERROR',3:'INDEX ERROR',4:'RANK ERROR',
+            5:'LENGTH ERROR',6:'VALUE ERROR',7:'FORMAT ERROR',10:'LIMIT ERROR',
+            11:'DOMAIN ERROR',12:'HOLD ERROR',16:'NONCE ERROR',
+            90:'EXCEPTION',92:'TRANSLATION ERROR',99:'INTERNAL ERROR',
+            1003:'INTERRUPT',1006:'TIMEOUT',1008:'DEADLOCK'
+        };
+        function humanizeAplError(text) {
+            return text.replace(/ERROR\s+(\d+):\s*/g, (m, n) => {
+                const num = parseInt(n, 10);
+                const base = num >= 200 && num < 1200 ? num - 200 : num;
+                return APL_ERROR_NAMES[base] ? `${APL_ERROR_NAMES[base]}\n` : m;
+            });
+        }
+
         // Language configuration
         const languages = {
             bqn: {
@@ -2398,9 +2415,11 @@
                         }
                         
                         const data = await response.json();
+                        const rawOutput = data.output || data.result || data.error || '';
+                        const isError = data.success === false;
                         return { 
                             success: data.success !== false, 
-                            output: data.output || data.result || data.error || '' 
+                            output: isError ? humanizeAplError(rawOutput) : rawOutput
                         };
                     } catch (error) {
                         if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {

@@ -17,6 +17,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const sandbox = require('./sandbox.cjs');
+const { humanizeAplError } = sandbox;
 
 const PORT = process.argv[2] ? parseInt(process.argv[2]) : 8081;
 const USE_SANDBOX = process.argv.includes('--sandbox');
@@ -206,7 +207,7 @@ function executeAPLCodeDirect(code) {
                 .trim();
             
             if (cleanError) {
-                resolve({ success: false, output: cleanError });
+                resolve({ success: false, output: humanizeAplError(cleanError) });
             } else {
                 // Return the stdout, filtering out ]boxing command output and input echo
                 const cleanOutput = stdout
@@ -228,7 +229,7 @@ function executeAPLCodeDirect(code) {
                     .replace(/\n+$/, '');  // Remove trailing newlines only (preserve spaces for box-drawing)
                 // Runtime errors (e.g. ERROR 206: Undefined name) often appear on stdout in batch mode
                 const isError = aplErrorInOutput(cleanOutput);
-                resolve({ success: !isError, output: cleanOutput });
+                resolve({ success: !isError, output: isError ? humanizeAplError(cleanOutput) : cleanOutput });
             }
         });
 

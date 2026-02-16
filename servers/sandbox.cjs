@@ -231,6 +231,59 @@ function isAplErrorOutput(text) {
     return APL_ERROR_REGEX.test(text) || APL_ERROR_NUMERIC_REGEX.test(text);
 }
 
+// Dyalog APL error number → human-readable name mapping
+const APL_ERROR_NAMES = {
+    1: 'WS FULL',
+    2: 'SYNTAX ERROR',
+    3: 'INDEX ERROR',
+    4: 'RANK ERROR',
+    5: 'LENGTH ERROR',
+    6: 'VALUE ERROR',
+    7: 'FORMAT ERROR',
+    10: 'LIMIT ERROR',
+    11: 'DOMAIN ERROR',
+    12: 'HOLD ERROR',
+    16: 'NONCE ERROR',
+    18: 'FILE TIE ERROR',
+    19: 'FILE ACCESS ERROR',
+    20: 'FILE INDEX ERROR',
+    21: 'FILE FULL',
+    22: 'FILE NAME ERROR',
+    23: 'FILE DAMAGED',
+    24: 'FILE TIED',
+    25: 'FILE TIED REMOTELY',
+    26: 'FILE SYSTEM ERROR',
+    28: 'FILE SYSTEM NOT AVAILABLE',
+    30: 'FILE SYSTEM TIES USED UP',
+    31: 'FILE TIE QUOTA USED UP',
+    32: 'FILE NAME QUOTA USED UP',
+    34: 'FILE SYSTEM NO SPACE',
+    35: 'FILE ACCESS ERROR - CONVERTING FILE',
+    38: 'FILE COMPONENT DAMAGED',
+    84: 'TRAP ERROR',
+    90: 'EXCEPTION',
+    92: 'TRANSLATION ERROR',
+    99: 'INTERNAL ERROR',
+    1003: 'INTERRUPT',
+    1005: 'EOF INTERRUPT',
+    1006: 'TIMEOUT',
+    1007: 'RESIZE',
+    1008: 'DEADLOCK',
+};
+
+// Replace "ERROR NNN:" with the human-readable error name
+// Safe3.dyalog offsets error numbers by +200, so ERROR 202 = SYNTAX ERROR (2)
+function humanizeAplError(text) {
+    return text.replace(/ERROR\s+(\d+):\s*/g, (match, numStr) => {
+        let num = parseInt(numStr, 10);
+        // Safe3 adds 200 to error numbers; map back to base if in that range
+        const baseNum = num >= 200 && num < 1200 ? num - 200 : num;
+        const name = APL_ERROR_NAMES[baseNum];
+        if (name) return `${name}\n`;
+        return match;
+    });
+}
+
 function createAplMarkers() {
     const id = Math.random().toString(36).slice(2);
     return {
@@ -267,7 +320,7 @@ function filterAplErrorOutput(stdout, stderr, code, markers = null) {
         lines = lines.slice(lastErrorIndex);
     }
     
-    return lines.join('\n').trim();
+    return humanizeAplError(lines.join('\n').trim());
 }
 
 /**
@@ -745,13 +798,13 @@ async function executeWithWarmContainer(language, code, options = {}) {
             if (filteredStderr) {
                 resolve({
                     success: false,
-                    output: filteredStderr,
+                    output: humanizeAplError(filteredStderr),
                     warm: true
                 });
             } else {
                 resolve({
                     success: false,
-                    output: output.trim() || 'Execution timed out',
+                    output: humanizeAplError(output.trim()) || 'Execution timed out',
                     warm: true
                 });
             }
@@ -1035,5 +1088,6 @@ module.exports = {
     checkDocker,
     cleanupWarmContainers,
     prewarmContainers,
+    humanizeAplError,
     CONFIG
 };
