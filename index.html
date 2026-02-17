@@ -2724,6 +2724,9 @@
                 return;
             }
             
+            // Don't interfere with IME/Compose key input
+            if (e.isComposing || e.keyCode === 229) return;
+            
             // Auto-focus code input when typing printable characters
             // (when not already focused and keyboard overlay is not visible)
             const keyboardWrapper = document.querySelector('.array-keyboard-wrapper.show');
@@ -3511,6 +3514,9 @@
         
         // Keyboard shortcuts for code input
         codeInput.addEventListener('keydown', (e) => {
+            // Don't interfere with IME/Compose key input
+            if (e.isComposing || e.keyCode === 229) return;
+            
             // Shift+Enter: evaluate highlighted text, or insert newline if no selection
             if (e.key === 'Enter' && e.shiftKey) {
                 const sel = window.getSelection();
@@ -3615,8 +3621,22 @@
             
         });
 
+        // Track IME/Compose key composition state to avoid disrupting input
+        let isComposing = false;
+        codeInput.addEventListener('compositionstart', () => {
+            isComposing = true;
+        });
+        codeInput.addEventListener('compositionend', () => {
+            isComposing = false;
+            // Apply highlighting after composition completes
+            applySyntaxHighlighting();
+            constrainHeights();
+        });
+
         // Handle input changes - apply syntax highlighting (output persists until next eval)
         codeInput.addEventListener('input', () => {
+            // Skip highlighting during IME/Compose input to avoid disrupting composition
+            if (isComposing) return;
             // Debounced highlighting will be applied automatically
             applySyntaxHighlighting();
             constrainHeights();

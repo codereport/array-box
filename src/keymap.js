@@ -587,6 +587,11 @@ export function createKeyboardHandler(inputElement, language) {
     }
     
     function handleKeyDown(e) {
+        // Don't interfere with IME/Compose key input
+        if (e.isComposing || e.keyCode === 229) {
+            return;
+        }
+        
         // Don't interfere with modifier keys or special keys
         if (e.key === 'Shift' || e.key === 'Control' || e.key === 'Alt' || e.key === 'Meta') {
             return;

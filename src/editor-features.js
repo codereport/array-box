@@ -615,6 +615,9 @@ export function createEditorFeaturesManager(elements, getLanguage, getInputText,
         
         // Also listen for keydown to expand proactively before the character is inserted
         codeInput.addEventListener('keydown', (e) => {
+            // Don't interfere with IME/Compose key input
+            if (e.isComposing || e.keyCode === 229) return;
+            
             // Only for printable characters (not modifiers, arrows, etc.)
             // Skip prefix keys (` and \) since they don't insert characters directly
             // in array languages - they activate prefix mode for special character input
