@@ -43,7 +43,6 @@
             color: var(--text-color);
             display: flex;
             justify-content: center;
-            align-items: center;
             min-height: 100vh;
             padding: 35px;
         }
@@ -54,7 +53,9 @@
             align-items: center;
             max-width: 875px;
             width: 100%;
-            transition: transform 0.2s ease-out, max-width 0.05s ease-out, margin-left 0.25s ease-out;
+            margin-top: auto;
+            margin-bottom: auto;
+            transition: max-width 0.05s ease-out, margin-left 0.25s ease-out;
         }
 
         .language-selector {
@@ -198,6 +199,9 @@
         .input-container {
             flex: 1;
             position: relative;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
         }
 
         .code-input {
@@ -213,8 +217,10 @@
             color: var(--text-color);
             white-space: pre;
             overflow-x: auto;
+            overflow-y: auto;
             line-height: 1.5;
             caret-color: #10b981;
+            flex-shrink: 0;
         }
 
         .code-input:focus {
@@ -253,10 +259,6 @@
         }
 
         .output {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
             margin-top: 24px;
             padding: 28px 35px;
             background: #1f2937;
@@ -267,12 +269,11 @@
             white-space: pre;
             word-wrap: break-word;
             display: none;
-            /* Dynamic max-height: viewport height minus space for input area (~300px) */
-            max-height: calc(100vh - 300px);
             overflow-y: auto;
             overflow-x: hidden;
             color: var(--text-color);
             line-height: 1.5;
+            flex-shrink: 0;
         }
 
         /* APL-family outputs need tight line-height for box-drawing characters */
@@ -3383,10 +3384,8 @@
                     output.style.overflowX = 'hidden';
                 }
                 
-                // Move container up by half the output height to keep input+output centered
-                const outputHeight = output.offsetHeight;
-                const margin = 24; // margin-top of output (scaled 1.75x)
-                container.style.transform = `translateY(-${(outputHeight + margin) / 2}px)`;
+                // Constrain heights so input + output fit in viewport
+                constrainHeights();
             });
         }
         
@@ -3445,17 +3444,59 @@
             });
         }
 
+        // Constrain input/output heights so everything fits in viewport.
+        // Priority: code editor keeps its natural size; output shrinks first.
+        // Output won't shrink below ~5 lines. Only then does the input shrink.
+        function constrainHeights() {
+            const containerMaxH = window.innerHeight - 70; // matches calc(100vh - 70px)
+            const gap = 24; // margin-top on output
+            const minOutputH = 375; // ~5 lines at 42px
+
+            // Reset any previous constraints
+            codeInput.style.maxHeight = '';
+            output.style.maxHeight = '';
+
+            if (!output.classList.contains('show')) {
+                // No output visible — only constrain the input
+                codeInput.style.maxHeight = containerMaxH + 'px';
+                return;
+            }
+
+            const inputH = codeInput.scrollHeight;
+            const outputH = output.scrollHeight;
+            const availableForOutput = containerMaxH - inputH - gap;
+
+            if (availableForOutput >= outputH) {
+                // Everything fits — no constraints needed
+                return;
+            }
+
+            if (availableForOutput >= minOutputH) {
+                // Shrink output to fit, input stays natural
+                output.style.maxHeight = availableForOutput + 'px';
+            } else {
+                // Output at minimum — give remaining space to input
+                output.style.maxHeight = minOutputH + 'px';
+                const availableForInput = containerMaxH - minOutputH - gap;
+                codeInput.style.maxHeight = Math.max(98, availableForInput) + 'px';
+            }
+        }
+
+        window.addEventListener('resize', constrainHeights);
+
         function hideOutput() {
             output.classList.remove('show');
             loadingIndicator.classList.remove('show');
-            container.style.transform = '';
             output.style.overflowX = 'hidden'; // Reset overflow when hiding
             output.style.textAlign = ''; // Reset centering (train trees)
+            output.style.maxHeight = ''; // Reset height constraint
+            codeInput.style.maxHeight = ''; // Reset height constraint
             lastResult = null;
             lastEvaluatedCode = null;
             // Recalculate width based on code only (no result)
             const codeText = getInputText();
             editorFeatures.handleAutoExpand();
+            constrainHeights();
         }
 
         // Initialize editor features (alignment, auto-expand)
@@ -3578,6 +3619,7 @@
         codeInput.addEventListener('input', () => {
             // Debounced highlighting will be applied automatically
             applySyntaxHighlighting();
+            constrainHeights();
         }, { passive: true });
         
         // Handle paste - ensure plain text only
@@ -4011,9 +4053,6 @@
             comboboxInput.value = '';
             filteredPrimitives = [];
             
-            // Restore proper vertical centering based on output visibility
-            restoreVerticalCentering();
-            
             // Focus code input and restore cursor position
             codeInput.focus();
             if (cursorPos !== null) {
@@ -4049,12 +4088,6 @@
             filterPrimitives('');
             comboboxInput.focus();
             
-            // Center the code editor + combo box vertically (like output does)
-            requestAnimationFrame(() => {
-                const comboboxHeight = primitiveCombobox.offsetHeight;
-                const margin = 24; // Same margin as output
-                container.style.transform = `translateY(-${(comboboxHeight + margin) / 2}px)`;
-            });
         }
         
         // Hide the combo box
@@ -4063,27 +4096,10 @@
             comboboxInput.value = '';
             filteredPrimitives = [];
             
-            // Restore vertical centering - if output is visible, center for output
-            restoreVerticalCentering();
-            
             // Restore focus to code input
             codeInput.focus();
         }
         
-        // Restore proper vertical centering based on whether output is visible
-        function restoreVerticalCentering() {
-            if (output.classList.contains('show')) {
-                // Output is visible - center input+output
-                requestAnimationFrame(() => {
-                    const outputHeight = output.offsetHeight;
-                    const margin = 24; // margin-top of output (scaled 1.75x)
-                    container.style.transform = `translateY(-${(outputHeight + margin) / 2}px)`;
-                });
-            } else {
-                // No output - reset transform
-                container.style.transform = '';
-            }
-        }
         
         // Check if combo box is visible
         function isComboboxVisible() {
