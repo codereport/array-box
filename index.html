@@ -2790,6 +2790,15 @@
             }
         });
 
+        languageButton.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const currentIndex = languageOrder.indexOf(currentLanguage);
+            const newIndex = e.deltaY < 0 
+                ? (currentIndex > 0 ? currentIndex - 1 : languageOrder.length - 1)
+                : (currentIndex < languageOrder.length - 1 ? currentIndex + 1 : 0);
+            switchLanguage(languageOrder[newIndex]);
+        });
+
         dropdownBackdrop.addEventListener('click', () => {
             closeLangPicker();
         });
@@ -3619,6 +3628,45 @@
                 return;
             }
             
+        });
+
+        codeInput.addEventListener('wheel', (e) => {
+            if (codeHistory.length === 0) return;
+            e.preventDefault();
+            
+            if (e.deltaY < 0) {
+                // Scroll up - go to previous (older) history entry
+                if (historyIndex === -1) {
+                    currentUnsavedCode = getInputText();
+                    historyIndex = codeHistory.length;
+                    
+                    if (codeHistory[codeHistory.length - 1] === currentUnsavedCode.trim()) {
+                        historyIndex--;
+                    }
+                }
+                
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    setInputText(codeHistory[historyIndex]);
+                    editorFeatures.handleAutoExpand();
+                    hideOutput();
+                }
+            } else {
+                // Scroll down - go to next (newer) history entry
+                if (historyIndex === -1) return;
+                
+                historyIndex++;
+                
+                if (historyIndex >= codeHistory.length) {
+                    historyIndex = -1;
+                    setInputText(currentUnsavedCode);
+                    currentUnsavedCode = '';
+                } else {
+                    setInputText(codeHistory[historyIndex]);
+                }
+                editorFeatures.handleAutoExpand();
+                hideOutput();
+            }
         });
 
         // Track IME/Compose key composition state to avoid disrupting input
