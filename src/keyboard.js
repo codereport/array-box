@@ -939,14 +939,13 @@ const defaultStyles = `
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    transform-origin: center center;
     display: none;
     align-items: center;
     justify-content: center;
     gap: 42px;
     z-index: 10000;
     pointer-events: none;
-    max-width: 95vw;
-    max-height: 95vh;
     overflow: visible;
 }
 
@@ -968,7 +967,6 @@ const defaultStyles = `
     border-radius: 21px;
     padding: 28px;
     box-shadow: 0 14px 56px rgba(0, 0, 0, 0.4);
-    max-width: 95vw;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     pointer-events: auto;
 }
@@ -1333,7 +1331,6 @@ const defaultStyles = `
 /* Category view styles */
 .array-keyboard-overlay.category-view {
     width: 1221px;
-    max-width: 95vw;
 }
 
 .array-keyboard-category-container {
@@ -1863,11 +1860,39 @@ export class ArrayKeyboard {
      */
     _setupResizeHandler() {
         this.resizeHandler = () => {
+            if (this.isVisible()) {
+                this._updateScale();
+            }
             if (this.namesVisible) {
                 this._updateLeaderLines();
             }
         };
         window.addEventListener('resize', this.resizeHandler);
+    }
+    
+    /**
+     * Calculate and apply a CSS scale transform so the keyboard + tooltip
+     * fits within the viewport on smaller screens.
+     */
+    _updateScale() {
+        if (!this.wrapper) return;
+        
+        // Temporarily remove scale to measure natural size
+        this.wrapper.style.transform = 'translate(-50%, -50%)';
+        
+        const rect = this.wrapper.getBoundingClientRect();
+        const naturalWidth = rect.width;
+        const naturalHeight = rect.height;
+        
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        
+        // Use 95% of viewport as the target area (matching the old max-width: 95vw intent)
+        const scaleX = (viewportWidth * 0.95) / naturalWidth;
+        const scaleY = (viewportHeight * 0.95) / naturalHeight;
+        const scale = Math.min(scaleX, scaleY, 1); // Never scale up, only down
+        
+        this.wrapper.style.transform = `translate(-50%, -50%) scale(${scale})`;
     }
     
     /**
@@ -2759,10 +2784,16 @@ export class ArrayKeyboard {
         this._positionTooltip(targetEl);
         
         // Show tooltip
+        const wasHidden = !this.tooltip.classList.contains('show');
         this.tooltip.classList.add('show');
         
         // Make links clickable
         this.tooltip.style.pointerEvents = 'auto';
+        
+        // Recalculate scale if tooltip just became visible (adds width to wrapper)
+        if (wasHidden) {
+            this._updateScale();
+        }
     }
     
     /**
@@ -2787,6 +2818,7 @@ export class ArrayKeyboard {
             this.tooltipTimeout = null;
         }
         
+        const wasVisible = this.tooltip.classList.contains('show');
         this.tooltip.classList.remove('show');
         this.tooltip.style.pointerEvents = 'none';
         this.currentTooltipGlyph = null;
@@ -2795,6 +2827,11 @@ export class ArrayKeyboard {
         // Only reset position cache when explicitly requested (e.g., keyboard hidden)
         if (resetPosition) {
             this.tooltipLeftPos = null;
+        }
+        
+        // Recalculate scale if tooltip was visible (wrapper is now narrower)
+        if (wasVisible && this.isVisible()) {
+            this._updateScale();
         }
     }
     
@@ -4395,6 +4432,7 @@ export class ArrayKeyboard {
     show() {
         if (this.wrapper) {
             this.wrapper.classList.add('show');
+            this._updateScale();
         }
         // Hide main app container when keyboard is shown
         const mainContainer = document.querySelector('.container');
