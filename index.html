@@ -3864,55 +3864,27 @@
         // Get syntax class for a glyph based on current language's syntax rules
         function getSyntaxClassForGlyph(glyph) {
             const config = keyboardConfigs[currentLanguage];
-            if (!config || !config.syntaxRules) return '';
+            if (!config) return '';
             
-            const rules = config.syntaxRules;
+            // Check glyphCategories first (source of truth for keyboard/character set coloring)
+            if (config.glyphCategories) {
+                for (const categoryData of Object.values(config.glyphCategories)) {
+                    if (categoryData.glyphs && categoryData.glyphs.includes(glyph)) {
+                        return categoryData.syntaxClass || 'syntax-default';
+                    }
+                }
+            }
             
             // Handle compound inverse glyphs for Uiua (°X and ⌝X patterns)
             if (currentLanguage === 'uiua' && glyph.length > 1) {
                 const firstChar = glyph[0];
                 if (firstChar === '°' || firstChar === '⌝') {
-                    return 'syntax-uiua-modifier-monadic';  // 1-modifiers for Uiua
-                }
-            }
-            
-            // Shared classifications
-            if (rules.comments && rules.comments.includes(glyph)) {
-                return 'syntax-comment';
-            }
-            if (rules.constants && rules.constants.includes(glyph)) {
-                return 'syntax-number';
-            }
-            
-            // Language-specific classifications
-            if (currentLanguage === 'uiua') {
-                // Uiua: monadic/dyadic functions AND monadic/dyadic modifiers
-                if (rules.monadic && rules.monadic.includes(glyph)) {
-                    return 'syntax-uiua-function-monadic';
-                }
-                if (rules.functions && rules.functions.includes(glyph)) {
-                    return 'syntax-uiua-function-dyadic';
-                }
-                if (rules.dyadic && rules.dyadic.includes(glyph)) {
                     return 'syntax-uiua-modifier-monadic';
                 }
-                if (rules.modifier && rules.modifier.includes(glyph)) {
-                    return 'syntax-uiua-modifier-dyadic';
-                }
-            } else {
-                // Other languages: functions + monadic/dyadic modifiers
-                if (rules.functions && rules.functions.includes(glyph)) {
-                    return 'syntax-function';
-                }
-                if (rules.monadic && rules.monadic.includes(glyph)) {
-                    return 'syntax-modifier-monadic';
-                }
-                if (rules.dyadic && rules.dyadic.includes(glyph)) {
-                    return 'syntax-modifier-dyadic';
-                }
             }
             
-            return '';
+            // Fall back to syntaxRules
+            return getSyntaxClass(glyph, currentLanguage) || '';
         }
         
         // Build list of primitives for current language
@@ -4403,8 +4375,8 @@
             
             const escapeDesc = (text) => escapeDescForF1(text, fontFamily);
             
-            // Get syntax class for glyph coloring
-            const syntaxClass = getSyntaxClass(glyph, currentLanguage);
+            // Get syntax class for glyph coloring (matches keyboard/character set)
+            const syntaxClass = getSyntaxClassForGlyph(glyph);
             
             let html = '<div class="f1-doc-tooltip-header">';
             html += `<span class="f1-doc-tooltip-glyph ${syntaxClass}" style="font-family: ${fontFamily}">${escapeHtml(glyph)}</span>`;
@@ -4424,7 +4396,7 @@
                         html += `<div class="f1-doc-tooltip-section-desc">${escapeDesc(overload.description)}</div>`;
                     }
                     if (overload.example) {
-                        html += `<div class="f1-doc-tooltip-example" style="font-family: ${fontFamily}">${escapeHtml(overload.example)}</div>`;
+                        html += `<div class="f1-doc-tooltip-example" style="font-family: ${fontFamily}">${highlightCode(overload.example, currentLanguage)}</div>`;
                     }
                     html += '</div>';
                 }
@@ -4437,7 +4409,7 @@
                         html += `<div class="f1-doc-tooltip-section-desc">${escapeDesc(doc.monad.description)}</div>`;
                     }
                     if (doc.monad.example) {
-                        html += `<div class="f1-doc-tooltip-example" style="font-family: ${fontFamily}">${escapeHtml(doc.monad.example)}</div>`;
+                        html += `<div class="f1-doc-tooltip-example" style="font-family: ${fontFamily}">${highlightCode(doc.monad.example, currentLanguage)}</div>`;
                     }
                     html += '</div>';
                 }
@@ -4448,7 +4420,7 @@
                         html += `<div class="f1-doc-tooltip-section-desc">${escapeDesc(doc.dyad.description)}</div>`;
                     }
                     if (doc.dyad.example) {
-                        html += `<div class="f1-doc-tooltip-example" style="font-family: ${fontFamily}">${escapeHtml(doc.dyad.example)}</div>`;
+                        html += `<div class="f1-doc-tooltip-example" style="font-family: ${fontFamily}">${highlightCode(doc.dyad.example, currentLanguage)}</div>`;
                     }
                     html += '</div>';
                 }
@@ -4463,7 +4435,7 @@
                     html += `<div class="f1-doc-tooltip-desc">${escapeDesc(shortDesc)}</div>`;
                 }
                 if (doc.example) {
-                    html += `<div class="f1-doc-tooltip-example" style="font-family: ${fontFamily}">${escapeHtml(doc.example)}</div>`;
+                    html += `<div class="f1-doc-tooltip-example" style="font-family: ${fontFamily}">${highlightCode(doc.example, currentLanguage)}</div>`;
                 }
             }
             

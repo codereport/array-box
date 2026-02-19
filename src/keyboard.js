@@ -21,6 +21,8 @@
  *   keyboard.toggleNames(); // Toggle leader line labels (press ? when visible)
  */
 
+import { highlightCode } from './syntax.js';
+
 // Re-export documentation for hover tooltips
 export { bqnGlyphDocs, bqnDocsMeta, getBqnHoverContent } from './bqn-docs.js';
 export { uiuaGlyphDocs, uiuaDocsMeta, getUiuaHoverContent } from './uiua-docs.js';
@@ -2693,8 +2695,8 @@ export class ArrayKeyboard {
         // Build tooltip content
         let html = '<div class="array-keyboard-tooltip-header">';
         
-        // Glyph with syntax coloring and language font
-        const syntaxClass = this._getSyntaxClass(glyph);
+        // Glyph with syntax coloring and language font (use category-aware class to match keyboard)
+        const syntaxClass = this._getNameLabelSyntaxClass(glyph);
         html += `<span class="array-keyboard-tooltip-glyph ${syntaxClass}" style="font-family: ${this.fontFamily}">${glyph}</span>`;
         
         // Glyph indicator (for shift cycling)
@@ -2721,7 +2723,7 @@ export class ArrayKeyboard {
                     html += `<div class="array-keyboard-tooltip-section-desc">${this._escapeHtml(overload.description)}</div>`;
                 }
                 if (overload.example) {
-                    html += `<div class="array-keyboard-tooltip-example" style="font-family: ${this.fontFamily}">${this._escapeHtml(overload.example)}</div>`;
+                    html += `<div class="array-keyboard-tooltip-example" style="font-family: ${this.fontFamily}">${highlightCode(overload.example, this.language)}</div>`;
                 }
                 html += '</div>';
             }
@@ -2739,7 +2741,7 @@ export class ArrayKeyboard {
                 }
                 // Show monad example if available
                 if (doc.monad.example) {
-                    html += `<div class="array-keyboard-tooltip-example" style="font-family: ${this.fontFamily}">${this._escapeHtml(doc.monad.example)}</div>`;
+                    html += `<div class="array-keyboard-tooltip-example" style="font-family: ${this.fontFamily}">${highlightCode(doc.monad.example, this.language)}</div>`;
                 }
                 html += '</div>';
             }
@@ -2752,7 +2754,7 @@ export class ArrayKeyboard {
                 }
                 // Show dyad example if available
                 if (doc.dyad.example) {
-                    html += `<div class="array-keyboard-tooltip-example" style="font-family: ${this.fontFamily}">${this._escapeHtml(doc.dyad.example)}</div>`;
+                    html += `<div class="array-keyboard-tooltip-example" style="font-family: ${this.fontFamily}">${highlightCode(doc.dyad.example, this.language)}</div>`;
                 }
                 html += '</div>';
             }
@@ -2769,7 +2771,7 @@ export class ArrayKeyboard {
             
             // Example (with language font for code) - for Uiua style
             if (doc.example) {
-                html += `<div class="array-keyboard-tooltip-example" style="font-family: ${this.fontFamily}">${this._escapeHtml(doc.example)}</div>`;
+                html += `<div class="array-keyboard-tooltip-example" style="font-family: ${this.fontFamily}">${highlightCode(doc.example, this.language)}</div>`;
             }
         }
         
