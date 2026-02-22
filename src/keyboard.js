@@ -470,7 +470,7 @@ export const tinyaplGlyphNames = {
     '⌿': 'replicate',
     ',': 'ravel / laminate',
     '⍪': 'join / catenate',
-    '⊖': 'reverse / rotate',
+    '⌽': 'reverse / rotate',
     '⍉': 'transpose / inverted table',
     
     // Lookup
