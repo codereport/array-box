@@ -1981,7 +1981,7 @@
     <script type="module">
         // Import from modular files
         import { createKeyboardHandler, bqnKeymap, aplKeymap, kapKeymap, tinyaplKeymap, tinyaplKeyboard, tinyaplGlyphs, uiuaGlyphs, jGlyphs, insertText } from './src/keymap.js?v=26';
-        import { syntaxRules, highlightCode, escapeHtml, getSyntaxClass, isAplTrainTree, highlightTrainTreeGlyphs } from './src/syntax.js?v=26';
+        import { syntaxRules, highlightCode, escapeHtml, getSyntaxClass, isTrainTree, highlightTrainTreeGlyphs } from './src/syntax.js?v=26';
         import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames, jGlyphNames, tinyaplGlyphNames, bqnGlyphDocs, uiuaGlyphDocs, jGlyphDocs, kapGlyphDocs, aplGlyphDocs, tinyaplGlyphDocs } from './src/keyboard.js?v=26';
         import { createEditorFeaturesManager, toggleComment, commentTokens, autoExpandWidthForCodeAndResult } from './src/editor-features.js?v=2';
         import { translatePrimitives, translateArrayLiterals, clearTranslationCache } from './src/primitive-translate.js?v=3';
@@ -3343,12 +3343,12 @@
                 setInputText(result.formatted.trim());
             }
             
-            // Use HTML rendering if available (TinyAPL fancy arrays), or APL train tree glyph highlighting
+            // Use HTML rendering if available (TinyAPL fancy arrays), or train tree glyph highlighting
             if (result.outputHtml) {
                 output.innerHTML = result.outputHtml;
                 output.style.textAlign = '';
-            } else if (currentLanguage === 'apl' && isAplTrainTree(result.output)) {
-                output.innerHTML = `<span style="display:inline-block;text-align:left">${highlightTrainTreeGlyphs(result.output)}</span>`;
+            } else if ((currentLanguage === 'apl' || currentLanguage === 'j') && isTrainTree(result.output)) {
+                output.innerHTML = `<span style="display:inline-block;text-align:left">${highlightTrainTreeGlyphs(result.output, currentLanguage)}</span>`;
                 output.style.textAlign = 'center';
             } else {
                 output.textContent = result.output;

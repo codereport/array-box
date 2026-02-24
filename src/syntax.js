@@ -710,22 +710,49 @@ export function getSyntaxClass(symbol, language) {
 }
 
 /**
- * Detect if output looks like an APL train tree (box-drawing from ]boxing -trains=tree)
+ * Detect if output looks like a train tree (box-drawing characters from ]boxing or (9!:3) 4)
  */
-export function isAplTrainTree(text) {
+export function isTrainTree(text) {
     if (!text || typeof text !== 'string') return false;
     return /[┌┐└┘─┼│├┤┬┴]/.test(text);
 }
 
+
 /**
- * Highlight only APL glyphs in text (for train tree output). Box-drawing and other chars stay plain.
+ * Highlight primitives in train tree output. Box-drawing and whitespace stay plain.
+ * Handles J multi-char tokens (e.g. i., @:, NB.) as well as single-char glyphs.
  */
-export function highlightTrainTreeGlyphs(text) {
+export function highlightTrainTreeGlyphs(text, language = 'apl') {
     if (!text || typeof text !== 'string') return '';
+    const rules = syntaxRules[language];
     const parts = [];
     for (let i = 0; i < text.length; i++) {
+        // For J, try multi-char tokens first (3-char, then 2-char)
+        if (language === 'j' && rules && rules.multiChar) {
+            let matched = false;
+            for (const len of [3, 2]) {
+                if (i + len > text.length) continue;
+                const substr = text.substring(i, i + len);
+                let cls = null;
+                if (rules.multiChar.functions && rules.multiChar.functions.includes(substr)) {
+                    cls = 'syntax-function';
+                } else if (rules.multiChar.monadic && rules.multiChar.monadic.includes(substr)) {
+                    cls = 'syntax-modifier-monadic';
+                } else if (rules.multiChar.dyadic && rules.multiChar.dyadic.includes(substr)) {
+                    cls = 'syntax-modifier-dyadic';
+                }
+                if (cls) {
+                    parts.push(`<span class="${cls}">${escapeHtml(substr)}</span>`);
+                    i += len - 1;
+                    matched = true;
+                    break;
+                }
+            }
+            if (matched) continue;
+        }
+
         const c = text[i];
-        const cls = getSyntaxClass(c, 'apl');
+        const cls = getSyntaxClass(c, language);
         if (cls !== 'syntax-default') {
             parts.push(`<span class="${cls}">${escapeHtml(c)}</span>`);
         } else {
@@ -741,6 +768,6 @@ export default {
     highlightCode,
     escapeHtml,
     getSyntaxClass,
-    isAplTrainTree,
+    isTrainTree,
     highlightTrainTreeGlyphs
 };
