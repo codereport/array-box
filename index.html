@@ -286,6 +286,9 @@
         .output.kap {
             line-height: 1;
         }
+        .output.j {
+            line-height: 1.13;
+        }
 
         /* TinyAPL fancy array tables */
         .output table.tinyapl-vector,
@@ -1673,6 +1676,7 @@
                                         jModule = Module;
                                         jReady = true;
                                         jLoading = false;
+                                        
                                         console.log('[J] WASM loaded successfully!');
                                         resolve(true);
                                     } catch (error) {
@@ -1752,8 +1756,9 @@
                 }
                 
                 try {
-                    // Execute code using J wrapped functions
-                    jsetstr('CODE_jrx_', code);
+                    // Prepend J display settings (tree display + Unicode box chars)
+                    const jInit = "9!:7 {. Boxes_j_\n(9!:3) 4\n";
+                    jsetstr('CODE_jrx_', jInit + code);
                     let result = jdo1("(0!:101) CODE_jrx_");
                     
                     // Clean up output: remove echoed input lines
@@ -1764,7 +1769,7 @@
                     }
                     
                     // Build set of trimmed code lines to identify echoed input
-                    const codeLines = new Set(code.split('\n').map(l => l.trim()).filter(l => l));
+                    const codeLines = new Set((jInit + code).split('\n').map(l => l.trim()).filter(l => l));
                     let lines = result.split('\n');
                     lines = lines.filter(line => {
                         const trimmed = line.trim();
@@ -1773,7 +1778,7 @@
                         if (codeLines.has(trimmed)) return false;
                         return true;
                     });
-                    result = lines.join('\n').trim();
+                    result = lines.join('\n').trimEnd();
                     
                     // Remove leading blank lines (lines containing only whitespace)
                     result = result.replace(/^(?:[ \t]*\r?\n)+/, '');
