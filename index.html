@@ -286,7 +286,7 @@
         .output.kap {
             line-height: 1;
         }
-        .output.j {
+        .output.j, .output.bqn {
             line-height: 1.13;
         }
 
@@ -2284,6 +2284,24 @@
                             })
                         }).catch(() => {}); // Ignore errors if server not running
                         
+                        // Tacit expression detection: if output matches input, it's a
+                        // tacit function/modifier that just echoes itself. Auto-run
+                        // )explain to show its train tree.
+                        if (result.success && result.output.trim() === code.trim()) {
+                            try {
+                                const explainResult = await window.cbqnWasm.eval(`)explain ${code.trim()}`);
+                                if (explainResult.success && explainResult.output.trim()) {
+                                    return {
+                                        success: true,
+                                        output: explainResult.output,
+                                        isBqnExplain: true
+                                    };
+                                }
+                            } catch (e) {
+                                // Fall through to original result
+                            }
+                        }
+                        
                         return result;
                     } catch (error) {
                         const duration = Math.round(performance.now() - startTime);
@@ -3349,6 +3367,9 @@
                 output.style.textAlign = '';
             } else if ((currentLanguage === 'apl' || currentLanguage === 'j') && isTrainTree(result.output)) {
                 output.innerHTML = `<span style="display:inline-block;text-align:left">${highlightTrainTreeGlyphs(result.output, currentLanguage)}</span>`;
+                output.style.textAlign = 'center';
+            } else if (result.isBqnExplain) {
+                output.innerHTML = `<span style="display:inline-block;text-align:left">${highlightTrainTreeGlyphs(result.output, 'bqn')}</span>`;
                 output.style.textAlign = 'center';
             } else {
                 output.textContent = result.output;
