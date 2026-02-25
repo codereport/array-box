@@ -106,6 +106,31 @@ const syntaxRules = {
         dyadic: ['@', '&', '`', ':'],
         constants: [],
         comments: [],
+        multiChar: {
+            functions: [
+                '{.', '}.', '{:', '}:', ',.', ',:', '{::',
+                '<.', '>.', '+.', '*.', '-.', '%.', '^.', '|.',
+                '$.', '~.', '#.', '#:',
+                '<:', '>:', '+:', '*:', '-:', '%:', '~:', '=.',
+                '?.', '?:', '".', '":', '!.',
+                'i.', 'i:', 'j.', 'o.', 'p.', 'p:', 'q.', 'q:', 'r.',
+                'A.', 'C.', 'e.', 'E.', 'I.', 'L.', 's:', 'S:', 'u:', 'x:',
+                '$:', '[:', '_.'
+            ],
+            monadic: [
+                '/.', '\\.',
+                'b.', 'f.', 'M.',
+                't.', 't:'
+            ],
+            dyadic: [
+                '@.', '@:', '&.', '&:',
+                '!:',
+                'd.', 'D.', 'D:',
+                'F.', 'F:', 'F..', 'F.:', 'F:.', 'F::',
+                'H.', 'L:', 'S:', 'T.',
+                '^:', '`:', '".'
+            ],
+        },
     },
 };
 
@@ -134,6 +159,16 @@ function getCharColor(char, lang) {
     }
     
     return COLORS.fg;
+}
+
+// Get color for a J multi-char token
+function getMultiCharColor(token, lang) {
+    const rules = syntaxRules[lang];
+    if (!rules || !rules.multiChar) return null;
+    if (rules.multiChar.functions && rules.multiChar.functions.includes(token)) return COLORS.cyan;
+    if (rules.multiChar.monadic && rules.multiChar.monadic.includes(token)) return COLORS.green;
+    if (rules.multiChar.dyadic && rules.multiChar.dyadic.includes(token)) return COLORS.yellow;
+    return null;
 }
 
 // Tokenize a line with pattern-based syntax highlighting
@@ -198,6 +233,23 @@ function tokenizeLine(line, lang) {
             continue;
         }
         
+        // For J, try multi-char tokens (3-char, then 2-char) before single-char
+        if (lang === 'j' && syntaxRules.j.multiChar) {
+            let matched = false;
+            for (const len of [3, 2]) {
+                if (i + len > line.length) continue;
+                const substr = line.substring(i, i + len);
+                const color = getMultiCharColor(substr, 'j');
+                if (color) {
+                    tokens.push({ text: substr, color });
+                    i += len;
+                    matched = true;
+                    break;
+                }
+            }
+            if (matched) continue;
+        }
+
         // Single character - use character-based coloring
         const char = line[i];
         tokens.push({ text: char, color: getCharColor(char, lang) });
@@ -421,8 +473,8 @@ async function generateOGImage(code, lang, result = null, resultHtml = null) {
     const gap = 20;
     
     // TinyAPL uses tighter line-height (matching .output.tinyapl CSS)
-    // Dyalog APL result box uses 1.0 to match in-browser .output.apl; train trees get letterSpacing too
-    const isTreeResult = lang === 'apl' && displayResult && isAplTrainTree(displayResult);
+    // APL result box uses 1.0 to match in-browser .output.apl; train trees get letterSpacing too
+    const isTreeResult = displayResult && isTrainTree(displayResult);
     const resultLineHeight = lang === 'tinyapl' ? 0.85 : lang === 'apl' ? 1.0 : 1.2;
     
     // Header dimensions (logo 80px + gap + text)
@@ -607,12 +659,20 @@ async function generateOGImage(code, lang, result = null, resultHtml = null) {
             color: COLORS.fg,
             fontFamily: 'ArrayLang',
             lineHeight: resultLineHeight,
-            whiteSpace: 'pre',
-            textAlign: 'left',  // Left-align to preserve box-drawing structure
+            textAlign: 'left',
         };
         if (isTreeResult) {
             resultInnerStyle.letterSpacing = '-0.5px';
+            resultInnerStyle.display = 'flex';
+            resultInnerStyle.flexDirection = 'column';
+            resultInnerStyle.alignItems = 'flex-start';
+            resultInnerStyle.gap = 0;
+        } else {
+            resultInnerStyle.whiteSpace = 'pre';
         }
+        const resultChildren = isTreeResult
+            ? createColoredTextElements(displayResult, lang, true)
+            : displayResult;
         rightSide = {
             type: 'div',
             props: {
@@ -629,7 +689,7 @@ async function generateOGImage(code, lang, result = null, resultHtml = null) {
                     type: 'div',
                     props: {
                         style: resultInnerStyle,
-                        children: displayResult,
+                        children: resultChildren,
                     },
                 },
             },
@@ -707,8 +767,8 @@ function trimTrailingWhitespace(text) {
     return text.split('\n').map(line => line.trimEnd()).join('\n');
 }
 
-/** Detect APL train tree output (box-drawing from ]boxing -trains=tree) */
-function isAplTrainTree(text) {
+/** Detect train tree output (box-drawing chars from APL ]boxing, J (9!:3)4, BQN )explain) */
+function isTrainTree(text) {
     if (!text || typeof text !== 'string') return false;
     return /[┌┐└┘─┼│├┤┬┴]/.test(text);
 }
@@ -743,8 +803,8 @@ async function generateVerticalImage(code, lang, result = null, resultHtml = nul
     const gap = 20;
     
     // TinyAPL uses tighter line-height (matching .output.tinyapl CSS)
-    // Dyalog APL result box uses 1.0 to match in-browser .output.apl; train trees get letterSpacing too
-    const isTreeResult = lang === 'apl' && displayResult && isAplTrainTree(displayResult);
+    // APL result box uses 1.0 to match in-browser .output.apl; train trees get letterSpacing too
+    const isTreeResult = displayResult && isTrainTree(displayResult);
     const resultLineHeight = lang === 'tinyapl' ? 0.85 : lang === 'apl' ? 1.0 : 1.2;
     
     // Header dimensions - logo 60px, text ~28px fits within logo height
@@ -882,10 +942,9 @@ async function generateVerticalImage(code, lang, result = null, resultHtml = nul
             },
         };
     } else if (displayResult) {
-        // APL train tree: use syntax-colored glyphs (same as in-browser); otherwise plain lines
-        const useColoredResult = lang === 'apl' && isAplTrainTree(displayResult);
-        const resultLineElements = useColoredResult
-            ? createColoredTextElements(displayResult, 'apl', true)
+        // Train tree: use syntax-colored glyphs (same as in-browser); otherwise plain lines
+        const resultLineElements = isTreeResult
+            ? createColoredTextElements(displayResult, lang, true)
             : displayResult.split('\n').map((line, idx) => ({
                 type: 'div',
                 props: {
