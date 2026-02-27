@@ -84,6 +84,7 @@ export const syntaxRules = {
         numberPattern: /^¯?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?/i
     },
     j: {
+        stringDelimiter: "'",
         // Functions (cyan) - J verbs (single character)
         functions: [
             '+', '-', '*', '%', '^', '$', '~', '|', ',', ';', '#',
@@ -187,7 +188,7 @@ export const syntaxRules = {
     },
     kap: {
         // String delimiter (single quote) - Kap uses ' for strings like APL
-        stringDelimiter: "'",
+        stringDelimiter: '"',
         // Functions (cyan) - scalar and structural functions
         functions: [
             // Scalar functions (arithmetic, comparison, logical)
@@ -342,10 +343,10 @@ export function highlightCode(text, language) {
             continue;
         }
         
-        // Check for strings (skip for J language - strings are heavily used for functions)
+        // Check for strings
         // Support both single stringDelimiter and array of stringDelimiters
         const stringDelimiters = rules.stringDelimiters || (rules.stringDelimiter ? [rules.stringDelimiter] : []);
-        if (language !== 'j' && stringDelimiters.includes(char)) {
+        if (stringDelimiters.includes(char)) {
             const delimiter = char;
             let stringEnd = i + 1;
             let isComplete = false;

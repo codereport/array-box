@@ -28,7 +28,7 @@ export const primitiveGroups = {
         bqn: '"',
         uiua: '"',
         j: "'",
-        kap: "'",
+        kap: '"',
         tinyapl: '"'
     },
     
@@ -270,6 +270,26 @@ export const primitiveGroups = {
         j: '~',
         kap: '⍨',
         tinyapl: '⍨'
+    },
+
+    // assign
+    assign: {
+        apl: '←',
+        bqn: '←',
+        uiua: '←',
+        j: '=.',
+        kap: '⇐',
+        tinyapl: '←'
+    }, 
+
+    // before
+    before: {
+        apl: '⍛',
+        bqn: '⊸',
+        uiua: '⊸',
+        j: null,
+        kap: '⍛',
+        tinyapl: '⊸'
     }
 };
 
