@@ -4399,25 +4399,35 @@ export class ArrayKeyboard {
         const wasVisible = this.isVisible();
         const namesWereVisible = this.namesVisible;
         
-        if (this.spacer) {
-            this.spacer.remove();
-        }
-        if (this.namesOverlay) {
-            this.namesOverlay.remove();
-        }
-        if (this.tooltip) {
-            this.tooltip.remove();
-        }
+        const oldSpacer = this.spacer;
+        const oldNamesOverlay = this.namesOverlay;
+        const oldTooltip = this.tooltip;
         
-        this._createOverlay();
-        this._createNamesOverlay();
-        this._createTooltip();
-        
-        if (wasVisible) {
-            this.show();
-            if (namesWereVisible) {
-                this.showNames();
+        const doSwap = () => {
+            this._createOverlay();
+            this._createNamesOverlay();
+            this._createTooltip();
+            
+            if (oldSpacer) oldSpacer.remove();
+            if (oldNamesOverlay) oldNamesOverlay.remove();
+            if (oldTooltip) oldTooltip.remove();
+            
+            if (wasVisible) {
+                this.show();
+                if (namesWereVisible) {
+                    this.showNames();
+                }
             }
+        };
+        
+        if (this.logoPath) {
+            // Pre-decode the new logo image before swapping DOM so it renders
+            // immediately with no blank frame between old and new logo
+            const preload = new Image();
+            preload.src = this.logoPath;
+            preload.decode().then(doSwap).catch(doSwap);
+        } else {
+            doSwap();
         }
     }
     
@@ -4492,8 +4502,9 @@ export class ArrayKeyboard {
         // Remove old overlay and create new one
         if (this.spacer) {
             const wasVisible = this.isVisible();
-            this.spacer.remove();
+            const oldSpacer = this.spacer;
             this._createOverlay();
+            oldSpacer.remove();
             if (wasVisible) this.show();
         }
     }
@@ -4506,8 +4517,9 @@ export class ArrayKeyboard {
         // Refresh display
         if (this.spacer) {
             const wasVisible = this.isVisible();
-            this.spacer.remove();
+            const oldSpacer = this.spacer;
             this._createOverlay();
+            oldSpacer.remove();
             if (wasVisible) this.show();
         }
     }
@@ -4560,16 +4572,16 @@ export class ArrayKeyboard {
         this.glyphNames = glyphNames;
         
         // Recreate names overlay
-        if (this.namesOverlay) {
-            this.namesOverlay.remove();
-        }
+        const oldNamesOverlay = this.namesOverlay;
         this._createNamesOverlay();
+        if (oldNamesOverlay) oldNamesOverlay.remove();
         
         // Update header hint
         if (this.spacer) {
             const wasVisible = this.isVisible();
-            this.spacer.remove();
+            const oldSpacer = this.spacer;
             this._createOverlay();
+            oldSpacer.remove();
             if (wasVisible) this.show();
         }
     }
@@ -4582,16 +4594,16 @@ export class ArrayKeyboard {
         this.glyphDocs = glyphDocs;
         
         // Recreate tooltip
-        if (this.tooltip) {
-            this.tooltip.remove();
-        }
+        const oldTooltip = this.tooltip;
         this._createTooltip();
+        if (oldTooltip) oldTooltip.remove();
         
         // Recreate overlay to re-add hover handlers
         if (this.spacer) {
             const wasVisible = this.isVisible();
-            this.spacer.remove();
+            const oldSpacer = this.spacer;
             this._createOverlay();
+            oldSpacer.remove();
             if (wasVisible) this.show();
         }
     }
