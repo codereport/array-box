@@ -1847,6 +1847,7 @@ export class ArrayKeyboard {
         this.navCol = null;
         this.navActive = false;
         this.navGlyphIndex = 0; // Index of glyph within current key (for Shift cycling)
+        this._recreateGeneration = 0;
         
         this._injectStyles();
         this._createWrapper();
@@ -4363,7 +4364,11 @@ export class ArrayKeyboard {
         const oldNamesOverlay = this.namesOverlay;
         const oldTooltip = this.tooltip;
         
+        const generation = ++this._recreateGeneration;
+        
         const doSwap = () => {
+            if (generation !== this._recreateGeneration) return;
+            
             this._createOverlay();
             this._createNamesOverlay();
             this._createTooltip();
