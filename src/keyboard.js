@@ -21,7 +21,7 @@
  *   keyboard.toggleNames(); // Toggle leader line labels (press ? when visible)
  */
 
-import { highlightCode } from './syntax.js';
+import { highlightCode, getSyntaxClass } from './syntax.js';
 
 // Re-export documentation for hover tooltips
 export { bqnGlyphDocs, bqnDocsMeta, getBqnHoverContent } from './bqn-docs.js';
@@ -1911,51 +1911,11 @@ export class ArrayKeyboard {
     
     /**
      * Get syntax class for a symbol
-     * Returns language-specific classes for Uiua, generic classes for other languages
+     * Delegates to the canonical getSyntaxClass in syntax.js
      */
     _getSyntaxClass(symbol) {
         if (!symbol) return 'empty';
-        
-        const rules = this.syntaxRules;
-        if (!rules) return 'syntax-default';
-        
-        // Shared classifications
-        if (rules.comments && rules.comments.includes(symbol)) {
-            return 'syntax-comment';
-        }
-        if (rules.constants && rules.constants.includes(symbol)) {
-            return 'syntax-number';
-        }
-        
-        // Language-specific classifications
-        if (this.language === 'uiua') {
-            // Uiua: monadic/dyadic functions AND monadic/dyadic modifiers
-            if (rules.monadic && rules.monadic.includes(symbol)) {
-                return 'syntax-uiua-function-monadic';
-            }
-            if (rules.functions && rules.functions.includes(symbol)) {
-                return 'syntax-uiua-function-dyadic';
-            }
-            if (rules.dyadic && rules.dyadic.includes(symbol)) {
-                return 'syntax-uiua-modifier-monadic';
-            }
-            if (rules.modifier && rules.modifier.includes(symbol)) {
-                return 'syntax-uiua-modifier-dyadic';
-            }
-        } else {
-            // Other languages: functions + monadic/dyadic modifiers
-            if (rules.functions && rules.functions.includes(symbol)) {
-                return 'syntax-function';
-            }
-            if (rules.monadic && rules.monadic.includes(symbol)) {
-                return 'syntax-modifier-monadic';
-            }
-            if (rules.dyadic && rules.dyadic.includes(symbol)) {
-                return 'syntax-modifier-dyadic';
-            }
-        }
-        
-        return 'syntax-default';
+        return getSyntaxClass(symbol, this.language.toLowerCase());
     }
     
     /**
