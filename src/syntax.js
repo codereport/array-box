@@ -332,7 +332,10 @@ export function highlightCode(text, language) {
         const char = text[i];
         
         // Check for numbers first (including negative numbers with ¯ or _)
-        const numberMatch = remainingText.match(rules.numberPattern);
+        // Only match if the digit is NOT continuing an identifier (e.g. IO, var2)
+        const prevChar = i > 0 ? text[i - 1] : '';
+        const isPartOfIdentifier = /[A-Za-z0-9_]/.test(prevChar);
+        const numberMatch = !isPartOfIdentifier && remainingText.match(rules.numberPattern);
         if (numberMatch) {
             tokens.push({
                 type: 'number',
