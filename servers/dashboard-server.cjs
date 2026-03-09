@@ -63,6 +63,11 @@ const dashboardHTML = `<!DOCTYPE html>
             min-height: 100vh;
             margin: 0;
             padding: 0;
+            transition: background 0.3s ease;
+        }
+        
+        body.server-down {
+            background: #cc0000;
         }
         
         .dashboard-layout {
@@ -1330,16 +1335,19 @@ const dashboardHTML = `<!DOCTYPE html>
             fetch('/servers')
                 .then(res => res.json())
                 .then(data => {
+                    let anyDown = false;
                     for (const [key, info] of Object.entries(data)) {
                         const el = document.getElementById('srv-' + key);
                         if (el) {
                             el.className = 'server-indicator ' + info.status;
                             el.title = info.name + ' (port ' + info.port + ') - ' + info.status.toUpperCase();
                         }
+                        if (info.status === 'down') anyDown = true;
                     }
+                    document.body.classList.toggle('server-down', anyDown);
                 })
                 .catch(() => {
-                    // If we can't reach the dashboard server itself, mark all as unknown
+                    document.body.classList.add('server-down');
                     for (const key of ['apl', 'permalink']) {
                         const el = document.getElementById('srv-' + key);
                         if (el) {
@@ -1444,6 +1452,8 @@ const dashboardHTML = `<!DOCTYPE html>
                 const status = document.getElementById('connectionStatus');
                 status.className = 'connection-status connected';
                 status.querySelector('.text').textContent = 'Live';
+                document.body.classList.remove('server-down');
+                fetchServerStatus();
             };
             
             eventSource.onmessage = (event) => {
@@ -1459,6 +1469,7 @@ const dashboardHTML = `<!DOCTYPE html>
                 const status = document.getElementById('connectionStatus');
                 status.className = 'connection-status disconnected';
                 status.querySelector('.text').textContent = 'Reconnecting...';
+                document.body.classList.add('server-down');
                 
                 // Reconnect after 3 seconds
                 setTimeout(connect, 3000);
