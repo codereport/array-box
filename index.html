@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ArrayBox</title>
-    
+
     <!-- Default Open Graph / Social Media Preview -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://arraybox.dev">
@@ -13,22 +13,22 @@
     <meta property="og:image" content="https://arraybox.dev/assets/og-default.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    
+
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="ArrayBox">
     <meta name="twitter:description" content="An online playground for array programming languages — APL, BQN, Uiua, J, Kap, and TinyAPL.">
     <meta name="twitter:image" content="https://arraybox.dev/assets/og-default.png">
-    
+
     <link rel="icon" id="favicon" href="assets/apl.png" type="image/png">
     <!-- JetBrains Mono loaded locally via @font-face in theme.css -->
-    
+
     <!-- Backend configuration (edit config.js to set your tunnel URL) -->
     <script src="config.js"></script>
-    
+
     <!-- Theme CSS with variables and syntax highlighting classes -->
     <link rel="stylesheet" href="src/theme.css">
-    
+
     <style>
         /* App-specific styles (layout, components) */
         * {
@@ -822,7 +822,7 @@
             visibility: visible;
             transform: translateY(-50%) translateX(0);
         }
-        
+
         /* When F1 tooltip is shown, shift container left */
         body.f1-doc-active .container {
             margin-left: -600px;
@@ -990,9 +990,9 @@
             </button>
         </div>
         <div class="input-container">
-            <div 
-                class="code-input apl" 
-                id="codeInput" 
+            <div
+                class="code-input apl"
+                id="codeInput"
                 contenteditable="true"
                 data-placeholder="Have fun! 🥳"
                 spellcheck="false"
@@ -1007,7 +1007,7 @@
             <!-- Ctrl+Space primitive combo box -->
             <div class="primitive-combobox" id="primitiveCombobox">
                 <div class="primitive-combobox-header">
-                    <input type="text" class="primitive-combobox-input" id="comboboxInput" 
+                    <input type="text" class="primitive-combobox-input" id="comboboxInput"
                            placeholder="Search primitives..." autocomplete="off" spellcheck="false">
                     <span class="primitive-combobox-hint">ESC to close</span>
                 </div>
@@ -1015,9 +1015,15 @@
             </div>
         </div>
     </div>
-    
+
     <!-- F1 Documentation Tooltip - fixed position to right of editor -->
     <div class="f1-doc-tooltip" id="f1DocTooltip"></div>
+
+    <!-- Explain tree combinator tooltip - small popover near hovered glyph -->
+    <div class="explain-tooltip" id="explainTooltip">
+        <div class="explain-tooltip-name" id="explainTooltipName"></div>
+        <div class="explain-tooltip-pattern" id="explainTooltipPattern"></div>
+    </div>
 
     <div class="keyboard-hint" id="keyboardHint">ctrl+k keyboard • ctrl+h help</div>
 
@@ -1142,7 +1148,7 @@
             <div class="fonts-footer">⬢ arraybox</div>
         </div>
     </div>
-    
+
     <div class="bug-report-container" id="bugReportContainer">
         <button class="bug-report-close" onclick="document.getElementById('bugReportContainer').style.display='none'" title="Hide">×</button>
         <a href="https://github.com/codereport/array-box/issues" target="_blank" class="bug-report">Report 🐞</a>
@@ -1160,33 +1166,33 @@
             let bqnLoading = false;
             let bqnLoadPromise = null;
             let bqnModule = null;
-            
+
             // CBQN wrapped C functions
             let cbqn_runLine = null;  // cbqn_runLine(char*, i64) - with error catching
-            
+
             // Output capture buffers
             let stdoutBuf = '';
             let stderrBuf = '';
-            
+
             async function loadBQN() {
                 if (bqnReady) return true;
                 if (bqnLoadError) return false;
                 if (bqnLoading) return bqnLoadPromise;
-                
+
                 bqnLoading = true;
                 bqnLoadPromise = (async () => {
                     try {
                         console.log('[BQN] Starting to load CBQN WASM module...');
-                        
+
                         // Create an iframe to load cbqn.js in isolation
                         const iframe = document.createElement('iframe');
                         iframe.style.display = 'none';
                         document.body.appendChild(iframe);
-                        
+
                         // Absolute base URL so WASM fetches resolve correctly from the iframe
                         const wasmBaseUrl = new URL('/wasm/bqn/', window.location.href).href;
                         console.log('[BQN] WASM base URL:', wasmBaseUrl);
-                        
+
                         // Use document.open/write/close to claim the iframe document.
                         // Firefox asynchronously replaces the initial about:blank document,
                         // which would wipe out any injected scripts. Writing explicitly
@@ -1195,7 +1201,7 @@
                         iframeDoc.open();
                         iframeDoc.write('<!DOCTYPE html><html><head></head><body></body></html>');
                         iframeDoc.close();
-                        
+
                         return new Promise((resolve, reject) => {
                             // Setup Module config in the iframe BEFORE loading the script
                             // (same pattern as J loader)
@@ -1207,10 +1213,10 @@
                                     try {
                                         console.log('[BQN] WASM runtime initialized');
                                         const Module = iframe.contentWindow.Module;
-                                        
+
                                         // Wrap C functions
                                         cbqn_runLine = Module.cwrap('cbqn_runLine', null, ['string', 'number']);
-                                        
+
                                         bqnModule = Module;
                                         bqnReady = true;
                                         bqnLoading = false;
@@ -1238,7 +1244,7 @@
                                     stderrBuf += text + '\n';
                                 }
                             };
-                            
+
                             // Load the script with absolute URL
                             const script = iframeDoc.createElement('script');
                             script.src = wasmBaseUrl + 'BQN.js';
@@ -1248,7 +1254,7 @@
                                 bqnLoading = false;
                                 reject(bqnLoadError);
                             };
-                            
+
                             iframeDoc.head.appendChild(script);
                         });
                     } catch (error) {
@@ -1258,31 +1264,31 @@
                         return false;
                     }
                 })();
-                
+
                 return bqnLoadPromise;
             }
-            
+
             async function evalBQN(code) {
                 if (!bqnReady) {
                     if (!bqnLoading && !bqnLoadError) {
                         loadBQN().catch(() => {});
                     }
-                    
+
                     if (bqnLoadError) {
                         return {
                             success: false,
                             output: `CBQN failed to load: ${bqnLoadError.message}\n\nCheck browser console (F12) for details.`
                         };
                     }
-                    
+
                     // Wait for loading to complete
                     const startWait = Date.now();
                     const maxWait = 15000; // 15 second timeout
-                    
+
                     while (!bqnReady && !bqnLoadError && (Date.now() - startWait) < maxWait) {
                         await new Promise(r => setTimeout(r, 100));
                     }
-                    
+
                     if (!bqnReady) {
                         if (bqnLoadError) {
                             return {
@@ -1296,11 +1302,11 @@
                         };
                     }
                 }
-                
+
                 // Clear output buffers
                 stdoutBuf = '';
                 stderrBuf = '';
-                
+
                 try {
                     // Use cbqn_runLine which has built-in error catching via CATCH/setjmp.
                     // It prints formatted results to stdout and errors to stderr.
@@ -1308,10 +1314,10 @@
                     const encoder = new TextEncoder();
                     const encoded = encoder.encode(code);
                     cbqn_runLine(code, encoded.length);
-                    
+
                     const stdout = stdoutBuf.replace(/\n$/, '');
                     const stderr = stderrBuf.replace(/\n$/, '');
-                    
+
                     if (stderr) {
                         // Error output present - extract the error message
                         // CBQN stderr format: "Error: <message>\n<stack trace>"
@@ -1325,7 +1331,7 @@
                             output: errMsg
                         };
                     }
-                    
+
                     return {
                         success: true,
                         output: stdout
@@ -1339,7 +1345,7 @@
                     };
                 }
             }
-            
+
             // Expose to global scope for use in main script
             window.cbqnWasm = {
                 load: loadBQN,
@@ -1347,7 +1353,7 @@
                 getError: () => bqnLoadError,
                 eval: evalBQN
             };
-            
+
             // Pre-load CBQN when page loads
             loadBQN().catch(() => {});
         })();
@@ -1357,14 +1363,14 @@
     <script type="module">
         // Load Uiua WASM module
         import initUiua, { eval_uiua, format_uiua, uiua_version } from './wasm/uiua_wasm.js';
-        
+
         let uiuaReady = false;
         let uiuaLoadError = null;
-        
+
         async function loadUiua() {
             if (uiuaReady) return true;
             if (uiuaLoadError) return false;
-            
+
             try {
                 await initUiua();
                 uiuaReady = true;
@@ -1382,7 +1388,7 @@
                 return false;
             }
         }
-        
+
         // Expose to global scope for use in main script
         window.uiuaWasm = {
             load: loadUiua,
@@ -1400,7 +1406,7 @@
             },
             version: () => uiuaReady ? uiua_version() : null
         };
-        
+
         // Pre-load Uiua when page loads
         loadUiua().catch(() => {});
     </script>
@@ -1414,32 +1420,32 @@
         let tinyaplContext = null;
         let tinyaplLoading = false;
         let tinyaplLoadPromise = null;
-        
+
         // Output buffers for capturing TinyAPL I/O
         let outputBuffer = '';
         let errorBuffer = '';
-        
+
         async function loadTinyapl() {
             if (tinyaplReady) return true;
             if (tinyaplLoadError) return false;
             if (tinyaplLoading) return tinyaplLoadPromise;
-            
+
             tinyaplLoading = true;
             tinyaplLoadPromise = (async () => {
                 try {
                     console.log('[TinyAPL] Starting to load WASM module...');
-                    
+
                     // Update version display to show loading
                     const versionEl = document.getElementById('tinyapl-version');
                     if (versionEl) {
                         versionEl.textContent = 'loading...';
                     }
-                    
+
                     // Dynamically import the local TinyAPL module
                     console.log('[TinyAPL] Importing module...');
                     tinyaplModule = await import('./wasm/tinyapl/tinyapl.js');
                     console.log('[TinyAPL] Module imported, creating context...');
-                    
+
                     // Create a context with I/O handlers
                     tinyaplContext = await tinyaplModule.newContext(
                         async () => '', // input - return empty for now
@@ -1447,34 +1453,34 @@
                         async (what) => { errorBuffer += what; }, // error
                         {} // quads - basic primitives only
                     );
-                    
+
                     tinyaplReady = true;
                     tinyaplLoading = false;
                     console.log('[TinyAPL] WASM loaded successfully!');
-                    
+
                     // Update version display in dropdown
                     if (versionEl) {
                         versionEl.textContent = '0.13-beta';
                     }
-                    
+
                     return true;
                 } catch (error) {
                     console.error('[TinyAPL] WASM loading failed:', error);
                     tinyaplLoadError = error;
                     tinyaplLoading = false;
-                    
+
                     const versionEl = document.getElementById('tinyapl-version');
                     if (versionEl) {
                         versionEl.textContent = 'error';
                     }
-                    
+
                     return false;
                 }
             })();
-            
+
             return tinyaplLoadPromise;
         }
-        
+
         async function evalTinyapl(code) {
             // If not ready, try to wait for loading
             if (!tinyaplReady) {
@@ -1484,15 +1490,15 @@
                         output: `TinyAPL failed to load: ${tinyaplLoadError.message}\n\nCheck browser console (F12) for details.`
                     };
                 }
-                
+
                 // Wait for loading to complete (with timeout)
                 const startWait = Date.now();
                 const maxWait = 30000; // 30 second timeout
-                
+
                 while (!tinyaplReady && !tinyaplLoadError && (Date.now() - startWait) < maxWait) {
                     await new Promise(r => setTimeout(r, 100));
                 }
-                
+
                 if (!tinyaplReady) {
                     if (tinyaplLoadError) {
                         return {
@@ -1506,11 +1512,11 @@
                     };
                 }
             }
-            
+
             // Reset output buffers
             outputBuffer = '';
             errorBuffer = '';
-            
+
             try {
                 // For multiline code, join lines with ⋄ (statement separator)
                 // Filter out empty lines and comment-only lines (⍝ comments out rest of line)
@@ -1523,17 +1529,17 @@
                         return commentIndex >= 0 ? line.substring(0, commentIndex).trim() : line;
                     })
                     .filter(line => line);
-                
+
                 const processedCode = lines.length > 1 ? lines.join(' ⋄ ') : (lines[0] || '');
                 console.log('[TinyAPL] Processing code:', processedCode);
-                
+
                 // Run code
                 const result = await tinyaplModule.runCode(tinyaplContext, processedCode);
                 console.log('[TinyAPL] Raw result:', result);
-                
+
                 // Handle different result formats
                 let value, success;
-                
+
                 if (Array.isArray(result)) {
                     // Expected format: [Value | Error, boolean]
                     [value, success] = result;
@@ -1552,27 +1558,27 @@
                     success = true;
                     value = result;
                 }
-                
+
                 // TinyAPL error patterns to detect in output
                 const TINYAPL_ERROR_PATTERNS = [
                     /^(?:Syntax|Parse|Value|Domain|Rank|Length|Index|NYI|Internal|Invalid|Assertion) error:/im,
                     /does not exist$/im,
                     /not assigned$/im
                 ];
-                
+
                 // Check errorBuffer for errors (errors from ⎕ERR go here)
                 const hasErrorInBuffer = errorBuffer && TINYAPL_ERROR_PATTERNS.some(p => p.test(errorBuffer));
-                
+
                 if (success && !hasErrorInBuffer) {
                     // Use the module's show() function for pretty-printing
                     let output = await tinyaplModule.show(value);
                     console.log('[TinyAPL] show() output:', output);
-                    
+
                     // Prepend any stdout output (from ⎕← in user code)
                     if (outputBuffer) {
                         output = outputBuffer.replace(/\n$/, '') + '\n' + output;
                     }
-                    
+
                     // Final check: look for error patterns in the formatted output
                     const hasErrorInOutput = TINYAPL_ERROR_PATTERNS.some(p => p.test(output));
                     if (hasErrorInOutput) {
@@ -1581,7 +1587,7 @@
                             output: output
                         };
                     }
-                    
+
                     return {
                         success: true,
                         output: output
@@ -1602,7 +1608,7 @@
                 };
             }
         }
-        
+
         // Expose to global scope for use in main script
         window.tinyaplWasm = {
             load: loadTinyapl,
@@ -1611,7 +1617,7 @@
             eval: evalTinyapl,
             version: () => tinyaplReady ? 'latest' : null
         };
-        
+
         // Pre-load TinyAPL when page loads
         loadTinyapl().catch(() => {});
     </script>
@@ -1626,29 +1632,29 @@
             let jModule = null;
             let jLoading = false;
             let jLoadPromise = null;
-            
+
             // J WASM functions
             let jdo1 = null;
             let jsetstr = null;
-            
+
             async function loadJ() {
                 if (jReady) return true;
                 if (jLoadError) return false;
                 if (jLoading) return jLoadPromise;
-                
+
                 jLoading = true;
                 jLoadPromise = (async () => {
                     try {
                         console.log('[J] Starting to load WASM module...');
-                        
+
                         // Create an iframe to load emj.js in isolation
                         const iframe = document.createElement('iframe');
                         iframe.style.display = 'none';
                         document.body.appendChild(iframe);
-                        
+
                         // Absolute base URL so fetches resolve correctly from the iframe
                         const wasmBaseUrl = new URL('/wasm/j/', window.location.href).href;
-                        
+
                         // Use document.open/write/close to claim the iframe document.
                         // Firefox asynchronously replaces the initial about:blank document,
                         // which would wipe out any injected scripts. Writing explicitly
@@ -1657,7 +1663,7 @@
                         iframeDoc.open();
                         iframeDoc.write('<!DOCTYPE html><html><head></head><body></body></html>');
                         iframeDoc.close();
-                        
+
                         return new Promise((resolve, reject) => {
                             // Setup Module config in the iframe
                             iframe.contentWindow.Module = {
@@ -1668,15 +1674,15 @@
                                     try {
                                         console.log('[J] WASM runtime initialized');
                                         const Module = iframe.contentWindow.Module;
-                                        
+
                                         // Wrap C functions
                                         jdo1 = Module.cwrap('em_jdo', 'string', ['string']);
                                         jsetstr = Module.cwrap('em_jsetstr', 'void', ['string', 'string']);
-                                        
+
                                         jModule = Module;
                                         jReady = true;
                                         jLoading = false;
-                                        
+
                                         console.log('[J] WASM loaded successfully!');
                                         resolve(true);
                                     } catch (error) {
@@ -1695,7 +1701,7 @@
                                 print: function(text) { console.log('[J]', text); },
                                 printErr: function(text) { console.warn('[J]', text); }
                             };
-                            
+
                             // Load the script with absolute URL
                             const script = iframeDoc.createElement('script');
                             script.src = wasmBaseUrl + 'emj.js';
@@ -1705,7 +1711,7 @@
                                 jLoading = false;
                                 reject(jLoadError);
                             };
-                            
+
                             iframeDoc.head.appendChild(script);
                         });
                     } catch (error) {
@@ -1715,32 +1721,32 @@
                         return false;
                     }
                 })();
-                
+
                 return jLoadPromise;
             }
-            
+
             async function evalJ(code) {
                 if (!jReady) {
                     // Try to load if not started
                     if (!jLoading && !jLoadError) {
                          loadJ().catch(() => {});
                     }
-                    
+
                     if (jLoadError) {
                         return {
                             success: false,
                             output: `J failed to load: ${jLoadError.message}\n\nCheck browser console (F12) for details.`
                         };
                     }
-                    
+
                     // Wait for loading to complete
                     const startWait = Date.now();
                     const maxWait = 10000; // 10 second timeout
-                    
+
                     while (!jReady && !jLoadError && (Date.now() - startWait) < maxWait) {
                         await new Promise(r => setTimeout(r, 100));
                     }
-                    
+
                     if (!jReady) {
                         if (jLoadError) {
                             return {
@@ -1754,20 +1760,20 @@
                         };
                     }
                 }
-                
+
                 try {
                     // Prepend J display settings (tree display + Unicode box chars)
                     const jInit = "9!:7 {. Boxes_j_\n(9!:3) 4\n";
                     jsetstr('CODE_jrx_', jInit + code);
                     let result = jdo1("(0!:101) CODE_jrx_");
-                    
+
                     // Clean up output: remove echoed input lines
                     // J's (0!:101) echoes each input line with leading whitespace
                     if (result.includes("output_jrx_\n")) {
                         let n = result.indexOf("output_jrx_\n");
                         result = result.slice(12 + n);
                     }
-                    
+
                     // Build set of trimmed code lines to identify echoed input
                     const codeLines = new Set((jInit + code).split('\n').map(l => l.trim()).filter(l => l));
                     let lines = result.split('\n');
@@ -1779,10 +1785,10 @@
                         return true;
                     });
                     result = lines.join('\n').trimEnd();
-                    
+
                     // Remove leading blank lines (lines containing only whitespace)
                     result = result.replace(/^(?:[ \t]*\r?\n)+/, '');
-                    
+
                     const isError = result.trimStart().startsWith('|');
                     return {
                         success: !isError,
@@ -1796,7 +1802,7 @@
                     };
                 }
             }
-            
+
             // Expose to global scope for use in main script
             window.jWasm = {
                 load: loadJ,
@@ -1805,7 +1811,7 @@
                 eval: evalJ,
                 version: () => jReady ? 'j9.7' : null
             };
-            
+
             // Pre-load J when page loads
             loadJ().catch(() => {});
         })();
@@ -1821,23 +1827,23 @@
             let kapEngine = null;
             let kapLoading = false;
             let kapLoadPromise = null;
-            
+
             async function loadKap() {
                 if (kapReady) return true;
                 if (kapLoadError) return false;
                 if (kapLoading) return kapLoadPromise;
-                
+
                 kapLoading = true;
                 kapLoadPromise = (async () => {
                     try {
                         console.log('[Kap] Starting to load JS module...');
-                        
+
                         // Create an iframe that navigates to kap-loader.html
                         // This ensures XHR requests for stdlib files resolve correctly
                         // (relative to /wasm/kap/ where standard-lib/ lives)
                         const iframe = document.createElement('iframe');
                         iframe.style.display = 'none';
-                        
+
                         return new Promise((resolve, reject) => {
                             // Set a timeout for loading
                             const timeout = setTimeout(() => {
@@ -1846,14 +1852,14 @@
                                 kapLoading = false;
                                 reject(kapLoadError);
                             }, 60000);
-                            
+
                             // Set onload BEFORE setting src and appending
                             iframe.onload = function() {
                                 // Skip the initial about:blank load — standalonejs
                                 // won't exist until kap-loader.html has loaded the script
                                 const kapApi = iframe.contentWindow.standalonejs;
                                 if (!kapApi) return;
-                                
+
                                 try {
                                     // Webpack production build flattens exports directly onto the module
                                     const createEngine = kapApi.createEngine;
@@ -1861,7 +1867,7 @@
                                         throw new Error('createEngine not found on Kap module. Available keys: ' + Object.keys(kapApi).join(', '));
                                     }
                                     console.log('[Kap] Script loaded, creating engine (loading stdlib)...');
-                                    
+
                                     createEngine().then(function(engine) {
                                         clearTimeout(timeout);
                                         kapEngine = engine;
@@ -1884,7 +1890,7 @@
                                     reject(error);
                                 }
                             };
-                            
+
                             iframe.onerror = function(e) {
                                 clearTimeout(timeout);
                                 console.error('[Kap] Failed to load iframe:', e);
@@ -1892,7 +1898,7 @@
                                 kapLoading = false;
                                 reject(kapLoadError);
                             };
-                            
+
                             // Navigate the iframe to kap-loader.html
                             // (set src before appending to avoid about:blank onload race)
                             iframe.src = '/wasm/kap/kap-loader.html';
@@ -1905,32 +1911,32 @@
                         return false;
                     }
                 })();
-                
+
                 return kapLoadPromise;
             }
-            
+
             async function evalKap(code) {
                 if (!kapReady) {
                     // Try to load if not started
                     if (!kapLoading && !kapLoadError) {
                         loadKap().catch(() => {});
                     }
-                    
+
                     if (kapLoadError) {
                         return {
                             success: false,
                             output: `Kap JS failed to load: ${kapLoadError.message}\n\nCheck browser console (F12) for details.`
                         };
                     }
-                    
+
                     // Wait for loading to complete
                     const startWait = Date.now();
                     const maxWait = 30000; // 30 second timeout (stdlib loading can take a moment)
-                    
+
                     while (!kapReady && !kapLoadError && (Date.now() - startWait) < maxWait) {
                         await new Promise(r => setTimeout(r, 100));
                     }
-                    
+
                     if (!kapReady) {
                         if (kapLoadError) {
                             return {
@@ -1944,7 +1950,7 @@
                         };
                     }
                 }
-                
+
                 try {
                     const result = kapEngine.parseAndEvalWithFormat(code);
                     // result.text is an Array<String> of formatted output lines
@@ -1963,7 +1969,7 @@
                     };
                 }
             }
-            
+
             // Expose to global scope for use in main script
             window.kapJs = {
                 load: loadKap,
@@ -1971,7 +1977,7 @@
                 getError: () => kapLoadError,
                 eval: evalKap
             };
-            
+
             // Pre-load Kap when page loads
             loadKap().catch(() => {});
         })();
@@ -1980,12 +1986,15 @@
     <!-- Main application module -->
     <script type="module">
         // Import from modular files
-        import { createKeyboardHandler, bqnKeymap, aplKeymap, kapKeymap, tinyaplKeymap, tinyaplKeyboard, tinyaplGlyphs, uiuaGlyphs, jGlyphs, insertText } from './src/keymap.js?v=26';
-        import { syntaxRules, highlightCode, escapeHtml, getSyntaxClass, isTrainTree, highlightTrainTreeGlyphs } from './src/syntax.js?v=26';
-        import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames, jGlyphNames, tinyaplGlyphNames, bqnGlyphDocs, uiuaGlyphDocs, jGlyphDocs, kapGlyphDocs, aplGlyphDocs, tinyaplGlyphDocs } from './src/keyboard.js?v=26';
-        import { createEditorFeaturesManager, toggleComment, commentTokens, autoExpandWidthForCodeAndResult } from './src/editor-features.js?v=2';
-        import { translatePrimitives, translateArrayLiterals, clearTranslationCache } from './src/primitive-translate.js?v=3';
-        
+        import { createKeyboardHandler, bqnKeymap, aplKeymap, kapKeymap, tinyaplKeymap, tinyaplKeyboard, tinyaplGlyphs, uiuaGlyphs, jGlyphs, insertText } from './src/keymap.js';
+        import { syntaxRules, highlightCode, escapeHtml, getSyntaxClass, isTrainTree, highlightTrainTreeGlyphs } from './src/syntax.js';
+        import { renderBqnExplainTree, BQN_COMBINATOR_INFO,
+                  renderAplExplainTree, APL_COMBINATOR_INFO,
+                  renderJExplainTree, J_COMBINATOR_INFO } from './src/explain-tree.js';
+        import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames, jGlyphNames, tinyaplGlyphNames, bqnGlyphDocs, uiuaGlyphDocs, jGlyphDocs, kapGlyphDocs, aplGlyphDocs, tinyaplGlyphDocs } from './src/keyboard.js';
+        import { createEditorFeaturesManager, toggleComment, commentTokens, autoExpandWidthForCodeAndResult } from './src/editor-features.js';
+        import { translatePrimitives, translateArrayLiterals, clearTranslationCache } from './src/primitive-translate.js';
+
         // Glyph documentation by language
         const glyphDocsByLanguage = {
             apl: aplGlyphDocs,
@@ -1995,7 +2004,7 @@
             kap: kapGlyphDocs,
             tinyapl: tinyaplGlyphDocs
         };
-        
+
         // Keyboard configurations for each language
         const keyboardConfigs = {
             bqn: {
@@ -2176,30 +2185,30 @@
                 }
             }
         };
-        
+
         // Create the visual keyboard (initialized later)
         let visualKeyboard = null;
-        
+
         // Check if keyboard should be shown for this language
         function languageSupportsKeyboard(lang) {
             return lang in keyboardConfigs;
         }
-        
+
         // Update keyboard for current language
         function updateKeyboardForLanguage(lang) {
             if (!visualKeyboard) return;
-            
+
             if (!languageSupportsKeyboard(lang)) {
                 visualKeyboard.disable();
                 return;
             }
-            
+
             const config = keyboardConfigs[lang];
             if (!config) {
                 visualKeyboard.disable();
                 return;
             }
-            
+
             // Check if display mode, language, glyphNames, glyphDocs, docLinks, logoPath, or tinyaplKeyboard changed - need to recreate overlay
             const modeChanged = visualKeyboard.displayMode !== (config.displayMode || 'keyboard');
             const languageChanged = visualKeyboard.language !== config.language;
@@ -2210,7 +2219,7 @@
             const logoChanged = visualKeyboard.logoPath !== (config.logoPath || null);
             const tinyaplKeyboardChanged = visualKeyboard.tinyaplKeyboard !== (config.tinyaplKeyboard || null);
             const needsRecreate = modeChanged || languageChanged || glyphNamesChanged || glyphDocsChanged || docLinksChanged || compactChanged || logoChanged || tinyaplKeyboardChanged;
-            
+
             visualKeyboard.enable();
             visualKeyboard.keymap = config.keymap || {};
             visualKeyboard.language = config.language;
@@ -2226,7 +2235,7 @@
             visualKeyboard.compactCategories = config.compactCategories || false;
             visualKeyboard.logoPath = config.logoPath || null;
             visualKeyboard.tinyaplKeyboard = config.tinyaplKeyboard || null;
-            
+
             if (needsRecreate) {
                 // Recreate the overlay for new display mode, language, or glyphNames
                 visualKeyboard.recreateOverlay();
@@ -2259,7 +2268,7 @@
                 fontClass: 'bqn',
                 evaluate: async (code) => {
                     const startTime = performance.now();
-                    
+
                     if (!window.cbqnWasm || !window.cbqnWasm.isReady()) {
                         const error = window.cbqnWasm ? window.cbqnWasm.getError() : null;
                         return {
@@ -2267,11 +2276,11 @@
                             output: error ? `CBQN WASM failed to load: ${error.message || 'Unknown error'}` : 'CBQN WASM is still loading...'
                         };
                     }
-                    
+
                     try {
                         const result = await window.cbqnWasm.eval(code);
                         const duration = Math.round(performance.now() - startTime);
-                        
+
                         // Log to server manager (fire and forget)
                         fetch(`${ArrayBoxConfig.getServiceUrl('log')}/log`, {
                             method: 'POST',
@@ -2283,7 +2292,7 @@
                                 duration: duration
                             })
                         }).catch(() => {}); // Ignore errors if server not running
-                        
+
                         // Tacit expression detection: if output matches input, it's a
                         // tacit function/modifier that just echoes itself. Auto-run
                         // )explain to show its train tree.
@@ -2294,18 +2303,18 @@
                                     return {
                                         success: true,
                                         output: explainResult.output,
-                                        isBqnExplain: true
+                                        isBqnExplain: true,
                                     };
                                 }
                             } catch (e) {
                                 // Fall through to original result
                             }
                         }
-                        
+
                         return result;
                     } catch (error) {
                         const duration = Math.round(performance.now() - startTime);
-                        
+
                         fetch(`${ArrayBoxConfig.getServiceUrl('log')}/log`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -2316,7 +2325,7 @@
                                 duration: duration
                             })
                         }).catch(() => {});
-                        
+
                         return {
                             success: false,
                             output: error.message || String(error)
@@ -2330,30 +2339,30 @@
                 fontClass: 'uiua',
                 evaluate: async (code) => {
                     const startTime = performance.now();
-                    
+
                     // Wait for WASM to load if not ready
                     if (!window.uiuaWasm || !window.uiuaWasm.isReady()) {
                         if (window.uiuaWasm) {
                             const loaded = await window.uiuaWasm.load();
                             if (!loaded) {
                                 const error = window.uiuaWasm.getError();
-                                return { 
-                                    success: false, 
+                                return {
+                                    success: false,
                                     output: `Failed to load Uiua WASM: ${error?.message || 'Unknown error'}\n\nPlease ensure the wasm/ directory contains the built WASM files.`
                                 };
                             }
                         } else {
-                            return { 
-                                success: false, 
+                            return {
+                                success: false,
                                 output: 'Uiua WASM module not available.\n\nRun: cd wasm/uiua && ./build.sh'
                             };
                         }
                     }
-                    
+
                     try {
                         const result = window.uiuaWasm.eval(code);
                         const duration = Math.round(performance.now() - startTime);
-                        
+
                         // Log to server manager (fire and forget)
                         fetch(`${ArrayBoxConfig.getServiceUrl('log')}/log`, {
                             method: 'POST',
@@ -2365,15 +2374,15 @@
                                 duration: duration
                             })
                         }).catch(() => {}); // Ignore errors if server not running
-                        
-                        return { 
-                            success: result.success, 
+
+                        return {
+                            success: result.success,
                             output: result.output || '',
                             formatted: result.formatted || null
                         };
                     } catch (error) {
-                        return { 
-                            success: false, 
+                        return {
+                            success: false,
                             output: `Uiua execution error: ${error.message || String(error)}`
                         };
                     }
@@ -2385,7 +2394,7 @@
                 fontClass: 'j',
                 evaluate: async (code) => {
                     const startTime = performance.now();
-                    
+
                     if (!window.jWasm || !window.jWasm.isReady()) {
                         const error = window.jWasm ? window.jWasm.getError() : null;
                         return {
@@ -2393,11 +2402,11 @@
                             output: error ? `J WASM failed to load: ${error.message || 'Unknown error'}` : 'J WASM is still loading...'
                         };
                     }
-                    
+
                     try {
                         const result = await window.jWasm.eval(code);
                         const duration = Math.round(performance.now() - startTime);
-                        
+
                         // Log to server manager (fire and forget)
                         fetch(`${ArrayBoxConfig.getServiceUrl('log')}/log`, {
                             method: 'POST',
@@ -2409,7 +2418,7 @@
                                 duration: duration
                             })
                         }).catch(() => {});
-                        
+
                         return result;
                     } catch (error) {
                         return {
@@ -2433,28 +2442,28 @@
                             },
                             body: JSON.stringify({ code: code })
                         });
-                        
+
                         if (!response.ok) {
                             throw new Error(`Server error: ${response.status}`);
                         }
-                        
+
                         const data = await response.json();
                         const rawOutput = data.output || data.result || data.error || '';
                         const isError = data.success === false;
-                        return { 
-                            success: data.success !== false, 
+                        return {
+                            success: data.success !== false,
                             output: isError ? humanizeAplError(rawOutput) : rawOutput
                         };
                     } catch (error) {
                         if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-                            return { 
-                                success: false, 
-                                output: `Dyalog APL server is not available currently.` 
+                            return {
+                                success: false,
+                                output: `Dyalog APL server is not available currently.`
                             };
                         }
-                        return { 
-                            success: false, 
-                            output: error.message || String(error) 
+                        return {
+                            success: false,
+                            output: error.message || String(error)
                         };
                     }
                 }
@@ -2465,30 +2474,30 @@
                 fontClass: 'kap',
                 evaluate: async (code) => {
                     const startTime = performance.now();
-                    
+
                     // Check if Kap JS is available
                     if (!window.kapJs || !window.kapJs.isReady()) {
                         if (window.kapJs) {
                             const loaded = await window.kapJs.load();
                             if (!loaded) {
                                 const error = window.kapJs.getError();
-                                return { 
-                                    success: false, 
+                                return {
+                                    success: false,
                                     output: `Failed to load Kap JS: ${error?.message || 'Unknown error'}\n\nCheck browser console (F12) for details.`
                                 };
                             }
                         } else {
-                            return { 
-                                success: false, 
+                            return {
+                                success: false,
                                 output: 'Kap JS module not available.\n\nThe Kap interpreter requires the client-side JS build.'
                             };
                         }
                     }
-                    
+
                     try {
                         const result = await window.kapJs.eval(code);
                         const duration = Math.round(performance.now() - startTime);
-                        
+
                         // Log to server manager (fire and forget)
                         fetch(`${ArrayBoxConfig.getServiceUrl('log')}/log`, {
                             method: 'POST',
@@ -2500,11 +2509,11 @@
                                 duration: duration
                             })
                         }).catch(() => {});
-                        
+
                         return result;
                     } catch (error) {
-                        return { 
-                            success: false, 
+                        return {
+                            success: false,
                             output: `Kap execution error: ${error.message || String(error)}`
                         };
                     }
@@ -2516,30 +2525,30 @@
                 fontClass: 'tinyapl',
                 evaluate: async (code) => {
                     const startTime = performance.now();
-                    
+
                     // Check if TinyAPL WASM is available
                     if (!window.tinyaplWasm || !window.tinyaplWasm.isReady()) {
                         if (window.tinyaplWasm) {
                             const loaded = await window.tinyaplWasm.load();
                             if (!loaded) {
                                 const error = window.tinyaplWasm.getError();
-                                return { 
-                                    success: false, 
+                                return {
+                                    success: false,
                                     output: `Failed to load TinyAPL WASM: ${error?.message || 'Unknown error'}\n\nTinyAPL WASM is not yet available. The interpreter requires a WASM build.\n\nFor now, try the online interpreter at: https://tinyapl.rubenverg.com/run/latest`
                                 };
                             }
                         } else {
-                            return { 
-                                success: false, 
+                            return {
+                                success: false,
                                 output: 'TinyAPL WASM module not available.\n\nTinyAPL requires a WASM build which is not yet integrated.\n\nFor now, try the online interpreter at: https://tinyapl.rubenverg.com/run/latest'
                             };
                         }
                     }
-                    
+
                     try {
                         const result = await window.tinyaplWasm.eval(code);
                         const duration = Math.round(performance.now() - startTime);
-                        
+
                         // Log to server manager (fire and forget)
                         fetch(`${ArrayBoxConfig.getServiceUrl('log')}/log`, {
                             method: 'POST',
@@ -2551,11 +2560,11 @@
                                 duration: duration
                             })
                         }).catch(() => {}); // Ignore errors if server not running
-                        
+
                         return result;
                     } catch (error) {
-                        return { 
-                            success: false, 
+                        return {
+                            success: false,
                             output: `TinyAPL execution error: ${error.message || String(error)}`
                         };
                     }
@@ -2567,7 +2576,7 @@
         let currentLanguage = 'apl';
         let currentKeyboardCleanup = null;
         let lastResult = null; // Store last evaluation result for permalinks
-        
+
         // Input history for cycling through previous evaluations
         const codeHistory = [];
         let historyIndex = -1; // -1 means not browsing history
@@ -2582,7 +2591,7 @@
         const output = document.getElementById('output');
         const loadingIndicator = document.getElementById('loadingIndicator');
         const container = document.querySelector('.container');
-        
+
         // Generate favicon with hexagon subscript badge
         function generateHexagonFavicon(logoSrc) {
             const canvas = document.createElement('canvas');
@@ -2590,7 +2599,7 @@
             canvas.width = size;
             canvas.height = size;
             const ctx = canvas.getContext('2d');
-            
+
             // Load and draw logo first
             const img = new Image();
             img.crossOrigin = 'anonymous';
@@ -2598,14 +2607,14 @@
                 // Draw logo (main element, slightly offset to top-left)
                 const logoSize = size * 0.75;
                 ctx.drawImage(img, 0, 0, logoSize, logoSize);
-                
+
                 // Draw hexagon subscript in bottom-right
                 // Red when running locally, white in production
                 const isLocal = ['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname);
                 const hexRadius = 12;
                 const hexCenterX = size - hexRadius - 2;
                 const hexCenterY = size - hexRadius - 2;
-                
+
                 ctx.beginPath();
                 for (let i = 0; i < 6; i++) {
                     const angle = (Math.PI / 3) * i - Math.PI / 2;
@@ -2620,7 +2629,7 @@
                 ctx.closePath();
                 ctx.fillStyle = isLocal ? '#e53e3e' : '#ffffff';
                 ctx.fill();
-                
+
                 // Update favicon
                 const favicon = document.getElementById('favicon');
                 if (favicon) {
@@ -2630,10 +2639,10 @@
             };
             img.src = logoSrc;
         }
-        
+
         // Help screen
         const helpScreen = document.getElementById('helpScreen');
-        
+
         function toggleHelpScreen() {
             if (!helpScreen.classList.contains('show')) {
                 // Dismiss F1 tooltip when opening help screen
@@ -2641,14 +2650,14 @@
             }
             helpScreen.classList.toggle('show');
         }
-        
+
         function isHelpScreenVisible() {
             return helpScreen.classList.contains('show');
         }
-        
+
         // Fonts screen
         const fontsScreen = document.getElementById('fontsScreen');
-        
+
         function toggleFontsScreen() {
             if (!fontsScreen.classList.contains('show')) {
                 // Dismiss F1 tooltip when opening fonts screen
@@ -2656,11 +2665,11 @@
             }
             fontsScreen.classList.toggle('show');
         }
-        
+
         function isFontsScreenVisible() {
             return fontsScreen.classList.contains('show');
         }
-        
+
         // Global keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             // Escape to close language picker
@@ -2677,50 +2686,50 @@
                 toggleHelpScreen();
                 return;
             }
-            
+
             // Ctrl+B to toggle fonts screen
             if (e.ctrlKey && e.key === 'b') {
                 e.preventDefault();
                 toggleFontsScreen();
                 return;
             }
-            
+
             // Ctrl+L to create permalink
             if (e.ctrlKey && e.key === 'l') {
                 e.preventDefault();
                 handleCreatePermalink();
                 return;
             }
-            
+
             // Ctrl+I to copy image to clipboard
             if (e.ctrlKey && e.key === 'i') {
                 e.preventDefault();
                 handleCopyImageToClipboard();
                 return;
             }
-            
+
             // Escape to close help screen if visible
             if (e.key === 'Escape' && isHelpScreenVisible()) {
                 e.preventDefault();
                 helpScreen.classList.remove('show');
                 return;
             }
-            
+
             // Escape to close fonts screen if visible
             if (e.key === 'Escape' && isFontsScreenVisible()) {
                 e.preventDefault();
                 fontsScreen.classList.remove('show');
                 return;
             }
-            
+
             // Escape to close F1 tooltip if visible (check handled by F1 tooltip code)
             // F1 global handler is set up after F1 tooltip is initialized
-            
+
             // Don't process other shortcuts if help or fonts screen is visible
             if (isHelpScreenVisible() || isFontsScreenVisible()) {
                 return;
             }
-            
+
             // Ctrl+P to toggle the language picker dropdown
             if (e.ctrlKey && !e.shiftKey && e.key === 'p') {
                 e.preventDefault();
@@ -2731,7 +2740,7 @@
                 }
                 return;
             }
-            
+
             // Ctrl+Up/Down to switch languages (works globally)
             // Skip if Shift is pressed - that's for input history cycling
             if (e.ctrlKey && !e.shiftKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
@@ -2746,23 +2755,23 @@
                 switchLanguage(languageOrder[newIndex]);
                 return;
             }
-            
+
             // Don't interfere with IME/Compose key input
             if (e.isComposing || e.keyCode === 229) return;
-            
+
             // Auto-focus code input when typing printable characters
             // (when not already focused and keyboard overlay is not visible)
             const keyboardWrapper = document.querySelector('.array-keyboard-wrapper.show');
             const keyboardOverlay = keyboardWrapper ? keyboardWrapper.querySelector('.keyboard-overlay') : null;
             const comboboxInputEl = document.getElementById('comboboxInput');
-            
-            if (document.activeElement !== codeInput && 
+
+            if (document.activeElement !== codeInput &&
                 document.activeElement !== comboboxInputEl &&
                 !keyboardWrapper &&
                 !isHelpScreenVisible() &&
                 !e.ctrlKey && !e.metaKey && !e.altKey &&
                 e.key.length === 1) {
-                
+
                 // For backtick (prefix key), focus and trigger a synthetic keydown
                 // so the keyboard handler can activate prefix mode
                 if (e.key === '`') {
@@ -2816,7 +2825,7 @@
         languageButton.addEventListener('wheel', (e) => {
             e.preventDefault();
             const currentIndex = languageOrder.indexOf(currentLanguage);
-            const newIndex = e.deltaY < 0 
+            const newIndex = e.deltaY < 0
                 ? (currentIndex > 0 ? currentIndex - 1 : languageOrder.length - 1)
                 : (currentIndex < languageOrder.length - 1 ? currentIndex + 1 : 0);
             switchLanguage(languageOrder[newIndex]);
@@ -2843,7 +2852,7 @@
 
         function switchLanguage(lang) {
             const oldLang = currentLanguage;
-            
+
             // Translate primitives and array literals in the code before switching
             if (oldLang !== lang) {
                 const currentCode = getInputText();
@@ -2856,41 +2865,41 @@
                     }
                 }
             }
-            
+
             currentLanguage = lang;
             const langConfig = languages[lang];
-            
+
             // Update logo
             currentLogo.src = langConfig.logo;
             currentLogo.alt = langConfig.name;
-            
+
             // Update favicon to match the current language (with hexagon background)
             generateHexagonFavicon(langConfig.logo);
-            
+
             // Update input font class
             codeInput.className = `code-input ${langConfig.fontClass}`;
-            
+
             // Update output font class
             output.className = output.className.replace(/\b(bqn|uiua|j|apl|kap|tinyapl)\b/g, '').trim();
             output.classList.add(langConfig.fontClass);
-            
+
             // Update keyboard handler
             if (currentKeyboardCleanup) {
                 currentKeyboardCleanup();
                 currentKeyboardCleanup = null;
             }
-            
+
             // BQN uses \ prefix, APL, Kap, and TinyAPL use ` prefix (each has own keymap)
             if (lang === 'bqn' || lang === 'apl' || lang === 'kap' || lang === 'tinyapl') {
                 currentKeyboardCleanup = createKeyboardHandler(codeInput, lang);
             }
-            
+
             // Update keyboard overlay for new language
             updateKeyboardForLanguage(lang);
-            
+
             // Re-apply syntax highlighting for new language (immediate to prevent flicker)
             applySyntaxHighlightingImmediate();
-            
+
             // Clear output
             hideOutput();
         }
@@ -2898,15 +2907,15 @@
         // ========================================
         // Permalink functionality (server-backed short codes)
         // ========================================
-        
+
         // Get permalink server URL from config
         const PERMALINK_SERVER = ArrayBoxConfig.getServiceUrl('permalink');
-        
+
         // Create a permalink via server API
         async function createPermalink() {
             const code = getInputText();
             if (!code.trim()) return null;
-            
+
             // Only include result if the code hasn't changed since evaluation
             // This ensures the preview shows current code, with result only if it matches
             let result = null;
@@ -2916,18 +2925,18 @@
                 if (lastResult.output) result = lastResult.output;
                 if (lastResult.outputHtml) resultHtml = lastResult.outputHtml;
             }
-            
+
             try {
                 const body = { lang: currentLanguage, code: code };
                 if (result) body.result = result;
                 if (resultHtml) body.resultHtml = resultHtml;
-                
+
                 const response = await fetch(`${PERMALINK_SERVER}/p`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(body)
                 });
-                
+
                 const data = await response.json();
                 if (data.success) {
                     // Track permalink creation for dashboard stats
@@ -2945,17 +2954,17 @@
                 return null;
             }
         }
-        
+
         // Look up a permalink code via server API
         async function lookupPermalink(shortCode) {
             if (!shortCode || shortCode.length < 4) return null;
-            
+
             try {
                 const response = await fetch(`${PERMALINK_SERVER}/p/${shortCode}`, {
                     headers: { 'Accept': 'application/json' }
                 });
                 const data = await response.json();
-                
+
                 if (data.success) {
                     return { lang: data.lang, code: data.code };
                 }
@@ -2965,11 +2974,11 @@
                 return null;
             }
         }
-        
+
         // Handle Ctrl+L to generate permalink
         async function handleCreatePermalink() {
             const code = getInputText();
-            
+
             // If editor is empty, generate a lightweight param-based link
             if (!code.trim()) {
                 const baseUrl = window.location.origin;
@@ -2986,12 +2995,12 @@
                 });
                 return;
             }
-            
+
             const shortCode = await createPermalink();
             if (shortCode) {
                 // Update URL with hash (for local navigation)
                 history.replaceState(null, '', '#' + shortCode);
-                
+
                 // Copy shareable URL with hash format
                 const baseUrl = window.location.origin;
                 const shareUrl = `${baseUrl}/#${shortCode}`;
@@ -3006,12 +3015,12 @@
                 showPermalinkError();
             }
         }
-        
+
         // Handle Ctrl+I to generate and copy vertical image to clipboard
         async function handleCopyImageToClipboard() {
             const code = getInputText();
             if (!code.trim()) return;
-            
+
             // Get current result if available
             let result = null;
             let resultHtml = null;
@@ -3020,7 +3029,7 @@
                 if (lastResult.output) result = lastResult.output;
                 if (lastResult.outputHtml) resultHtml = lastResult.outputHtml;
             }
-            
+
             try {
                 const imageUrl = `${ArrayBoxConfig.getServiceUrl('image')}/image/vertical`;
                 console.log('Fetching image from:', imageUrl);
@@ -3034,19 +3043,19 @@
                         resultHtml: resultHtml
                     })
                 });
-                
+
                 if (!response.ok) {
                     const errText = await response.text();
                     console.error('Server error:', response.status, errText);
                     throw new Error('Server error: ' + response.status);
                 }
-                
+
                 const blob = await response.blob();
                 console.log('Got blob:', blob.type, blob.size);
-                
+
                 // Ensure blob is PNG type (some browsers are picky)
                 const pngBlob = new Blob([blob], { type: 'image/png' });
-                
+
                 // Copy to clipboard using ClipboardItem
                 try {
                     if (!navigator.clipboard || !navigator.clipboard.write) {
@@ -3072,22 +3081,22 @@
                 showImageError();
             }
         }
-        
+
         // Show feedback when image is copied
         function showImageCopiedFeedback() {
             showFeedbackMessage('Image copied to clipboard', '#065f46', '#d1fae5');
         }
-        
+
         // Show error when image generation fails
         function showImageError() {
             showFeedbackMessage('Failed to generate image', '#991b1b', '#fecaca');
         }
-        
+
         // Show error when clipboard write fails
         function showClipboardError() {
             showFeedbackMessage('Clipboard not supported (try HTTPS)', '#991b1b', '#fecaca');
         }
-        
+
         // Generic feedback message helper
         function showFeedbackMessage(message, bgColor, textColor) {
             let feedback = document.getElementById('imageFeedback');
@@ -3115,7 +3124,7 @@
             feedback.style.opacity = '1';
             setTimeout(() => { feedback.style.opacity = '0'; }, 2000);
         }
-        
+
         // Show error when permalink server is unavailable
         function showPermalinkError() {
             let feedback = document.getElementById('permalinkFeedback');
@@ -3139,16 +3148,16 @@
                 `;
                 document.body.appendChild(feedback);
             }
-            
+
             feedback.textContent = 'Permalink server unavailable';
             feedback.style.background = '#ef4444';
             feedback.style.opacity = '1';
-            
+
             setTimeout(() => {
                 feedback.style.opacity = '0';
             }, 2000);
         }
-        
+
         // Show brief feedback when permalink is created
         function showPermalinkFeedback(code) {
             // Create or reuse feedback element
@@ -3173,35 +3182,35 @@
                 `;
                 document.body.appendChild(feedback);
             }
-            
+
             feedback.textContent = `Permalink copied! #${code}`;
             feedback.style.opacity = '1';
-            
+
             setTimeout(() => {
                 feedback.style.opacity = '0';
             }, 2000);
         }
-        
+
         // Load state from URL hash or PERMALINK_CODE on page load
         async function loadFromPermalink() {
             // Check for PERMALINK_CODE (set when served from /p/:code for social media)
             // or fall back to URL hash
             const code = window.PERMALINK_CODE || window.location.hash.slice(1);
             if (!code) return false;
-            
+
             const state = await lookupPermalink(code);
             if (!state) return false;
-            
+
             // Switch language and set code
             switchLanguage(state.lang);
             setInputText(state.code);
             applySyntaxHighlighting();
-            
+
             // Update URL to hash format for consistency (if we came from /p/:code)
             if (window.PERMALINK_CODE && window.location.pathname.startsWith('/p/')) {
                 window.history.replaceState(null, '', `/#${code}`);
             }
-            
+
             return true;
         }
 
@@ -3211,16 +3220,16 @@
             // Normalize non-breaking spaces (U+00A0) to regular spaces
             return (codeInput.innerText || '').replace(/\u00A0/g, ' ');
         }
-        
+
         // Set cursor position in contenteditable div
         function setCursorPosition(element, pos) {
             const range = document.createRange();
             const sel = window.getSelection();
-            
+
             let currentPos = 0;
             let targetNode = null;
             let targetOffset = 0;
-            
+
             function traverse(node) {
                 if (node.nodeType === Node.TEXT_NODE) {
                     const length = node.textContent.length;
@@ -3237,9 +3246,9 @@
                 }
                 return false;
             }
-            
+
             traverse(element);
-            
+
             if (targetNode) {
                 range.setStart(targetNode, targetOffset);
                 range.collapse(true);
@@ -3247,23 +3256,23 @@
                 sel.addRange(range);
             }
         }
-        
+
         // Get current cursor position
         function getCursorPosition() {
             const sel = window.getSelection();
             if (sel.rangeCount === 0) return 0;
-            
+
             const range = sel.getRangeAt(0);
             const preCaretRange = range.cloneRange();
             preCaretRange.selectNodeContents(codeInput);
             preCaretRange.setEnd(range.endContainer, range.endOffset);
             return preCaretRange.toString().length;
         }
-        
+
         // Debounced syntax highlighting for performance
         let highlightTimeout = null;
         let highlightAnimationFrame = null;
-        
+
         // Immediate syntax highlighting (no debounce) - use for bulk updates like history/language switch
         function applySyntaxHighlightingImmediate() {
             // Cancel any pending debounced highlight
@@ -3275,11 +3284,11 @@
                 cancelAnimationFrame(highlightAnimationFrame);
                 highlightAnimationFrame = null;
             }
-            
+
             const cursorPos = getCursorPosition();
             const text = getInputText();
             const highlighted = highlightCode(text, currentLanguage);
-            
+
             // Only update if content actually changed
             if (codeInput.innerHTML !== highlighted) {
                 codeInput.innerHTML = highlighted;
@@ -3287,34 +3296,34 @@
                 setCursorPosition(codeInput, cursorPos);
             }
         }
-        
+
         function applySyntaxHighlighting() {
             // Clear any pending timeout
             if (highlightTimeout) {
                 clearTimeout(highlightTimeout);
                 highlightTimeout = null;
             }
-            
+
             // Cancel any pending animation frame
             if (highlightAnimationFrame) {
                 cancelAnimationFrame(highlightAnimationFrame);
                 highlightAnimationFrame = null;
             }
-            
+
             // Debounce: wait 50ms after last keystroke before highlighting
             highlightTimeout = setTimeout(() => {
                 highlightAnimationFrame = requestAnimationFrame(() => {
                     const cursorPos = getCursorPosition();
                     const text = getInputText();
                     const highlighted = highlightCode(text, currentLanguage);
-                    
+
                     // Only update if content actually changed
                     if (codeInput.innerHTML !== highlighted) {
                         codeInput.innerHTML = highlighted;
                         // Restore cursor position
                         setCursorPosition(codeInput, cursorPos);
                     }
-                    
+
                     highlightAnimationFrame = null;
                 });
                 highlightTimeout = null;
@@ -3331,11 +3340,11 @@
             }
 
             const langConfig = languages[currentLanguage];
-            
+
             // Show loading indicator and hide previous output
             output.classList.remove('show');
             loadingIndicator.classList.add('show');
-            
+
             let result;
             try {
                 result = await langConfig.evaluate(code);
@@ -3343,11 +3352,11 @@
                 // Hide loading indicator
                 loadingIndicator.classList.remove('show');
             }
-            
+
             // Store result for permalinks (use plain text output)
             lastResult = result;
             lastEvaluatedCode = code; // Track what code produced this result
-            
+
             // Add to input history (avoid duplicating consecutive identical entries)
             if (codeHistory.length === 0 || codeHistory[codeHistory.length - 1] !== code) {
                 codeHistory.push(code);
@@ -3355,65 +3364,85 @@
             // Reset history browsing state
             historyIndex = -1;
             currentUnsavedCode = '';
-            
+
             // If formatted code is returned (Uiua), replace input with it
             if (result.formatted && result.formatted.trim() !== code) {
                 setInputText(result.formatted.trim());
             }
-            
+
             // Use HTML rendering if available (TinyAPL fancy arrays), or train tree glyph highlighting
             if (result.outputHtml) {
                 output.innerHTML = result.outputHtml;
                 output.style.textAlign = '';
-            } else if ((currentLanguage === 'apl' || currentLanguage === 'j') && isTrainTree(result.output)) {
-                output.innerHTML = `<span style="display:inline-block;text-align:left">${highlightTrainTreeGlyphs(result.output, currentLanguage)}</span>`;
+            } else if (currentLanguage === 'apl' && isTrainTree(result.output)) {
+                const { html: explainHtml, groups: explainGroups } = renderAplExplainTree(code, result.output);
+                output.innerHTML = `<span style="display:inline-block;text-align:left" id="explainTreeRoot">${explainHtml}</span>`;
                 output.style.textAlign = 'center';
+                const explainRoot = document.getElementById('explainTreeRoot');
+                if (explainRoot) {
+                    explainRoot._explainGroups = explainGroups;
+                    explainRoot._combinatorInfo = APL_COMBINATOR_INFO;
+                    explainRoot._tooltipLabels = { monad: '⍵', dyad: '⍺⍵' };
+                }
+            } else if (currentLanguage === 'j' && isTrainTree(result.output)) {
+                const { html: explainHtml, groups: explainGroups } = renderJExplainTree(code, result.output);
+                output.innerHTML = `<span style="display:inline-block;text-align:left" id="explainTreeRoot">${explainHtml}</span>`;
+                output.style.textAlign = 'center';
+                const explainRoot = document.getElementById('explainTreeRoot');
+                if (explainRoot) {
+                    explainRoot._explainGroups = explainGroups;
+                    explainRoot._combinatorInfo = J_COMBINATOR_INFO;
+                    explainRoot._tooltipLabels = { monad: 'y', dyad: 'x y' };
+                }
             } else if (result.isBqnExplain) {
-                output.innerHTML = `<span style="display:inline-block;text-align:left">${highlightTrainTreeGlyphs(result.output, 'bqn')}</span>`;
+                const { html: explainHtml, groups: explainGroups } = renderBqnExplainTree(result.output);
+                output.innerHTML = `<span style="display:inline-block;text-align:left" id="explainTreeRoot">${explainHtml}</span>`;
                 output.style.textAlign = 'center';
+                const explainRoot = document.getElementById('explainTreeRoot');
+                if (explainRoot) explainRoot._explainGroups = explainGroups;
             } else {
                 output.textContent = result.output;
                 output.style.textAlign = '';
             }
             output.className = `output show ${langConfig.fontClass} ${result.success ? '' : 'error'}`;
-            
+
             // Dynamically adjust font size first, then calculate width once at final size
             requestAnimationFrame(() => {
                 // Reset to default font size (scaled 1.75x)
                 let fontSize = 42;
                 const minFontSize = 10;
                 output.style.fontSize = `${fontSize}px`;
-                
+
                 // Reset overflow-x to hidden initially
                 output.style.overflowX = 'hidden';
-                
+
                 // Temporarily make container very wide to allow accurate font size calculation
                 // This prevents the bounce from width changes affecting font size calculation
                 container.style.maxWidth = '9999px';
-                
+
                 // Force a reflow to apply the wide width
                 void container.offsetWidth;
                 void output.offsetWidth;
-                
+
                 // Reduce font size until content fits or we hit minimum
                 // Now we can measure accurately since container is wide
                 while (output.scrollWidth > output.clientWidth && fontSize > minFontSize) {
                     fontSize -= 1;
                     output.style.fontSize = `${fontSize}px`;
                 }
-                
+
                 // Force a reflow to ensure font size is applied before width calculation
                 void output.offsetWidth;
-                
+
                 // Now calculate and set the final container width based on the final font size
                 // This happens in the same frame to avoid bounce
                 const codeText = getInputText();
                 autoExpandWidthForCodeAndResult(container, codeInput, output, codeText);
-                
+
                 // Force a reflow to ensure container width is applied
                 void container.offsetWidth;
                 void output.offsetWidth;
-                
+
                 // Check if content still doesn't fit even after font reduction and width increase
                 // If so, enable horizontal scrolling
                 if (output.scrollWidth > output.clientWidth) {
@@ -3421,34 +3450,34 @@
                 } else {
                     output.style.overflowX = 'hidden';
                 }
-                
+
                 // Constrain heights so input + output fit in viewport
                 constrainHeights();
             });
         }
-        
+
         // Get cursor position as character offset from start
         function getCursorOffset() {
             const sel = window.getSelection();
             if (sel.rangeCount === 0) return 0;
-            
+
             const range = sel.getRangeAt(0);
             const preCaretRange = range.cloneRange();
             preCaretRange.selectNodeContents(codeInput);
             preCaretRange.setEnd(range.startContainer, range.startOffset);
             return preCaretRange.toString().length;
         }
-        
+
         // Set cursor position by character offset
         function setCursorOffset(offset) {
             const sel = window.getSelection();
             const range = document.createRange();
-            
+
             // Walk through text nodes to find the right position
             let currentOffset = 0;
             const walker = document.createTreeWalker(codeInput, NodeFilter.SHOW_TEXT, null, false);
             let node;
-            
+
             while ((node = walker.nextNode())) {
                 const nodeLength = node.textContent.length;
                 if (currentOffset + nodeLength >= offset) {
@@ -3460,7 +3489,7 @@
                 }
                 currentOffset += nodeLength;
             }
-            
+
             // If offset is beyond content, place at end
             if (codeInput.lastChild) {
                 range.selectNodeContents(codeInput);
@@ -3469,7 +3498,7 @@
                 sel.addRange(range);
             }
         }
-        
+
         // Set the input text and apply syntax highlighting, preserving cursor position
         function setInputText(text) {
             const cursorOffset = getCursorOffset();
@@ -3546,12 +3575,12 @@
             applySyntaxHighlighting
         );
         editorFeatures.init();
-        
+
         // Keyboard shortcuts for code input
         codeInput.addEventListener('keydown', (e) => {
             // Don't interfere with IME/Compose key input
             if (e.isComposing || e.keyCode === 229) return;
-            
+
             // Shift+Enter: evaluate highlighted text, or insert newline if no selection
             if (e.key === 'Enter' && e.shiftKey) {
                 const sel = window.getSelection();
@@ -3572,7 +3601,7 @@
                 editorFeatures.alignAll();
                 evaluateCode();
             }
-            
+
             // Ctrl+F to format only (no evaluation)
             if (e.ctrlKey && e.key === 'f') {
                 e.preventDefault();
@@ -3580,7 +3609,7 @@
                 hideOutput();
                 return;
             }
-            
+
             // Ctrl+/ to toggle comment
             if (e.ctrlKey && e.key === '/') {
                 e.preventDefault();
@@ -3595,7 +3624,7 @@
                     endRange.setEnd(range.endContainer, range.endOffset);
                     selEnd = endRange.toString().length;
                 }
-                
+
                 const result = toggleComment(text, currentLanguage, selStart, selEnd);
                 if (result.text !== text) {
                     codeInput.textContent = result.text;
@@ -3606,24 +3635,24 @@
                 }
                 return;
             }
-            
+
             // Ctrl+Shift+Up to go to previous input in history
             if (e.ctrlKey && e.shiftKey && e.key === 'ArrowUp') {
                 e.preventDefault();
                 if (codeHistory.length === 0) return;
-                
+
                 // Save current input when starting to browse
                 if (historyIndex === -1) {
                     currentUnsavedCode = getInputText();
                     historyIndex = codeHistory.length;
-                    
+
                     // If current input matches the last history entry, skip it
                     // (user just evaluated and wants to see the previous expression)
                     if (codeHistory[codeHistory.length - 1] === currentUnsavedCode.trim()) {
                         historyIndex--;
                     }
                 }
-                
+
                 // Move to previous entry if possible
                 if (historyIndex > 0) {
                     historyIndex--;
@@ -3633,14 +3662,14 @@
                 }
                 return;
             }
-            
+
             // Ctrl+Shift+Down to go to next input in history
             if (e.ctrlKey && e.shiftKey && e.key === 'ArrowDown') {
                 e.preventDefault();
                 if (historyIndex === -1) return; // Not browsing history
-                
+
                 historyIndex++;
-                
+
                 if (historyIndex >= codeHistory.length) {
                     // Return to unsaved input
                     historyIndex = -1;
@@ -3653,24 +3682,24 @@
                 hideOutput();
                 return;
             }
-            
+
         });
 
         codeInput.addEventListener('wheel', (e) => {
             if (codeHistory.length === 0) return;
             e.preventDefault();
-            
+
             if (e.deltaY < 0) {
                 // Scroll up - go to previous (older) history entry
                 if (historyIndex === -1) {
                     currentUnsavedCode = getInputText();
                     historyIndex = codeHistory.length;
-                    
+
                     if (codeHistory[codeHistory.length - 1] === currentUnsavedCode.trim()) {
                         historyIndex--;
                     }
                 }
-                
+
                 if (historyIndex > 0) {
                     historyIndex--;
                     setInputText(codeHistory[historyIndex]);
@@ -3680,9 +3709,9 @@
             } else {
                 // Scroll down - go to next (newer) history entry
                 if (historyIndex === -1) return;
-                
+
                 historyIndex++;
-                
+
                 if (historyIndex >= codeHistory.length) {
                     historyIndex = -1;
                     setInputText(currentUnsavedCode);
@@ -3715,12 +3744,12 @@
             applySyntaxHighlighting();
             constrainHeights();
         }, { passive: true });
-        
+
         // Handle paste - ensure plain text only
         codeInput.addEventListener('paste', (e) => {
             e.preventDefault();
             const text = e.clipboardData.getData('text/plain');
-            
+
             // Insert text at cursor
             const sel = window.getSelection();
             if (sel.rangeCount > 0) {
@@ -3728,13 +3757,13 @@
                 range.deleteContents();
                 const textNode = document.createTextNode(text);
                 range.insertNode(textNode);
-                
+
                 // Move cursor after pasted text
                 range.setStartAfter(textNode);
                 range.setEndAfter(textNode);
                 sel.removeAllRanges();
                 sel.addRange(range);
-                
+
                 // Trigger input event to apply highlighting
                 codeInput.dispatchEvent(new Event('input', { bubbles: true }));
             }
@@ -3742,10 +3771,10 @@
 
         // Initialize keyboard handler for default language (APL)
         currentKeyboardCleanup = createKeyboardHandler(codeInput, 'apl');
-        
+
         // Initialize favicon with hexagon background for default language (APL)
         generateHexagonFavicon(languages.apl.logo);
-        
+
         // Initialize visual keyboard for default language (APL)
         const aplConfig = keyboardConfigs.apl;
         visualKeyboard = new ArrayKeyboard({
@@ -3764,7 +3793,7 @@
                 applySyntaxHighlighting();
             }
         });
-        
+
         // Load state from URL permalink (if present)
         loadFromPermalink().then((loaded) => {
             // Apply initial syntax highlighting after loading
@@ -3775,14 +3804,14 @@
                 evaluateCode();
             }
         });
-        
+
         // Track visitor (server identifies unique visitors by IP)
         fetch(`${ArrayBoxConfig.getServiceUrl('log')}/visitor`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({})
         }).catch(() => {}); // Ignore if server not running
-        
+
         // Show keyboard hint for 10 seconds
         const keyboardHint = document.getElementById('keyboardHint');
         setTimeout(() => {
@@ -3796,22 +3825,22 @@
         // ========================================
         // Ctrl+Space Primitive Combo Box
         // ========================================
-        
+
         const primitiveCombobox = document.getElementById('primitiveCombobox');
         const comboboxInput = document.getElementById('comboboxInput');
         const comboboxList = document.getElementById('comboboxList');
         let comboboxSelectedIndex = 0;
         let filteredPrimitives = [];
         let savedCursorPosition = null;
-        
+
         // Build reverse keymap (glyph -> shortcut) for each language
         function buildReverseKeymap(keymap, prefixKey, language) {
             const reverse = {};
-            
+
             if (!keymap || Object.keys(keymap).length === 0) {
                 return reverse;
             }
-            
+
             if (language === 'tinyapl') {
                 // TinyAPL uses special structure with symP, symPS, symPP, symPPS
                 for (const [code, entry] of Object.entries(keymap)) {
@@ -3846,7 +3875,7 @@
                     } else if (code === 'Space') {
                         key = 'space';
                     }
-                    
+
                     if (entry.symP && !reverse[entry.symP]) {
                         reverse[entry.symP] = `${prefixKey} ${key}`;
                     }
@@ -3872,7 +3901,7 @@
             }
             return reverse;
         }
-        
+
         // Get input hint for languages without keymaps (Uiua, J)
         function getInputHint(glyph, name, language) {
             if (language === 'uiua') {
@@ -3886,12 +3915,12 @@
             }
             return '';
         }
-        
+
         // Get syntax class for a glyph based on current language's syntax rules
         function getSyntaxClassForGlyph(glyph) {
             const config = keyboardConfigs[currentLanguage];
             if (!config) return '';
-            
+
             // Check glyphCategories first (source of truth for keyboard/character set coloring)
             if (config.glyphCategories) {
                 for (const categoryData of Object.values(config.glyphCategories)) {
@@ -3900,7 +3929,7 @@
                     }
                 }
             }
-            
+
             // Handle compound inverse glyphs for Uiua (°X and ⌝X patterns)
             if (currentLanguage === 'uiua' && glyph.length > 1) {
                 const firstChar = glyph[0];
@@ -3908,21 +3937,21 @@
                     return 'syntax-uiua-modifier-monadic';
                 }
             }
-            
+
             // Fall back to syntaxRules
             return getSyntaxClass(glyph, currentLanguage) || '';
         }
-        
+
         // Build list of primitives for current language
         function buildPrimitivesList() {
             const config = keyboardConfigs[currentLanguage];
             if (!config || !config.glyphNames) return [];
-            
+
             const glyphNames = config.glyphNames;
             const keymap = config.keymap || {};
             const prefixKey = config.prefixKey || '`';
             const reverseKeymap = buildReverseKeymap(keymap, prefixKey, currentLanguage);
-            
+
             const primitives = [];
             for (const [glyph, name] of Object.entries(glyphNames)) {
                 // Get shortcut from keymap, or input hint for languages without keymaps
@@ -3930,26 +3959,26 @@
                 if (!shortcut && (currentLanguage === 'uiua' || currentLanguage === 'j')) {
                     shortcut = getInputHint(glyph, name, currentLanguage);
                 }
-                
+
                 primitives.push({
                     glyph,
                     name,
                     shortcut: shortcut || ''
                 });
             }
-            
+
             // Sort by name alphabetically
             primitives.sort((a, b) => a.name.localeCompare(b.name));
             return primitives;
         }
-        
+
         // Fuzzy match function - returns match score and highlighted name
         function fuzzyMatch(text, query) {
             if (!query) return { score: 1, highlighted: text };
-            
+
             const textLower = text.toLowerCase();
             const queryLower = query.toLowerCase();
-            
+
             // Check for exact substring match first (highest priority)
             const substringIndex = textLower.indexOf(queryLower);
             if (substringIndex !== -1) {
@@ -3961,7 +3990,7 @@
                     highlighted: `${before}<em>${match}</em>${after}`
                 };
             }
-            
+
             // Fuzzy matching - find all query chars in order
             let textIdx = 0;
             let queryIdx = 0;
@@ -3969,12 +3998,12 @@
             let highlighted = '';
             let lastMatchIdx = -1;
             let consecutiveMatches = 0;
-            
+
             while (textIdx < text.length && queryIdx < queryLower.length) {
                 if (textLower[textIdx] === queryLower[queryIdx]) {
                     highlighted += `<em>${text[textIdx]}</em>`;
                     score += 10;
-                    
+
                     // Bonus for consecutive matches
                     if (lastMatchIdx === textIdx - 1) {
                         consecutiveMatches++;
@@ -3982,12 +4011,12 @@
                     } else {
                         consecutiveMatches = 0;
                     }
-                    
+
                     // Bonus for matching at word boundaries
                     if (textIdx === 0 || text[textIdx - 1] === ' ' || text[textIdx - 1] === '/') {
                         score += 15;
                     }
-                    
+
                     lastMatchIdx = textIdx;
                     queryIdx++;
                 } else {
@@ -3995,22 +4024,22 @@
                 }
                 textIdx++;
             }
-            
+
             // Add remaining text
             highlighted += text.slice(textIdx);
-            
+
             // Return null if not all query chars were found
             if (queryIdx < queryLower.length) {
                 return null;
             }
-            
+
             return { score, highlighted };
         }
-        
+
         // Filter and render primitives list
         function filterPrimitives(query) {
             const allPrimitives = buildPrimitivesList();
-            
+
             if (!query) {
                 filteredPrimitives = allPrimitives.map(p => ({ ...p, highlighted: p.name }));
             } else {
@@ -4020,7 +4049,7 @@
                     const nameMatch = fuzzyMatch(p.name, query);
                     // Also check if query matches the glyph itself
                     const glyphMatch = p.glyph.includes(query) ? { score: 200, highlighted: p.name } : null;
-                    
+
                     const bestMatch = glyphMatch || nameMatch;
                     if (bestMatch) {
                         filteredPrimitives.push({
@@ -4033,35 +4062,35 @@
                 // Sort by score descending
                 filteredPrimitives.sort((a, b) => b.score - a.score);
             }
-            
+
             renderComboboxList();
         }
-        
+
         // Render the combo box list
         function renderComboboxList() {
             comboboxList.innerHTML = '';
-            
+
             if (filteredPrimitives.length === 0) {
                 comboboxList.innerHTML = '<div class="primitive-combobox-empty">No primitives found</div>';
                 return;
             }
-            
+
             const fontClass = languages[currentLanguage]?.fontClass || '';
-            
+
             filteredPrimitives.forEach((p, index) => {
                 const item = document.createElement('div');
                 item.className = 'primitive-combobox-item' + (index === comboboxSelectedIndex ? ' selected' : '');
                 item.dataset.index = index;
-                
+
                 const glyphSpan = document.createElement('span');
                 const syntaxClass = getSyntaxClassForGlyph(p.glyph);
                 glyphSpan.className = 'primitive-combobox-glyph ' + fontClass + (syntaxClass ? ' ' + syntaxClass : '');
                 glyphSpan.textContent = p.glyph;
-                
+
                 const nameSpan = document.createElement('span');
                 nameSpan.className = 'primitive-combobox-name';
                 nameSpan.innerHTML = p.highlighted;
-                
+
                 const shortcutSpan = document.createElement('span');
                 shortcutSpan.className = 'primitive-combobox-shortcut';
                 if (p.shortcut) {
@@ -4069,27 +4098,27 @@
                     const parts = p.shortcut.split(' ');
                     shortcutSpan.innerHTML = parts.map(part => `<kbd>${part}</kbd>`).join(' ');
                 }
-                
+
                 item.appendChild(glyphSpan);
                 item.appendChild(nameSpan);
                 item.appendChild(shortcutSpan);
-                
+
                 item.addEventListener('click', () => {
                     selectPrimitive(index);
                 });
-                
+
                 item.addEventListener('mouseenter', () => {
                     comboboxSelectedIndex = index;
                     updateComboboxSelection();
                 });
-                
+
                 comboboxList.appendChild(item);
             });
-            
+
             // Scroll selected item into view
             scrollSelectedIntoView();
         }
-        
+
         // Update selection highlighting
         function updateComboboxSelection() {
             const items = comboboxList.querySelectorAll('.primitive-combobox-item');
@@ -4098,7 +4127,7 @@
             });
             scrollSelectedIntoView();
         }
-        
+
         // Scroll selected item into view
         function scrollSelectedIntoView() {
             const selected = comboboxList.querySelector('.primitive-combobox-item.selected');
@@ -4106,78 +4135,78 @@
                 selected.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
             }
         }
-        
+
         // Select a primitive and insert it
         function selectPrimitive(index) {
             if (index < 0 || index >= filteredPrimitives.length) return;
-            
+
             const primitive = filteredPrimitives[index];
             const cursorPos = savedCursorPosition;
-            
+
             // Hide combo box first
             primitiveCombobox.classList.remove('show');
             comboboxInput.value = '';
             filteredPrimitives = [];
-            
+
             // Focus code input and restore cursor position
             codeInput.focus();
             if (cursorPos !== null) {
                 setCursorPosition(codeInput, cursorPos);
             }
-            
+
             // Now insert the glyph at the restored cursor position
             insertText(codeInput, primitive.glyph);
             applySyntaxHighlighting();
         }
-        
+
         // Show the combo box
         function showCombobox() {
             // Save cursor position
             savedCursorPosition = getCursorPosition();
-            
+
             // Position the combo box below the code input
             // Since the combo box is inside input-container (position: relative),
             // we position it relative to that container
             const inputRect = codeInput.getBoundingClientRect();
             const containerRect = codeInput.parentElement.getBoundingClientRect();
-            
+
             // Position below the code input, aligned to left edge
             // Use same margin as output (24px)
             primitiveCombobox.style.top = `${inputRect.height + 24}px`;
             primitiveCombobox.style.left = '0';
             primitiveCombobox.style.width = `${inputRect.width}px`;
             primitiveCombobox.style.maxWidth = `${inputRect.width}px`;
-            
+
             primitiveCombobox.classList.add('show');
             comboboxInput.value = '';
             comboboxSelectedIndex = 0;
             filterPrimitives('');
             comboboxInput.focus();
-            
+
         }
-        
+
         // Hide the combo box
         function hideCombobox() {
             primitiveCombobox.classList.remove('show');
             comboboxInput.value = '';
             filteredPrimitives = [];
-            
+
             // Restore focus to code input
             codeInput.focus();
         }
-        
-        
+
+
         // Check if combo box is visible
         function isComboboxVisible() {
             return primitiveCombobox.classList.contains('show');
         }
-        
+
         // Handle combo box input
         comboboxInput.addEventListener('input', () => {
             comboboxSelectedIndex = 0;
             filterPrimitives(comboboxInput.value);
         });
-        
+
         // Handle combo box keyboard navigation
         comboboxInput.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowDown') {
@@ -4199,19 +4228,19 @@
                 selectPrimitive(comboboxSelectedIndex);
             }
         });
-        
+
         // Add Ctrl+Space handler to code input
         codeInput.addEventListener('keydown', (e) => {
             // Ctrl+Space to show combo box
             if (e.ctrlKey && e.key === ' ') {
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 // Don't show if keyboard overlay is visible
                 if (visualKeyboard && visualKeyboard.isVisible()) {
                     return;
                 }
-                
+
                 if (isComboboxVisible()) {
                     hideCombobox();
                 } else {
@@ -4219,21 +4248,21 @@
                 }
             }
         });
-        
+
         // Close combo box when clicking outside
         document.addEventListener('click', (e) => {
-            if (isComboboxVisible() && 
-                !primitiveCombobox.contains(e.target) && 
+            if (isComboboxVisible() &&
+                !primitiveCombobox.contains(e.target) &&
                 e.target !== codeInput) {
                 hideCombobox();
             }
         });
-        
+
         // Prevent combo box clicks from propagating
         primitiveCombobox.addEventListener('click', (e) => {
             e.stopPropagation();
         });
-        
+
         // Keep focus in combo box input when clicking inside the combo box
         primitiveCombobox.addEventListener('mousedown', (e) => {
             // If clicking on an item, let the click handler work
@@ -4249,10 +4278,10 @@
         // ========================================
         // F1 Documentation Tooltip
         // ========================================
-        
+
         const f1DocTooltip = document.getElementById('f1DocTooltip');
         let f1TooltipVisible = false;
-        
+
         /**
          * Get all known glyphs for the current language
          * Includes functions, monadic, dyadic, modifiers, constants from syntax rules
@@ -4261,9 +4290,9 @@
         function getAllGlyphs(language) {
             const rules = syntaxRules[language];
             if (!rules) return new Set();
-            
+
             const glyphs = new Set();
-            
+
             // Add all single-char glyphs
             if (rules.functions) rules.functions.forEach(g => glyphs.add(g));
             if (rules.monadic) rules.monadic.forEach(g => glyphs.add(g));
@@ -4271,17 +4300,17 @@
             if (rules.modifier) rules.modifier.forEach(g => glyphs.add(g));
             if (rules.constants) rules.constants.forEach(g => glyphs.add(g));
             if (rules.comparison) rules.comparison.forEach(g => glyphs.add(g));
-            
+
             // For J, also add multi-char tokens
             if (language === 'j' && rules.multiChar) {
                 if (rules.multiChar.functions) rules.multiChar.functions.forEach(g => glyphs.add(g));
                 if (rules.multiChar.monadic) rules.multiChar.monadic.forEach(g => glyphs.add(g));
                 if (rules.multiChar.dyadic) rules.multiChar.dyadic.forEach(g => glyphs.add(g));
             }
-            
+
             return glyphs;
         }
-        
+
         /**
          * Find the glyph at or before the cursor position
          * Returns { glyph, position } or null if no glyph found
@@ -4289,12 +4318,12 @@
         function findGlyphAtCursor() {
             const text = getInputText();
             const cursorPos = getCursorPosition();
-            
+
             if (!text) return null;
-            
+
             const allGlyphs = getAllGlyphs(currentLanguage);
             const glyphDocs = glyphDocsByLanguage[currentLanguage] || {};
-            
+
             // For J language, try to match multi-char tokens first (looking at chars before cursor)
             if (currentLanguage === 'j') {
                 // Try 3-char, then 2-char matches
@@ -4307,7 +4336,7 @@
                     }
                 }
             }
-            
+
             // Try single character at cursor position (if cursor is on a glyph)
             if (cursorPos < text.length) {
                 const charAtCursor = text[cursorPos];
@@ -4315,7 +4344,7 @@
                     return { glyph: charAtCursor, position: cursorPos };
                 }
             }
-            
+
             // Try character before cursor
             if (cursorPos > 0) {
                 const charBefore = text[cursorPos - 1];
@@ -4323,10 +4352,10 @@
                     return { glyph: charBefore, position: cursorPos - 1 };
                 }
             }
-            
+
             return null;
         }
-        
+
         /**
          * Build tooltip HTML content for a glyph
          */
@@ -4337,25 +4366,25 @@
          */
         function escapeDescForF1(text, fontFamily) {
             if (!text) return '';
-            
+
             const codeGlyphs = '←→⊢⊣⍳⍸∊⍷⋷⋵⍴ϼ⍋⍒⌿⍪⊖⍉⊃⊇⌷⍎⍕↗⇂↾⍬∇⋄⍝⎕⍞⁖⍣∙⊞⍤◡◠⍥⌓⌸⌺⍢∵⎊⍨∘⍛⊸⟜⸚«»⇾⇽⫤⫣⊩¨ᐵᑈᑣᑒᓗᓚ⊕⊗∡ℜℑ⧺ⵧ⊥⊤⊲⊴⊵⊳∪∩§↑↓⊂⊆⫇√⸠⌹⍲⍱⩓⩔⨳…⍮‥߹∻⬚○';
             const codeGlyphsRegex = new RegExp(`[${codeGlyphs}]`);
             const codeStyle = `font-family: ${fontFamily}; background: rgba(128, 128, 128, 0.15); padding: 0.1em 0.25em; border-radius: 3px`;
-            
+
             // Handle escaped brackets \[ and \] (from TinyAPL docs)
             let processed = text.replace(/\\\[/g, '[').replace(/\\\]/g, ']');
-            
+
             // Find code spans and protect them, then escape the rest
             const codeSpans = [];
             const MARKER = '\uE000'; // Private Use Area char as placeholder
-            
+
             // Detect r←... assignment patterns
             processed = processed.replace(/\br←[^\s.!?,;]+/g, (match) => {
                 const idx = codeSpans.length;
                 codeSpans.push(`<code style="${codeStyle}">${escapeHtml(match)}</code>`);
                 return MARKER + idx + MARKER;
             });
-            
+
             // Detect expressions with APL glyphs (only outside existing markers)
             const textForGlyphCheck = processed.replace(new RegExp(MARKER + '\\d+' + MARKER, 'g'), '');
             if (codeGlyphsRegex.test(textForGlyphCheck)) {
@@ -4381,7 +4410,7 @@
                     });
                 }).join('');
             }
-            
+
             // HTML-escape the remaining text (non-code parts)
             const markerSplitPattern = new RegExp(`(${MARKER}\\d+${MARKER})`);
             const finalParts = processed.split(markerSplitPattern);
@@ -4393,17 +4422,17 @@
                 return escapeHtml(part);
             }).join('');
         }
-        
+
         function buildF1TooltipContent(glyph, doc) {
             // Use font family from keyboard config
             const kbConfig = keyboardConfigs[currentLanguage];
             const fontFamily = kbConfig?.fontFamily || "'Courier New', monospace";
-            
+
             const escapeDesc = (text) => escapeDescForF1(text, fontFamily);
-            
+
             // Get syntax class for glyph coloring (matches keyboard/character set)
             const syntaxClass = getSyntaxClassForGlyph(glyph);
-            
+
             let html = '<div class="f1-doc-tooltip-header">';
             html += `<span class="f1-doc-tooltip-glyph ${syntaxClass}" style="font-family: ${fontFamily}">${escapeHtml(glyph)}</span>`;
             html += `<span class="f1-doc-tooltip-type">${escapeHtml(doc.type || 'primitive')}</span>`;
@@ -4411,7 +4440,7 @@
                 html += `<span class="f1-doc-tooltip-sig">${escapeHtml(doc.signature)}</span>`;
             }
             html += '</div>';
-            
+
             // Handle different doc formats
             if (doc.overloads && doc.overloads.length > 0) {
                 // TinyAPL style: multiple overloads
@@ -4456,7 +4485,7 @@
                     html += `<div class="f1-doc-tooltip-title-line">${escapeHtml(doc.name)}</div>`;
                 }
                 if (doc.description) {
-                    const shortDesc = doc.description.length > 300 ? 
+                    const shortDesc = doc.description.length > 300 ?
                         doc.description.substring(0, 297) + '...' : doc.description;
                     html += `<div class="f1-doc-tooltip-desc">${escapeDesc(shortDesc)}</div>`;
                 }
@@ -4464,44 +4493,44 @@
                     html += `<div class="f1-doc-tooltip-example" style="font-family: ${fontFamily}">${highlightCode(doc.example, currentLanguage)}</div>`;
                 }
             }
-            
+
             // Doc link
             if (doc.docUrl) {
                 html += `<a class="f1-doc-tooltip-link" href="${doc.docUrl}" target="_blank" rel="noopener">View full docs ↗</a>`;
             }
-            
+
             // Hint
             html += '<div class="f1-doc-tooltip-hint">Press F1 or Escape to close</div>';
-            
+
             return html;
         }
-        
+
         /**
          * Show F1 documentation tooltip for a glyph
          * Positions tooltip to right of container, slides container left
          */
         function showF1Tooltip(glyph, doc) {
             f1DocTooltip.innerHTML = buildF1TooltipContent(glyph, doc);
-            
+
             // Position tooltip to the right of where container will be
             const containerRect = container.getBoundingClientRect();
             const tooltipWidth = 560;
             const gap = 28;
-            
+
             // Calculate position: container center + half container width + gap
             // After container shifts left by 300px, tooltip should be to its right
             const containerCenterX = containerRect.left + containerRect.width / 2;
             const newContainerRight = containerCenterX - 300 + containerRect.width / 2;
             const tooltipLeft = newContainerRight + gap;
-            
+
             f1DocTooltip.style.left = `${tooltipLeft}px`;
-            
+
             // Add class to body to trigger container shift
             document.body.classList.add('f1-doc-active');
             f1DocTooltip.classList.add('show');
             f1TooltipVisible = true;
         }
-        
+
         /**
          * Hide F1 documentation tooltip
          */
@@ -4510,70 +4539,196 @@
             f1DocTooltip.classList.remove('show');
             f1TooltipVisible = false;
         }
-        
+
         /**
          * Check if F1 tooltip is visible
          */
         function isF1TooltipVisible() {
             return f1DocTooltip.classList.contains('show');
         }
-        
+
         // F1 key handler for code input
         codeInput.addEventListener('keydown', (e) => {
             if (e.key === 'F1') {
                 e.preventDefault();
-                
+
                 // If tooltip is visible, hide it
                 if (isF1TooltipVisible()) {
                     hideF1Tooltip();
                     return;
                 }
-                
+
                 // Don't show if other overlays are visible
                 if (visualKeyboard && visualKeyboard.isVisible()) return;
                 if (isComboboxVisible()) return;
                 if (isHelpScreenVisible()) return;
-                
+
                 // Find glyph at cursor
                 const found = findGlyphAtCursor();
                 if (!found) return;
-                
+
                 // Get documentation for the glyph
                 const glyphDocs = glyphDocsByLanguage[currentLanguage];
                 if (!glyphDocs) return;
-                
+
                 const doc = glyphDocs[found.glyph];
                 if (!doc) return;
-                
+
                 showF1Tooltip(found.glyph, doc);
             }
-            
+
             // Escape to close tooltip
             if (e.key === 'Escape' && isF1TooltipVisible()) {
                 e.preventDefault();
                 hideF1Tooltip();
             }
         });
-        
+
         // Close F1 tooltip when clicking outside
         document.addEventListener('click', (e) => {
             if (isF1TooltipVisible() && !f1DocTooltip.contains(e.target)) {
                 hideF1Tooltip();
             }
         });
-        
+
         // Close F1 tooltip when typing
         codeInput.addEventListener('input', () => {
             if (isF1TooltipVisible()) {
                 hideF1Tooltip();
             }
         });
-        
+
         // Global Escape handler for F1 tooltip (handles escape when focus is elsewhere)
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && isF1TooltipVisible()) {
                 e.preventDefault();
                 hideF1Tooltip();
+            }
+        });
+
+        // ========================================
+        // Explain Tree Hover Interactivity
+        // ========================================
+
+        const explainTooltip     = document.getElementById('explainTooltip');
+        const explainTooltipName = document.getElementById('explainTooltipName');
+        const explainTooltipPat  = document.getElementById('explainTooltipPattern');
+        let explainActiveGroups  = null; // currently highlighted group IDs string
+
+        function showExplainTooltip(groupIds, targetEl) {
+            // Use the innermost group (first in sorted list — highest rowEnd = deepest)
+            const innermostId = groupIds[0];
+            // We need access to the parsed groups — store them on the root element
+            const root = document.getElementById('explainTreeRoot');
+            if (!root || !root._explainGroups) return;
+            const groups = root._explainGroups;
+            const group  = groups[innermostId];
+            if (!group) return;
+
+            const info = (root._combinatorInfo || BQN_COMBINATOR_INFO)[group.type];
+            if (!info) return;
+
+            const labels = root._tooltipLabels || { monad: '𝕩', dyad: '𝕨𝕩' };
+            explainTooltipName.textContent = info.name;
+            if (info.monad && info.dyad) {
+                explainTooltipPat.textContent = `${labels.monad}:    ${info.monad}\n${labels.dyad}:  ${info.dyad}`;
+            } else if (info.monad) {
+                explainTooltipPat.textContent = info.monad;
+            } else {
+                explainTooltipPat.textContent = '';
+            }
+
+            // Anchor above the hovered span so the tooltip never covers the
+            // highlighted connector tree below. Use getBoundingClientRect so the
+            // position is based on the span's actual location, not the cursor.
+            const ttw = 360;
+            const tth = explainTooltip.offsetHeight || 72;
+            const rect = targetEl.getBoundingClientRect();
+
+            // Horizontal: centered over the hovered span, clamped to viewport
+            let left = rect.left + rect.width / 2 - ttw / 2;
+            left = Math.max(8, Math.min(left, window.innerWidth - ttw - 8));
+
+            // Vertical: above the span; fall back below the whole diagram if too close to top
+            let top = rect.top - tth - 8;
+            if (top < 8) {
+                const diagramRect = root.getBoundingClientRect();
+                top = diagramRect.bottom + 8;
+            }
+
+            explainTooltip.style.left = `${left}px`;
+            explainTooltip.style.top  = `${top}px`;
+            explainTooltip.classList.add('show');
+        }
+
+        function hideExplainTooltip() {
+            explainTooltip.classList.remove('show');
+        }
+
+        // Maps each group type + role to a CSS class.
+        // "center" = applied last / connector; "tine" = operand / applied first.
+        const EXPLAIN_ROLE_CLASS = {
+            'fork:f': 'explain-role-tine',   'fork:g': 'explain-role-center',  'fork:h': 'explain-role-tine',
+            'atop:f': 'explain-role-center',  'atop:g': 'explain-role-tine',
+            '1-mod:operand': 'explain-role-tine', '1-mod:modifier': 'explain-role-center',
+            '2-mod:left': 'explain-role-tine', '2-mod:modifier': 'explain-role-center', '2-mod:right': 'explain-role-tine',
+        };
+        const EXPLAIN_ROLE_CLASSES = new Set(Object.values(EXPLAIN_ROLE_CLASS));
+
+        function highlightExplainGroups(groupIdsStr) {
+            if (explainActiveGroups === groupIdsStr) return;
+            clearExplainHighlights();
+            explainActiveGroups = groupIdsStr;
+            const root = document.getElementById('explainTreeRoot');
+            if (!root) return;
+            const innermostId = Number(groupIdsStr.split(',')[0]);
+            const groups = root._explainGroups;
+            const group  = groups && groups[innermostId];
+            if (!group || !group.parts) return;
+
+            // Build col → CSS class from the innermost group's parts
+            const colClass = new Map();
+            for (const part of group.parts) {
+                const cls = EXPLAIN_ROLE_CLASS[`${group.type}:${part.role}`] || 'explain-role-tine';
+                for (const col of part.cols) colClass.set(col, cls);
+            }
+
+            root.querySelectorAll('.explain-source-char').forEach(el => {
+                const col = parseInt(el.dataset.col, 10);
+                const cls = colClass.get(col);
+                if (cls) el.classList.add(cls);
+            });
+        }
+
+        function clearExplainHighlights() {
+            explainActiveGroups = null;
+            const root = document.getElementById('explainTreeRoot');
+            if (!root) return;
+            root.querySelectorAll('.explain-source-char').forEach(el => {
+                EXPLAIN_ROLE_CLASSES.forEach(cls => el.classList.remove(cls));
+            });
+        }
+
+        // Event delegation on the output element.
+        // Only .explain-source-char spans (row 0 glyphs) trigger highlighting —
+        // hovering the connector tree below has no effect.
+        const outputEl = document.getElementById('output');
+        outputEl.addEventListener('mouseover', (e) => {
+            const target = e.target.closest('.explain-source-char[data-groups]');
+            if (!target) return;
+            const groupIdsStr = target.dataset.groups;
+            highlightExplainGroups(groupIdsStr);
+            showExplainTooltip(groupIdsStr.split(',').map(Number), target);
+        });
+
+        outputEl.addEventListener('mouseout', (e) => {
+            const target = e.target.closest('.explain-source-char[data-groups]');
+            if (!target) return;
+            // Clear when leaving a source-char span and not entering another one
+            const next = e.relatedTarget && e.relatedTarget.closest('.explain-source-char[data-groups]');
+            if (!next) {
+                clearExplainHighlights();
+                hideExplainTooltip();
             }
         });
 

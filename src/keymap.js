@@ -416,7 +416,7 @@ export const jGlyphs = {
         '!.',
         // Named primitives
         'i.', 'i:', 'j.', 'o.', 'p.', 'p:', 'q:', 'r.',
-        'A.', 'C.', 'e.', 'E.', 'I.', 'L.', 's:', 'S:', 'u:', 'x:'
+        'A.', 'C.', 'e.', 'E.', 'I.', 'L.', 's:', 'u:', 'x:'
     ],
     // Adverbs (1-modifiers) - green
     monadic: [
