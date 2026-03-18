@@ -109,7 +109,7 @@ const syntaxRules = {
         multiChar: {
             functions: [
                 '{.', '}.', '{:', '}:', ',.', ',:', '{::',
-                '<.', '>.', '+.', '*.', '-.', '%.', '^.', '|.',
+                '<.', '>.', '+.', '*.', '-.', '%.', '^.', '|.', '|:',
                 '$.', '~.', '#.', '#:',
                 '<:', '>:', '+:', '*:', '-:', '%:', '~:', '=.',
                 '?.', '?:', '".', '":', '!.',
@@ -231,6 +231,16 @@ function tokenizeLine(line, lang) {
             tokens.push({ text: numMatch[0], color: COLORS.purple });
             i += numMatch[0].length;
             continue;
+        }
+        
+        // J explicit definition delimiters {{ }} — plain/default
+        if (lang === 'j' && i + 1 < line.length) {
+            const pair = line[i] + line[i + 1];
+            if (pair === '{{' || pair === '}}') {
+                tokens.push({ text: pair, color: COLORS.fg });
+                i += 2;
+                continue;
+            }
         }
         
         // For J, try multi-char tokens (3-char, then 2-char) before single-char

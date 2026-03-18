@@ -107,7 +107,7 @@ export const syntaxRules = {
                 // Structural/selection verbs
                 '{.', '}.', '{:', '}:', ',.', ',:', '{::', 
                 // Math verbs
-                '<.', '>.', '+.', '*.', '-.', '%.', '^.', '|.',
+                '<.', '>.', '+.', '*.', '-.', '%.', '^.', '|.', '|:',
                 '$.',  '~.', '#.', '#:',
                 // Comparison/logic
                 '<:', '>:', '+:', '*:', '-:', '%:', '~:', '=.',
@@ -533,6 +533,16 @@ export function highlightCode(text, language) {
             lastGlyphType = 'comment';
             i = commentEnd;
             continue;
+        }
+        
+        // J explicit definition delimiters {{ }} — plain/default, not function-colored
+        if (language === 'j' && i + 1 < text.length) {
+            const pair = text[i] + text[i + 1];
+            if (pair === '{{' || pair === '}}') {
+                tokens.push({ type: 'default', value: pair });
+                i += 2;
+                continue;
+            }
         }
         
         // Check for multi-character operators (J language)
