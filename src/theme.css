@@ -294,3 +294,68 @@
     color: #FFFFFF;
 }
 
+/* ============================================================
+   Explain tree — interactive )explain hover visualization
+   ============================================================ */
+
+/* Role-coloured highlight: tines/operands (amber) vs center/modifier (blue) */
+.explain-role-tine {
+    background: rgba(229, 165, 10, 0.22);
+    border-radius: 2px;
+    outline: 1px solid rgba(229, 165, 10, 0.55);
+    outline-offset: 0px;
+    color: #e5a50a !important;
+}
+
+.explain-role-center {
+    background: rgba(96, 165, 250, 0.18);
+    border-radius: 2px;
+    outline: 1px solid rgba(96, 165, 250, 0.50);
+    outline-offset: 0px;
+    color: #60a5fa !important;
+}
+
+/* Source expression chars (row 0) — interactive hover targets */
+.explain-source-char[data-groups] {
+    cursor: pointer;
+}
+
+/* Small popover tooltip */
+.explain-tooltip {
+    position: fixed;
+    background: #1f2937;
+    border: 2px solid #e5a50a;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-variant-ligatures: none;
+    z-index: 10003;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.12s ease, visibility 0.12s ease;
+    max-width: 380px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+}
+
+.explain-tooltip.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.explain-tooltip-name {
+    color: #e5a50a;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.explain-tooltip-pattern {
+    color: #d1d5db;
+    font-size: 13px;
+    white-space: pre;
+    line-height: 1.7;
+}
+
