@@ -394,6 +394,7 @@ function bqnSyntaxClass(ch) {
     if (BQN_FUNCTIONS.has(ch))   return 'syntax-function';
     if (BQN_MOD1_GLYPHS.has(ch)) return 'syntax-modifier-monadic';
     if (BQN_MOD2_GLYPHS.has(ch)) return 'syntax-modifier-dyadic';
+    if (/\d/.test(ch))           return 'syntax-number';
     return null;
 }
 
@@ -498,6 +499,7 @@ function aplSyntaxClass(ch) {
     if (APL_FUNC_GLYPHS.has(ch))  return 'syntax-function';
     if (APL_MOD1_GLYPHS.has(ch))  return 'syntax-modifier-monadic';
     if (APL_MOD2_GLYPHS.has(ch))  return 'syntax-modifier-dyadic';
+    if (/\d/.test(ch))            return 'syntax-number';
     return null;
 }
 

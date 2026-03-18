@@ -755,6 +755,17 @@ export function highlightTrainTreeGlyphs(text, language = 'apl') {
             if (matched) continue;
         }
 
+        // Try number pattern before single-char glyph lookup
+        if (rules && rules.numberPattern) {
+            const remaining = text.substring(i);
+            const numMatch = remaining.match(rules.numberPattern);
+            if (numMatch) {
+                parts.push(`<span class="syntax-number">${escapeHtml(numMatch[0])}</span>`);
+                i += numMatch[0].length;
+                continue;
+            }
+        }
+
         const c = text[i];
         const cls = getSyntaxClass(c, language);
         if (cls !== 'syntax-default') {
