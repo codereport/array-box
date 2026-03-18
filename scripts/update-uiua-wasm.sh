@@ -77,8 +77,8 @@ uiua = { git = "https://github.com/uiua-lang/uiua", default-features = false, fe
 wasm-bindgen = "0.2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-# Required for WASM random number generation (0.3+ uses wasm_js cfg flag set in .cargo/config.toml)
-getrandom = { version = "0.3", features = ["wasm_js"] }
+# Required for WASM random number generation
+getrandom = { version = "0.4", features = ["wasm_js"] }
 # web-sys with features needed by uiua
 web-sys = { version = "0.3", features = ["Performance", "Window"] }
 
