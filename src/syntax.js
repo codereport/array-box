@@ -183,8 +183,8 @@ export const syntaxRules = {
         ],
         // Subscript characters (should inherit color from preceding glyph)
         subscripts: '₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎ₐₑₒₓₔₕₖₗₘₙₚₛₜ',
-        // Numbers pattern
-        numberPattern: /^¯?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?/i
+        // Numbers pattern — _ is Uiua's array separator (2_3 ≡ [2 3])
+        numberPattern: /^¯?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?(_¯?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?)*/i
     },
     kap: {
         // String delimiter (single quote) - Kap uses ' for strings like APL
