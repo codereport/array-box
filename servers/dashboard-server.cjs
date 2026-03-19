@@ -945,7 +945,7 @@ const dashboardHTML = `<!DOCTYPE html>
             const langLogos = { 
                 bqn: '/assets/bqn.svg', 
                 apl: '/assets/apl.png', 
-                j: '/assets/j_logo.png', 
+                j: '/assets/j_logo.svg', 
                 uiua: '/assets/uiua.png', 
                 kap: '/assets/kap.png', 
                 tinyapl: '/assets/tinyapl.svg' 

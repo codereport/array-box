@@ -58,7 +58,7 @@ async function generate() {
         { name: 'APL', file: 'apl.png' },
         { name: 'BQN', file: 'bqn.svg' },
         { name: 'Uiua', file: 'uiua.png' },
-        { name: 'J', file: 'j_logo.png' },
+        { name: 'J', file: 'j_logo.svg' },
         { name: 'Kap', file: 'kap.png' },
         { name: 'TinyAPL', file: 'tinyapl.svg' },
     ];

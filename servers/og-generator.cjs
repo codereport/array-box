@@ -429,7 +429,7 @@ function getLogoPath(lang) {
         bqn: path.join(__dirname, '..', 'assets', 'bqn.svg'),
         uiua: path.join(__dirname, '..', 'assets', 'uiua.png'),
         apl: path.join(__dirname, '..', 'assets', 'apl.png'),
-        j: path.join(__dirname, '..', 'assets', 'j_logo.png'),
+        j: path.join(__dirname, '..', 'assets', 'j_logo.svg'),
         kap: path.join(__dirname, '..', 'assets', 'kap.png'),
         tinyapl: path.join(__dirname, '..', 'assets', 'tinyapl.svg'),
     };
