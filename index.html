@@ -946,6 +946,143 @@
             padding-top: 11px;
             border-top: 1px solid #374151;
         }
+
+        /* ═══ Primitive Comparison Table (Ctrl+Shift+C) ═══ */
+        .compare-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 11000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease-out, visibility 0s 0.2s;
+        }
+        .compare-backdrop.show {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.2s ease-out, visibility 0s 0s;
+        }
+        .compare-screen {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.92);
+            z-index: 11001;
+            background: #1a2233;
+            border: 2px solid #374151;
+            border-radius: 20px;
+            padding: 40px 48px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            max-width: 96vw;
+            max-height: 94vh;
+            overflow: auto;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.2s ease-out, transform 0.2s ease-out, visibility 0s 0.2s;
+        }
+        .compare-screen.show {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: translate(-50%, -50%) scale(1);
+            transition: opacity 0.2s ease-out, transform 0.2s ease-out, visibility 0s 0s;
+        }
+        .compare-table {
+            border-collapse: separate;
+            border-spacing: 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-variant-ligatures: none;
+            width: 100%;
+        }
+        .compare-table th,
+        .compare-table td {
+            padding: 14px 28px;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .compare-table thead th {
+            padding-bottom: 18px;
+        }
+        .compare-col-header {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            transition: background 0.15s;
+            border-radius: 10px;
+        }
+        .compare-col-header:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+        .compare-col-header.no-toggle {
+            cursor: default;
+        }
+        .compare-col-header.no-toggle:hover {
+            background: transparent;
+        }
+        .compare-col-header .compare-name {
+            font-size: 15px;
+            letter-spacing: 0.3px;
+            text-transform: lowercase;
+        }
+        .compare-col-header .compare-name.monad {
+            color: var(--syntax-function);
+        }
+        .compare-col-header .compare-name.dyad {
+            color: var(--syntax-modifier-monadic);
+        }
+        .compare-color-2 {
+            background: var(--dracula-yellow) !important;
+            color: #1a1a2e !important;
+        }
+        .compare-color-2 span { color: #1a1a2e !important; }
+        .compare-color-3 {
+            background: #FFB86C !important;
+            color: #1a1a2e !important;
+        }
+        .compare-color-3 span { color: #1a1a2e !important; }
+        .compare-color-4 {
+            background: var(--dracula-red) !important;
+            color: #1a1a2e !important;
+        }
+        .compare-color-4 span { color: #1a1a2e !important; }
+        .compare-lang-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .compare-lang-cell img {
+            width: 42px;
+            height: 42px;
+            object-fit: contain;
+        }
+        .compare-table tbody td {
+            font-size: 36px;
+        }
+        .compare-cell-sad {
+            font-size: 26px;
+            opacity: 0.35;
+        }
+        .compare-table .font-kap {
+            font-family: 'Kap', 'Courier New', monospace;
+        }
+        .compare-table .font-j {
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+        }
+        .compare-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #4b5563;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .compare-footer kbd {
+            background: #374151;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -1089,6 +1226,10 @@
                     <span class="help-key">f1</span>
                     <span class="help-desc">show docs for glyph at cursor</span>
                 </div>
+                <div class="help-row">
+                    <span class="help-key">ctrl + shift + c</span>
+                    <span class="help-desc">compare primitives across languages</span>
+                </div>
             </div>
 
             <div class="help-section">
@@ -1148,6 +1289,10 @@
             <div class="fonts-footer">⬢ arraybox</div>
         </div>
     </div>
+
+    <!-- Primitive Comparison Table (Ctrl+Shift+C) -->
+    <div class="compare-backdrop" id="compareBackdrop"></div>
+    <div class="compare-screen" id="compareScreen"></div>
 
     <div class="bug-report-container" id="bugReportContainer">
         <button class="bug-report-close" onclick="document.getElementById('bugReportContainer').style.display='none'" title="Hide">×</button>
@@ -1994,6 +2139,7 @@
         import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames, jGlyphNames, tinyaplGlyphNames, bqnGlyphDocs, uiuaGlyphDocs, jGlyphDocs, kapGlyphDocs, aplGlyphDocs, tinyaplGlyphDocs } from './src/keyboard.js';
         import { createEditorFeaturesManager, toggleComment, commentTokens, autoExpandWidthForCodeAndResult } from './src/editor-features.js';
         import { translatePrimitives, translateArrayLiterals, clearTranslationCache } from './src/primitive-translate.js';
+        import { primitiveMap, compareLanguages, lookupPrimitive, parsePrimitives, getPrimitiveName, getEquivalent, hasValence } from './src/primitive-compare.js';
 
         // Glyph documentation by language
         const glyphDocsByLanguage = {
@@ -2670,8 +2816,254 @@
             return fontsScreen.classList.contains('show');
         }
 
+        // ═══ Primitive Comparison Table ═══
+        const compareScreen = document.getElementById('compareScreen');
+        const compareBackdrop = document.getElementById('compareBackdrop');
+        let compareColumnValences = [];
+        let compareColorMode = false;
+        let compareCurrentEntries = null;
+
+        function isCompareVisible() {
+            return compareScreen.classList.contains('show');
+        }
+
+        function closeCompareTable() {
+            compareScreen.classList.remove('show');
+            compareBackdrop.classList.remove('show');
+        }
+
+        function openCompareTable(glyphs) {
+            if (!glyphs || glyphs.length === 0) return;
+
+            const entries = glyphs.map(g => {
+                let entry = lookupPrimitive(g);
+                if (!entry) {
+                    const doc = tinyaplGlyphDocs[g];
+                    if (doc) {
+                        entry = {
+                            monad: doc.monad ? { name: doc.monad.name } : null,
+                            dyad: doc.dyad ? { name: doc.dyad.name } : null
+                        };
+                    }
+                }
+                return { glyph: g, entry };
+            });
+            compareColumnValences = entries.map(({ entry }) => {
+                if (entry && entry.monad) return 'monad';
+                if (entry && entry.dyad) return 'dyad';
+                return 'monad';
+            });
+
+            renderCompareTable(entries);
+            compareScreen.classList.add('show');
+            compareBackdrop.classList.add('show');
+        }
+
+        function highlightCompareGlyph(glyph, langId) {
+            if (!glyph) return '';
+
+            if (langId === 'j') {
+                const jRules = syntaxRules.j;
+                const allMulti = [
+                    ...jRules.multiChar.functions,
+                    ...jRules.multiChar.monadic,
+                    ...jRules.multiChar.dyadic,
+                    ...jRules.multiChar.comments
+                ];
+                let result = '';
+                let i = 0;
+                while (i < glyph.length) {
+                    let matched = false;
+                    for (let len = Math.min(4, glyph.length - i); len >= 2; len--) {
+                        const token = glyph.substring(i, i + len);
+                        if (allMulti.includes(token)) {
+                            let cls = 'syntax-function';
+                            if (jRules.multiChar.monadic.includes(token)) cls = 'syntax-modifier-monadic';
+                            else if (jRules.multiChar.dyadic.includes(token)) cls = 'syntax-modifier-dyadic';
+                            else if (jRules.multiChar.comments.includes(token)) cls = 'syntax-comment';
+                            result += `<span class="${cls}">${escapeHtml(token)}</span>`;
+                            i += len;
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (!matched) {
+                        const ch = glyph[i];
+                        if (/[0-9]/.test(ch)) {
+                            result += `<span class="syntax-number">${escapeHtml(ch)}</span>`;
+                        } else if (ch === '"' && glyph.length > 1) {
+                            result += `<span class="syntax-modifier-dyadic">${escapeHtml(ch)}</span>`;
+                        } else if (jRules.functions.includes(ch) || (jRules.comparison && jRules.comparison.includes(ch))) {
+                            result += `<span class="syntax-function">${escapeHtml(ch)}</span>`;
+                        } else if (jRules.monadic.includes(ch)) {
+                            result += `<span class="syntax-modifier-monadic">${escapeHtml(ch)}</span>`;
+                        } else if (jRules.dyadic.includes(ch)) {
+                            result += `<span class="syntax-modifier-dyadic">${escapeHtml(ch)}</span>`;
+                        } else {
+                            result += escapeHtml(ch);
+                        }
+                        i++;
+                    }
+                }
+                return result;
+            }
+
+            let result = '';
+            for (const ch of glyph) {
+                const cls = getSyntaxClass(ch, langId);
+                if (cls !== 'syntax-default') {
+                    result += `<span class="${cls}">${escapeHtml(ch)}</span>`;
+                } else if (/[0-9]/.test(ch)) {
+                    result += `<span class="syntax-number">${escapeHtml(ch)}</span>`;
+                } else {
+                    result += escapeHtml(ch);
+                }
+            }
+            return result;
+        }
+
+        function countPrimitives(glyph, langId) {
+            if (!glyph || glyph.length <= 1) return 1;
+            if (langId === 'j') {
+                const jRules = syntaxRules.j;
+                const allMulti = [
+                    ...jRules.multiChar.functions,
+                    ...jRules.multiChar.monadic,
+                    ...jRules.multiChar.dyadic,
+                    ...jRules.multiChar.comments
+                ];
+                let count = 0;
+                let i = 0;
+                while (i < glyph.length) {
+                    let matched = false;
+                    for (let len = Math.min(4, glyph.length - i); len >= 2; len--) {
+                        const token = glyph.substring(i, i + len);
+                        if (allMulti.includes(token)) {
+                            count++;
+                            i += len;
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (!matched) {
+                        const ch = glyph[i];
+                        if (!/\s/.test(ch)) count++;
+                        i++;
+                    }
+                }
+                return count;
+            }
+            let count = 0;
+            for (const ch of glyph) {
+                if (!/\s/.test(ch)) count++;
+            }
+            return count;
+        }
+
+        function getColorClass(glyph, langId) {
+            if (!compareColorMode || !glyph) return '';
+            const n = countPrimitives(glyph, langId);
+            if (n >= 4) return 'compare-color-4';
+            if (n === 3) return 'compare-color-3';
+            if (n === 2) return 'compare-color-2';
+            return '';
+        }
+
+        function renderCompareTable(entries) {
+            compareCurrentEntries = entries;
+            let html = '<table class="compare-table"><thead><tr>';
+            html += '<th></th>';
+
+            entries.forEach(({ glyph, entry }, colIdx) => {
+                const valence = compareColumnValences[colIdx];
+                const monadName = entry?.monad?.name || null;
+                const dyadName = entry?.dyad?.name || null;
+                const displayName = valence === 'monad'
+                    ? (monadName || dyadName || '???')
+                    : (dyadName || monadName || '???');
+                const hasBoth = monadName && dyadName;
+
+                html += `<th class="compare-col-header${hasBoth ? '' : ' no-toggle'}" data-col="${colIdx}">`;
+                html += `<div class="compare-name ${valence}">${displayName}</div>`;
+                html += '</th>';
+            });
+            html += '</tr></thead><tbody>';
+
+            compareLanguages.forEach(lang => {
+                html += '<tr>';
+                html += `<td><div class="compare-lang-cell">`;
+                html += `<img src="${lang.logo}" alt="${lang.name}" title="${lang.name}">`;
+                html += `</div></td>`;
+
+                entries.forEach(({ glyph, entry }, colIdx) => {
+                    const valence = compareColumnValences[colIdx];
+                    let cellGlyph;
+
+                    if (lang.id === 'tinyapl') {
+                        cellGlyph = glyph;
+                    } else {
+                        cellGlyph = getEquivalent(entry, lang.id, valence);
+                    }
+
+                    const fc = lang.fontClass || '';
+                    if (cellGlyph) {
+                        const cc = getColorClass(cellGlyph, lang.id);
+                        html += `<td class="${fc} ${cc}" data-col="${colIdx}" data-lang="${lang.id}">${highlightCompareGlyph(cellGlyph, lang.id)}</td>`;
+                    } else {
+                        html += `<td class="compare-cell-sad" data-col="${colIdx}" data-lang="${lang.id}">😢</td>`;
+                    }
+                });
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            html += `<div class="compare-footer">click header to toggle <kbd>monad</kbd> / <kbd>dyad</kbd> • <kbd>c</kbd> color mode${compareColorMode ? ' ●' : ''} • <kbd>esc</kbd> close</div>`;
+            compareScreen.innerHTML = html;
+
+            compareScreen.querySelectorAll('.compare-col-header:not(.no-toggle)').forEach(th => {
+                th.addEventListener('click', () => {
+                    const col = parseInt(th.dataset.col);
+                    const current = compareColumnValences[col];
+                    compareColumnValences[col] = current === 'monad' ? 'dyad' : 'monad';
+                    renderCompareTable(entries);
+                });
+            });
+        }
+
+        compareBackdrop.addEventListener('click', closeCompareTable);
+
         // Global keyboard shortcuts
         document.addEventListener('keydown', (e) => {
+            // Escape to close comparison table
+            if (e.key === 'Escape' && isCompareVisible()) {
+                e.preventDefault();
+                e.stopPropagation();
+                closeCompareTable();
+                return;
+            }
+
+            // 'c' to toggle color mode while comparison table is open
+            if ((e.key === 'c' || e.key === 'C') && !e.ctrlKey && !e.metaKey && isCompareVisible() && compareCurrentEntries) {
+                e.preventDefault();
+                compareColorMode = !compareColorMode;
+                renderCompareTable(compareCurrentEntries);
+                return;
+            }
+
+            // Ctrl+Shift+C to open primitive comparison table
+            if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c')) {
+                e.preventDefault();
+                const sel = window.getSelection();
+                const selectedText = sel.toString().trim();
+                const text = selectedText || getInputText();
+                if (!text) return;
+                const glyphs = parsePrimitives(text);
+                if (glyphs.length > 0) {
+                    openCompareTable(glyphs);
+                }
+                return;
+            }
+
             // Escape to close language picker
             if (e.key === 'Escape' && dropdown.classList.contains('show')) {
                 e.preventDefault();
@@ -2725,8 +3117,8 @@
             // Escape to close F1 tooltip if visible (check handled by F1 tooltip code)
             // F1 global handler is set up after F1 tooltip is initialized
 
-            // Don't process other shortcuts if help or fonts screen is visible
-            if (isHelpScreenVisible() || isFontsScreenVisible()) {
+            // Don't process other shortcuts if help, fonts, or compare screen is visible
+            if (isHelpScreenVisible() || isFontsScreenVisible() || isCompareVisible()) {
                 return;
             }
 
