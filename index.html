@@ -3766,7 +3766,7 @@
             if (result.outputHtml) {
                 output.innerHTML = result.outputHtml;
                 output.style.textAlign = '';
-            } else if (currentLanguage === 'apl' && isTrainTree(result.output)) {
+            } else if (currentLanguage === 'apl' && isTrainTree(result.output, 'apl')) {
                 const { html: explainHtml, groups: explainGroups } = renderAplExplainTree(code, result.output);
                 output.innerHTML = `<span style="display:inline-block;text-align:left" id="explainTreeRoot">${explainHtml}</span>`;
                 output.style.textAlign = 'center';
@@ -3776,7 +3776,7 @@
                     explainRoot._combinatorInfo = APL_COMBINATOR_INFO;
                     explainRoot._tooltipLabels = { monad: '⍵', dyad: '⍺⍵' };
                 }
-            } else if (currentLanguage === 'j' && isTrainTree(result.output)) {
+            } else if (currentLanguage === 'j' && isTrainTree(result.output, 'j')) {
                 const { html: explainHtml, groups: explainGroups } = renderJExplainTree(code, result.output);
                 output.innerHTML = `<span style="display:inline-block;text-align:left" id="explainTreeRoot">${explainHtml}</span>`;
                 output.style.textAlign = 'center';

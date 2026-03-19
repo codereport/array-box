@@ -484,7 +484,7 @@ async function generateOGImage(code, lang, result = null, resultHtml = null) {
     
     // TinyAPL uses tighter line-height (matching .output.tinyapl CSS)
     // APL result box uses 1.0 to match in-browser .output.apl; train trees get letterSpacing too
-    const isTreeResult = displayResult && isTrainTree(displayResult);
+    const isTreeResult = displayResult && isTrainTree(displayResult, lang);
     const resultLineHeight = lang === 'tinyapl' ? 0.85 : lang === 'apl' ? 1.0 : 1.2;
     
     // Header dimensions (logo 80px + gap + text)
@@ -777,10 +777,32 @@ function trimTrailingWhitespace(text) {
     return text.split('\n').map(line => line.trimEnd()).join('\n');
 }
 
-/** Detect train tree output (box-drawing chars from APL ]boxing, J (9!:3)4, BQN )explain) */
-function isTrainTree(text) {
+/**
+ * Detect train tree output vs regular boxed array display.
+ * J verb trees contain only primitive tokens; APL fork trees have ┼ on ┌-lines.
+ */
+function isTrainTree(text, language) {
     if (!text || typeof text !== 'string') return false;
-    return /[┌┐└┘─┼│├┤┬┴]/.test(text);
+    if (!/[┌┐└┘─┼│├┤┬┴]/.test(text)) return false;
+
+    if (language === 'j') {
+        const content = text.replace(/[┌┐└┘─┬┴│├┤┼\s]/g, '');
+        if (!content) return false;
+        if (/\d/.test(content)) return false;
+        const rest = content.replace(/[a-zA-Z]+[.:]/g, '');
+        if (/[a-zA-Z]/.test(rest)) return false;
+        return true;
+    }
+
+    if (language === 'apl') {
+        const lines = text.split('\n');
+        for (const line of lines) {
+            if (line.includes('┌') && line.includes('┼')) return true;
+        }
+        return false;
+    }
+
+    return false;
 }
 
 /**
@@ -814,7 +836,7 @@ async function generateVerticalImage(code, lang, result = null, resultHtml = nul
     
     // TinyAPL uses tighter line-height (matching .output.tinyapl CSS)
     // APL result box uses 1.0 to match in-browser .output.apl; train trees get letterSpacing too
-    const isTreeResult = displayResult && isTrainTree(displayResult);
+    const isTreeResult = displayResult && isTrainTree(displayResult, lang);
     const resultLineHeight = lang === 'tinyapl' ? 0.85 : lang === 'apl' ? 1.0 : 1.2;
     
     // Header dimensions - logo 60px, text ~28px fits within logo height

@@ -724,11 +724,47 @@ export function getSyntaxClass(symbol, language) {
 }
 
 /**
- * Detect if output looks like a train tree (box-drawing characters from ]boxing or (9!:3) 4)
+ * Detect if output is a train tree vs regular boxed array display.
+ *
+ * J's (9!:3)4 and APL's ]boxing -trains=tree both use box-drawing chars,
+ * but so does regular boxed noun output. We distinguish them:
+ *
+ *  - J verb trees contain only primitive tokens (symbols like +, i., @:).
+ *    Boxed noun output contains data (digits, multi-letter strings).
+ *  - APL fork trees have ┼ on the same line as ┌ (e.g. ┌─┼─┐).
+ *    Boxed arrays never place ┼ on a ┌-line.
+ *
+ * @param {string} text     - the raw output text
+ * @param {string} language - 'j' | 'apl' (other languages return false)
  */
-export function isTrainTree(text) {
+export function isTrainTree(text, language) {
     if (!text || typeof text !== 'string') return false;
-    return /[┌┐└┘─┼│├┤┬┴]/.test(text);
+    if (!/[┌┐└┘─┼│├┤┬┴]/.test(text)) return false;
+
+    if (language === 'j') {
+        // Strip box-drawing and whitespace to get cell content only.
+        const content = text.replace(/[┌┐└┘─┬┴│├┤┼\s]/g, '');
+        if (!content) return false;
+        // Digits never appear inside J verb-tree cells.
+        if (/\d/.test(content)) return false;
+        // Remove recognised multi-char primitives (letter(s) + dot/colon: i., E., s:, …).
+        const rest = content.replace(/[a-zA-Z]+[.:]/g, '');
+        // Any remaining letters are data, not J primitives.
+        if (/[a-zA-Z]/.test(rest)) return false;
+        return true;
+    }
+
+    if (language === 'apl') {
+        // APL fork trees use ┼ at the junction: ┌─┼─┐
+        // In boxed arrays ┼ only appears on ├-lines, never on ┌-lines.
+        const lines = text.split('\n');
+        for (const line of lines) {
+            if (line.includes('┌') && line.includes('┼')) return true;
+        }
+        return false;
+    }
+
+    return false;
 }
 
 
