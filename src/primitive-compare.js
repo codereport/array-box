@@ -98,11 +98,11 @@ export const primitiveMap = {
         dyad:  { name: 'Equal', apl: '=', bqn: '=', j: '=', kap: '=', uiua: '=' }
     },
     '≥': {
-        monad: { name: 'Last Cell', apl: null, bqn: '⊢˝', j: '{:', kap: null, uiua: '⊣' },
+        monad: { name: 'Last Cell', apl: '≢⍛⌷', bqn: '⊢˝', j: '{:', kap: '(1-⍨≢)⍛⌷', uiua: '⊣' },
         dyad:  { name: 'Greater or Equal', apl: '≥', bqn: '≥', j: '>:', kap: '≥', uiua: null }
     },
     '>': {
-        monad: { name: 'First Cell', apl: null, bqn: '⊏', j: '{.', kap: null, uiua: '⊢' },
+        monad: { name: 'First Cell', apl: '1∘⌷', bqn: '⊏', j: '{.', kap: '0⌷', uiua: '⊢' },
         dyad:  { name: 'Greater Than', apl: '>', bqn: '>', j: '>', kap: '>', uiua: '>' }
     },
     '≠': {
@@ -140,7 +140,7 @@ export const primitiveMap = {
         dyad:  { name: 'Partitioned Enclose', apl: '⊂', bqn: null, j: null, kap: '⊂', uiua: null }
     },
     '⊃': {
-        monad: { name: 'First', apl: '⊃', bqn: '⊑', j: null, kap: '↑', uiua: '◇∘⊢♭' },
+        monad: { name: 'First', apl: '⊃', bqn: '⊑', j: '>{.,', kap: '↑', uiua: '◇∘⊢♭' },
         dyad:  { name: 'Pick',  apl: '⊃', bqn: '⊑', j: null, kap: '⊃', uiua: null }
     },
     '⊆': {
@@ -148,11 +148,11 @@ export const primitiveMap = {
         dyad:  { name: 'Partition', apl: '⊆', bqn: '⊔', j: ';.', kap: '⊆', uiua: '⊜' }
     },
     '⊇': {
-        monad: { name: 'Last', apl: '⊢/', bqn: '⊢´', j: null, kap: '⊢/', uiua: '◇∘⊣♭' },
+        monad: { name: 'Last', apl: '⊢/', bqn: '⊢´', j: '>{:,', kap: '⊢/', uiua: '◇∘⊣♭' },
         dyad:  { name: 'From', apl: '⌷', bqn: '⊏', j: '{', kap: null, uiua: '⊡' }
     },
     '↑': {
-        monad: { name: 'Mix',  apl: '↑', bqn: '>', j: '>', kap: '↑', uiua: '≡₀°□' },
+        monad: { name: 'Mix',  apl: '↑', bqn: '>', j: '>', kap: '⊃', uiua: '≡₀°□' },
         dyad:  { name: 'Take', apl: '↑', bqn: '↑', j: '{.', kap: '↑', uiua: '↙' }
     },
     '↓': {
