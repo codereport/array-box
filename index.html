@@ -69,14 +69,20 @@
             cursor: pointer;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 24px;
             min-width: 184px;
             height: 135px;
+            position: relative;
             transition: opacity 0.2s;
         }
 
         .language-button:hover {
             opacity: 0.8;
+        }
+
+        .language-button.startup-spinning {
+            pointer-events: none;
         }
 
         .language-button img {
@@ -88,6 +94,75 @@
         .language-button svg {
             width: 98px;
             height: 98px;
+        }
+
+        #currentLogo {
+            transition: opacity 0.2s ease;
+        }
+
+        .language-wheel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 98px;
+            height: 135px;
+            transform: translate(-50%, -50%);
+            overflow: hidden;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            -webkit-mask-image: linear-gradient(
+                to bottom,
+                transparent 0%,
+                rgba(0, 0, 0, 0.5) 16%,
+                #000 34%,
+                #000 66%,
+                rgba(0, 0, 0, 0.5) 84%,
+                transparent 100%
+            );
+            mask-image: linear-gradient(
+                to bottom,
+                transparent 0%,
+                rgba(0, 0, 0, 0.5) 16%,
+                #000 34%,
+                #000 66%,
+                rgba(0, 0, 0, 0.5) 84%,
+                transparent 100%
+            );
+        }
+
+        .language-button.startup-spinning .language-wheel {
+            opacity: 1;
+        }
+
+        .language-button.startup-spinning #currentLogo {
+            opacity: 0;
+        }
+
+        .language-wheel-track {
+            display: flex;
+            flex-direction: column;
+            will-change: transform;
+        }
+
+        .language-wheel-item {
+            height: 98px;
+            flex: 0 0 98px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .language-wheel-item img {
+            display: block;
+            width: 98px;
+            height: 98px;
+            object-fit: contain;
+        }
+
+        .language-wheel-gap {
+            flex: 0 0 auto;
+            pointer-events: none;
         }
 
         .dropdown {
@@ -1126,6 +1201,9 @@
     <div class="container">
         <div class="language-selector">
             <button class="language-button" id="languageButton" tabindex="2">
+                <div class="language-wheel" id="languageWheel" aria-hidden="true">
+                    <div class="language-wheel-track" id="languageWheelTrack"></div>
+                </div>
                 <img id="currentLogo" src="assets/apl.png" alt="APL">
             </button>
         </div>
@@ -2734,12 +2812,20 @@
 
         // DOM elements
         const languageButton = document.getElementById('languageButton');
+        const languageWheel = document.getElementById('languageWheel');
+        const languageWheelTrack = document.getElementById('languageWheelTrack');
         const currentLogo = document.getElementById('currentLogo');
         const dropdown = document.getElementById('dropdown');
         const codeInput = document.getElementById('codeInput');
         const output = document.getElementById('output');
         const loadingIndicator = document.getElementById('loadingIndicator');
         const container = document.querySelector('.container');
+        const STARTUP_WHEEL_VIEWPORT_HEIGHT = 135;
+        const STARTUP_WHEEL_SLOT_HEIGHT = 98;
+        const STARTUP_WHEEL_UIUA_J_GAP = 10;
+        const STARTUP_WHEEL_TINYAPL_APL_GAP = 12;
+        const STARTUP_WHEEL_DURATION_MS = 2000;
+        let startupSpinPlayed = false;
 
         // Generate favicon with hexagon subscript badge
         function generateHexagonFavicon(logoSrc) {
@@ -2787,6 +2873,109 @@
                 }
             };
             img.src = logoSrc;
+        }
+
+        function getWheelTranslateY(logoOffsets, centerIndex) {
+            return ((STARTUP_WHEEL_VIEWPORT_HEIGHT - STARTUP_WHEEL_SLOT_HEIGHT) / 2) - logoOffsets[centerIndex];
+        }
+
+        function getWheelGapAfter(lang, nextLang) {
+            if (!nextLang) return 0;
+            const isUiuaJPair = (lang === 'uiua' && nextLang === 'j') || (lang === 'j' && nextLang === 'uiua');
+            const isTinyaplAplPair = (lang === 'tinyapl' && nextLang === 'apl') || (lang === 'apl' && nextLang === 'tinyapl');
+            if (isTinyaplAplPair) return STARTUP_WHEEL_TINYAPL_APL_GAP;
+            return isUiuaJPair ? STARTUP_WHEEL_UIUA_J_GAP : 0;
+        }
+
+        function buildStartupWheelMarkup(sequence) {
+            const logoOffsets = [];
+            const parts = [];
+            let currentOffset = 0;
+
+            sequence.forEach((lang, index) => {
+                const langConfig = languages[lang];
+                logoOffsets.push(currentOffset);
+                parts.push(`<div class="language-wheel-item" data-lang="${lang}"><img src="${langConfig.logo}" alt=""></div>`);
+                currentOffset += STARTUP_WHEEL_SLOT_HEIGHT;
+
+                const gap = getWheelGapAfter(lang, sequence[index + 1]);
+                if (gap > 0) {
+                    parts.push(`<div class="language-wheel-gap" style="height:${gap}px;flex-basis:${gap}px"></div>`);
+                    currentOffset += gap;
+                }
+            });
+
+            return {
+                html: parts.join(''),
+                logoOffsets
+            };
+        }
+
+        function buildStartupWheelSequence(targetLang) {
+            const startIndex = languageOrder.indexOf('apl');
+            const targetIndex = languageOrder.indexOf(targetLang);
+            const forwardSteps = (targetIndex - startIndex + languageOrder.length) % languageOrder.length;
+            const fullCycles = 4 + Math.floor(Math.random() * 2);
+            const totalSteps = (fullCycles * languageOrder.length) + forwardSteps;
+            const sequence = [];
+
+            for (let i = 0; i < totalSteps + 3; i++) {
+                const langIndex = (startIndex - 1 + i + (languageOrder.length * 8)) % languageOrder.length;
+                sequence.push(languageOrder[langIndex]);
+            }
+
+            return {
+                sequence,
+                finalCenterIndex: totalSteps + 1
+            };
+        }
+
+        async function preloadWheelLogos() {
+            await Promise.all(languageOrder.map((lang) => new Promise((resolve) => {
+                const img = new Image();
+                img.onload = resolve;
+                img.onerror = resolve;
+                img.src = languages[lang].logo;
+                if (img.complete) resolve();
+            })));
+        }
+
+        async function playStartupLanguageSpin(targetLang) {
+            if (startupSpinPlayed || !languageWheel || !languageWheelTrack || !languages[targetLang]) {
+                return;
+            }
+
+            await preloadWheelLogos();
+
+            const { sequence, finalCenterIndex } = buildStartupWheelSequence(targetLang);
+            const { html, logoOffsets } = buildStartupWheelMarkup(sequence);
+            languageWheelTrack.innerHTML = html;
+
+            languageWheelTrack.style.transition = 'none';
+            languageWheelTrack.style.transform = `translateY(${getWheelTranslateY(logoOffsets, 1)}px)`;
+            languageButton.classList.add('startup-spinning');
+
+            await new Promise((resolve) => {
+                requestAnimationFrame(() => requestAnimationFrame(resolve));
+            });
+
+            languageWheelTrack.style.transition = `transform ${STARTUP_WHEEL_DURATION_MS}ms cubic-bezier(0.12, 0.94, 0.2, 1)`;
+            languageWheelTrack.style.transform = `translateY(${getWheelTranslateY(logoOffsets, finalCenterIndex)}px)`;
+
+            await Promise.race([
+                new Promise((resolve) => {
+                    languageWheelTrack.addEventListener('transitionend', resolve, { once: true });
+                }),
+                new Promise((resolve) => setTimeout(resolve, STARTUP_WHEEL_DURATION_MS + 200))
+            ]);
+
+            const targetConfig = languages[targetLang];
+            currentLogo.src = targetConfig.logo;
+            currentLogo.alt = targetConfig.name;
+            generateHexagonFavicon(targetConfig.logo);
+            languageButton.classList.remove('startup-spinning');
+            languageWheelTrack.style.transition = 'none';
+            startupSpinPlayed = true;
         }
 
         // Help screen
@@ -3591,22 +3780,47 @@
             // Check for PERMALINK_CODE (set when served from /p/:code for social media)
             // or fall back to URL hash
             const code = window.PERMALINK_CODE || window.location.hash.slice(1);
-            if (!code) return false;
+            if (!code) return null;
 
             const state = await lookupPermalink(code);
-            if (!state) return false;
-
-            // Switch language and set code
-            switchLanguage(state.lang);
-            setInputText(state.code);
-            applySyntaxHighlighting();
+            if (!state) return null;
 
             // Update URL to hash format for consistency (if we came from /p/:code)
             if (window.PERMALINK_CODE && window.location.pathname.startsWith('/p/')) {
                 window.history.replaceState(null, '', `/#${code}`);
             }
 
-            return true;
+            return { code, ...state };
+        }
+
+        async function initializeStartupState() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const langParam = urlParams.get('lang');
+            const overlayParam = urlParams.get('kb');
+            const langFromParam = languages[langParam] ? langParam : null;
+            const langFromOverlay = languages[overlayParam] ? overlayParam : null;
+            const permalinkState = await loadFromPermalink();
+            const initialLanguage = permalinkState?.lang || langFromOverlay || langFromParam || 'apl';
+
+            await playStartupLanguageSpin(initialLanguage);
+
+            if (initialLanguage !== currentLanguage) {
+                switchLanguage(initialLanguage);
+            }
+
+            if (permalinkState) {
+                setInputText(permalinkState.code);
+                applySyntaxHighlighting();
+                editorFeatures.handleAutoExpand();
+                evaluateCode();
+                return;
+            }
+
+            applySyntaxHighlighting();
+
+            if (overlayParam && visualKeyboard) {
+                visualKeyboard.show();
+            }
         }
 
         // Get plain text from contenteditable div (supports multiline)
@@ -4189,16 +4403,8 @@
             }
         });
 
-        // Load state from URL permalink (if present)
-        loadFromPermalink().then((loaded) => {
-            // Apply initial syntax highlighting after loading
-            applySyntaxHighlighting();
-            // If content was loaded, adjust container width for it and auto-evaluate
-            if (loaded) {
-                editorFeatures.handleAutoExpand();
-                evaluateCode();
-            }
-        });
+        // Load initial language state and play the startup wheel animation.
+        initializeStartupState();
 
         // Track visitor (server identifies unique visitors by IP)
         fetch(`${ArrayBoxConfig.getServiceUrl('log')}/visitor`, {
@@ -5127,24 +5333,6 @@
             }
         });
 
-        // URL param handling
-        const urlParams = new URLSearchParams(window.location.search);
-
-        const langParam = urlParams.get('lang');
-        if(languages[langParam]) {
-            currentLanguage = langParam;
-            switchLanguage(currentLanguage);
-        }
-
-        const overlayParam = urlParams.get('kb');
-        if (overlayParam && visualKeyboard) {
-            // kb=<lang> implies both language switch and keyboard open
-            if (languages[overlayParam]) {
-                currentLanguage = overlayParam;
-                switchLanguage(currentLanguage);
-            }
-            visualKeyboard.show();
-        }
     </script>
 </body>
 </html>
