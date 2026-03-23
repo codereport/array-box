@@ -269,6 +269,10 @@ function tokenizeLine(line, lang) {
     return tokens;
 }
 
+// Characters that APL fonts render as custom glyphs instead of their standard shape.
+// These get rendered with the fallback font (JetBrains Mono) instead.
+const FALLBACK_FONT_CHARS = new Set(['\\']);
+
 // Create colored text spans for Satori, handling newlines
 // compact: when true (for APL train trees), use gap:0 and tight styling so box-drawing chars connect
 function createColoredTextElements(text, lang, compact = false) {
@@ -278,28 +282,34 @@ function createColoredTextElements(text, lang, compact = false) {
     // This ensures consistent layout with flexDirection: column container
     return lines.map((line, idx) => {
         const tokens = tokenizeLine(line, lang);
-        const lineElements = tokens.map((token, tidx) => ({
-            type: 'span',
-            props: {
-                key: tidx,
-                style: { color: token.color, whiteSpace: 'pre' },
-                children: token.text,
-            },
-        }));
+        const lineElements = tokens.map((token, tidx) => {
+            const style = { color: token.color, whiteSpace: 'pre' };
+            if (token.text.length === 1 && FALLBACK_FONT_CHARS.has(token.text)) {
+                style.fontFamily = 'Fallback';
+            }
+            return {
+                type: 'span',
+                props: {
+                    key: tidx,
+                    style,
+                    children: token.text,
+                },
+            };
+        });
         
         // Add empty space for empty lines to preserve height
         if (lineElements.length === 0) {
             lineElements.push({
                 type: 'span',
                 props: {
-                    style: { color: COLORS.fg },
+                    style: { color: COLORS.fg, whiteSpace: 'pre' },
                     children: ' ',
                 },
             });
         }
         const lineStyle = compact
-            ? { display: 'flex', gap: 0 }
-            : { display: 'flex' };
+            ? { display: 'flex', gap: 0, lineHeight: 1.2 }
+            : { display: 'flex', lineHeight: 1.2 };
         return {
             type: 'div',
             props: {
@@ -404,10 +414,17 @@ const FONTS = {
     tinyapl: path.join(FONT_DIR, 'TinyAPL386.ttf'),
 };
 
+// Fallback font for characters that APL fonts render as custom glyphs (e.g. \ as scan)
+const FALLBACK_FONT_PATH = path.join(FONT_DIR, 'JetBrainsMono-Regular.ttf');
+
 // Load font for a specific language
 function loadFont(lang) {
     const fontPath = FONTS[lang] || FONTS.apl;
     return fs.readFileSync(fontPath);
+}
+
+function loadFallbackFont() {
+    return fs.readFileSync(FALLBACK_FONT_PATH);
 }
 
 // Get display name for language
@@ -460,6 +477,7 @@ function loadLogoAsDataUri(lang) {
  */
 async function generateOGImage(code, lang, result = null, resultHtml = null) {
     const fontData = loadFont(lang);
+    const fallbackFontData = loadFallbackFont();
     const logoDataUri = loadLogoAsDataUri(lang);
     
     // Use full code - image will size dynamically
@@ -751,6 +769,12 @@ async function generateOGImage(code, lang, result = null, resultHtml = null) {
                     weight: 400,
                     style: 'normal',
                 },
+                {
+                    name: 'Fallback',
+                    data: fallbackFontData,
+                    weight: 400,
+                    style: 'normal',
+                },
             ],
         }
     );
@@ -816,6 +840,7 @@ function isTrainTree(text, language) {
  */
 async function generateVerticalImage(code, lang, result = null, resultHtml = null) {
     const fontData = loadFont(lang);
+    const fallbackFontData = loadFallbackFont();
     const logoDataUri = loadLogoAsDataUri(lang);
     
     const displayCode = code;
@@ -1045,6 +1070,12 @@ async function generateVerticalImage(code, lang, result = null, resultHtml = nul
                 {
                     name: 'ArrayLang',
                     data: fontData,
+                    weight: 400,
+                    style: 'normal',
+                },
+                {
+                    name: 'Fallback',
+                    data: fallbackFontData,
                     weight: 400,
                     style: 'normal',
                 },
