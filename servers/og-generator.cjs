@@ -481,7 +481,7 @@ async function generateOGImage(code, lang, result = null, resultHtml = null) {
     const logoDataUri = loadLogoAsDataUri(lang);
     
     // Use full code - image will size dynamically
-    const displayCode = code;
+    const displayCode = code.replace(/\n+$/, '');
     
     // Try to parse HTML table for visual display (TinyAPL)
     const tableInfo = resultHtml ? parseHtmlTableToSatori(resultHtml) : null;
@@ -843,7 +843,7 @@ async function generateVerticalImage(code, lang, result = null, resultHtml = nul
     const fallbackFontData = loadFallbackFont();
     const logoDataUri = loadLogoAsDataUri(lang);
     
-    const displayCode = code;
+    const displayCode = code.replace(/\n+$/, '');
     const tableInfo = resultHtml ? parseHtmlTableToSatori(resultHtml) : null;
     const tableElement = tableInfo ? tableInfo.element : null;
     // Trim trailing whitespace from result for proper centering
