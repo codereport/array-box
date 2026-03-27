@@ -1161,6 +1161,66 @@
             padding: 2px 6px;
             font-size: 12px;
         }
+        .rank-badge {
+            font-size: 10px;
+            margin-left: 2px;
+            opacity: 0.75;
+            vertical-align: super;
+        }
+        .compare-popover {
+            position: fixed;
+            background: #1e293b;
+            border: 1px solid #475569;
+            border-radius: 10px;
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 11010;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            white-space: nowrap;
+            transform: translateX(-50%);
+        }
+        .compare-popover-row {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+        }
+        .compare-popover-btn {
+            background: #334155;
+            border: 1px solid #475569;
+            border-radius: 6px;
+            color: #94a3b8;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
+        }
+        .compare-popover-btn:hover {
+            background: #475569;
+            color: #e2e8f0;
+        }
+        .compare-popover-btn.active {
+            background: #475569;
+            color: #f1f5f9;
+            border-color: #6366f1;
+        }
+        .compare-popover-btn.active[data-valence="monad"] {
+            color: var(--syntax-function);
+            border-color: var(--syntax-function);
+        }
+        .compare-popover-btn.active[data-valence="dyad"] {
+            color: var(--syntax-modifier-monadic);
+            border-color: var(--syntax-modifier-monadic);
+        }
+        .compare-popover-label {
+            font-size: 10px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -2220,7 +2280,7 @@
         import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames, jGlyphNames, tinyaplGlyphNames, bqnGlyphDocs, uiuaGlyphDocs, jGlyphDocs, kapGlyphDocs, aplGlyphDocs, tinyaplGlyphDocs } from './src/keyboard.js';
         import { createEditorFeaturesManager, toggleComment, commentTokens, autoExpandWidthForCodeAndResult } from './src/editor-features.js';
         import { translatePrimitives, translateArrayLiterals, clearTranslationCache } from './src/primitive-translate.js';
-        import { primitiveMap, compareLanguages, lookupPrimitive, parsePrimitives, getPrimitiveName, getEquivalent, hasValence } from './src/primitive-compare.js';
+        import { primitiveMap, compareLanguages, lookupPrimitive, parsePrimitives, getPrimitiveName, getEquivalent, hasValence, isScalar, getAvailableRanks, getDefaultRank } from './src/primitive-compare.js';
 
         // Glyph documentation by language
         const glyphDocsByLanguage = {
@@ -3012,6 +3072,7 @@
         const compareScreen = document.getElementById('compareScreen');
         const compareBackdrop = document.getElementById('compareBackdrop');
         let compareColumnValences = [];
+        let compareColumnRanks = [];
         let compareColorMode = false;
         let compareCurrentEntries = null;
 
@@ -3020,6 +3081,7 @@
         }
 
         function closeCompareTable() {
+            closeComparePopover();
             compareScreen.classList.remove('show');
             compareBackdrop.classList.remove('show');
         }
@@ -3044,6 +3106,11 @@
                 if (entry && entry.monad) return 'monad';
                 if (entry && entry.dyad) return 'dyad';
                 return 'monad';
+            });
+            compareColumnRanks = entries.map(({ entry }, i) => {
+                const v = entry?.[compareColumnValences[i]];
+                if (!v || isScalar(v)) return null;
+                return getDefaultRank(v);
             });
 
             renderCompareTable(entries);
@@ -3161,6 +3228,15 @@
             return '';
         }
 
+        function rankBadgeText(valenceObj, currentRank) {
+            if (!valenceObj) return '';
+            if (isScalar(valenceObj)) return 'S';
+            if (currentRank != null) return String(currentRank);
+            const dr = getDefaultRank(valenceObj);
+            if (dr != null) return String(dr);
+            return '';
+        }
+
         function renderCompareTable(entries) {
             compareCurrentEntries = entries;
             let html = '<table class="compare-table"><thead><tr>';
@@ -3168,15 +3244,22 @@
 
             entries.forEach(({ glyph, entry }, colIdx) => {
                 const valence = compareColumnValences[colIdx];
+                const v = entry?.[valence];
                 const monadName = entry?.monad?.name || null;
                 const dyadName = entry?.dyad?.name || null;
                 const displayName = valence === 'monad'
                     ? (monadName || dyadName || '???')
                     : (dyadName || monadName || '???');
-                const hasBoth = monadName && dyadName;
 
-                html += `<th class="compare-col-header${hasBoth ? '' : ' no-toggle'}" data-col="${colIdx}">`;
-                html += `<div class="compare-name ${valence}">${displayName}</div>`;
+                const hasBoth = monadName && dyadName;
+                const isNonScalar = v && !isScalar(v) && getDefaultRank(v) != null;
+                const isTogglable = hasBoth || isNonScalar;
+
+                const badge = rankBadgeText(v, compareColumnRanks[colIdx]);
+                const badgeHtml = badge ? `<sup class="rank-badge">${badge}</sup>` : '';
+
+                html += `<th class="compare-col-header${isTogglable ? '' : ' no-toggle'}" data-col="${colIdx}">`;
+                html += `<div class="compare-name ${valence}">${displayName}${badgeHtml}</div>`;
                 html += '</th>';
             });
             html += '</tr></thead><tbody>';
@@ -3189,12 +3272,13 @@
 
                 entries.forEach(({ glyph, entry }, colIdx) => {
                     const valence = compareColumnValences[colIdx];
+                    const rank = compareColumnRanks[colIdx];
                     let cellGlyph;
 
                     if (lang.id === 'tinyapl') {
                         cellGlyph = glyph;
                     } else {
-                        cellGlyph = getEquivalent(entry, lang.id, valence);
+                        cellGlyph = getEquivalent(entry, lang.id, valence, rank);
                     }
 
                     const fc = lang.fontClass || '';
@@ -3209,17 +3293,144 @@
             });
 
             html += '</tbody></table>';
-            html += `<div class="compare-footer">click header to toggle <kbd>monad</kbd> / <kbd>dyad</kbd> • <kbd>c</kbd> color mode${compareColorMode ? ' ●' : ''} • <kbd>esc</kbd> close</div>`;
+            html += `<div class="compare-footer">click header to select <kbd>monad</kbd> / <kbd>dyad</kbd> + rank • <kbd>c</kbd> color mode${compareColorMode ? ' ●' : ''} • <kbd>esc</kbd> close</div>`;
             compareScreen.innerHTML = html;
 
             compareScreen.querySelectorAll('.compare-col-header:not(.no-toggle)').forEach(th => {
-                th.addEventListener('click', () => {
+                th.addEventListener('click', (e) => {
+                    e.stopPropagation();
                     const col = parseInt(th.dataset.col);
-                    const current = compareColumnValences[col];
-                    compareColumnValences[col] = current === 'monad' ? 'dyad' : 'monad';
+                    const colEntry = entries[col].entry;
+                    const colValence = compareColumnValences[col];
+                    const colV = colEntry?.[colValence];
+                    const bothExist = colEntry?.monad?.name && colEntry?.dyad?.name;
+                    const currentIsScalar = colV && isScalar(colV);
+                    if (bothExist && currentIsScalar) {
+                        compareColumnValences[col] = colValence === 'monad' ? 'dyad' : 'monad';
+                        renderCompareTable(entries);
+                    } else {
+                        openComparePopover(col, th, entries);
+                    }
+                });
+            });
+        }
+
+        let comparePopoverCleanup = null;
+
+        function closeComparePopover() {
+            const el = document.getElementById('comparePopover');
+            if (el) el.remove();
+            if (comparePopoverCleanup) {
+                comparePopoverCleanup();
+                comparePopoverCleanup = null;
+            }
+        }
+
+        function openComparePopover(colIdx, thElement, entries) {
+            closeComparePopover();
+
+            const { entry } = entries[colIdx];
+            const valence = compareColumnValences[colIdx];
+            const v = entry?.[valence];
+            const monadName = entry?.monad?.name || null;
+            const dyadName = entry?.dyad?.name || null;
+            const hasBoth = monadName && dyadName;
+            const isNonScalar = v && !isScalar(v) && getDefaultRank(v) != null;
+
+            const popover = document.createElement('div');
+            popover.className = 'compare-popover';
+            popover.id = 'comparePopover';
+
+            let html = '';
+
+            if (hasBoth) {
+                html += '<div class="compare-popover-label">valence</div>';
+                html += '<div class="compare-popover-row">';
+                html += `<button class="compare-popover-btn${valence === 'monad' ? ' active' : ''}" data-valence="monad">monad</button>`;
+                html += `<button class="compare-popover-btn${valence === 'dyad' ? ' active' : ''}" data-valence="dyad">dyad</button>`;
+                html += '</div>';
+            }
+
+            if (isNonScalar) {
+                const currentRank = compareColumnRanks[colIdx];
+                const definedRanks = getAvailableRanks(v);
+                const isDyadic = valence === 'dyad';
+                const standardMonadic = ['0', '1', '2', 'N'];
+                const standardDyadic = ['0,0', '0,1', '0,2', '0,N', '1,1', '1,2', '1,N', 'N,N'];
+                let rankOptions;
+                if (definedRanks) {
+                    const standard = isDyadic ? standardDyadic : standardMonadic;
+                    const merged = new Set([...definedRanks, ...standard]);
+                    rankOptions = [...merged].sort((a, b) => {
+                        const order = isDyadic ? standardDyadic : standardMonadic;
+                        return order.indexOf(a) - order.indexOf(b);
+                    });
+                } else {
+                    rankOptions = isDyadic ? standardDyadic : standardMonadic;
+                }
+                html += '<div class="compare-popover-label">rank</div>';
+                html += '<div class="compare-popover-row">';
+                rankOptions.forEach(r => {
+                    const isActive = String(currentRank) === String(r);
+                    html += `<button class="compare-popover-btn${isActive ? ' active' : ''}" data-rank="${r}">${r}</button>`;
+                });
+                html += '</div>';
+            }
+
+            popover.innerHTML = html;
+
+            const rect = thElement.getBoundingClientRect();
+            popover.style.left = (rect.left + rect.width / 2) + 'px';
+            popover.style.top = (rect.bottom + 6) + 'px';
+            document.body.appendChild(popover);
+
+            popover.querySelectorAll('[data-valence]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const newValence = btn.dataset.valence;
+                    if (newValence === valence) return;
+                    compareColumnValences[colIdx] = newValence;
+                    const newV = entry?.[newValence];
+                    compareColumnRanks[colIdx] = (!newV || isScalar(newV)) ? null : (getDefaultRank(newV));
+                    closeComparePopover();
+                    renderCompareTable(entries);
+                    const newTh = compareScreen.querySelector(`.compare-col-header[data-col="${colIdx}"]`);
+                    if (newTh) openComparePopover(colIdx, newTh, entries);
+                });
+            });
+
+            popover.querySelectorAll('[data-rank]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    let newRank = btn.dataset.rank;
+                    if (/^\d+$/.test(newRank)) newRank = parseInt(newRank);
+                    compareColumnRanks[colIdx] = newRank;
+                    closeComparePopover();
                     renderCompareTable(entries);
                 });
             });
+
+            const closeOnOutsideClick = (e) => {
+                if (!popover.contains(e.target) && !thElement.contains(e.target)) {
+                    closeComparePopover();
+                }
+            };
+            const closeOnEsc = (e) => {
+                if (e.key === 'Escape') {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    closeComparePopover();
+                }
+            };
+            setTimeout(() => {
+                document.addEventListener('click', closeOnOutsideClick, true);
+                document.addEventListener('keydown', closeOnEsc, true);
+            }, 0);
+
+            comparePopoverCleanup = () => {
+                document.removeEventListener('click', closeOnOutsideClick, true);
+                document.removeEventListener('keydown', closeOnEsc, true);
+            };
         }
 
         compareBackdrop.addEventListener('click', closeCompareTable);
@@ -3237,6 +3448,7 @@
             // 'c' to toggle color mode while comparison table is open
             if ((e.key === 'c' || e.key === 'C') && !e.ctrlKey && !e.metaKey && isCompareVisible() && compareCurrentEntries) {
                 e.preventDefault();
+                closeComparePopover();
                 compareColorMode = !compareColorMode;
                 renderCompareTable(compareCurrentEntries);
                 return;
