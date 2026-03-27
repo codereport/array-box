@@ -1,0 +1,330 @@
+#!/usr/bin/env node
+/**
+ * Primitive rank test runner.
+ *
+ * Derives expressions from primitiveMap + standard inputs, then
+ * evaluates in each language via Playwright (headless browser).
+ *
+ * Usage:  node tests/run-tests.js
+ *         npm test
+ */
+
+import { chromium } from 'playwright';
+import { createServer } from 'http';
+import { readFileSync, existsSync, statSync } from 'fs';
+import { resolve, extname } from 'path';
+import { fileURLToPath } from 'url';
+import { tests, inputs } from './primitive-tests.js';
+import { primitiveMap, getEquivalent } from '../src/primitive-compare.js';
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url));
+const ROOT = resolve(__dirname, '..');
+const PORT = 9753;
+const APL_URL = 'http://localhost:8081';
+const RUNTIME_TIMEOUT = 60_000;
+const ALL_LANGS = ['tinyapl', 'apl', 'kap', 'bqn', 'j', 'uiua'];
+
+// ── name → primitiveMap index ────────────────────────
+
+const nameIndex = {};
+for (const [glyph, entry] of Object.entries(primitiveMap)) {
+    if (entry.monad?.name) {
+        nameIndex[entry.monad.name] = { glyph, valence: 'monad', entry };
+    }
+    if (entry.dyad?.name) {
+        nameIndex[entry.dyad.name] = { glyph, valence: 'dyad', entry };
+    }
+}
+
+// ── input formatting ─────────────────────────────────
+
+const SIMPLE_NUMS = /^[\d\s.¯]+$/;
+
+function formatInputForLang(str, lang) {
+    if (lang === 'bqn' && SIMPLE_NUMS.test(str) && str.includes(' ')) {
+        return str.trim().replace(/\s+/g, '‿');
+    }
+    if (lang === 'uiua' && SIMPLE_NUMS.test(str) && str.includes(' ')) {
+        return '[' + str.trim() + ']';
+    }
+    if (lang === 'tinyapl' && str.includes(' ')) {
+        return null;
+    }
+    return str;
+}
+
+function getInputForLang(rank, lang) {
+    const rankInputs = inputs[rank];
+    if (!rankInputs) return null;
+    if (lang in rankInputs) return rankInputs[lang];
+    return rankInputs.default ?? null;
+}
+
+function buildExpression(glyph, valence, inputStr, lang) {
+    if (valence === 'monad') {
+        return '(' + glyph + ')' + inputStr;
+    }
+    const [left, right] = inputStr;
+    if (lang === 'uiua') return glyph + ' ' + right + ' ' + left;
+    return left + '(' + glyph + ')' + right;
+}
+
+// ── static server ────────────────────────────────────
+
+const MIME = {
+    '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript',
+    '.css': 'text/css', '.json': 'application/json', '.wasm': 'application/wasm',
+    '.png': 'image/png', '.svg': 'image/svg+xml', '.woff2': 'font/woff2',
+    '.ttf': 'font/ttf', '.kap': 'text/plain',
+};
+
+function startStaticServer() {
+    return new Promise((res) => {
+        const server = createServer((req, rsp) => {
+            const url = new URL(req.url, `http://localhost:${PORT}`);
+            let filePath = resolve(ROOT, '.' + url.pathname);
+            if (url.pathname === '/') filePath = resolve(ROOT, 'index.html');
+            if (!existsSync(filePath) || statSync(filePath).isDirectory()) {
+                rsp.writeHead(404); rsp.end(); return;
+            }
+            const stat = readFileSync(filePath);
+            const ext = extname(filePath);
+            rsp.writeHead(200, {
+                'Content-Type': MIME[ext] || 'application/octet-stream',
+                'Cross-Origin-Opener-Policy': 'same-origin',
+                'Cross-Origin-Embedder-Policy': 'require-corp',
+            });
+            rsp.end(stat);
+        });
+        server.listen(PORT, () => res(server));
+    });
+}
+
+async function checkAplServer() {
+    try {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 2000);
+        const r = await fetch(`${APL_URL}/health`, { signal: ctrl.signal }).catch(() => null);
+        clearTimeout(timer);
+        return r && r.ok;
+    } catch { return false; }
+}
+
+// ── output normalization ─────────────────────────────
+
+function normalizeOutput(s) {
+    if (s == null) return '';
+    s = s.trim();
+    // BQN list brackets
+    if (s.startsWith('⟨') && s.endsWith('⟩')) s = s.slice(1, -1).trim();
+    // Uiua square brackets (single-line)
+    if (s.startsWith('[') && s.endsWith(']') && !s.includes('\n')) s = s.slice(1, -1).trim();
+    // BQN unit array: ┌· · VALUE ┘
+    s = s.replace(/^┌[·\s]*·\s*/g, '').replace(/\s*┘$/g, '');
+    // Box display (TinyAPL, Kap, APL): strip box-drawing lines,
+    // extract content from between │ or | delimiters
+    const BOX = /[┌┐└┘─│┬┴→←~|]/;
+    if (BOX.test(s)) {
+        const BOX_LINE = /^[┌┐└┘─│┬┴→←~|\s]+$/;
+        const lines = s.split('\n').map(l => l.trim())
+            .filter(l => !BOX_LINE.test(l))
+            .map(l => {
+                l = l.replace(/^[│|]\s*/, '').replace(/\s*[│|]$/, '');
+                l = l.replace(/[│|]/g, ' ');
+                return l;
+            });
+        s = lines.join('\n').trim();
+    }
+    return s.replace(/\s+/g, ' ');
+}
+
+// ── language eval dispatch ───────────────────────────
+
+const LANG_EVAL = {
+    bqn:     (code) => window.cbqnWasm.eval(code),
+    uiua:    (code) => window.uiuaWasm.eval(code),
+    j:       (code) => window.jWasm.eval(code),
+    kap:     (code) => window.kapJs.eval(code),
+    tinyapl: (code) => window.tinyaplWasm.eval(code),
+    apl:     async (code) => {
+        const r = await fetch('http://localhost:8081/eval', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code })
+        });
+        const d = await r.json();
+        return { success: d.success !== false, output: d.output || d.result || d.error || '' };
+    },
+};
+
+const LANG_READY = {
+    bqn:     'window.cbqnWasm && window.cbqnWasm.isReady()',
+    uiua:    'window.uiuaWasm && window.uiuaWasm.isReady()',
+    j:       'window.jWasm && window.jWasm.isReady()',
+    kap:     'window.kapJs && window.kapJs.isReady()',
+    tinyapl: 'window.tinyaplWasm && window.tinyaplWasm.isReady()',
+};
+
+async function waitForRuntimes(page, langs) {
+    const start = Date.now();
+    const pending = new Set(langs);
+    while (pending.size > 0 && Date.now() - start < RUNTIME_TIMEOUT) {
+        for (const lang of [...pending]) {
+            const check = LANG_READY[lang];
+            if (!check) { pending.delete(lang); continue; }
+            const ready = await page.evaluate(check).catch(() => false);
+            if (ready) pending.delete(lang);
+        }
+        if (pending.size > 0) await new Promise(r => setTimeout(r, 500));
+    }
+    return pending;
+}
+
+async function evalInLang(page, lang, code) {
+    const fn = LANG_EVAL[lang];
+    if (!fn) throw new Error(`No eval for ${lang}`);
+    return page.evaluate(fn, code);
+}
+
+// ── main ─────────────────────────────────────────────
+
+const server = await startStaticServer();
+console.log(`Static server on http://localhost:${PORT}`);
+
+const aplAvailable = await checkAplServer();
+console.log(`APL server: ${aplAvailable ? 'available' : 'not reachable (APL tests will be skipped)'}`);
+
+const activeLangs = new Set(ALL_LANGS);
+if (!aplAvailable) activeLangs.delete('apl');
+
+const browser = await chromium.launch();
+const ctx = await browser.newContext();
+const page = await ctx.newPage();
+page.on('pageerror', (err) => console.error('  PAGE ERROR:', err.message));
+
+console.log('Loading ArrayBox...');
+await page.goto(`http://localhost:${PORT}`, { waitUntil: 'domcontentloaded' });
+
+const wasmLangs = [...activeLangs].filter(l => l !== 'apl');
+console.log(`Waiting for runtimes: ${wasmLangs.join(', ')}...`);
+const notReady = await waitForRuntimes(page, wasmLangs);
+if (notReady.size > 0) {
+    console.error(`Timed out waiting for: ${[...notReady].join(', ')}`);
+    for (const lang of notReady) activeLangs.delete(lang);
+}
+console.log(`Ready: ${[...activeLangs].join(', ')}\n`);
+
+let passed = 0;
+let failed = 0;
+let skipped = 0;
+
+for (const test of tests) {
+    const info = nameIndex[test.name];
+    if (!info) {
+        console.log(`  ? ${test.name} — not found in primitiveMap`);
+        skipped++;
+        continue;
+    }
+
+    const { glyph, valence, entry } = info;
+    const isDyadic = valence === 'dyad';
+    const rankKey = test.rank;
+
+    // Parse dyadic rank pair for input lookup
+    let leftRank, rightRank;
+    if (isDyadic && typeof rankKey === 'string' && rankKey.includes(',')) {
+        [leftRank, rightRank] = rankKey.split(',');
+    }
+
+    const header = `${glyph} ${test.name} (${valence} rank ${rankKey})`;
+    const langResults = [];
+
+    for (const lang of ALL_LANGS) {
+        if (!activeLangs.has(lang)) { skipped++; continue; }
+
+        // Check per-test overrides: null = skip, string = replacement glyph
+        const override = test.overrides?.[lang];
+        if (override === null) { skipped++; continue; }
+
+        let equiv;
+        if (override !== undefined) {
+            equiv = override;
+        } else if (lang === 'tinyapl') {
+            equiv = glyph;
+        } else {
+            equiv = getEquivalent(entry, lang, valence, rankKey);
+        }
+        if (!equiv) { skipped++; continue; }
+
+        // Build input
+        let inputStr;
+        if (isDyadic) {
+            if (!test.input || test.input.length < 2) {
+                skipped++; continue;
+            }
+            const left = formatInputForLang(test.input[0], lang);
+            const right = formatInputForLang(test.input[1], lang);
+            if (left == null || right == null) { skipped++; continue; }
+            inputStr = [left, right];
+        } else {
+            const inp = getInputForLang(rankKey, lang);
+            if (inp == null) { skipped++; continue; }
+            inputStr = inp;
+        }
+
+        const expression = buildExpression(equiv, valence, inputStr, lang);
+
+        try {
+            const result = await evalInLang(page, lang, expression);
+            if (!result || result.success === false) {
+                langResults.push({ lang, ok: false, expr: expression, reason: `error: ${result?.output || 'no output'}` });
+                failed++;
+                continue;
+            }
+
+            if (test.expected == null) {
+                langResults.push({ lang, ok: true });
+                passed++;
+                continue;
+            }
+
+            const actual = normalizeOutput(result.output);
+            const expected = normalizeOutput(test.expected);
+            if (actual === expected) {
+                langResults.push({ lang, ok: true });
+                passed++;
+            } else {
+                langResults.push({ lang, ok: false, expr: expression, reason: `expected "${expected}" got "${actual}"` });
+                failed++;
+            }
+        } catch (err) {
+            langResults.push({ lang, ok: false, expr: expression, reason: `exception: ${err.message}` });
+            failed++;
+        }
+    }
+
+    const allOk = langResults.length > 0 && langResults.every(r => r.ok);
+    const icon = allOk ? '✓' : '✗';
+
+    if (allOk) {
+        const langs = langResults.map(r => r.lang).join(', ');
+        console.log(`  ${icon} ${header}  [${langs}]`);
+    } else if (langResults.length === 0) {
+        console.log(`  - ${header}  [all skipped]`);
+    } else {
+        console.log(`  ${icon} ${header}`);
+        for (const f of langResults.filter(r => !r.ok)) {
+            console.log(`      ${f.lang}: ${f.reason}`);
+            console.log(`        expr: ${f.expr}`);
+        }
+        for (const s of langResults.filter(r => r.ok)) {
+            console.log(`      ${s.lang}: ok`);
+        }
+    }
+}
+
+console.log(`\n  ${passed} passed, ${failed} failed, ${skipped} skipped`);
+
+await browser.close();
+server.close();
+process.exit(failed > 0 ? 1 : 0);

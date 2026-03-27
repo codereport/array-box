@@ -97,11 +97,19 @@ export const primitiveMap = {
         dyad:  { name: 'Equal', scalar: true, apl: '=', bqn: '=', j: '=', kap: '=', uiua: '=' }
     },
     '≥': {
-        monad: { name: 'Last Cell', defaultRank: 1, apl: '≢⍛⌷', bqn: '⊢˝', j: '{:', kap: '(1-⍨≢)⍛⌷', uiua: '⊣' },
+        monad: { name: 'Last Cell', defaultRank: 1, apl: '≢⍛⌷', bqn: '⊢˝', j: '{:', kap: '⊢⌿', uiua: '⊣',
+            ranks: {
+                0: { bqn: null}
+            }
+         }, // (1-⍨≢)⍛⌷
         dyad:  { name: 'Greater or Equal', scalar: true, apl: '≥', bqn: '≥', j: '>:', kap: '≥', uiua: null }
     },
     '>': {
-        monad: { name: 'First Cell', defaultRank: 1, apl: '1∘⌷', bqn: '⊏', j: '{.', kap: '0⌷', uiua: '⊢' },
+        monad: { name: 'First Cell', defaultRank: 1, apl: '1∘⌷', bqn: '⊏', j: '{.', kap: '0⌷', uiua: '⊢' ,
+            ranks: {
+                0: { bqn: null, kap: null}
+            }
+        },
         dyad:  { name: 'Greater Than', scalar: true, apl: '>', bqn: '>', j: '>', kap: '>', uiua: '>' }
     },
     '≠': {
@@ -146,7 +154,11 @@ export const primitiveMap = {
         dyad:  { name: 'Partitioned Enclose', defaultRank: '1,1', apl: '⊂', bqn: null, j: null, kap: '⊂', uiua: null }
     },
     '⊃': {
-        monad: { name: 'First', defaultRank: 1, apl: '⊃', bqn: '⊑', j: '>{.,', kap: '↑', uiua: '◇∘⊢♭' },
+        monad: { name: 'First', defaultRank: 1, apl: '⊃', bqn: '⊑', j: '{.', kap: '↑', uiua: '◇∘⊢♭',
+            ranks: {
+                2: { j: '{.@,'}
+            }
+        },
         dyad:  { name: 'Pick',  defaultRank: '0,N', apl: '⊃', bqn: '⊑', j: null, kap: '⊃', uiua: null }
     },
     '⊆': {
@@ -154,7 +166,14 @@ export const primitiveMap = {
         dyad:  { name: 'Partition', defaultRank: '1,1', apl: '⊆', bqn: '⊔', j: ';.', kap: '⊆', uiua: '⊜' }
     },
     '⊇': {
-        monad: { name: 'Last', defaultRank: 1, apl: '⊢/', bqn: '⊢´', j: '>{:,', kap: '⊢/', uiua: '◇∘⊣♭' },
+        monad: {
+            name: 'Last', defaultRank: 1,
+            apl: '⊢/', bqn: '⊢´', j: '{:', kap: '⊢⌿', uiua: '◇∘⊣♭',
+            ranks: {
+                0: { bqn: '⊢´⥊' },
+                2: { j: '{:@,', kap: '⊢⌿,', bqn: '⊢´⥊'}
+            }
+        },
         dyad:  {
             name: 'From',
             defaultRank: '0,1',
