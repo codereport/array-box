@@ -5,6 +5,8 @@
   "type": "module",
   "main": "./src/keymap.js",
   "scripts": {
+    "test": "node tests/run-tests.js",
+    "test:install": "npx playwright install chromium",
     "scrape:bqn": "node scripts/scrape-bqn-docs.cjs",
     "scrape:uiua": "node scripts/scrape-uiua-docs.cjs",
     "scrape:j": "node scripts/scrape-j-docs.cjs",
@@ -92,5 +94,8 @@
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",
     "satori": "^0.19.1"
+  },
+  "devDependencies": {
+    "playwright": "^1.58.2"
   }
 }
