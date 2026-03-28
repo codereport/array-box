@@ -3167,10 +3167,17 @@
                 return result;
             }
 
+            const uiuaSubscripts = langId === 'uiua' ? (syntaxRules.uiua?.subscripts || '') : '';
             let result = '';
+            let lastCls = 'syntax-default';
             for (const ch of glyph) {
+                if (uiuaSubscripts && uiuaSubscripts.includes(ch)) {
+                    result += `<span class="${lastCls}">${escapeHtml(ch)}</span>`;
+                    continue;
+                }
                 const cls = getSyntaxClass(ch, langId);
                 if (cls !== 'syntax-default') {
+                    lastCls = cls;
                     result += `<span class="${cls}">${escapeHtml(ch)}</span>`;
                 } else if (/[0-9]/.test(ch)) {
                     result += `<span class="syntax-number">${escapeHtml(ch)}</span>`;
