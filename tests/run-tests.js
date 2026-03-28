@@ -172,7 +172,8 @@ function normalizeOutput(s) {
     }
     // BQN list brackets (after box stripping to catch inner ⟨⟩)
     s = s.replace(/^[⟨‹]\s*/, '').replace(/\s*[⟩›]$/, '').trim();
-    // Uiua square brackets (single-line)
+    // Uiua box markers and square brackets
+    s = s.replace(/^□+/, '').trim();
     if (s.startsWith('[') && s.endsWith(']') && !s.includes('\n')) s = s.slice(1, -1).trim();
     return s.replace(/\s+/g, ' ');
 }
@@ -337,15 +338,22 @@ for (const test of tests) {
             }
 
             if (test.expected_depth != null) {
-                const depthExpr = buildDepthExpression(expression, lang);
-                if (depthExpr) {
+                let depthActual;
+                if (lang === 'uiua') {
+                    const raw = (result.output || '').trim();
+                    const boxes = raw.match(/^□*/)[0].length;
+                    depthActual = String(boxes + 1);
+                } else {
+                    const depthExpr = buildDepthExpression(expression, lang);
+                    if (!depthExpr) { langResults.push({ lang, ok: true }); passed++; continue; }
                     const depthResult = await evalInLang(page, lang, depthExpr);
-                    const depthActual = normalizeOutput(depthResult?.output);
-                    if (depthActual !== String(test.expected_depth)) {
-                        langResults.push({ lang, ok: false, expr: depthExpr, reason: `depth: expected ${test.expected_depth} got ${depthActual}` });
-                        failed++;
-                        continue;
-                    }
+                    depthActual = normalizeOutput(depthResult?.output);
+                }
+                if (depthActual !== String(test.expected_depth)) {
+                    const depthExpr = buildDepthExpression(expression, lang) || '(counted □ prefixes)';
+                    langResults.push({ lang, ok: false, expr: depthExpr, reason: `depth: expected ${test.expected_depth} got ${depthActual}` });
+                    failed++;
+                    continue;
                 }
             }
 

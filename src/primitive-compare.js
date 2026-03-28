@@ -156,10 +156,10 @@ export const primitiveMap = {
         dyad:  { name: 'Partitioned Enclose', defaultRank: '1,1', apl: '⊂', bqn: null, j: null, kap: '⊂', uiua: null }
     },
     '⊃': {
-        monad: { name: 'First', defaultRank: 1, apl: '⊃', bqn: '⊑', j: '{.', kap: '↑', uiua: '◇∘⊢♭',
+        monad: { name: 'First', defaultRank: 1, apl: '⊃', bqn: '⊑', j: '{.', kap: '↑', uiua: '⊢',
             ranks: {
-                2: { j: '{.@,'},
-                'N': { j: '>@{.'}
+                2: { j: '{.@,', uiua: '⊢♭'},
+                'N': { j: '>@{.', uiua: '°□⊢♭'}
             }
         },
         dyad:  { name: 'Pick',  defaultRank: '0,N', apl: '⊃', bqn: '⊑', j: null, kap: '⊃', uiua: null }
@@ -171,11 +171,11 @@ export const primitiveMap = {
     '⊇': {
         monad: {
             name: 'Last', defaultRank: 1,
-            apl: '⊢⌿', bqn: '⊢´', j: '{:', kap: '⊢⌿', uiua: '◇∘⊣♭',
+            apl: '⊢⌿', bqn: '⊢´', j: '{:', kap: '⊢⌿', uiua: '⊣',
             ranks: {
                 0: { bqn: '⊢´⥊' },
-                2: { j: '{:@,', kap: '⊢⌿,', bqn: '⊢´⥊', apl: '⊢⌿,'},
-                'N': { j: '>@{:', kap: '⊃⊢⌿', apl: '⊃⊢⌿'}
+                2: { j: '{:@,', kap: '⊢⌿,', bqn: '⊢´⥊', apl: '⊢⌿,', uiua: '⊣♭'},
+                'N': { j: '>@{:', kap: '⊃⊢⌿', apl: '⊃⊢⌿', uiua: '°□⊣♭'}
             }
         },
         dyad:  {
