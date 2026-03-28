@@ -97,17 +97,18 @@ export const primitiveMap = {
         dyad:  { name: 'Equal', scalar: true, apl: '=', bqn: '=', j: '=', kap: '=', uiua: '=' }
     },
     '≥': {
-        monad: { name: 'Last Cell', defaultRank: 1, apl: '≢⍛⌷', bqn: '⊢˝', j: '{:', kap: '⊢⌿', uiua: '⊣',
+        monad: { name: 'Last Cell', defaultRank: 1, apl: '⊢⌿', bqn: '⊢˝', j: '{:', kap: '⊢⌿', uiua: '⊣',
             ranks: {
-                0: { bqn: null}
+                0: { bqn: null, apl: null}
             }
          }, // (1-⍨≢)⍛⌷
         dyad:  { name: 'Greater or Equal', scalar: true, apl: '≥', bqn: '≥', j: '>:', kap: '≥', uiua: null }
     },
     '>': {
-        monad: { name: 'First Cell', defaultRank: 1, apl: '1∘⌷', bqn: '⊏', j: '{.', kap: '0⌷', uiua: '⊢' ,
+        monad: { name: 'First Cell', defaultRank: 1, apl: '⊃', bqn: '⊏', j: '{.', kap: '↑', uiua: '⊢' ,
             ranks: {
-                0: { bqn: null, kap: null}
+                0: { bqn: null},
+                2: { apl: '1∘⌷', kap: '0⌷'}
             }
         },
         dyad:  { name: 'Greater Than', scalar: true, apl: '>', bqn: '>', j: '>', kap: '>', uiua: '>' }
@@ -168,10 +169,10 @@ export const primitiveMap = {
     '⊇': {
         monad: {
             name: 'Last', defaultRank: 1,
-            apl: '⊢/', bqn: '⊢´', j: '{:', kap: '⊢⌿', uiua: '◇∘⊣♭',
+            apl: '⊢⌿', bqn: '⊢´', j: '{:', kap: '⊢⌿', uiua: '◇∘⊣♭',
             ranks: {
                 0: { bqn: '⊢´⥊' },
-                2: { j: '{:@,', kap: '⊢⌿,', bqn: '⊢´⥊'}
+                2: { j: '{:@,', kap: '⊢⌿,', bqn: '⊢´⥊', apl: '⊢⌿,'}
             }
         },
         dyad:  {

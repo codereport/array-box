@@ -42,11 +42,13 @@ export const tests = [
     { name: 'Last',       rank: 0, expected: '5' },
     { name: 'Last',       rank: 1, expected: '5' },
     { name: 'Last',       rank: 2, expected: '9' },
+    { name: 'Last',       rank: 'N', expected: '4 5 6' },
 
     // ─── > First Cell / Greater Than ───
     { name: 'First Cell', rank: 0, expected: '5' },
     { name: 'First Cell', rank: 1, expected: '1' },
     { name: 'First Cell', rank: 2, expected: '1 2 3' },
+    { name: 'First Cell', rank: 'N', expected: '1 2 3' },
 
     // ─── ≥ Last Cell / Greater or Equal ───
     { name: 'Last Cell',  rank: 0, expected: '5' },

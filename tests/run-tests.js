@@ -16,6 +16,7 @@ import { resolve, extname } from 'path';
 import { fileURLToPath } from 'url';
 import { tests, inputs } from './primitive-tests.js';
 import { primitiveMap, getEquivalent } from '../src/primitive-compare.js';
+import { syntaxRules } from '../src/syntax.js';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const ROOT = resolve(__dirname, '..');
@@ -23,6 +24,31 @@ const PORT = 9753;
 const APL_URL = 'http://localhost:8081';
 const RUNTIME_TIMEOUT = 60_000;
 const ALL_LANGS = ['tinyapl', 'apl', 'kap', 'bqn', 'j', 'uiua'];
+
+const rgb = (r, g, b) => s => `\x1b[38;2;${r};${g};${b}m${s}\x1b[0m`;
+const c = {
+    green:  s => `\x1b[32m${s}\x1b[0m`,
+    red:    s => `\x1b[31m${s}\x1b[0m`,
+    yellow: s => `\x1b[33m${s}\x1b[0m`,
+    cyan:   s => `\x1b[36m${s}\x1b[0m`,
+    dim:    s => `\x1b[2m${s}\x1b[0m`,
+    bold:   s => `\x1b[1m${s}\x1b[0m`,
+    // Dracula syntax colors
+    fn:     rgb(139, 233, 253),  // #8BE9FD cyan — functions
+    mod1:   rgb(80, 250, 123),   // #50FA7B green — 1-modifiers
+    mod2:   rgb(241, 250, 140),  // #F1FA8C yellow — 2-modifiers
+    num:    rgb(189, 147, 249),  // #BD93F9 purple — numbers
+    str:    rgb(241, 250, 140),  // #F1FA8C yellow — strings
+};
+
+function colorGlyph(glyph) {
+    const apl = syntaxRules.apl;
+    for (const ch of glyph) {
+        if (apl.monadic.includes(ch)) return c.mod1(glyph);
+        if (apl.dyadic.includes(ch)) return c.mod2(glyph);
+    }
+    return c.fn(glyph);
+}
 
 // ── name → primitiveMap index ────────────────────────
 
@@ -103,8 +129,13 @@ function startStaticServer() {
 async function checkAplServer() {
     try {
         const ctrl = new AbortController();
-        const timer = setTimeout(() => ctrl.abort(), 2000);
-        const r = await fetch(`${APL_URL}/health`, { signal: ctrl.signal }).catch(() => null);
+        const timer = setTimeout(() => ctrl.abort(), 3000);
+        const r = await fetch(`${APL_URL}/eval`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: '1' }),
+            signal: ctrl.signal,
+        }).catch(() => null);
         clearTimeout(timer);
         return r && r.ok;
     } catch { return false; }
@@ -192,7 +223,7 @@ const server = await startStaticServer();
 console.log(`Static server on http://localhost:${PORT}`);
 
 const aplAvailable = await checkAplServer();
-console.log(`APL server: ${aplAvailable ? 'available' : 'not reachable (APL tests will be skipped)'}`);
+console.log(`APL server: ${aplAvailable ? c.green('available') : c.yellow('not reachable (APL tests will be skipped)')}`);
 
 const activeLangs = new Set(ALL_LANGS);
 if (!aplAvailable) activeLangs.delete('apl');
@@ -212,7 +243,7 @@ if (notReady.size > 0) {
     console.error(`Timed out waiting for: ${[...notReady].join(', ')}`);
     for (const lang of notReady) activeLangs.delete(lang);
 }
-console.log(`Ready: ${[...activeLangs].join(', ')}\n`);
+console.log(`${c.green('Ready:')} ${[...activeLangs].map(l => c.cyan(l)).join(', ')}\n`);
 
 let passed = 0;
 let failed = 0;
@@ -236,7 +267,7 @@ for (const test of tests) {
         [leftRank, rightRank] = rankKey.split(',');
     }
 
-    const header = `${glyph} ${test.name} (${valence} rank ${rankKey})`;
+    const header = `${colorGlyph(glyph)} ${test.name.toLowerCase()} ${c.dim(`(${valence} rank ${rankKey})`)}`;
     const langResults = [];
 
     for (const lang of ALL_LANGS) {
@@ -304,26 +335,30 @@ for (const test of tests) {
     }
 
     const allOk = langResults.length > 0 && langResults.every(r => r.ok);
-    const icon = allOk ? '✓' : '✗';
 
     if (allOk) {
-        const langs = langResults.map(r => r.lang).join(', ');
-        console.log(`  ${icon} ${header}  [${langs}]`);
+        const langs = langResults.map(r => c.dim(r.lang)).join(', ');
+        console.log(`  ${c.green('✓')} ${c.bold(header)}  [${langs}]`);
     } else if (langResults.length === 0) {
-        console.log(`  - ${header}  [all skipped]`);
+        console.log(`  ${c.yellow('-')} ${c.dim(header)}  [all skipped]`);
     } else {
-        console.log(`  ${icon} ${header}`);
+        console.log(`  ${c.red('✗')} ${c.bold(header)}`);
         for (const f of langResults.filter(r => !r.ok)) {
-            console.log(`      ${f.lang}: ${f.reason}`);
-            console.log(`        expr: ${f.expr}`);
+            console.log(`      ${c.red(f.lang)}: ${f.reason}`);
+            console.log(`        ${c.dim('expr:')} ${c.dim(f.expr)}`);
         }
         for (const s of langResults.filter(r => r.ok)) {
-            console.log(`      ${s.lang}: ok`);
+            console.log(`      ${c.green(s.lang)}: ok`);
         }
     }
 }
 
-console.log(`\n  ${passed} passed, ${failed} failed, ${skipped} skipped`);
+const summary = [
+    c.green(`${passed} passed`),
+    failed > 0 ? c.red(`${failed} failed`) : c.dim(`${failed} failed`),
+    c.yellow(`${skipped} skipped`),
+].join(c.dim(', '));
+console.log(`\n  ${summary}`);
 
 await browser.close();
 server.close();
