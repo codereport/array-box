@@ -107,8 +107,9 @@ export const primitiveMap = {
     '>': {
         monad: { name: 'First Cell', defaultRank: 1, apl: '⊃', bqn: '⊏', j: '{.', kap: '↑', uiua: '⊢' ,
             ranks: {
-                0: { bqn: null},
-                2: { apl: '1∘⌷', kap: '0⌷'}
+                0: { bqn: null },
+                2: { apl: '1∘⌷', kap: '0⌷'},
+                'N': { apl: '1∘⌷', kap: '0⌷'}
             }
         },
         dyad:  { name: 'Greater Than', scalar: true, apl: '>', bqn: '>', j: '>', kap: '>', uiua: '>' }
@@ -157,7 +158,8 @@ export const primitiveMap = {
     '⊃': {
         monad: { name: 'First', defaultRank: 1, apl: '⊃', bqn: '⊑', j: '{.', kap: '↑', uiua: '◇∘⊢♭',
             ranks: {
-                2: { j: '{.@,'}
+                2: { j: '{.@,'},
+                'N': { j: '>@{.'}
             }
         },
         dyad:  { name: 'Pick',  defaultRank: '0,N', apl: '⊃', bqn: '⊑', j: null, kap: '⊃', uiua: null }
@@ -172,7 +174,8 @@ export const primitiveMap = {
             apl: '⊢⌿', bqn: '⊢´', j: '{:', kap: '⊢⌿', uiua: '◇∘⊣♭',
             ranks: {
                 0: { bqn: '⊢´⥊' },
-                2: { j: '{:@,', kap: '⊢⌿,', bqn: '⊢´⥊', apl: '⊢⌿,'}
+                2: { j: '{:@,', kap: '⊢⌿,', bqn: '⊢´⥊', apl: '⊢⌿,'},
+                'N': { j: '>@{:', kap: '⊃⊢⌿', apl: '⊃⊢⌿'}
             }
         },
         dyad:  {

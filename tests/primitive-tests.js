@@ -36,19 +36,19 @@ export const tests = [
     { name: 'First',      rank: 0, expected: '5' },
     { name: 'First',      rank: 1, expected: '1' },
     { name: 'First',      rank: 2, expected: '1' },
-    { name: 'First',      rank: 'N', expected: '1 2 3' },
+    { name: 'First',      rank: 'N', expected: '1 2 3', expected_depth: 1 },
 
     // ─── ⊇ Last / From ───
     { name: 'Last',       rank: 0, expected: '5' },
     { name: 'Last',       rank: 1, expected: '5' },
     { name: 'Last',       rank: 2, expected: '9' },
-    { name: 'Last',       rank: 'N', expected: '4 5 6' },
+    { name: 'Last',       rank: 'N', expected: '4 5 6', expected_depth: 1 },
 
     // ─── > First Cell / Greater Than ───
     { name: 'First Cell', rank: 0, expected: '5' },
     { name: 'First Cell', rank: 1, expected: '1' },
     { name: 'First Cell', rank: 2, expected: '1 2 3' },
-    { name: 'First Cell', rank: 'N', expected: '1 2 3' },
+    { name: 'First Cell', rank: 'N', expected: '1 2 3', expected_depth: 2 },
 
     // ─── ≥ Last Cell / Greater or Equal ───
     { name: 'Last Cell',  rank: 0, expected: '5' },

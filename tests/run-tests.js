@@ -95,6 +95,14 @@ function buildExpression(glyph, valence, inputStr, lang) {
     return left + '(' + glyph + ')' + right;
 }
 
+const DEPTH_GLYPH = { tinyapl: '≡', apl: '≡', kap: '≡', j: '1+L.', bqn: '≡', uiua: null };
+
+function buildDepthExpression(mainExpr, lang) {
+    const dg = DEPTH_GLYPH[lang];
+    if (!dg) return null;
+    return dg + '(' + mainExpr + ')';
+}
+
 // ── static server ────────────────────────────────────
 
 const MIME = {
@@ -146,17 +154,13 @@ async function checkAplServer() {
 function normalizeOutput(s) {
     if (s == null) return '';
     s = s.trim();
-    // BQN list brackets
-    if (s.startsWith('⟨') && s.endsWith('⟩')) s = s.slice(1, -1).trim();
-    // Uiua square brackets (single-line)
-    if (s.startsWith('[') && s.endsWith(']') && !s.includes('\n')) s = s.slice(1, -1).trim();
-    // BQN unit array: ┌· · VALUE ┘
-    s = s.replace(/^┌[·\s]*·\s*/g, '').replace(/\s*┘$/g, '');
+    // BQN unit array: ┌· · VALUE ┘ (strip outer box first)
+    s = s.replace(/^┌[·\s]*·\s*/g, '').replace(/\s*┘$/g, '').trim();
     // Box display (TinyAPL, Kap, APL): strip box-drawing lines,
     // extract content from between │ or | delimiters
-    const BOX = /[┌┐└┘─│┬┴→←~|]/;
+    const BOX = /[┌┐└┘─│┬┴→←~|⊂⊃∊]/;
     if (BOX.test(s)) {
-        const BOX_LINE = /^[┌┐└┘─│┬┴→←~|\s]+$/;
+        const BOX_LINE = /^[┌┐└┘─│┬┴→←~|⊂⊃∊\s]+$/;
         const lines = s.split('\n').map(l => l.trim())
             .filter(l => !BOX_LINE.test(l))
             .map(l => {
@@ -166,6 +170,10 @@ function normalizeOutput(s) {
             });
         s = lines.join('\n').trim();
     }
+    // BQN list brackets (after box stripping to catch inner ⟨⟩)
+    s = s.replace(/^[⟨‹]\s*/, '').replace(/\s*[⟩›]$/, '').trim();
+    // Uiua square brackets (single-line)
+    if (s.startsWith('[') && s.endsWith(']') && !s.includes('\n')) s = s.slice(1, -1).trim();
     return s.replace(/\s+/g, ' ');
 }
 
@@ -321,13 +329,28 @@ for (const test of tests) {
 
             const actual = normalizeOutput(result.output);
             const expected = normalizeOutput(test.expected);
-            if (actual === expected) {
-                langResults.push({ lang, ok: true });
-                passed++;
-            } else {
+            if (actual !== expected) {
+
                 langResults.push({ lang, ok: false, expr: expression, reason: `expected "${expected}" got "${actual}"` });
                 failed++;
+                continue;
             }
+
+            if (test.expected_depth != null) {
+                const depthExpr = buildDepthExpression(expression, lang);
+                if (depthExpr) {
+                    const depthResult = await evalInLang(page, lang, depthExpr);
+                    const depthActual = normalizeOutput(depthResult?.output);
+                    if (depthActual !== String(test.expected_depth)) {
+                        langResults.push({ lang, ok: false, expr: depthExpr, reason: `depth: expected ${test.expected_depth} got ${depthActual}` });
+                        failed++;
+                        continue;
+                    }
+                }
+            }
+
+            langResults.push({ lang, ok: true });
+            passed++;
         } catch (err) {
             langResults.push({ lang, ok: false, expr: expression, reason: `exception: ${err.message}` });
             failed++;
