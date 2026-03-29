@@ -1142,6 +1142,17 @@
             font-size: 26px;
             opacity: 0.35;
         }
+        .compare-cell-name {
+            font-size: 10px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: #64748b;
+            margin-top: 2px;
+            line-height: 1.2;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
         .compare-table .font-kap {
             font-family: 'Kap', 'Courier New', monospace;
         }
@@ -3074,10 +3085,27 @@
         let compareColumnValences = [];
         let compareColumnRanks = [];
         let compareColorMode = false;
+        let compareNameMode = false;
         let compareCurrentEntries = null;
 
         function isCompareVisible() {
             return compareScreen.classList.contains('show');
+        }
+
+        const glyphDocsByLang = {
+            bqn: bqnGlyphDocs, apl: aplGlyphDocs, kap: kapGlyphDocs,
+            uiua: uiuaGlyphDocs, j: jGlyphDocs, tinyapl: tinyaplGlyphDocs,
+        };
+
+        function getGlyphValenceName(glyph, langId, valence) {
+            const docs = glyphDocsByLang[langId];
+            const entry = docs?.[glyph];
+            if (!entry) return null;
+            const v = entry[valence];
+            if (v?.name) return v.name.toLowerCase();
+            if (entry.monad?.name) return entry.monad.name.toLowerCase();
+            if (entry.dyad?.name) return entry.dyad.name.toLowerCase();
+            return null;
         }
 
         function closeCompareTable() {
@@ -3291,7 +3319,12 @@
                     const fc = lang.fontClass || '';
                     if (cellGlyph) {
                         const cc = getColorClass(cellGlyph, lang.id);
-                        html += `<td class="${fc} ${cc}" data-col="${colIdx}" data-lang="${lang.id}">${highlightCompareGlyph(cellGlyph, lang.id)}</td>`;
+                        let nameHtml = '';
+                        if (compareNameMode && countPrimitives(cellGlyph, lang.id) === 1) {
+                            const name = getGlyphValenceName(cellGlyph, lang.id, valence);
+                            if (name) nameHtml = `<div class="compare-cell-name">${name}</div>`;
+                        }
+                        html += `<td class="${fc} ${cc}" data-col="${colIdx}" data-lang="${lang.id}">${highlightCompareGlyph(cellGlyph, lang.id)}${nameHtml}</td>`;
                     } else {
                         html += `<td class="compare-cell-sad" data-col="${colIdx}" data-lang="${lang.id}">😢</td>`;
                     }
@@ -3300,7 +3333,7 @@
             });
 
             html += '</tbody></table>';
-            html += `<div class="compare-footer">click header to select <kbd>monad</kbd> / <kbd>dyad</kbd> + rank • <kbd>c</kbd> color mode${compareColorMode ? ' ●' : ''} • <kbd>esc</kbd> close</div>`;
+            html += `<div class="compare-footer">click header to select <kbd>monad</kbd> / <kbd>dyad</kbd> + rank • <kbd>c</kbd> color${compareColorMode ? ' ●' : ''} • <kbd>n</kbd> names${compareNameMode ? ' ●' : ''} • <kbd>esc</kbd> close</div>`;
             compareScreen.innerHTML = html;
 
             compareScreen.querySelectorAll('.compare-col-header:not(.no-toggle)').forEach(th => {
@@ -3457,6 +3490,15 @@
                 e.preventDefault();
                 closeComparePopover();
                 compareColorMode = !compareColorMode;
+                renderCompareTable(compareCurrentEntries);
+                return;
+            }
+
+            // 'n' to toggle name labels while comparison table is open
+            if ((e.key === 'n' || e.key === 'N') && !e.ctrlKey && !e.metaKey && isCompareVisible() && compareCurrentEntries) {
+                e.preventDefault();
+                closeComparePopover();
+                compareNameMode = !compareNameMode;
                 renderCompareTable(compareCurrentEntries);
                 return;
             }
