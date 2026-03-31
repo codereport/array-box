@@ -55,6 +55,12 @@ export const tests = [
     { name: 'Last Cell',  rank: 1, expected: '5' },
     { name: 'Last Cell',  rank: 2, expected: '7 8 9' },
 
+    // ─── ⊴ Sort Up ───
+    { name: 'Sort Up',    rank: 1, expected: '1 2 3 4 5' },
+
+    // ─── ⊵ Sort Down ───
+    { name: 'Sort Down',  rank: 1, expected: '5 4 3 2 1' },
+
     // ─── ~ Not / Without ───
     { name: 'Without',    rank: '1,1', input: ['1 2 3 4 5', '2 4'], expected: '1 3 5' },
 

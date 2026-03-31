@@ -255,6 +255,14 @@ export const primitiveMap = {
         monad: { name: 'Grade Down', defaultRank: 1, apl: '⍒', bqn: '⍒', j: '\\:', kap: '⍒', uiua: '⍖' },
         dyad:  null
     },
+    '⊴': {
+        monad: { name: 'Sort Up', defaultRank: 1, apl: '⊂⍤⍋⍛⌷', bqn: '∧', j: '/:~', kap: '∧', uiua: '⍆' },
+        dyad:  null
+    },
+    '⊵': {
+        monad: { name: 'Sort Down', defaultRank: 1, apl: '⊂⍤⍒⍛⌷', bqn: '∨', j: '\\:~', kap: '∨', uiua: '⇌⍆' },
+        dyad:  null
+    },
     '⌷': {
         monad: null,
         dyad:  { name: 'Index', defaultRank: '1,1', apl: '⌷', bqn: null, j: '{', kap: '⌷', uiua: null }
