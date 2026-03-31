@@ -516,6 +516,10 @@ export const tinyaplGlyphNames = {
     '⍢': 'under',
     '∵': 'bitwise',
     '⎊': 'catch',
+    '˝': 'inverse',
+    '⥼': 'on right',
+    '⥽': 'on left',
+    '⍦': 'multisets / on counts',
     
     // Combinators (2-modifiers)
     '⍨': 'constant / commute / duplicate',
@@ -531,6 +535,9 @@ export const tinyaplGlyphNames = {
     '⫤': 'ident',
     '⫣': 'lev',
     '⊩': 'dex',
+    '○': 'default bind / over',
+    '⍜': 'default reverse bind / reverse over',
+    '⍫': 'contextual under',
     
     // Syntax
     '←': 'assign',
