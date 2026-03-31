@@ -230,6 +230,8 @@ export const aplGlyphNames = {
     '⌺': 'stencil',
     '⍠': 'variant',
     '⌶': 'i-beam',
+    '.': 'inner product',
+    '⍢': 'structural under',
     
     // I/O & Evaluation
     '⍎': 'execute',
@@ -655,6 +657,7 @@ export const jGlyphNames = {
     
     // Verb digraphs - Random
     '?.': 'roll (fixed seed)',
+    '?:': 'deal (fixed seed)',
     
     // Named primitive verbs
     'i.': 'integers / index of',
@@ -686,6 +689,7 @@ export const jGlyphNames = {
     'b.': 'boolean / bitwise',
     'f.': 'fix',
     'M.': 'memo',
+    't:': 'weighted taylor',
     
     // Conjunctions (2-modifiers)
     '@': 'atop',
@@ -766,7 +770,9 @@ export const uiuaGlyphNames = {
     '⤙': 'with',
     '⤚': 'off',
     '◡': 'below',
+    '◠': 'above',
     '∩': 'both',
+    '∪': 'reach',
     '⊃': 'fork',
     '⊓': 'bracket',
     
@@ -804,6 +810,7 @@ export const uiuaGlyphNames = {
     'ⁿ': 'power',
     '↧': 'minimum',
     '↥': 'maximum',
+    '∨': 'or',
     '∠': 'atangent',
     'ℂ': 'complex',
     
@@ -825,7 +832,9 @@ export const uiuaGlyphNames = {
     '◴': 'deduplicate',
     '⊛': 'classify',
     '⧆': 'occurrences',
+    '◰': 'unique',
     '□': 'box',
+    '⋕': 'parse',
     
     // Dyadic Array
     '≍': 'match',
@@ -843,6 +852,9 @@ export const uiuaGlyphNames = {
     '⦷': 'mask',
     '∊': 'memberof',
     '⨂': 'indexin',
+    '⊗': 'indexof',
+    '◫': 'windows',
+    '☇': 'rerank',
     '⊥': 'base',
     
     // Mapping Modifiers
@@ -853,6 +865,8 @@ export const uiuaGlyphNames = {
     '⧈': 'stencil',
     '⊕': 'group',
     '⊜': 'partition',
+    '∵': 'each',
+    '⍩': 'case',
     
     // Iterating Modifiers
     '/': 'reduce',
@@ -866,6 +880,7 @@ export const uiuaGlyphNames = {
     '°': 'un',
     '⌝': 'anti',
     '⍜': 'under',
+    '⍣': 'try',
     
     // Un (°) Inverse Operations
     '°▽': 'run-length encode (un keep)',
@@ -916,6 +931,11 @@ export const uiuaGlyphNames = {
     '◇': 'content',
     '⬚': 'fill',
     '⨬': 'switch',
+    '⍤': 'assert',
+    '⚂': 'random',
+    '∂': 'derivative',
+    '∫': 'integral',
+    '⩜': 'geometric',
     
     // Syntax
     '‿': 'strand',
