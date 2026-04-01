@@ -87,12 +87,12 @@ export const syntaxRules = {
         stringDelimiter: "'",
         // Functions (cyan) - J verbs (single character)
         functions: [
-            '+', '-', '*', '%', '^', '$', '~', '|', ',', ';', '#',
+            '+', '-', '*', '%', '^', '$', '|', ',', ';', '#',
             '{', '}', '[', ']', '"', '?', '!'
         ],
         // 1-modifiers / Adverbs (green) - single character
         monadic: [
-            '/', '\\'
+            '/', '\\', '~'
         ],
         // 2-modifiers / Conjunctions (yellow) - single character
         dyadic: [
@@ -105,7 +105,7 @@ export const syntaxRules = {
             // Verbs with . suffix
             functions: [
                 // Structural/selection verbs
-                '{.', '}.', '{:', '}:', ',.', ',:', '{::', 
+                '{.', '}.', '{:', '}:', ',.', ',:', '{::', '/:', '\\:',
                 // Math verbs
                 '<.', '>.', '+.', '*.', '-.', '%.', '^.', '|.', '|:',
                 '$.',  '~.', '#.', '#:',

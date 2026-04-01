@@ -381,7 +381,7 @@ export const jGlyphs = {
         // Comparison  
         '<', '=', '>',
         // Structural
-        '$', '~', '|', ',', ';', '#',
+        '$', '|', ',', ';', '#',
         // Selection/indexing
         '{', '}', '[', ']',
         // Other
@@ -394,7 +394,7 @@ export const jGlyphs = {
         // Arithmetic extensions
         '+.', '+:', '*.', '*:', '-.', '-:', '%.', '%:',
         // Power/Log
-        '^.', '^:',
+        '^.',
         // Structural
         '$.', '$:', '|.', '|:',
         // Tally/Copy/Base
@@ -416,7 +416,9 @@ export const jGlyphs = {
         '!.',
         // Named primitives
         'i.', 'i:', 'j.', 'o.', 'p.', 'p:', 'q:', 'r.',
-        'A.', 'C.', 'e.', 'E.', 'I.', 'L.', 's:', 'u:', 'x:'
+        'A.', 'C.', 'e.', 'E.', 'I.', 'L.', 's:', 'u:', 'x:',
+        // Grade Up/Down
+        '/:', '\\:'
     ],
     // Adverbs (1-modifiers) - green
     monadic: [
@@ -426,7 +428,6 @@ export const jGlyphs = {
         '~'                  // Reflex/Passive
     ],
     adverbDigraphs: [
-        '/:', '\\:',         // Grade Up/Down
         'b.', 'f.', 'M.',    // Boolean, Fix, Memo
         't.', 't:'           // Taylor
     ],
