@@ -74,6 +74,7 @@
     --syntax-comment: var(--dracula-comment);
     --syntax-default: var(--dracula-fg);
     --syntax-string:  var(--dracula-yellow);
+    --syntax-char:    var(--dracula-yellow);
     --syntax-string-incomplete: var(--dracula-red);
     
     /* Uiua (monadic/dyadic for both functions and modifiers) */
@@ -92,6 +93,7 @@
 .syntax-number  { color: var(--syntax-number); }
 .syntax-comment { color: var(--syntax-comment); }
 .syntax-string  { color: var(--syntax-string); }
+.syntax-char    { color: var(--syntax-char); }
 .syntax-string-incomplete { color: var(--syntax-string-incomplete); }
 
 .syntax-uiua-function-monadic { color: var(--syntax-uiua-function-monadic); }

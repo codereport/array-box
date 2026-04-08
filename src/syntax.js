@@ -395,22 +395,24 @@ export function highlightCode(text, language) {
         
         // Check for BQN character literals ('x')
         if (language === 'bqn' && rules.charDelimiter && char === rules.charDelimiter) {
-            // BQN character literal: 'x' (single char after ')
-            // The quote itself plus one character
+            // BQN character literal: 'x' (opening quote, single char, closing quote)
             let charEnd = i + 1;
             let isComplete = false;
             
             if (charEnd < text.length && text[charEnd] !== '\n') {
                 charEnd++; // Include the character
-                isComplete = true;
+                if (charEnd < text.length && text[charEnd] === "'") {
+                    charEnd++; // Include the closing quote
+                    isComplete = true;
+                }
             }
             
             const charValue = text.substring(i, charEnd);
             tokens.push({
-                type: isComplete ? 'string' : 'string-incomplete',
+                type: isComplete ? 'char' : 'string-incomplete',
                 value: charValue
             });
-            lastGlyphType = isComplete ? 'string' : 'string-incomplete';
+            lastGlyphType = isComplete ? 'char' : 'string-incomplete';
             i = charEnd;
             continue;
         }
@@ -645,6 +647,7 @@ function getTokenCssClass(tokenType, language) {
     if (tokenType === 'number') return 'syntax-number';
     if (tokenType === 'comment') return 'syntax-comment';
     if (tokenType === 'string') return 'syntax-string';
+    if (tokenType === 'char') return 'syntax-char';
     if (tokenType === 'string-incomplete') return 'syntax-string-incomplete';
     if (tokenType === 'default') return null;
     
