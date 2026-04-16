@@ -1,0 +1,51 @@
+name: Check Language Updates
+
+on:
+  schedule:
+    - cron: '0 8 * * *'  # daily at 8:00 UTC
+  workflow_dispatch:       # manual trigger from Actions tab
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  check-updates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for language updates
+        id: check
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/check-language-updates.sh
+
+      - name: Create issue if updates found
+        if: steps.check.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Don't create duplicate issues
+          open=$(gh issue list --label "language-update" --state open --json number --jq 'length' 2>/dev/null || echo "0")
+          if [ "$open" != "0" ]; then
+            echo "Open language-update issue already exists, skipping."
+            exit 0
+          fi
+
+          gh label create "language-update" --color "0E8A16" \
+            --description "New language version available" 2>/dev/null || true
+
+          {
+            cat update-report.md 2>/dev/null || echo "Check workflow logs for details."
+            echo ""
+            echo "---"
+            echo "*Update \`scripts/known-versions.json\` after upgrading to silence this alert.*"
+          } > /tmp/issue-body.md
+
+          gh issue create \
+            --title "Language updates available ($(date +%Y-%m-%d))" \
+            --body-file /tmp/issue-body.md \
+            --label "language-update" \
+            --assignee "codereport"
