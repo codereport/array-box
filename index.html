@@ -2895,7 +2895,7 @@
         const STARTUP_WHEEL_SLOT_HEIGHT = 98;
         const STARTUP_WHEEL_UIUA_J_GAP = 10;
         const STARTUP_WHEEL_TINYAPL_APL_GAP = 12;
-        const STARTUP_WHEEL_DURATION_MS = 2000;
+        const STARTUP_WHEEL_DURATION_MS = 1200;
         let startupSpinPlayed = false;
 
         // Generate favicon with hexagon subscript badge
@@ -2986,7 +2986,7 @@
             const startIndex = languageOrder.indexOf('apl');
             const targetIndex = languageOrder.indexOf(targetLang);
             const forwardSteps = (targetIndex - startIndex + languageOrder.length) % languageOrder.length;
-            const fullCycles = 4 + Math.floor(Math.random() * 2);
+            const fullCycles = 2 + Math.floor(Math.random() * 2);
             const totalSteps = (fullCycles * languageOrder.length) + forwardSteps;
             const sequence = [];
 
@@ -3026,6 +3026,15 @@
             languageWheelTrack.style.transform = `translateY(${getWheelTranslateY(logoOffsets, 1)}px)`;
             languageButton.classList.add('startup-spinning');
 
+            let skipResolve = null;
+            const onSkipKey = (e) => {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    if (skipResolve) skipResolve();
+                }
+            };
+            document.addEventListener('keydown', onSkipKey);
+
             await new Promise((resolve) => {
                 requestAnimationFrame(() => requestAnimationFrame(resolve));
             });
@@ -3037,8 +3046,11 @@
                 new Promise((resolve) => {
                     languageWheelTrack.addEventListener('transitionend', resolve, { once: true });
                 }),
-                new Promise((resolve) => setTimeout(resolve, STARTUP_WHEEL_DURATION_MS + 200))
+                new Promise((resolve) => setTimeout(resolve, STARTUP_WHEEL_DURATION_MS + 200)),
+                new Promise((resolve) => { skipResolve = resolve; })
             ]);
+
+            document.removeEventListener('keydown', onSkipKey);
 
             const targetConfig = languages[targetLang];
             currentLogo.src = targetConfig.logo;
