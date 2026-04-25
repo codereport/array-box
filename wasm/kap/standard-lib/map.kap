@@ -6,4 +6,28 @@ namespace("map")
   m map:with pairs ({ (↑⍺) ⍮ (⊃(null≡⍵) ⊇ (⊃⍵) ⍬),⊂↑↓⍺ }⍤1 0) m map:get ,null 1 ↑ pairs
 }
 
-declare(:export map:appendTo)
+declare(:export appendTo)
+
+∇ (p) find2 (m) {
+  'kap:map ≡ typeof m or 'kap:IllegalArgumentException int:throwNative "Right argument must be a map. Got: ",⍕typeof m
+   {⍺.(⍵)}/ m , (@.≠)⍛⊂ p
+}
+
+∇ (p) find (m) {
+  findone ⇐ {
+    type ← typeof ⍺
+    when {
+      ('kap:array ≡ type) { ⍺.(⍎⍵) }
+      ('kap:map ≡ type)   { ⍺.(⍵) }
+      ('kap:list ≡ type)  { ⍺.(⍎⍵) }
+      (1)                 { throw "Can't perform lookup on elements of type ",⍕type }
+    }
+  }
+  findone/ m , (@.≠)⍛⊂ p
+}
+
+declare(:export find)
+
+flip ⇐ (∧∪,/map:keys¨)⍛{⍺ labels ⊃(⊂⍺) {⍵[⍺]}¨⍵}
+
+declare(:export flip)

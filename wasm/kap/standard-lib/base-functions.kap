@@ -1,8 +1,8 @@
 namespace("kap")
  	
-∇ (keys) ⌸ (values) {
+∇ (keys) (fn ⌸) (values) {
 	a ← ∪keys
-	a ,[0.5] {values /⍨ keys≡¨⊂⍵}¨ a
+	a ,[0.5] {⍞fn values /⍨ keys≡¨⊂⍵}¨ a
 }
 
 declare(:export ⌸)
