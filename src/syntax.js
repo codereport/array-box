@@ -758,11 +758,12 @@ export function isTrainTree(text, language) {
     }
 
     if (language === 'apl') {
-        // APL fork trees use ┼ at the junction: ┌─┼─┐
-        // In boxed arrays ┼ only appears on ├-lines, never on ┌-lines.
+        // APL fork trees use ┼ at wide junctions (┌─┼─┐) or ┴ at narrow ones (┌┴┐).
+        // In boxed arrays ┼ only appears on ├-lines and ┴ only on └-lines,
+        // so neither ever shares a line with ┌.
         const lines = text.split('\n');
         for (const line of lines) {
-            if (line.includes('┌') && line.includes('┼')) return true;
+            if (line.includes('┌') && (line.includes('┼') || line.includes('┴'))) return true;
         }
         return false;
     }

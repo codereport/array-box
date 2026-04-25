@@ -821,7 +821,7 @@ function isTrainTree(text, language) {
     if (language === 'apl') {
         const lines = text.split('\n');
         for (const line of lines) {
-            if (line.includes('┌') && line.includes('┼')) return true;
+            if (line.includes('┌') && (line.includes('┼') || line.includes('┴'))) return true;
         }
         return false;
     }
