@@ -6,12 +6,6 @@ namespace("o3")
 ⍝ followed by "[...]" and finally the last b characters.
 maxStringLength ← 100 15
 
-⍝ For arrays wider than +/arrayMaxWidth or longer than +/arrayMaxHeight,
-⍝ trim the content by keeping only the indicated number of characters
-⍝ on each side of the array.
-arrayMaxWidth ← 200 50
-arrayMaxHeight ← 60 10
-
 formatInt ⇐ { throw "Forward declaration" }
 
 isArray ⇐ 'kap:array≡typeof
@@ -87,6 +81,7 @@ renderString ⇐ {
 
 trimVert ⇐ {
   vertSizes ← ¯1↓⍴⍵
+  arrayMaxHeight ← ↑↓sysparam 'kap:rendererParameters
   h ← +/arrayMaxHeight
   ⍝ Compute the dimension where splitting may be needed.
   d ← 2+/ h > ×\⍢⌽vertSizes,1
@@ -118,6 +113,7 @@ trimHoriz ⇐ {
   ⍝ ⍺ is the minimum width of a single column. For regular arrays, this
   ⍝ is usually 2 (one character for the cell content and one for the space
   ⍝ between cells). For character arrays, this is 1.
+  arrayMaxWidth ← ↑sysparam 'kap:rendererParameters
   if ((↑⌽⍴⍵) > (+/arrayMaxWidth)÷2) {
     ((⌈arrayMaxWidth[0]÷⍺)↑[¯1+≢⍴⍵])«,»((-⌈arrayMaxWidth[1]÷⍺)↑[¯1+≢⍴⍵]) ⍵
   } else {
@@ -236,6 +232,7 @@ renderMap ⇐ {
   vals ← if (0=≢keys) {
     <"⍬"
   } else {
+    arrayMaxHeight ← ↑↓sysparam 'kap:rendererParameters
     h ← +/arrayMaxHeight
     trimmedKeys ← if (h ≥ ≢keys) { keys } else { ((↑arrayMaxHeight)↑keys) , (-↑↓arrayMaxHeight)↑keys }
     0 1 ↓ ⊃⍪/,/ alignCells (⊂⍺) formatInt¨ (⍪trimmedKeys) , ⍵[trimmedKeys]
@@ -281,6 +278,7 @@ typeToFormatter ← map:with `
 
 cutVerticalResult ⇐ {
   m ← :metadata ∊ ⍺
+  arrayMaxHeight ← ↑↓sysparam 'kap:rendererParameters
   (startRowIndex endRowIndex) ← arrayMaxHeight
   dimensions ← ⍴⍵
   if ((+/arrayMaxHeight) < ↑⍴⍵) {
@@ -297,6 +295,7 @@ cutVerticalResult ⇐ {
 
 cutHorizontalResult ⇐ {
   m ← :metadata ∊ ⍺
+  arrayMaxWidth ← ↑sysparam 'kap:rendererParameters
   (startColIndex endColIndex) ← arrayMaxWidth
   dimensions ← ⍴⍵
   if ((+/arrayMaxWidth) < ↑↓⍴⍵) {
@@ -330,14 +329,13 @@ format ⇐ {
 }
 
 ratmodeCmd ⇐ {
-  fn ← when {
-    (⍵≡"normal")  { λrenderNumber }
-    (⍵≡"fancy")   { λrenderRationalWithFractionSlash }
-    (⍵≡"decimal") { λrenderRationalAsDecimal }
-    (1)           { throw "Invalid mode. Expected one of: normal, fancy, decimal" }
-  }
-  typeToFormatter ← typeToFormatter map:with 'kap:rational fn
-  io:println "Rational print mode changed to: ",⍵
+  ⍵≢⍬ or throw "Argument must be the prefix of one of the following options: normal, fancy, decimal"
+  renderers ← λrenderNumber λrenderRationalWithFractionSlash λrenderRationalAsDecimal
+  names ← "normal" "fancy" "decimal"
+  i ← 1 ⍳⍨ (⊂⍵) (↑⍷)¨ names
+  i<≢names or throw "Invalid mode. Expected one of: normal, fancy, decimal"
+  typeToFormatter ← typeToFormatter map:with 'kap:rational renderers[i]
+  io:println "Rational print mode changed to: ",names[i]
 }
 
 int:registerCmd ("ratmode" ; "Select how to display rational numbers (normal, fancy, decimal)" ; λratmodeCmd)
