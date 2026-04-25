@@ -8,6 +8,7 @@ on:
 permissions:
   issues: write
   contents: read
+  actions: write   # needed to dispatch auto-update-kap.yml
 
 jobs:
   check-updates:
@@ -22,15 +23,38 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: bash scripts/check-language-updates.sh
 
-      - name: Create issue if updates found
+      - name: Detect Kap-specific update
+        id: kap
+        if: steps.check.outcome == 'failure'
+        run: |
+          if [ ! -f update-report.md ]; then
+            echo "kap_updated=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # update-report.md line format: - **Kap**: `OLD` → `NEW` — source
+          new_version=$(grep -E '^- \*\*Kap\*\*' update-report.md \
+            | grep -oP '`\K[^`]+(?=`[^`]*$)' || true)
+          if [ -n "$new_version" ]; then
+            echo "Kap update detected: $new_version"
+            echo "kap_version=$new_version" >> "$GITHUB_OUTPUT"
+            echo "kap_updated=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No Kap update in this run."
+            echo "kap_updated=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Find or create language-update issue
+        id: issue
         if: steps.check.outcome == 'failure'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Don't create duplicate issues
-          open=$(gh issue list --label "language-update" --state open --json number --jq 'length' 2>/dev/null || echo "0")
-          if [ "$open" != "0" ]; then
-            echo "Open language-update issue already exists, skipping."
+          existing=$(gh issue list --label "language-update" --state open \
+            --json number --jq '.[0].number // empty' 2>/dev/null || echo "")
+          if [ -n "$existing" ]; then
+            echo "Open language-update issue already exists: #$existing"
+            echo "issue_number=$existing" >> "$GITHUB_OUTPUT"
+            echo "issue_created=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -44,8 +68,24 @@ jobs:
             echo "*Update \`scripts/known-versions.json\` after upgrading to silence this alert.*"
           } > /tmp/issue-body.md
 
-          gh issue create \
+          issue_url=$(gh issue create \
             --title "Language updates available ($(date +%Y-%m-%d))" \
             --body-file /tmp/issue-body.md \
             --label "language-update" \
-            --assignee "codereport"
+            --assignee "codereport")
+          issue_number=$(echo "$issue_url" | grep -oE '[0-9]+$')
+          echo "Created issue #$issue_number ($issue_url)"
+          echo "issue_number=$issue_number" >> "$GITHUB_OUTPUT"
+          echo "issue_created=true" >> "$GITHUB_OUTPUT"
+
+      - name: Trigger auto-update-kap workflow
+        if: steps.kap.outputs.kap_updated == 'true' && steps.issue.outputs.issue_number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          KAP_VERSION: ${{ steps.kap.outputs.kap_version }}
+          ISSUE_NUMBER: ${{ steps.issue.outputs.issue_number }}
+        run: |
+          echo "Dispatching auto-update-kap.yml (kap_version=$KAP_VERSION, issue=#$ISSUE_NUMBER)"
+          gh workflow run auto-update-kap.yml \
+            -f kap_version="$KAP_VERSION" \
+            -f issue_number="$ISSUE_NUMBER"
