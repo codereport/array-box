@@ -56,15 +56,35 @@ jobs:
       - name: Build Kap JS
         run: bash scripts/build-kap-js.sh
 
-      - name: Update known-versions.json
+      - name: Update known-versions.json and display strings
         env:
           KAP_VERSION: ${{ inputs.kap_version }}
         run: |
+          # known-versions.json keeps the upstream form (e.g. 20260425-1).
           tmp=$(mktemp)
           jq --arg v "$KAP_VERSION" '.kap = $v' scripts/known-versions.json > "$tmp"
           mv "$tmp" scripts/known-versions.json
           echo "--- updated known-versions.json ---"
           cat scripts/known-versions.json
+
+          # User-facing displays render YYYYMMDD-N as YYYY-MM-DD.
+          if [[ ! "$KAP_VERSION" =~ ^([0-9]{4})([0-9]{2})([0-9]{2})- ]]; then
+            echo "ERROR: kap_version '$KAP_VERSION' is not in YYYYMMDD-N form" >&2
+            exit 1
+          fi
+          KAP_DISPLAY="${BASH_REMATCH[1]}-${BASH_REMATCH[2]}-${BASH_REMATCH[3]}"
+          echo "Display version: $KAP_DISPLAY"
+
+          # index.html: scoped to the data-lang="kap" dropdown item only.
+          sed -i -E "/data-lang=\"kap\"/,/<\/div>/ s|(<span class=\"lang-version\">)[0-9]{4}-[0-9]{2}-[0-9]{2}(</span>)|\1${KAP_DISPLAY}\2|" index.html
+
+          # generate-og-languages.cjs: only the Kap row.
+          sed -i -E "s|(name: 'Kap',[[:space:]]+version: ')[0-9]{4}-[0-9]{2}-[0-9]{2}(')|\1${KAP_DISPLAY}\2|" scripts/generate-og-languages.cjs
+
+          echo "--- index.html (Kap dropdown) ---"
+          grep -A1 'data-lang="kap"' index.html | head -5
+          echo "--- generate-og-languages.cjs (Kap row) ---"
+          grep "name: 'Kap'" scripts/generate-og-languages.cjs
 
       - name: Compose PR body
         id: body
@@ -105,3 +125,5 @@ jobs:
             wasm/kap/standalonejs.js
             wasm/kap/standard-lib
             scripts/known-versions.json
+            scripts/generate-og-languages.cjs
+            index.html
