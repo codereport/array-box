@@ -43,6 +43,25 @@ jobs:
             echo "kap_updated=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Detect J-specific update
+        id: j
+        if: steps.check.outcome == 'failure'
+        run: |
+          if [ ! -f update-report.md ]; then
+            echo "j_updated=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          new_version=$(grep -E '^- \*\*J\*\*' update-report.md \
+            | grep -oP '`\K[^`]+(?=`[^`]*$)' || true)
+          if [ -n "$new_version" ]; then
+            echo "J update detected: $new_version"
+            echo "j_version=$new_version" >> "$GITHUB_OUTPUT"
+            echo "j_updated=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No J update in this run."
+            echo "j_updated=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Find or create language-update issue
         id: issue
         if: steps.check.outcome == 'failure'
@@ -88,4 +107,16 @@ jobs:
           echo "Dispatching auto-update-kap.yml (kap_version=$KAP_VERSION, issue=#$ISSUE_NUMBER)"
           gh workflow run auto-update-kap.yml \
             -f kap_version="$KAP_VERSION" \
+            -f issue_number="$ISSUE_NUMBER"
+
+      - name: Trigger auto-update-j workflow
+        if: steps.j.outputs.j_updated == 'true' && steps.issue.outputs.issue_number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          J_VERSION: ${{ steps.j.outputs.j_version }}
+          ISSUE_NUMBER: ${{ steps.issue.outputs.issue_number }}
+        run: |
+          echo "Dispatching auto-update-j.yml (j_version=$J_VERSION, issue=#$ISSUE_NUMBER)"
+          gh workflow run auto-update-j.yml \
+            -f j_version="$J_VERSION" \
             -f issue_number="$ISSUE_NUMBER"

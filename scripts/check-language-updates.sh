@@ -7,7 +7,7 @@
 # Sources:
 #   CBQN    – latest GitHub tag (dzaima/CBQN)
 #   Uiua    – Cargo.toml version from uiua-lang/uiua "latest" tag (= uiua.org/pad)
-#   J       – latest GitHub release (jsoftware/jsource)
+#   J       – jsoftware/jsource master version.txt (#define jversion)
 #   Kap     – kapdemo.dhsdevelopments.com/downloads.html
 #   TinyAPL – beta.tinyapl.rubenverg.com/run version selector
 #
@@ -81,13 +81,18 @@ else
 fi
 
 # ── J ─────────────────────────────────────────────────────────
-echo "J (github.com/jsoftware/jsource releases)"
+echo "J (github.com/jsoftware/jsource version.txt)"
 known=$(read_known j)
-latest_j=$(gh api repos/jsoftware/jsource/releases/latest --jq '.tag_name' 2>/dev/null || true)
+# version.txt on master is the source of truth — jsource bumps it whenever
+# they cut a build. GitHub release tags lag and use a different scheme.
+latest_j=$(curl -sfL --max-time 10 \
+    "https://raw.githubusercontent.com/jsoftware/jsource/master/version.txt" 2>/dev/null \
+    | grep -oP '#define jversion "\K[^"]+' \
+    | head -1 || true)
 if $snapshot_mode; then
     echo "  Current: ${latest_j:-FETCH_FAILED}"
 else
-    compare "J" "$known" "$latest_j" "github.com/jsoftware/jsource/releases"
+    compare "J" "$known" "$latest_j" "github.com/jsoftware/jsource version.txt"
 fi
 
 # ── Kap ───────────────────────────────────────────────────────
