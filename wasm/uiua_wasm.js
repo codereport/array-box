@@ -191,22 +191,6 @@ export function format_uiua(code) {
 }
 
 /**
- * @returns {string}
- */
-export function uiua_version() {
-    let deferred1_0;
-    let deferred1_1;
-    try {
-        const ret = wasm.uiua_version();
-        deferred1_0 = ret[0];
-        deferred1_1 = ret[1];
-        return getStringFromWasm0(ret[0], ret[1]);
-    } finally {
-        wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
-    }
-}
-
-/**
  * @param {string} code
  * @returns {string}
  */
@@ -222,6 +206,22 @@ export function eval_uiua(code) {
         return getStringFromWasm0(ret[0], ret[1]);
     } finally {
         wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+    }
+}
+
+/**
+ * @returns {string}
+ */
+export function uiua_version() {
+    let deferred1_0;
+    let deferred1_1;
+    try {
+        const ret = wasm.uiua_version();
+        deferred1_0 = ret[0];
+        deferred1_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
+    } finally {
+        wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
     }
 }
 
