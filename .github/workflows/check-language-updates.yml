@@ -62,6 +62,25 @@ jobs:
             echo "j_updated=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Detect Uiua-specific update
+        id: uiua
+        if: steps.check.outcome == 'failure'
+        run: |
+          if [ ! -f update-report.md ]; then
+            echo "uiua_updated=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          new_version=$(grep -E '^- \*\*Uiua\*\*' update-report.md \
+            | grep -oP '`\K[^`]+(?=`[^`]*$)' || true)
+          if [ -n "$new_version" ]; then
+            echo "Uiua update detected: $new_version"
+            echo "uiua_version=$new_version" >> "$GITHUB_OUTPUT"
+            echo "uiua_updated=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No Uiua update in this run."
+            echo "uiua_updated=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Find or create language-update issue
         id: issue
         if: steps.check.outcome == 'failure'
@@ -119,4 +138,16 @@ jobs:
           echo "Dispatching auto-update-j.yml (j_version=$J_VERSION, issue=#$ISSUE_NUMBER)"
           gh workflow run auto-update-j.yml \
             -f j_version="$J_VERSION" \
+            -f issue_number="$ISSUE_NUMBER"
+
+      - name: Trigger auto-update-uiua workflow
+        if: steps.uiua.outputs.uiua_updated == 'true' && steps.issue.outputs.issue_number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          UIUA_VERSION: ${{ steps.uiua.outputs.uiua_version }}
+          ISSUE_NUMBER: ${{ steps.issue.outputs.issue_number }}
+        run: |
+          echo "Dispatching auto-update-uiua.yml (uiua_version=$UIUA_VERSION, issue=#$ISSUE_NUMBER)"
+          gh workflow run auto-update-uiua.yml \
+            -f uiua_version="$UIUA_VERSION" \
             -f issue_number="$ISSUE_NUMBER"
