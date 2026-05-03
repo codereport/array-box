@@ -8,6 +8,7 @@ use("time.kap")
 use("regex.kap")
 use("util.kap")
 use("map.kap")
+use("stat.kap")
 use("fhelp.kap")
 
 int:libInitialised 0
