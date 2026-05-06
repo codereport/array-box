@@ -62,28 +62,8 @@ mkdir -p "$KAP_DIR/standard-lib"
 # Copy the JS bundle
 cp "$BUILD_DIR/standalonejs/build/dist/js/productionExecutable/standalonejs.js" "$KAP_DIR/standalonejs.js"
 
-# Copy standard library files (needed by the JS runtime)
-STDLIB_FILES=(
-    "standard-lib.kap"
-    "base-functions.kap"
-    "http.kap"
-    "io.kap"
-    "map.kap"
-    "math.kap"
-    "math-kap.kap"
-    "output.kap"
-    "output3.kap"
-    "regex.kap"
-    "structure.kap"
-    "time.kap"
-    "util.kap"
-    "fhelp.kap"
-    "fhelp-impl.kap"
-)
-
-for f in "${STDLIB_FILES[@]}"; do
-    cp "$BUILD_DIR/array/standard-lib/$f" "$KAP_DIR/standard-lib/$f"
-done
+# Copy all standard library .kap files (needed by the JS runtime)
+cp "$BUILD_DIR/array/standard-lib/"*.kap "$KAP_DIR/standard-lib/"
 
 # Copy the loader HTML
 if [ ! -f "$KAP_DIR/kap-loader.html" ]; then

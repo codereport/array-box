@@ -249,7 +249,7 @@ const wasmLangs = [...activeLangs].filter(l => l !== 'apl');
 console.log(`Waiting for runtimes: ${wasmLangs.join(', ')}...`);
 const notReady = await waitForRuntimes(page, wasmLangs);
 if (notReady.size > 0) {
-    console.error(`Timed out waiting for: ${[...notReady].join(', ')}`);
+    console.error(c.red(`Timed out waiting for: ${[...notReady].join(', ')}`));
     for (const lang of notReady) activeLangs.delete(lang);
 }
 console.log(`${c.green('Ready:')} ${[...activeLangs].map(l => c.cyan(l)).join(', ')}\n`);
@@ -257,6 +257,7 @@ console.log(`${c.green('Ready:')} ${[...activeLangs].map(l => c.cyan(l)).join(',
 let passed = 0;
 let failed = 0;
 let skipped = 0;
+let timedOut = notReady.size;
 
 for (const test of tests) {
     const info = nameIndex[test.name];
@@ -388,9 +389,10 @@ const summary = [
     c.green(`${passed} passed`),
     failed > 0 ? c.red(`${failed} failed`) : c.dim(`${failed} failed`),
     c.yellow(`${skipped} skipped`),
-].join(c.dim(', '));
+    timedOut > 0 ? c.red(`${timedOut} timed out`) : '',
+].filter(Boolean).join(c.dim(', '));
 console.log(`\n  ${summary}`);
 
 await browser.close();
 server.close();
-process.exit(failed > 0 ? 1 : 0);
+process.exit(failed > 0 || timedOut > 0 ? 1 : 0);

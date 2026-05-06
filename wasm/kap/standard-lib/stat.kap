@@ -1,0 +1,7 @@
+namespace("stat")
+
+avg ⇐ +/«÷»≢
+
+median ⇐ 2 ÷⍨ +/ (¯1r2 0+2÷⍨≢)⍛⊇ ∧
+
+declare(:export (avg median))
