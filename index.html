@@ -23,8 +23,9 @@
     <link rel="icon" id="favicon" href="assets/apl.png" type="image/png">
     <!-- JetBrains Mono loaded locally via @font-face in theme.css -->
 
-    <!-- Backend configuration (edit config.js to set your tunnel URL) -->
+    <!-- Backend configuration -->
     <script src="config.js"></script>
+    <script src="config.local.js" onerror=""></script>
 
     <!-- Theme CSS with variables and syntax highlighting classes -->
     <link rel="stylesheet" href="src/theme.css">
@@ -1069,7 +1070,7 @@
             border-spacing: 0;
             font-family: 'JetBrains Mono', monospace;
             font-variant-ligatures: none;
-            width: 100%;
+            margin: 0 auto;
         }
         .compare-table th,
         .compare-table td {
@@ -3117,6 +3118,7 @@
             if (v?.name) return v.name.toLowerCase();
             if (entry.monad?.name) return entry.monad.name.toLowerCase();
             if (entry.dyad?.name) return entry.dyad.name.toLowerCase();
+            if (entry.name) return entry.name.toLowerCase();
             return null;
         }
 
@@ -3345,7 +3347,7 @@
             });
 
             html += '</tbody></table>';
-            html += `<div class="compare-footer">click header to select <kbd>monad</kbd> / <kbd>dyad</kbd> + rank • <kbd>c</kbd> color${compareColorMode ? ' ●' : ''} • <kbd>n</kbd> names${compareNameMode ? ' ●' : ''} • <kbd>esc</kbd> close</div>`;
+            html += `<div class="compare-footer"><kbd>c</kbd> color${compareColorMode ? ' ●' : ''} • <kbd>n</kbd> names${compareNameMode ? ' ●' : ''}`;
             compareScreen.innerHTML = html;
 
             compareScreen.querySelectorAll('.compare-col-header:not(.no-toggle)').forEach(th => {

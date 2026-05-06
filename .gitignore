@@ -22,3 +22,6 @@ wasm/uiua/
 wasm/package.json
 wasm/uiua_wasm.d.ts
 wasm/uiua_wasm_bg.wasm.d.ts
+
+# Local config overrides
+config.local.js

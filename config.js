@@ -7,15 +7,12 @@
  *   - Leave BACKEND_URL as null (uses localhost directly)
  * 
  * For REMOTE deployment (GitHub Pages frontend + tunneled backend):
- *   - Set BACKEND_URL to your tunnel URL (e.g., from Cloudflare Tunnel or ngrok)
- *   - Example: 'https://your-tunnel-name.trycloudflare.com'
- *   - Example: 'https://abcd1234.ngrok-free.app'
+ *   - Create config.local.js (gitignored) with:
+ *       ArrayBoxConfig.BACKEND_URL = 'https://your-tunnel.trycloudflare.com';
  */
 
 const ArrayBoxConfig = {
-    // Set this to your tunnel URL when deploying to GitHub Pages
-    // Leave as null for local development
-    BACKEND_URL: null, //'https://front-quad-instead-questions.trycloudflare.com',
+    BACKEND_URL: null,
     
     // Example configurations:
     // BACKEND_URL: 'https://arraybox.your-domain.com',     // Custom domain with Cloudflare Tunnel
