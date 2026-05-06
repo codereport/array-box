@@ -1,18 +1,16 @@
 /**
  * Array Box Configuration
  * 
- * Configure the backend URL for your deployment.
+ * BACKEND_URL is the production tunnel URL (used on arraybox.dev).
  * 
- * For LOCAL development (frontend and backend on same machine):
- *   - Leave BACKEND_URL as null (uses localhost directly)
- * 
- * For REMOTE deployment (GitHub Pages frontend + tunneled backend):
- *   - Create config.local.js (gitignored) with:
- *       ArrayBoxConfig.BACKEND_URL = 'https://your-tunnel.trycloudflare.com';
+ * For local development, config.local.js (gitignored) overrides this to null
+ * so requests go to localhost ports instead. To set up local dev:
+ *   Create config.local.js with:
+ *       ArrayBoxConfig.BACKEND_URL = null;
  */
 
 const ArrayBoxConfig = {
-    BACKEND_URL: null,
+    BACKEND_URL: 'https://front-quad-instead-questions.trycloudflare.com',
     
     // Example configurations:
     // BACKEND_URL: 'https://arraybox.your-domain.com',     // Custom domain with Cloudflare Tunnel
