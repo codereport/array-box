@@ -1,0 +1,63 @@
+namespace("output2")
+
+⍝ ┌┌┌→──┐
+⍝ ↓↓↓0 1│
+⍝ │││2 3│
+⍝ ││├→──┤
+⍝ ││↓4 5│
+⍝ │││6 7│
+⍝ │├├→──┤
+⍝ │↓↓0 1│
+⍝ │││2 3│
+⍝ ││├→──┤
+⍝ ││↓4 5│
+⍝ │││6 7│
+⍝ └└└───┘
+
+isArray ⇐ 'array≡typeof
+isChar ⇐ 'char≡typeof
+
+∇ isAplString (v) {
+  (1≢≢⍴v) → 0
+  ~0∊'char=typeof¨v
+}
+
+⍝ Convert a plain 1D string to a grapheme array
+stringToGraphemes ⇐ (1,≢)⍛⍴ unicode:toGraphemes
+
+⍝ Replace 0 with a space in the input array
+zSpc ⇐ { (0≡¨⍵) % ⍵ @\s }
+
+⍝ Given a 2D array of grapheme arrays, return a new array where each cell is
+⍝ right-aligned to the maximum width of all cells in each column, and top-aligned
+⍝ according to the height of cells in the rows.
+∇ alignCells (v) {
+  ⍝ The width of each column is the maximum width of any cell
+  colWidths ← ⌈⌿ (↑↓⍴)¨v
+  ⍝ Pad each cell to the correct width
+  xAligned ← ((⍴v) ⍴ colWidths) {((≢⍵) (⍺-↑↓⍴⍵) ⍴ @\s),⍵}¨ v
+
+  ⍝ Likewise for the heights
+  rowHeights ← ⌈/ ≢¨xAligned
+  yAligned ← (⍉ (⌽ ⍴ xAligned) ⍴ rowHeights) {⍵ ,[0] ((⍺-≢⍵) (↑↓⍴⍵)) ⍴ @\s}¨ xAligned
+}
+
+⍝ test: output2:prettyPrintToChars 2 3 3 ⍴ ⍳100
+
+∇ renderArray (v) {
+  r ← ¯1 (↑¯1↑⍴v) ⍴ v
+  alignCells r
+}
+
+∇ renderString {
+  zSpc ⊃unicode:toGraphemes¨ (@\n≠)⍛⊂ ⍵
+}
+
+∇ prettyPrintToChars (v) {
+  when {
+    (isChar(v))      { renderChar v }
+    (isAplString(v)) { renderString @",v,@" }
+    (isArray(v))     { renderArray v }
+    (1)              { renderString ⍕v }
+  }
+}

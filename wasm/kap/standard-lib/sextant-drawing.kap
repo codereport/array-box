@@ -1,0 +1,7 @@
+blockMapping ← (@\u2590,)⍢(0x2A↓) (@\u258C,)⍢(0x15↓) @\uA0 , (@\u1FB00+⍳60),@\u2588
+
+draw ⇐ {
+	(2=≢⍴⍵) or throw "Argument must be a 2-dimensional array"
+	v ← ((⍴⍵) + 3 2 | -⍴⍵) ↑ ⍵
+	blockMapping ⊇⍨ (2⊥⌽)¨ ((¯2+≢v) ⍴ 1 0 0) ⌿ 3,⌿  ((¯1+1⊇⍴v) ⍴ 1 0) / 2,/v
+}

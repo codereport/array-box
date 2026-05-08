@@ -1,0 +1,14 @@
+namespace("jvm")
+
+∇ toJvmType (arg) {
+    objectClass ← findClass "java.lang.Object"
+    getClassMethod ← objectClass findMethod "getClass"
+    getClassMethod callMethod arg
+}
+
+defsyntax mk (:string className :nexprfunction args) {
+    a ← ⍞args 0
+    cl ← findClass className
+    argTypes ← toJvmType¨ a
+    (cl findConstructor argTypes) createInstance a
+}

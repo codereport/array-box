@@ -1,0 +1,220 @@
+namespace("xml")
+
+objectClass ← jvm:findClass "java.lang.Object"
+stringClass ← jvm:findClass "java.lang.String"
+inputStreamClass ← jvm:findClass "java.io.InputStream"
+fileClass ← jvm:findClass "java.io.File"
+ioExceptionClass ← jvm:findClass "java.io.IOException"
+throwableClass ← jvm:findClass "java.lang.Throwable"
+saxExceptionClass ← jvm:findClass⟦"org.xml.sax.SAXException"⟧
+nodeClass ← jvm:findClass "org.w3c.dom.Node"
+docBuilderClass ← jvm:findClass "javax.xml.parsers.DocumentBuilder"
+namedNodeMapClass ← jvm:findClass "org.w3c.dom.NamedNodeMap"
+attrClass ← jvm:findClass "org.w3c.dom.Attr"
+
+fileConstructor ← jvm:findConstructor⟦fileClass; stringClass⟧
+getMessageMethod ← jvm:findMethod⟦throwableClass; "getMessage"⟧
+childNodesMethod ← jvm:findMethod⟦nodeClass; "getChildNodes"⟧
+getNodeNameMethod ← jvm:findMethod⟦nodeClass; "getNodeName"⟧
+getNodeValueMethod ← jvm:findMethod⟦nodeClass; "getNodeValue"⟧
+getNodeTypeMethod ← jvm:findMethod⟦nodeClass; "getNodeType"⟧
+getAttributesMethod ← jvm:findMethod⟦nodeClass; "getAttributes"⟧
+attrNamedMapLengthMethod ← jvm:findMethod⟦namedNodeMapClass; "getLength"⟧
+attrNamedMapItemMethod ← jvm:findMethod⟦namedNodeMapClass; "item"; jvm:findPrimitiveTypeClass 'jvm:int⟧
+attrGetNameMethod ← jvm:findMethod⟦attrClass; "getName"⟧
+attrGetValueMethod ← jvm:findMethod⟦attrClass; "getValue"⟧
+
+handleXmlParseException ⇐ {
+	exception ← ⍺
+	message ← jvm:callMethod⟦getMessageMethod; exception⟧
+	when {
+		(jvm:instanceOf⟦exception; ioExceptionClass⟧) { throw "Error reading stream: ",message }
+		(jvm:instanceOf⟦exception; saxExceptionClass⟧) { throw "Error parsing document: ",message }
+		(1) { throw "JVM Error: ",message }
+	}
+}
+
+nodeList ← (
+	lc ← jvm:findClass⟦"org.w3c.dom.NodeList"⟧
+	map:with `
+		'jvmClass  lc `
+		'getLength jvm:findMethod⟦lc; "getLength"⟧ `
+		'item      jvm:findMethod⟦lc; "item"; jvm:findPrimitiveTypeClass 'jvm:int⟧ `
+		'kap:methods (map:with `
+			'getLength λ{jvm:fromJvm jvm:callMethod⟦⍺.xml:getLength; ⍵⟧} `
+			'item      λ{(obj;i)←⍵ ⋄ jvm:callMethod⟦⍺.xml:item; obj; jvm:toJvmInt i⟧})
+)
+
+makeDocumentBuilder ⇐ {
+	dbfClass ← jvm:findClass "javax.xml.parsers.DocumentBuilderFactory"
+	dbf ← jvm:callMethod⟦jvm:findMethod⟦dbfClass; "newInstance"⟧; null⟧
+	builder ← jvm:callMethod⟦jvm:findMethod⟦dbfClass; "newDocumentBuilder"⟧; dbf⟧	
+}
+
+readFile ⇐ {
+	name ← ⍵
+	parseFromFileMethod ← jvm:findMethod⟦docBuilderClass; "parse"; fileClass⟧
+	builder ← makeDocumentBuilder ⍬
+	file ← jvm:createInstance⟦fileConstructor; name⟧
+	{ jvm:callMethod⟦parseFromFileMethod; builder; file⟧ } catch 'jvm:jvmMethodCallException λhandleXmlParseException
+}
+
+declare(:export readFile)
+
+readString ⇐ {
+	s ← ⍵
+	byteArrayInputStreamClass ← jvm:findClass "java.io.ByteArrayInputStream"
+	byteArrayInputStreamConstructor ← jvm:findConstructor⟦byteArrayInputStreamClass; jvm:findPrimitiveTypeClass 'jvm:byteArray⟧
+	getBytesMethod ← jvm:findMethod⟦stringClass; "getBytes"; stringClass⟧
+	parseFromStreamMethod ← jvm:findMethod⟦docBuilderClass; "parse"; inputStreamClass⟧
+	builder ← makeDocumentBuilder ⍬
+	buf ← jvm:callMethod⟦getBytesMethod; jvm:toJvmString s; jvm:toJvmString "UTF-8"⟧
+	stream ← jvm:createInstance⟦byteArrayInputStreamConstructor; buf⟧
+	{ jvm:callMethod⟦parseFromStreamMethod; builder; stream⟧ } catch 'jvm:jvmMethodCallException λhandleXmlParseException
+}
+
+declare(:export readString)
+
+nodeName ⇐ {
+	node ← ⍵
+	jvm:fromJvm jvm:callMethod⟦getNodeNameMethod; node⟧
+}
+
+declare(:export nodeName)
+
+childNodes ⇐ {
+	node ← ⍵
+	list ← jvm:callMethod⟦childNodesMethod; node⟧
+	n ← nodeList⍠getLength list
+	{ nodeList⍠item (node; ⍵) }¨ ⍳n
+}
+
+declare(:export childNodes)
+
+nodeTypePairs ← {
+	field ⇐ {
+		f ← jvm:findField⟦nodeClass; ⍵⟧
+		jvm:fromJvm jvm:getField⟦f; null⟧
+	}
+	¯1 2 ⍴ `
+		'element (field "ELEMENT_NODE") `
+		'attribute (field "ATTRIBUTE_NODE") `
+		'text (field "TEXT_NODE") `
+		'cdataSection (field "CDATA_SECTION_NODE") `
+		'entityReference (field "ENTITY_REFERENCE_NODE") `
+		'entity (field "ENTITY_NODE") `
+		'processingInstruction (field "PROCESSING_INSTRUCTION_NODE") `
+		'comment (field "COMMENT_NODE") `
+		'document (field "DOCUMENT_NODE") `
+		'documentType (field "DOCUMENT_TYPE_NODE") `
+		'documentFragment (field "DOCUMENT_FRAGMENT_NODE") `
+		'notation (field "NOTATION_NODE")
+} ⍬
+
+nodeType ⇐ {
+	type ← jvm:fromJvm jvm:callMethod⟦getNodeTypeMethod; ⍵⟧
+	nodeTypePairs[type ⍳⍨ ,null ¯1↑nodeTypePairs ; 0]
+}
+
+declare(:export nodeType)
+
+nodeText ⇐ {
+	node ← ⍵
+	jvm:fromJvm jvm:callMethod⟦getNodeValueMethod; node⟧
+}
+
+declare(:export nodeText)
+
+attributes ⇐ {
+	node ← ⍵
+	a ← jvm:callMethod⟦getAttributesMethod; node⟧
+	if (jvm:isJvmNull a) {
+		0 2 ⍴ 0
+	} else {
+		n ← jvm:fromJvm jvm:callMethod⟦attrNamedMapLengthMethod; a⟧
+		⊃ {
+			item ← jvm:callMethod⟦attrNamedMapItemMethod; a; jvm:toJvmInt ⍵⟧
+			jvm:fromJvm¨ jvm:callMethod⟦attrGetNameMethod; item⟧ jvm:callMethod⟦attrGetValueMethod; item⟧
+		}¨ ⍳n
+	}
+}
+
+declare(:export attributes)
+
+nodeToMap ⇐ {
+	node ← ⍵
+	type ← nodeType node
+	when {
+		(type ∊ 'document 'element 'text) {
+			,map:with `
+				'type type `
+				'name (nodeName node) `
+				'attributes (attributes node) `
+				'text (nodeText node) `
+				'children (⊃,/nodeToMap¨ childNodes node) }
+		(1) { ⍬ }
+	}
+}
+
+toTree ⇐ {
+	res ← nodeToMap ⍵
+	when {
+		(0=≢res) { throw "Node cannot be converted to map" }
+		(1=≢res) { ↑res }
+		(1)      { throw "Got more than one node in result. Number of results: ",⍕≢res }
+	}
+}
+
+declare(:export toTree)
+
+xPath ← (
+	factoryClass  ← jvm:findClass⟦"javax.xml.xpath.XPathFactory"⟧
+	xpathClass    ← jvm:findClass⟦"javax.xml.xpath.XPath"⟧
+	qnameClass    ← jvm:findClass⟦"javax.xml.namespace.QName"⟧
+	xpc           ← jvm:findClass⟦"javax.xml.xpath.XPathConstants"⟧
+	stringQname   ← jvm:getField⟦jvm:findField⟦xpc; "STRING"⟧; null⟧
+	nodeQname     ← jvm:getField⟦jvm:findField⟦xpc; "NODE"⟧; null⟧
+	nodeListQname ← jvm:getField⟦jvm:findField⟦xpc; "NODESET"⟧; null⟧
+	map:with `
+		'factoryClass factoryClass `
+		'xpathClass   xpathClass `
+		'newInstance  jvm:findMethod⟦factoryClass; "newInstance"⟧ `
+		'newXpath     jvm:findMethod⟦factoryClass; "newXPath"⟧ `
+		'evalMethod   jvm:findMethod⟦xpathClass; "evaluate"; stringClass; objectClass; qnameClass⟧ `
+		'kap:methods  (map:with `
+				'newFactoryInstance λ{jvm:callMethod⟦⍺.xml:newInstance; null⟧} `
+				'newXpath λ{jvm:callMethod⟦⍺.xml:newXpath; ⍵⟧} `
+				'evalToString λ{(xp;s;node)←⍵ ⋄ jvm:callMethod⟦⍺.xml:evalMethod; xp; jvm:toJvmString s; node; stringQname⟧} `
+				'evalToNode λ{(xp;s;node)←⍵ ⋄ jvm:callMethod⟦⍺.xml:evalMethod; xp; jvm:toJvmString s; node; nodeQname⟧} `
+				'evalToNodeList λ{(xp;s;node)←⍵ ⋄ jvm:callMethod⟦⍺.xml:evalMethod; xp; jvm:toJvmString s; node; nodeListQname⟧})
+)
+
+makeXpath ⇐ {
+	xPath⍠newXpath (xPath⍠newFactoryInstance ⍬)
+}
+
+xpathEvalToString ⇐ {
+	(path ; node) ← ⍵
+	xp ← makeXpath 0
+	jvm:fromJvm xPath⍠evalToString (xp; path; node)
+}
+
+declare(:export xpathEvalToString)
+
+xpathEvalToNode ⇐ {
+	(path ; node) ← ⍵
+	xp ← makeXpath 0
+	xPath⍠evalToNode (xp; path; node)	
+}
+
+declare(:export xpathEvalToNode)
+
+xpathEvalToNodeList ⇐ {
+	(path ; node) ← ⍵
+	xp ← makeXpath 0
+	res ← xPath⍠evalToNodeList (xp; path; node)
+	n ← nodeList⍠getLength res
+	{ nodeList⍠item (res; ⍵) }¨ ⍳n
+}
+
+declare(:export xpathEvalToNodeList)

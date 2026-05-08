@@ -1,0 +1,24 @@
+namespace("animation")
+
+layout ⇐ {
+	⌽¨ (1r2 + ⍳⍴⍵) ÷ ⊂⍴⍵ 
+}
+
+showArray ⇐ {
+	, (layout ⍵) {(⍕⍵) ⍺}¨ ⍵
+}
+
+animateTransform ⇐ {
+	(dest src coordTrn) ← (⌷⍵) {⍺,⍵↓⍨≢⍺} null null λ⊢
+	layoutSrc ← layout src
+	layoutDest ← layout dest
+	⍝ Should use dyadic ⍳ here, once the extension to support higher dimensions have been implemented
+	res ← layoutDest {
+		p ← ⍸ src=⍵ 
+		translate ← if (0≡≢p) {⍬} else {:translate (⍞coordTrn ⊃(↑p)⌷layoutSrc)}
+		(⍕⍵) (⍞coordTrn ⍺) , translate
+	}¨ dest
+	,res
+}
+
+declare(:export (showArray animateTransform))
