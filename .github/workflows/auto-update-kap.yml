@@ -114,6 +114,7 @@ jobs:
       - name: Open pull request
         uses: peter-evans/create-pull-request@v7
         with:
+          token: ${{ secrets.PAT_REPO }}
           branch: auto/update-kap-${{ inputs.kap_version }}
           delete-branch: true
           commit-message: "Update Kap to ${{ inputs.kap_version }}"

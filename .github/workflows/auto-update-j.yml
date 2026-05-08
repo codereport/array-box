@@ -99,6 +99,7 @@ jobs:
       - name: Open pull request
         uses: peter-evans/create-pull-request@v7
         with:
+          token: ${{ secrets.PAT_REPO }}
           branch: auto/update-j-${{ inputs.j_version }}
           delete-branch: true
           commit-message: "Update J to ${{ inputs.j_version }}"
