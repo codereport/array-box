@@ -39,7 +39,8 @@ cd "$WORK"
 if [ ! -f gmp-install/lib/libgmp.a ]; then
     if [ ! -d gmp-6.3.0 ]; then
         echo "Downloading GMP 6.3.0..."
-        wget -q https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz
+        wget -q https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz \
+          || wget -q https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz
         tar xf gmp-6.3.0.tar.xz
     fi
     cd gmp-6.3.0
