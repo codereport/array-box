@@ -235,7 +235,7 @@ renderMap ⇐ {
     arrayMaxHeight ← ↑↓sysparam 'kap:rendererParameters
     h ← +/arrayMaxHeight
     trimmedKeys ← if (h ≥ ≢keys) { keys } else { ((↑arrayMaxHeight)↑keys) , (-↑↓arrayMaxHeight)↑keys }
-    0 1 ↓ ⊃⍪/,/ alignCells (⊂⍺) formatInt¨ (⍪trimmedKeys) , ⍵[trimmedKeys]
+    0 1 ↓ ⊃⍪/,/ alignCells comp (⊂⍺) formatInt¨ (⍪trimmedKeys) , ⍵[trimmedKeys]
   }
   withBorderAndTitle (vals ; "Map: ",⍕≢map:keys ⍵ ; singleLineSyms)
 }
@@ -245,7 +245,7 @@ renderList ⇐ {
   if (0=≢list) {
     2 3 ⍴ "╔⊖╗╚═╝"
   } else {
-    aligned ← { (0 1↓)¨ alignCells ¯1 (↑⌽⍴⍵) ⍴ ⍵ } (⊂⍺) formatInt¨ list
+    aligned ← { (0 1↓)¨ alignCells ¯1 (↑⌽⍴⍵) ⍴ ⍵ } comp (⊂⍺) formatInt¨ list
     ⍝ Height of the first cell (all cells have the same height)
     h ← ↑⍴↑aligned
     withSeparators ← @║ , (,/ ¯1↓ , (⍉aligned) , ⊂⍪ h ⍴ @│) , @║
