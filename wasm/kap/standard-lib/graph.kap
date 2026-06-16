@@ -46,3 +46,19 @@ matrixToLinks ⇐ ⍸
 linksToList ⇐ {(1+⌈/∊⍵)↑(↑¨⍵)⫇(↑↓)¨⍵}
 listToLinks ⇐ {,/ (⍳≢⍵) ,¨¨ ⍵}
 declare(:export (listToMatrix matrixToList linksToMatrix matrixToLinks linksToList listToLinks))
+
+jsonGraphToMatrix ⇐ {
+	edges ← ⊃ {⍵["source" "target"]}¨ ⍵.edges
+	linksToMatrix ⊂[1] =⍢, edges
+}
+
+declare(:export jsonGraphToMatrix)
+
+
+jsonGraphToRenderLinks ⇐ {
+	edges ← {⍵["source" "target" "relation"]}¨ ⍵.edges
+	names ← ({⊂(⊃⍵[0]) ⍵[1].label}⍤1) map:entries .nodes
+	names edges
+}
+
+declare(:export jsonGraphToRenderLinks)
