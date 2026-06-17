@@ -57,7 +57,7 @@ declare(:export jsonGraphToMatrix)
 
 jsonGraphToRenderLinks ⇐ {
 	edges ← {⍵["source" "target" "relation"]}¨ ⍵.edges
-	names ← ({⊂(⊃⍵[0]) ⍵[1].label}⍤1) map:entries .nodes
+	names ← ({⊂(⊃⍵[0]) ⍵[1].label}⍤1) map:entries ⍵.nodes
 	names edges
 }
 

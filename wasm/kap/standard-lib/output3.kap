@@ -131,7 +131,7 @@ renderArray ⇐ {
   } else {
     (header f d) ← if (~hasColLabels and isChars) {
       trimmed0 ← (1 trimHoriz) trimVert ⍵
-      fRes0 ← (⊂⍤2) ((¯1,¯2↑1,⍴trimmed0) ⍴ trimmed0) , @│
+      fRes0 ← (⊂⍤2) (¯1,¯2↑1,⍴trimmed0) ⍴ trimmed0
       ⍬ fRes0 (⍴trimmed0)
     } else {
       trimmed1 ← (2 trimHoriz) trimVert ⍵
@@ -146,49 +146,56 @@ renderArray ⇐ {
       (headerRes aligned) ← (1↑)«,⍥⊂»(1 0↓) alignCells colLabels ⍪ ¯1 (↑⌽d) ⍴ v0
 
       ⍝ Concatenate the cells, add the right border and drop the leading space
-      fRes1 ← (⍪/,/(¯1,(¯2↑1,d)) ⍴ aligned) (0 1↓,)¨ @│
+      fRes1 ← (0 1↓)¨ (⍪/,/(¯1,(¯2↑1,d)) ⍴ aligned) ⍝(0 1↓,)¨ @│
 
       headerRes fRes1 (⍴trimmed1)
     }
 
-    w ← ↑↓⍴↑f
-
-    top ← if (hasColLabels) {
-      headerTop ← (¯1↓ ↑ ,/ {((¯1+↑↓⍴⍵) ⍴ @─) , @┬}¨ header) , @┐
-      headerCentre ← ↑ ,/ {(0 1 ↓ ⍵) , @│}¨ header
-      headerBottom ← ("→" , 1↓  ¯1↓ ↑ ,/ {((¯1+↑↓⍴⍵) ⍴ @─) , @┴}¨ header) , @┤
-      q ← headerTop ⍪ headerCentre ⍪ headerBottom
+    ⍝ Check if we can use compressed form
+    if (sysparam 'kap:altVectorOutput and 1=≢f and 1=≢↑f and ~hasColLabels) {
+      < "⟨",(>↑f),"⟩"
     } else {
-      < "→" , ((w-2) ⍴ @─) ,"┐"
+
+	 f ← (@│,⍨)¨ f
+      w ← ↑↓⍴↑f
+
+      top ← if (hasColLabels) {
+        headerTop ← (¯1↓ ↑ ,/ {((¯1+↑↓⍴⍵) ⍴ @─) , @┬}¨ header) , @┐
+        headerCentre ← ↑ ,/ {(0 1 ↓ ⍵) , @│}¨ header
+        headerBottom ← ("→" , 1↓  ¯1↓ ↑ ,/ {((¯1+↑↓⍴⍵) ⍴ @─) , @┴}¨ header) , @┤
+        q ← headerTop ⍪ headerCentre ⍪ headerBottom
+      } else {
+        < "→" , ((w-2) ⍴ @─) ,"┐"
+      }
+      bottom ← < ((w-1) ⍴ @─) ,"┘"
+      separator ← < "→" , ((w-2) ⍴ @─) , "┤"
+      res ← {top⍪⍵⍪bottom} ↑ ⍪⌿⍪ ¯1↓ , f ,[0.5] ⊂separator
+
+      ⍝ To draw the layers to the left, first determine the number of layers and their sizes.
+      ds ← ¯2↓d
+
+      ⍝ Compute the number of layer indicators for each layer
+      layerPos ← ⌽1,×\ds
+
+      makeVerticalLayer ⇐ {
+        ⍝ Split content in groups of size ⍵, and compute height of each group
+        sizes ← +/≢¨ ¯1 ⍵ ⍴ f
+        ⍝ Create a sequence of vertical bars according to the sizes,
+        ⍝ and end with a split symbol. Finally remove the last instance.
+        coverage ← ⍵-1
+        vertArrow ← ⍺ ⌷ "│↓"
+        centre ← ¯1↓,/ {( vertArrow , (⍵+coverage-1) ⍴ @│) , @├}¨ sizes
+        ⍪ ,/ @┌ , centre , @└
+      }
+
+      verticalAxisIndicator ← ((0⌈¯1+≢layerPos) ⍴ 0) , (1 ≠ ≢d)
+      cornerContent ← if (hasColLabels) {
+        ((¯1+≢top) (¯1+≢layerPos) ⍴ @\s) , ⍪ @┌,(¯2+≢top) ⍴ @│
+      } else {
+        0 (≢layerPos) ⍴ @\s
+      }
+      (cornerContent ⍪ {<<hasColLabels⌷"┌├"}⍢(1 ¯1↑) (,/ verticalAxisIndicator makeVerticalLayer¨ layerPos)) , res
     }
-    bottom ← < ((w-1) ⍴ @─) ,"┘"
-    separator ← < "→" , ((w-2) ⍴ @─) , "┤"
-    res ← {top⍪⍵⍪bottom} ↑ ⍪⌿⍪ ¯1↓ , f ,[0.5] ⊂separator
-
-    ⍝ To draw the layers to the left, first determine the number of layers and their sizes.
-    ds ← ¯2↓d
-
-    ⍝ Compute the number of layer indicators for each layer
-    layerPos ← ⌽1,×\ds
-
-    makeVerticalLayer ⇐ {
-      ⍝ Split content in groups of size ⍵, and compute height of each group
-      sizes ← +/≢¨ ¯1 ⍵ ⍴ f
-      ⍝ Create a sequence of vertical bars according to the sizes,
-      ⍝ and end with a split symbol. Finally remove the last instance.
-      coverage ← ⍵-1
-      vertArrow ← ⍺ ⌷ "│↓"
-      centre ← ¯1↓,/ {( vertArrow , (⍵+coverage-1) ⍴ @│) , @├}¨ sizes
-      ⍪ ,/ @┌ , centre , @└
-    }
-
-    verticalAxisIndicator ← ((0⌈¯1+≢layerPos) ⍴ 0) , (1 ≠ ≢d)
-    cornerContent ← if (hasColLabels) {
-      ((¯1+≢top) (¯1+≢layerPos) ⍴ @\s) , ⍪ @┌,(¯2+≢top) ⍴ @│
-    } else {
-      0 (≢layerPos) ⍴ @\s
-    }
-    (cornerContent ⍪ {<<hasColLabels⌷"┌├"}⍢(1 ¯1↑) (,/ verticalAxisIndicator makeVerticalLayer¨ layerPos)) , res
   }
 }
 
