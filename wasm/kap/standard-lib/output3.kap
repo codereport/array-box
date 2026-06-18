@@ -152,7 +152,7 @@ renderArray ⇐ {
     }
 
     ⍝ Check if we can use compressed form
-    if (sysparam 'kap:altVectorOutput and 1=≢f and 1=≢↑f and ~hasColLabels) {
+    if (sysparam 'kap:altVectorOutput and 1=≢f and 1=≢↑f and 1=≢⍴⍵ and ~hasColLabels) {
       < "⟨",(>↑f),"⟩"
     } else {
 
