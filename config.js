@@ -10,7 +10,7 @@
  */
 
 const ArrayBoxConfig = {
-    BACKEND_URL: 'https://front-quad-instead-questions.trycloudflare.com',
+    BACKEND_URL: 'https://controlling-affordable-civilian-diamonds.trycloudflare.com',
     
     // Example configurations:
     // BACKEND_URL: 'https://arraybox.your-domain.com',     // Custom domain with Cloudflare Tunnel
