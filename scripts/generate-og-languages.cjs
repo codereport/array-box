@@ -28,7 +28,7 @@ const COLORS = {
 const LANGS = [
     // Row 1
     { name: 'APL',     version: 'Dyalog v20.0',     file: 'apl.png' },
-    { name: 'BQN',     version: 'CBQN 0.11',        file: 'bqn.svg' },
+    { name: 'BQN',     version: 'CBQN 0.12',        file: 'bqn.svg' },
     { name: 'Uiua',    version: '0.19.0-dev.4',      file: 'uiua.png' },
     // Row 2
     { name: 'J',       version: 'J9.8.0-beta4',    file: 'j_logo.svg' },
