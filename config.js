@@ -10,7 +10,7 @@
  */
 
 const ArrayBoxConfig = {
-    BACKEND_URL: 'https://conclusions-maryland-raises-gets.trycloudflare.com',
+    BACKEND_URL: 'https://dylan-bomb-insurance-utilization.trycloudflare.com',
     
     // Example configurations:
     // BACKEND_URL: 'https://arraybox.your-domain.com',     // Custom domain with Cloudflare Tunnel
