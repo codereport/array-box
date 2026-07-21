@@ -974,7 +974,7 @@ HS=: SZI*HSN
 AFRO=: 1
 AFNJA=: 2
 NULLPTR=: <0
-allochdr=: 3 : 'r[2 setHADC r=.15!:8 y'
+allochdr=: 3 : '15!:8 y'
 freehdr=: 15!:9
 msize=: gethadmsize=: 3 : 'memr y,HADM,1,JINT'
 fullname=: 3 : 0
@@ -1012,6 +1012,7 @@ end.
 getHADC=: 3 : '  memr y,HADC,1,JINT'
 setHADC=: 4 : 'x memw y,HADC,1,JINT'
 refcount=: getHADC
+initc=:initc"_`(((15!:9 ] 01 memw ,&(HADT,1,JINT)) ] 2 {.@:= getHADC)@(15!:8))@.(_1 = 4!:0 <'initc') 0
 
 3 : 0''
 if. IFUNIX do.
@@ -1212,7 +1213,7 @@ i. 0 0
 showmap=: 3 : 0
 h=. 'name';'fn';'sn';'fh';'mh';'address';'header';'fsize';'jmf';'mt';'msize';'refs'
 hads=. 6{"1 mappings
-h,mappings,.(gethadmsize each hads),.refcount each hads
+h,mappings,.(gethadmsize each hads),.((1-initc) + refcount) each hads
 )
 mapsub=: 3 : 0
 'name fn sn ro'=. y
@@ -1282,7 +1283,7 @@ if. ro*.0=type do.
   had=. allochdr 63
   d=. memr fad,0,HSN,JINT
   d=. (sfu HS+-/ufs fad,had),aa,2}.d
-  d=. 1 HADCN} d
+  d=. initc HADCN} d
   d setheader had
 elseif. 0=type do.
   had=. fad
@@ -1293,21 +1294,23 @@ elseif. 0=type do.
   else.
     t=. 10000+ getHADC had
   end.
-  (,t+1) setHADC had
-elseif. 1 do.
+  (,t+initc) setHADC had
+else.
   had=. allochdr 63
   'JBOXED (non-jmf) not supported' assert JBOXED~:type
   bx=. JBOXED=type
   hs=. +/hsize [ asize=. JSIZES {~ JTYPES i. type
   lshape=. bx}.<.(ts-hs)%(*/tshape)*asize
   d=. sfu hs+-/ufs fad,had
-  h=. d,aa,ts,type,1,(*/lshape,tshape),((-.bx)+#tshape),lshape,tshape
+  h=. d,aa,ts,type,initc,(*/lshape,tshape),((-.bx)+#tshape),lshape,tshape
   h setheader had
 end.
 
 m=. (had;0=type) (MAPHEADER,MAPJMF)}m
 mappings=: mappings,m
+if. -. initc do. (1{a.) memw had,(3 3 p. SZI),1,JCHAR end.
 (name)=: 15!:7 had
+if. -. initc do. (0{a.) memw had,(3 3 p. SZI),1,JCHAR end.
 i.0 0
 )
 remap=: 3 : 0
@@ -1342,11 +1345,18 @@ n=. <fullname y
 row=. ({."1 mappings)i.n
 if. row=#mappings do. 1 return. end.
 m=. row{mappings
-4!:55 ::] n
 'sn fh mh fad had jmf ts'=. (MAPSN,MAPFH,MAPMH,MAPADDRESS,MAPHEADER,MAPJMF,,MAPFSIZE){m
-
-if. *./(-.x),(0=#sn),1~:getHADC had do. 2 return. end.
-if. -.jmf do. freehdr had end.
+ac =. getHADC had
+if. *./(-.x),(0=#sn),(initc+1)<ac do. 2 return. end.
+(2 (20 b.) memr had,HADFLAG,1,JINT) memw had,HADFLAG,1,JINT
+if. jmf do.
+ (>:ac) setHADC had
+ if. initc do. 4!:55 ::] n else. (271828) 4!:55 ::] n end.
+ (<:ac) setHADC had
+else.
+ if. initc do. 4!:55 ::] n else. (271828) 4!:55 ::] n end.
+ if. initc do. freehdr had end.
+end.
 if. _1=newsize do.
   free fh,mh,fad
 else.
@@ -1410,13 +1420,13 @@ DESCRIPTION=: 0 : 0
 J Memory Mapped File
 )
 
-VERSION=: '1.0.44'
+VERSION=: '1.0.45'
 
 RELEASE=: ''
 
 FOLDER=: 'data/jmf'
 
-PLATFORMS=: ''
+PLATFORMS=: 'j9.8'
 
 FILES=: 0 : 0
 history.txt
@@ -21473,7 +21483,7 @@ Public=: i. 0 2
 UserFolders=: i. 0 2
 getignore=: 3 : 0
 r=. ' colib compare convert coutil dates dir dll files libpath strings text gl2 graphics/gl2'
-Ignore=: <;._1 r
+Ignore=: (<;._1 r), ((-.IFQT)#<'ide/qt'), ((-.IFJA)#<'ide/ja'), ((-.IFWIN)#<'ide/jnet'), ((IFQT+.IFJA+.IFJNET)#<'ide/jhs')
 )
 
 getignore''
@@ -21723,7 +21733,7 @@ empty''
 )
 loadd=: 1&load
 require=: 3 : 0
-fls=. (getscripts_j_ y) -. 4!:3''
+fls=. (getscripts_j_ y) -. jpathsep&.> 4!:3''
 if. # fls do. load fls else. empty'' end.
 )
 scripts=: scripts_j_
