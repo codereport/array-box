@@ -40,7 +40,7 @@ search ⇐ {
 declare(:export search)
 
 listToMatrix ⇐ (⍉(⍳≢)⍛(∊⌻))
-matrixToList ⇐ ((⊂⍸)⍤1)
+matrixToList ⇐ (⍸¨ ⊂[1])
 linksToMatrix ⇐ {(⍳2⍴1+⌈/∊⍵) ∊ ⍵}
 matrixToLinks ⇐ ⍸
 linksToList ⇐ {(1+⌈/∊⍵)↑(↑¨⍵)⫇(↑↓)¨⍵}
