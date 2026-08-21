@@ -29,10 +29,10 @@ const LANGS = [
     // Row 1
     { name: 'APL',     version: 'Dyalog v20.0',     file: 'apl.png' },
     { name: 'BQN',     version: 'CBQN 0.12',        file: 'bqn.svg' },
-    { name: 'Uiua',    version: '0.19.0-dev.4',      file: 'uiua.png' },
+    { name: 'Uiua',    version: '0.19.0-rc.1',      file: 'uiua.png' },
     // Row 2
     { name: 'J',       version: 'J9.8.0-beta6',    file: 'j_logo.svg' },
-    { name: 'Kap',     version: '2026-07-20',        file: 'kap.png' },
+    { name: 'Kap',     version: '2026-08-16',        file: 'kap.png' },
     { name: 'TinyAPL', version: '0.13-beta',         file: 'tinyapl.svg' },
 ];
 

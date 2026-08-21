@@ -1,0 +1,7 @@
+namespace("thread")
+
+defsyntax withLock (:value lock :function fn) {
+  (⍞fn thread:withHeldLock lock) ⍬
+}
+
+declare (:export withLock)

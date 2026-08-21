@@ -44,7 +44,7 @@ replaceChars ⇐ {
 renderString ⇐ {
   s ← ⍵
   adjusted ← if ((+/maxStringLength)≥≢s) { s } else { ((↑maxStringLength)↑s) , "[...]" , ((-↑↓maxStringLength)↑s) }
-  res ← zSpc ⊃ (@\n≠)⍛⊂ @",(replaceChars adjusted),@"
+  res ← (⊃ int:proto @\s) (@\n≠)⍛⊂ @",(replaceChars adjusted),@"
   ⍝ Assign information about the underlying string to the top-left corner of the string.
   ⍝ The display function in the UI can use this information to allow the user to see
   ⍝ the whole string by selecting it in some way.
@@ -76,7 +76,7 @@ renderString ⇐ {
   colWidths ← ⌈⌿ (↑↓⍴)¨ v
   rowHeights ← ⌈/ ≢¨ v
   ⍝ Pad each cell with spaces to align the sizes
-  (rowHeights ,⌻ -1+colWidths) (zSpc↑)¨ v
+  (rowHeights ,⌻ -1+colWidths) (↑ int:proto @\s)¨ v
 }
 
 trimVert ⇐ {
@@ -210,7 +210,7 @@ withBorder ⇐ {
 ∇ withBorderAndTitle (a ; header ; syms) {
   width ← (≢header) ⌈ (↑↓⍴a)
   top ← syms[0] , header , ((width-≢header) ⍴ syms[4]) , syms[1]
-  middle ← syms[5] , (zSpc (≢a) width ↑ a) , syms[5]
+  middle ← syms[5] , ((≢a) width (↑ int:proto @\s) a) , syms[5]
   bottom ← syms[2] , (width ⍴ syms[4]) , syms[3]
   top ⍪ middle ⍪ bottom
 }
