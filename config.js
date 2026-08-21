@@ -10,7 +10,7 @@
  */
 
 const ArrayBoxConfig = {
-    BACKEND_URL: 'https://magnetic-shirt-outcomes-mat.trycloudflare.com',
+    BACKEND_URL: 'https://identifies-responded-motorola-wet.trycloudflare.com',
     
     // Example configurations:
     // BACKEND_URL: 'https://arraybox.your-domain.com',     // Custom domain with Cloudflare Tunnel
