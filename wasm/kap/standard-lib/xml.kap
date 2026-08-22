@@ -167,7 +167,7 @@ toTree ⇐ {
 
 declare(:export toTree)
 
-xPath ← (
+xPath ← {
 	factoryClass  ← jvm:findClass⟦"javax.xml.xpath.XPathFactory"⟧
 	xpathClass    ← jvm:findClass⟦"javax.xml.xpath.XPath"⟧
 	qnameClass    ← jvm:findClass⟦"javax.xml.namespace.QName"⟧
@@ -187,7 +187,7 @@ xPath ← (
 				'evalToString λ{(xp;s;node)←⍵ ⋄ jvm:callMethod⟦⍺.xml:evalMethod; xp; jvm:toJvmString s; node; stringQname⟧} `
 				'evalToNode λ{(xp;s;node)←⍵ ⋄ jvm:callMethod⟦⍺.xml:evalMethod; xp; jvm:toJvmString s; node; nodeQname⟧} `
 				'evalToNodeList λ{(xp;s;node)←⍵ ⋄ jvm:callMethod⟦⍺.xml:evalMethod; xp; jvm:toJvmString s; node; nodeListQname⟧})
-)
+} ⍬
 
 makeXpath ⇐ {
 	xPath⍠newXpath (xPath⍠newFactoryInstance ⍬)
