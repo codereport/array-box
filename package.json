@@ -5,7 +5,8 @@
   "type": "module",
   "main": "./src/keymap.js",
   "scripts": {
-    "test": "node tests/run-tests.js",
+    "test": "node --test tests/*.test.cjs && node tests/run-tests.js",
+    "test:health": "node --test tests/health-checks.test.cjs",
     "test:install": "npx playwright install chromium",
     "scrape:bqn": "node scripts/scrape-bqn-docs.cjs",
     "scrape:uiua": "node scripts/scrape-uiua-docs.cjs",

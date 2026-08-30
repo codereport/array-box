@@ -11,6 +11,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const stats = require('./stats.cjs');
+const { checkDashboardServices } = require('./health-checks.cjs');
 
 const PORT = process.argv[2] ? parseInt(process.argv[2]) : 8085;
 const BIND_ADDRESS = process.argv[3] || '0.0.0.0';
@@ -689,6 +690,10 @@ const dashboardHTML = `<!DOCTYPE html>
                     <span class="srv-dot"></span>
                     <span>Link</span>
                 </div>
+                <div class="server-indicator" id="srv-site" title="Public ArrayBox backend routes">
+                    <span class="srv-dot"></span>
+                    <span>Site</span>
+                </div>
             </div>
         </div>
     </div>
@@ -1333,14 +1338,19 @@ const dashboardHTML = `<!DOCTYPE html>
         // Server health check
         function fetchServerStatus() {
             fetch('/servers')
-                .then(res => res.json())
+                .then(res => {
+                    if (!res.ok) throw new Error('Health check returned HTTP ' + res.status);
+                    return res.json();
+                })
                 .then(data => {
                     let anyDown = false;
                     for (const [key, info] of Object.entries(data)) {
                         const el = document.getElementById('srv-' + key);
                         if (el) {
                             el.className = 'server-indicator ' + info.status;
-                            el.title = info.name + ' (port ' + info.port + ') - ' + info.status.toUpperCase();
+                            const port = info.port ? ' (port ' + info.port + ')' : '';
+                            const detail = info.detail ? ' - ' + info.detail : '';
+                            el.title = info.name + port + ' - ' + info.status.toUpperCase() + detail;
                         }
                         if (info.status === 'down') anyDown = true;
                     }
@@ -1348,7 +1358,7 @@ const dashboardHTML = `<!DOCTYPE html>
                 })
                 .catch(() => {
                     document.body.classList.add('server-down');
-                    for (const key of ['apl', 'permalink']) {
+                    for (const key of ['apl', 'permalink', 'site']) {
                         const el = document.getElementById('srv-' + key);
                         if (el) {
                             el.className = 'server-indicator';
@@ -1670,48 +1680,16 @@ const server = http.createServer((req, res) => {
 
     // Server health check endpoint
     if (req.method === 'GET' && req.url === '/servers') {
-        const serverChecks = [
-            { name: 'APL', key: 'apl', port: 8081 },
-            { name: 'Permalink', key: 'permalink', port: 8084 }
-        ];
-        
-        const results = {};
-        let pending = serverChecks.length;
-        
-        for (const svc of serverChecks) {
-            const checkReq = http.request({
-                hostname: 'localhost',
-                port: svc.port,
-                path: '/',
-                method: 'GET',
-                timeout: 2000
-            }, (checkRes) => {
-                results[svc.key] = { name: svc.name, status: 'up', port: svc.port };
-                if (--pending === 0) {
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify(results));
-                }
-            });
-            
-            checkReq.on('error', () => {
-                results[svc.key] = { name: svc.name, status: 'down', port: svc.port };
-                if (--pending === 0) {
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify(results));
-                }
-            });
-            
-            checkReq.on('timeout', () => {
-                checkReq.destroy();
-                results[svc.key] = { name: svc.name, status: 'down', port: svc.port };
-                if (--pending === 0) {
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify(results));
-                }
-            });
-            
-            checkReq.end();
-        }
+        checkDashboardServices({
+            publicConfigUrl: process.env.ARRAYBOX_PUBLIC_CONFIG_URL,
+            localConfigPath: process.env.ARRAYBOX_LOCAL_CONFIG_PATH
+        }).then((results) => {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(results));
+        }).catch((error) => {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: error.message }));
+        });
         return;
     }
     

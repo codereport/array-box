@@ -481,7 +481,7 @@ function createLoggerProxy(targetKey, targetPort, proxyPort) {
     const proxy = http.createServer((req, res) => {
         // Handle CORS preflight
         res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
         res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
         
         if (req.method === 'OPTIONS') {
@@ -688,7 +688,7 @@ async function main() {
     const logServer = http.createServer((req, res) => {
         // CORS headers
         res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
         res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
         
         if (req.method === 'OPTIONS') {
@@ -697,7 +697,10 @@ async function main() {
             return;
         }
         
-        if (req.method === 'POST' && req.url === '/log') {
+        if (req.method === 'GET' && req.url === '/health') {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ status: 'ok' }));
+        } else if (req.method === 'POST' && req.url === '/log') {
             let body = '';
             req.on('data', chunk => body += chunk.toString());
             req.on('end', () => {

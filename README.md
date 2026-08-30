@@ -69,6 +69,12 @@ node servers/server-manager.cjs
 # Open index.html in a browser
 ```
 
+The dashboard's **Site** indicator checks the deployed application end to end every
+15 seconds. It turns red if `arraybox.dev/config.js` does not match the local
+`config.js`, or if the published tunnel cannot reach the APL or metrics health
+routes. Hover over the indicator for the specific failure. For a different public
+deployment, set `ARRAYBOX_PUBLIC_CONFIG_URL` before starting the server manager.
+
 **Note:** 
 - **BQN**, **Uiua**, **J**, **Kap**, and **TinyAPL** run entirely in the browser (no server required)
   - BQN uses [CBQN](https://github.com/dzaima/CBQN) compiled to WASM for client-side execution
