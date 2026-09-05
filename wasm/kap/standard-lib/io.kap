@@ -28,9 +28,9 @@ base64Encode ⇐ {
 declare(:export base64Encode)
 
 base64Decode ⇐ {
-	v ← :fill 4 (⍴ int:proto @=) ⍵
+	v ← :fill 4 (⍴ int:proto @=) ⍵ ∩ base64Chars,@=
 	⍝ Extra collapse below gives a 27% performance boost
-	(- 1 ⍳⍨ ⌽,v≠@=) ↓ , ⍉ (3 ⍴ 256) ⊤ 64 ⊥ ⍉ comp 64 | io:base64Chars ⍳ v
+	(- 1 ⍳⍨ ⌽,v≠@=) ↓ , ⍉ (3 ⍴ 256) ⊤ 64 ⊥ ⍉ comp 64 | base64Chars ⍳ v
 }
 
 declare(:export base64Decode)
