@@ -11,7 +11,7 @@
 
 /**
  * Standard inputs per rank, per language.
- * Use 'default' for APL-family syntax (APL, TinyAPL, Kap).
+ * Use 'default' for APL-family syntax (APL, NARS2000, TinyAPL, Kap).
  * Override specific languages as needed.
  * null = skip that language for this rank.
  */

@@ -1,11 +1,12 @@
 /**
  * Keyboard mappings for array languages
  * BQN uses backslash (\) as prefix key
- * Dyalog APL uses backtick (`) as prefix key
+ * APL-family languages use backtick (`) as prefix key
  * 
  * Based on standard keymaps:
  * - BQN: https://mlochbaum.github.io/BQN/keymap.html
  * - APL: https://aplwiki.com/wiki/Typing_glyphs (Dyalog layout)
+ * - NARS2000: https://wiki.nars2000.org/index.php?title=Character_names
  * - Uiua: https://www.uiua.org/docs/
  * - J: https://code.jsoftware.com/wiki/NuVoc
  */
@@ -132,6 +133,71 @@ export const aplKeymap = {
     ',': '⍝', '<': '⍪',
     '.': '⍀', '>': '⍙',
     '/': '⌿', '?': '⍠'
+};
+
+/**
+ * NARS2000 US keymap: backtick (`) prefix.
+ *
+ * ArrayBox uses a prefix instead of NARS2000's native Alt modifier so that the
+ * layout also works in browsers and on platforms where Alt is handled by the OS.
+ * Unshifted entries correspond to Alt+key and shifted entries to Alt+Shift+key
+ * in the official NARS2000 layout.
+ */
+export const nars2000Keymap = {
+    // Numbers row
+    '`': '⋄', '~': '⍪',
+    '1': '¨', '!': '≡',
+    '2': '¯', '@': '≢',
+    '3': '<',  '#': '⍒',
+    '4': '≤', '$': '⍋',
+    '5': '∅', '%': '⌽',
+    '6': '≥', '^': '⍉',
+    '7': '>',  '&': '⊖',
+    '8': '≠', '*': '⍟',
+    '9': '∨', '(': '⍱',
+    '0': '∧', ')': '⍲',
+    '-': '×', '_': '⍠',
+    '=': '÷', '+': '⌹',
+
+    // QWERTY row
+    'q': '?',  'Q': '',
+    'w': '⍵', 'W': '',
+    'e': '∊', 'E': '⍷',
+    'r': '⍴', 'R': '√',
+    't': '§', 'T': '⍨',
+    'y': '↑', 'Y': '',
+    'u': '↓', 'U': '⍸',
+    'i': '⍳', 'I': '',
+    'o': '○', 'O': '⍥',
+    'p': 'π', 'P': '⍣',
+    '[': '←', '{': '⍞',
+    ']': '→', '}': '⍬',
+    '\\': '⊢', '|': '⊣',
+
+    // Home row
+    'a': '⍺', 'A': '',
+    's': '⌈', 'S': '∫',
+    'd': '⌊', 'D': '∂',
+    'f': '∞', 'F': '⌻',
+    'g': '∇', 'G': '⍢',
+    'h': '∆', 'H': '⍙',
+    'j': '∘', 'J': '⍤',
+    'k': '‼', 'K': '⍫',
+    'l': '⎕', 'L': '⌷',
+    ';': '⍎', ':': '',
+    "'": '⍕', '"': '',
+
+    // Bottom row
+    'z': '⊂', 'Z': '⊆',
+    'x': '⊃', 'X': '⊇',
+    'c': '∩', 'C': 'χ',
+    'v': '∪', 'V': '',
+    'b': '⊥', 'B': '⍡',
+    'n': '⊤', 'N': '⍭',
+    'm': '⍦', 'M': '',
+    ',': '⍝', '<': '⊙',
+    '.': '⍀', '>': '',
+    '/': '⌿', '?': ''
 };
 
 /**
@@ -513,7 +579,7 @@ export function insertText(element, text) {
 /**
  * Creates a keyboard input handler for an input element
  * @param {HTMLInputElement|HTMLTextAreaElement|HTMLElement} inputElement - The input element to attach to
- * @param {string} language - 'bqn', 'apl', 'kap', or 'tinyapl'
+ * @param {string} language - 'bqn', 'apl', 'nars2000', 'kap', or 'tinyapl'
  * @returns {function} - Cleanup function to remove the handler
  */
 export function createKeyboardHandler(inputElement, language) {
@@ -523,6 +589,7 @@ export function createKeyboardHandler(inputElement, language) {
     let prefixLevel = 0; // 0, 1, or 2 for TinyAPL; 0 or 1 for others
     const prefixKey = language === 'bqn' ? '\\' : '`';
     const keymap = language === 'bqn' ? bqnKeymap : 
+                   language === 'nars2000' ? nars2000Keymap :
                    language === 'kap' ? kapKeymap : 
                    language === 'tinyapl' ? tinyaplKeymap :
                    aplKeymap;
@@ -749,12 +816,13 @@ export function createKeyboardHandler(inputElement, language) {
 
 /**
  * Get info about a keyboard mapping for display
- * @param {string} language - 'bqn', 'apl', 'kap', or 'tinyapl'
+ * @param {string} language - 'bqn', 'apl', 'nars2000', 'kap', or 'tinyapl'
  * @returns {object} Object with prefixKey, keymap, and description
  */
 export function getKeymapInfo(language) {
     const prefixKey = language === 'bqn' ? '\\' : '`';
     const keymap = language === 'bqn' ? bqnKeymap : 
+                   language === 'nars2000' ? nars2000Keymap :
                    language === 'kap' ? kapKeymap :
                    language === 'tinyapl' ? tinyaplKeymap :
                    aplKeymap;
@@ -772,7 +840,7 @@ export function getKeymapInfo(language) {
         keymap,
         description: language === 'bqn' 
             ? 'Press \\ followed by a key to insert BQN characters'
-            : `Press \` followed by a key to insert ${language === 'kap' ? 'Kap' : 'APL'} characters`
+            : `Press \` followed by a key to insert ${language === 'kap' ? 'Kap' : language === 'nars2000' ? 'NARS2000' : 'APL'} characters`
     };
 }
 
@@ -780,6 +848,7 @@ export function getKeymapInfo(language) {
 export default {
     bqnKeymap,
     aplKeymap,
+    nars2000Keymap,
     kapKeymap,
     tinyaplKeymap,
     tinyaplKeyboard,

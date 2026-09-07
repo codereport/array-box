@@ -2,7 +2,7 @@
  * Cross-language Primitive Comparison
  *
  * Comprehensive database mapping TinyAPL primitives to their equivalents
- * across Dyalog APL, BQN, J, Kap, and Uiua — with both monadic and
+ * across NARS2000, Dyalog APL, BQN, J, Kap, and Uiua — with both monadic and
  * dyadic definitions, plus rank annotations.
  *
  * Used by the Ctrl+Shift+C comparison table feature.
@@ -165,8 +165,9 @@ export const primitiveMap = {
         dyad:  { name: 'Pick',  defaultRank: '0,N', apl: '⊃', bqn: '⊑', j: null, kap: '⊃', uiua: null }
     },
     '⊆': {
-        monad: { name: 'Nest',      defaultRank: 'N', apl: '⊆', bqn: null, j: null, kap: '⊆', uiua: null },
-        dyad:  { name: 'Partition', defaultRank: '1,1', apl: '⊆', bqn: '⊔', j: ';.', kap: '⊆', uiua: '⊜' }
+        // NARS2000 assigns ⊆ to its Set/Subset function, not these Dyalog meanings.
+        monad: { name: 'Nest',      defaultRank: 'N', apl: '⊆', nars2000: null, bqn: null, j: null, kap: '⊆', uiua: null },
+        dyad:  { name: 'Partition', defaultRank: '1,1', apl: '⊆', nars2000: null, bqn: '⊔', j: ';.', kap: '⊆', uiua: '⊜' }
     },
     '⊇': {
         monad: {
@@ -308,7 +309,7 @@ export const primitiveMap = {
         dyad:  null
     },
     '⊸': {
-        monad: { name: 'Before', apl: '⍛', bqn: '⊸', j: null, kap: '⍛', uiua: null },
+        monad: { name: 'Before', apl: '⍛', nars2000: null, bqn: '⊸', j: null, kap: '⍛', uiua: null },
         dyad:  null
     },
     '⟜': {
@@ -341,6 +342,7 @@ export const primitiveMap = {
 export const compareLanguages = [
     { id: 'tinyapl', name: 'TinyAPL', logo: 'assets/tinyapl.svg', fontClass: 'font-tinyapl' },
     { id: 'apl',     name: 'Dyalog',  logo: 'assets/apl.png',     fontClass: 'font-apl' },
+    { id: 'nars2000', name: 'NARS2000', logo: 'assets/nars2000.svg', fontClass: 'font-nars2000' },
     { id: 'kap',     name: 'Kap',     logo: 'assets/kap.png',     fontClass: 'font-kap' },
     { id: 'bqn',     name: 'BQN',     logo: 'assets/bqn.svg',     fontClass: 'font-bqn' },
     { id: 'j',       name: 'J',       logo: 'assets/j_logo.svg',  fontClass: 'font-j' },
@@ -383,16 +385,22 @@ export function getPrimitiveName(entry, valence) {
  */
 export function getEquivalent(entry, langId, valence, rank) {
     if (!entry) return null;
+    // The comparison database stores the common Extended APL spelling once.
+    // NARS2000-specific entries can still override it when they are added.
+    const fallbackLangId = langId === 'nars2000' ? 'apl' : null;
     const v = entry[valence];
     if (v) {
         if (rank != null && v.ranks) {
             const rankData = v.ranks[rank];
             if (rankData && langId in rankData) return rankData[langId];
+            if (rankData && fallbackLangId && fallbackLangId in rankData) return rankData[fallbackLangId];
         }
         if (langId in v) return v[langId];
+        if (fallbackLangId && fallbackLangId in v) return v[fallbackLangId];
     }
     const fallback = valence === 'monad' ? entry.dyad : entry.monad;
     if (fallback && langId in fallback) return fallback[langId];
+    if (fallback && fallbackLangId && fallbackLangId in fallback) return fallback[fallbackLangId];
     return null;
 }
 

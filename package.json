@@ -1,7 +1,7 @@
 {
   "name": "array-box",
   "version": "1.0.0",
-  "description": "Array language code editor with syntax highlighting and keyboard mappings for BQN, APL, J, and Uiua",
+  "description": "Array language code editor and runner for APL, NARS2000, BQN, J, Uiua, Kap, and TinyAPL",
   "type": "module",
   "main": "./src/keymap.js",
   "scripts": {
@@ -67,6 +67,14 @@
       "import": "./src/j-docs.js",
       "default": "./src/j-docs.js"
     },
+    "./nars2000-docs": {
+      "import": "./src/nars2000-docs.js",
+      "default": "./src/nars2000-docs.js"
+    },
+    "./nars2000-docs.js": {
+      "import": "./src/nars2000-docs.js",
+      "default": "./src/nars2000-docs.js"
+    },
     "./fonts/*": "./fonts/*",
     "./assets/*": "./assets/*"
   },
@@ -78,6 +86,7 @@
   "keywords": [
     "bqn",
     "apl",
+    "nars2000",
     "j",
     "uiua",
     "array-language",

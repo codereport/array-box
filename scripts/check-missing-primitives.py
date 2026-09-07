@@ -254,7 +254,7 @@ def parse_doc_keys(source, export_name):
     keys = set()
     # Top-level entries are at 4-space indent: '    "glyph": {'
     # Nested keys like "monad": { are at 8+ spaces or tabs
-    for m in re.finditer(r'^    "([^"]+)"\s*:\s*\{', block, re.MULTILINE):
+    for m in re.finditer(r'''^    ["']([^"']+)["']\s*:\s*\{''', block, re.MULTILINE):
         keys.add(m.group(1))
     # Uiua docs use the same indent — check for 4-space entries that
     # aren't inner structural keys
@@ -356,6 +356,17 @@ def main():
     apl_kb = parse_simple_keymap(keymap_js, "aplKeymap")
     apl_docs = parse_doc_keys(read("apl-docs.js"), "aplGlyphDocs")
     langs.append(("APL", apl_names, apl_cats, apl_kb, apl_docs))
+
+    # ---- NARS2000 (common primitives inherit the APL catalog) ----
+    nars_unsupported = {"⌸", "⌺", "⌶", "⍛"}
+    nars_names = {
+        **{glyph: name for glyph, name in apl_names.items() if glyph not in nars_unsupported},
+        **parse_glyph_names(keyboard_js, "nars2000GlyphNames")
+    }
+    nars_cats = parse_syntax_rules(syntax_js, "nars2000", ["functions", "monadic", "dyadic"])
+    nars_kb = parse_simple_keymap(keymap_js, "nars2000Keymap")
+    nars_docs = (apl_docs - nars_unsupported) | parse_doc_keys(read("nars2000-docs.js"), "nars2000GlyphDocs")
+    langs.append(("NARS2000", nars_names, nars_cats, nars_kb, nars_docs))
 
     # ---- Kap ----
     kap_names = parse_glyph_names(keyboard_js, "kapGlyphNames")

@@ -123,10 +123,12 @@ async function checkPublicBackend({
         await Promise.all([
             checkJsonHealth(`${deployedBackendUrl}/api/apl/health`, { fetchImpl, timeoutMs })
                 .catch((error) => { throw new Error(`APL: ${error.message}`); }),
+            checkJsonHealth(`${deployedBackendUrl}/api/nars2000/health`, { fetchImpl, timeoutMs })
+                .catch((error) => { throw new Error(`NARS2000: ${error.message}`); }),
             checkJsonHealth(`${deployedBackendUrl}/api/log/health`, { fetchImpl, timeoutMs })
                 .catch((error) => { throw new Error(`metrics: ${error.message}`); })
         ]);
-        return status('Site', true, 'Published config, APL, and metrics routes are healthy');
+        return status('Site', true, 'Published config, APL, NARS2000, and metrics routes are healthy');
     } catch (error) {
         return status('Site', false, `Public backend route failed: ${error.message}`);
     }
@@ -138,8 +140,9 @@ async function checkDashboardServices(options = {}) {
         timeoutMs: options.timeoutMs || DEFAULT_TIMEOUT_MS
     };
 
-    const [apl, permalink, site] = await Promise.all([
+    const [apl, nars2000, permalink, site] = await Promise.all([
         checkLocalService({ name: 'APL', port: 8081, ...shared }),
+        checkLocalService({ name: 'NARS2000', port: 8086, ...shared }),
         checkLocalService({ name: 'Permalink', port: 8084, ...shared }),
         checkPublicBackend({
             publicConfigUrl: options.publicConfigUrl,
@@ -148,7 +151,7 @@ async function checkDashboardServices(options = {}) {
         })
     ]);
 
-    return { apl, permalink, site };
+    return { apl, nars2000, permalink, site };
 }
 
 module.exports = {

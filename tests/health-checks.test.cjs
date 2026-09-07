@@ -81,6 +81,7 @@ test('public check fails when the deployed tunnel cannot reach backend routes', 
         assert.deepEqual(requestedUrls, [
             'https://arraybox.dev/config.js',
             'https://new-tunnel.trycloudflare.com/api/apl/health',
+            'https://new-tunnel.trycloudflare.com/api/nars2000/health',
             'https://new-tunnel.trycloudflare.com/api/log/health'
         ]);
         assert.equal(result.status, 'down');
@@ -99,7 +100,7 @@ test('public check fails when metrics are unavailable even if APL is healthy', a
                         "const ArrayBoxConfig = { BACKEND_URL: 'https://new-tunnel.trycloudflare.com' };"
                     );
                 }
-                if (url.endsWith('/api/apl/health')) {
+                if (url.endsWith('/api/apl/health') || url.endsWith('/api/nars2000/health')) {
                     return response(JSON.stringify({ status: 'ok' }));
                 }
                 return response('not found', 404);
@@ -111,7 +112,7 @@ test('public check fails when metrics are unavailable even if APL is healthy', a
     });
 });
 
-test('public check passes only when published config, APL, and metrics routes are healthy', async () => {
+test('public check passes only when published config, APL, NARS2000, and metrics routes are healthy', async () => {
     await withLocalConfig('https://new-tunnel.trycloudflare.com/', async (localConfigPath) => {
         const result = await checkPublicBackend({
             localConfigPath,

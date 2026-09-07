@@ -22,8 +22,9 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const ROOT = resolve(__dirname, '..');
 const PORT = 9753;
 const APL_URL = 'http://localhost:8081';
+const NARS2000_URL = 'http://localhost:8086';
 const RUNTIME_TIMEOUT = 60_000;
-const ALL_LANGS = ['tinyapl', 'apl', 'kap', 'bqn', 'j', 'uiua'];
+const ALL_LANGS = ['tinyapl', 'apl', 'nars2000', 'kap', 'bqn', 'j', 'uiua'];
 
 const rgb = (r, g, b) => s => `\x1b[38;2;${r};${g};${b}m${s}\x1b[0m`;
 const c = {
@@ -95,7 +96,7 @@ function buildExpression(glyph, valence, inputStr, lang) {
     return left + '(' + glyph + ')' + right;
 }
 
-const DEPTH_GLYPH = { tinyapl: '≡', apl: '≡', kap: '≡', j: '1+L.', bqn: '≡', uiua: null };
+const DEPTH_GLYPH = { tinyapl: '≡', apl: '≡', nars2000: '≡', kap: '≡', j: '1+L.', bqn: '≡', uiua: null };
 
 function buildDepthExpression(mainExpr, lang) {
     const dg = DEPTH_GLYPH[lang];
@@ -149,6 +150,31 @@ async function checkAplServer() {
     } catch { return false; }
 }
 
+async function checkNars2000Server() {
+    try {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 3000);
+        const healthResponse = await fetch(`${NARS2000_URL}/health`, { signal: ctrl.signal }).catch(() => null);
+        if (!healthResponse?.ok) {
+            clearTimeout(timer);
+            return false;
+        }
+        const health = await healthResponse.json();
+        if (!health.ready) {
+            clearTimeout(timer);
+            return false;
+        }
+        const evalResponse = await fetch(`${NARS2000_URL}/eval`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: '1' }),
+            signal: ctrl.signal,
+        }).catch(() => null);
+        clearTimeout(timer);
+        return Boolean(evalResponse?.ok && (await evalResponse.json()).success !== false);
+    } catch { return false; }
+}
+
 // ── output normalization ─────────────────────────────
 
 function normalizeOutput(s) {
@@ -195,6 +221,15 @@ const LANG_EVAL = {
         const d = await r.json();
         return { success: d.success !== false, output: d.output || d.result || d.error || '' };
     },
+    nars2000: async (code) => {
+        const r = await fetch('http://localhost:8086/eval', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code })
+        });
+        const d = await r.json();
+        return { success: d.success !== false, output: d.output || d.result || d.error || '' };
+    },
 };
 
 const LANG_READY = {
@@ -226,6 +261,30 @@ async function evalInLang(page, lang, code) {
     return page.evaluate(fn, code);
 }
 
+async function checkNars2000AuthoringUi(page) {
+    await page.click('#languageButton');
+    await page.click('.dropdown-item[data-lang="nars2000"]');
+    const selected = await page.evaluate(() => ({
+        inputClass: document.getElementById('codeInput').className,
+        logoAlt: document.getElementById('currentLogo').alt
+    }));
+    if (!selected.inputClass.includes('nars2000') || selected.logoAlt !== 'NARS2000') {
+        throw new Error(`NARS2000 selector smoke test failed: ${JSON.stringify(selected)}`);
+    }
+
+    await page.focus('#codeInput');
+    await page.keyboard.press('`');
+    await page.keyboard.press('Shift+R');
+    const inserted = await page.locator('#codeInput').innerText();
+    if (inserted !== '√') {
+        throw new Error(`NARS2000 prefix keyboard inserted ${JSON.stringify(inserted)} instead of √`);
+    }
+
+    await page.locator('#codeInput').evaluate((element) => { element.textContent = ''; });
+    await page.click('#languageButton');
+    await page.click('.dropdown-item[data-lang="apl"]');
+}
+
 // ── main ─────────────────────────────────────────────
 
 const server = await startStaticServer();
@@ -233,9 +292,12 @@ console.log(`Static server on http://localhost:${PORT}`);
 
 const aplAvailable = await checkAplServer();
 console.log(`APL server: ${aplAvailable ? c.green('available') : c.yellow('not reachable (APL tests will be skipped)')}`);
+const nars2000Available = await checkNars2000Server();
+console.log(`NARS2000 server: ${nars2000Available ? c.green('available') : c.yellow('not ready (NARS2000 tests will be skipped)')}`);
 
 const activeLangs = new Set(ALL_LANGS);
 if (!aplAvailable) activeLangs.delete('apl');
+if (!nars2000Available) activeLangs.delete('nars2000');
 
 const browser = await chromium.launch();
 const ctx = await browser.newContext();
@@ -245,7 +307,7 @@ page.on('pageerror', (err) => console.error('  PAGE ERROR:', err.message));
 console.log('Loading ArrayBox...');
 await page.goto(`http://localhost:${PORT}`, { waitUntil: 'domcontentloaded' });
 
-const wasmLangs = [...activeLangs].filter(l => l !== 'apl');
+const wasmLangs = [...activeLangs].filter(l => l !== 'apl' && l !== 'nars2000');
 console.log(`Waiting for runtimes: ${wasmLangs.join(', ')}...`);
 const notReady = await waitForRuntimes(page, wasmLangs);
 if (notReady.size > 0) {
@@ -253,6 +315,9 @@ if (notReady.size > 0) {
     for (const lang of notReady) activeLangs.delete(lang);
 }
 console.log(`${c.green('Ready:')} ${[...activeLangs].map(l => c.cyan(l)).join(', ')}\n`);
+
+await checkNars2000AuthoringUi(page);
+console.log(`  ${c.green('✓')} ${c.bold('NARS2000 selector and prefix keyboard')}\n`);
 
 let passed = 0;
 let failed = 0;

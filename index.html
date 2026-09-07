@@ -9,7 +9,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://arraybox.dev">
     <meta property="og:title" content="ArrayBox">
-    <meta property="og:description" content="An online playground for array programming languages — APL, BQN, Uiua, J, Kap, and TinyAPL.">
+    <meta property="og:description" content="An online playground for array programming languages — APL, NARS2000, BQN, Uiua, J, Kap, and TinyAPL.">
     <meta property="og:image" content="https://arraybox.dev/assets/og-default.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -17,7 +17,7 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="ArrayBox">
-    <meta name="twitter:description" content="An online playground for array programming languages — APL, BQN, Uiua, J, Kap, and TinyAPL.">
+    <meta name="twitter:description" content="An online playground for array programming languages — APL, NARS2000, BQN, Uiua, J, Kap, and TinyAPL.">
     <meta name="twitter:image" content="https://arraybox.dev/assets/og-default.png">
 
     <link rel="icon" id="favicon" href="assets/apl.png" type="image/png">
@@ -326,6 +326,10 @@
             font-family: 'APL', 'Courier New', monospace;
         }
 
+        .code-input.nars2000 {
+            font-family: 'NARS2000', 'APL', 'Courier New', monospace;
+        }
+
         .code-input.kap {
             font-family: 'Kap', 'Courier New', monospace;
         }
@@ -357,6 +361,9 @@
             line-height: 0.85;
         }
         .output.apl {
+            line-height: 1.13;
+        }
+        .output.nars2000 {
             line-height: 1.13;
         }
         .output.kap {
@@ -461,6 +468,10 @@
 
         .output.apl {
             font-family: 'APL', 'Courier New', monospace;
+        }
+
+        .output.nars2000 {
+            font-family: 'NARS2000', 'APL', 'Courier New', monospace;
         }
 
         .output.kap {
@@ -687,6 +698,10 @@
 
         .primitive-combobox-glyph.apl {
             font-family: 'APL', 'Courier New', monospace;
+        }
+
+        .primitive-combobox-glyph.nars2000 {
+            font-family: 'NARS2000', 'APL', 'Courier New', monospace;
         }
 
         .primitive-combobox-glyph.kap {
@@ -1243,6 +1258,11 @@
             <span class="lang-name">APL</span>
             <span class="lang-version">Dyalog v20.0</span>
         </div>
+        <div class="dropdown-item" data-lang="nars2000">
+            <img src="assets/nars2000.svg" alt="NARS2000">
+            <span class="lang-name">NARS2000</span>
+            <span class="lang-version">0.5.14.11 · native</span>
+        </div>
         <div class="dropdown-item" data-lang="bqn">
             <img src="assets/bqn.svg" alt="BQN">
             <span class="lang-name">BQN</span>
@@ -1416,6 +1436,10 @@
                 <div class="fonts-title">fonts</div>
                 <div class="font-row">
                     <span class="font-lang">APL</span>
+                    <span class="font-name">APL387</span>
+                </div>
+                <div class="font-row">
+                    <span class="font-lang">NARS2000</span>
                     <span class="font-name">APL387</span>
                 </div>
                 <div class="font-row">
@@ -2284,12 +2308,12 @@
     <!-- Main application module -->
     <script type="module">
         // Import from modular files
-        import { createKeyboardHandler, bqnKeymap, aplKeymap, kapKeymap, tinyaplKeymap, tinyaplKeyboard, tinyaplGlyphs, uiuaGlyphs, jGlyphs, insertText } from './src/keymap.js';
+        import { createKeyboardHandler, bqnKeymap, aplKeymap, nars2000Keymap, kapKeymap, tinyaplKeymap, tinyaplKeyboard, tinyaplGlyphs, uiuaGlyphs, jGlyphs, insertText } from './src/keymap.js';
         import { syntaxRules, highlightCode, escapeHtml, getSyntaxClass, isTrainTree, highlightTrainTreeGlyphs } from './src/syntax.js';
         import { renderBqnExplainTree, BQN_COMBINATOR_INFO,
                   renderAplExplainTree, APL_COMBINATOR_INFO,
                   renderJExplainTree, J_COMBINATOR_INFO } from './src/explain-tree.js';
-        import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames, jGlyphNames, tinyaplGlyphNames, bqnGlyphDocs, uiuaGlyphDocs, jGlyphDocs, kapGlyphDocs, aplGlyphDocs, tinyaplGlyphDocs } from './src/keyboard.js';
+        import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, nars2000GlyphNames, kapGlyphNames, jGlyphNames, tinyaplGlyphNames, bqnGlyphDocs, uiuaGlyphDocs, jGlyphDocs, kapGlyphDocs, aplGlyphDocs, nars2000GlyphDocs, tinyaplGlyphDocs } from './src/keyboard.js';
         import { createEditorFeaturesManager, toggleComment, commentTokens, autoExpandWidthForCodeAndResult } from './src/editor-features.js';
         import { translatePrimitives, translateArrayLiterals, clearTranslationCache } from './src/primitive-translate.js';
         import { primitiveMap, compareLanguages, lookupPrimitive, parsePrimitives, getPrimitiveName, getEquivalent, hasValence, isScalar, getAvailableRanks, getDefaultRank } from './src/primitive-compare.js';
@@ -2297,6 +2321,7 @@
         // Glyph documentation by language
         const glyphDocsByLanguage = {
             apl: aplGlyphDocs,
+            nars2000: nars2000GlyphDocs,
             bqn: bqnGlyphDocs,
             uiua: uiuaGlyphDocs,
             j: jGlyphDocs,
@@ -2336,6 +2361,22 @@
                     layout: 'https://dfns.dyalog.com/n_keyboards.htm',
                     primitives: 'https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/',
                     syntax: 'https://docs.dyalog.com/20.0/language-reference-guide/key-to-notation/'
+                }
+            },
+            nars2000: {
+                keymap: nars2000Keymap,
+                language: 'NARS2000',
+                prefixKey: '`',
+                fontFamily: "'NARS2000', 'APL', 'Courier New', monospace",
+                syntaxRules: syntaxRules.nars2000,
+                displayMode: 'keyboard',
+                glyphNames: nars2000GlyphNames,
+                glyphDocs: nars2000GlyphDocs,
+                logoPath: 'assets/nars2000.svg',
+                docLinks: {
+                    layout: 'https://wiki.nars2000.org/index.php?title=Character_names',
+                    primitives: 'https://wiki.nars2000.org/index.php?title=Language_Features',
+                    syntax: 'https://wiki.nars2000.org/index.php?title=Main_Page'
                 }
             },
             kap: {
@@ -2767,6 +2808,47 @@
                     }
                 }
             },
+            nars2000: {
+                name: 'NARS2000',
+                logo: 'assets/nars2000.svg',
+                fontClass: 'nars2000',
+                evaluate: async (code) => {
+                    try {
+                        const response = await fetch(`${ArrayBoxConfig.getServiceUrl('nars2000')}/eval`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ code })
+                        });
+
+                        let data;
+                        try {
+                            data = await response.json();
+                        } catch (_) {
+                            throw new Error(`NARS2000 server returned ${response.status}`);
+                        }
+
+                        if (!response.ok && !data.output && !data.error) {
+                            throw new Error(`NARS2000 server returned ${response.status}`);
+                        }
+
+                        return {
+                            success: response.ok && data.success !== false,
+                            output: data.output || data.error || ''
+                        };
+                    } catch (error) {
+                        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                            return {
+                                success: false,
+                                output: 'NARS2000 server is not available. See docs/nars2000-integration.md for runner setup.'
+                            };
+                        }
+                        return {
+                            success: false,
+                            output: error.message || String(error)
+                        };
+                    }
+                }
+            },
             kap: {
                 name: 'Kap',
                 logo: 'assets/kap.png',
@@ -2871,7 +2953,7 @@
             }
         };
 
-        const languageOrder = ['apl', 'bqn', 'uiua', 'j', 'kap', 'tinyapl'];
+        const languageOrder = ['apl', 'nars2000', 'bqn', 'uiua', 'j', 'kap', 'tinyapl'];
         let currentLanguage = 'apl';
         let currentKeyboardCleanup = null;
         let lastResult = null; // Store last evaluation result for permalinks
@@ -3106,7 +3188,7 @@
         }
 
         const glyphDocsByLang = {
-            bqn: bqnGlyphDocs, apl: aplGlyphDocs, kap: kapGlyphDocs,
+            bqn: bqnGlyphDocs, apl: aplGlyphDocs, nars2000: nars2000GlyphDocs, kap: kapGlyphDocs,
             uiua: uiuaGlyphDocs, j: jGlyphDocs, tinyapl: tinyaplGlyphDocs,
         };
 
@@ -3739,7 +3821,7 @@
             codeInput.className = `code-input ${langConfig.fontClass}`;
 
             // Update output font class
-            output.className = output.className.replace(/\b(bqn|uiua|j|apl|kap|tinyapl)\b/g, '').trim();
+            output.className = output.className.replace(/\b(bqn|uiua|j|apl|nars2000|kap|tinyapl)\b/g, '').trim();
             output.classList.add(langConfig.fontClass);
 
             // Update keyboard handler
@@ -3748,8 +3830,8 @@
                 currentKeyboardCleanup = null;
             }
 
-            // BQN uses \ prefix, APL, Kap, and TinyAPL use ` prefix (each has own keymap)
-            if (lang === 'bqn' || lang === 'apl' || lang === 'kap' || lang === 'tinyapl') {
+            // BQN uses \ prefix; APL-family languages use ` (each has its own keymap).
+            if (lang === 'bqn' || lang === 'apl' || lang === 'nars2000' || lang === 'kap' || lang === 'tinyapl') {
                 currentKeyboardCleanup = createKeyboardHandler(codeInput, lang);
             }
 
@@ -5161,7 +5243,7 @@
         /**
          * Get all known glyphs for the current language
          * Includes functions, monadic, dyadic, modifiers, constants from syntax rules
-         * and multi-char tokens for J
+         * and language-specific multi-character tokens
          */
         function getAllGlyphs(language) {
             const rules = syntaxRules[language];
@@ -5177,8 +5259,8 @@
             if (rules.constants) rules.constants.forEach(g => glyphs.add(g));
             if (rules.comparison) rules.comparison.forEach(g => glyphs.add(g));
 
-            // For J, also add multi-char tokens
-            if (language === 'j' && rules.multiChar) {
+            // Include multi-character primitives where the language defines them.
+            if (rules.multiChar) {
                 if (rules.multiChar.functions) rules.multiChar.functions.forEach(g => glyphs.add(g));
                 if (rules.multiChar.monadic) rules.multiChar.monadic.forEach(g => glyphs.add(g));
                 if (rules.multiChar.dyadic) rules.multiChar.dyadic.forEach(g => glyphs.add(g));
@@ -5200,8 +5282,8 @@
             const allGlyphs = getAllGlyphs(currentLanguage);
             const glyphDocs = glyphDocsByLanguage[currentLanguage] || {};
 
-            // For J language, try to match multi-char tokens first (looking at chars before cursor)
-            if (currentLanguage === 'j') {
+            // Try multi-character primitives first (looking at chars before cursor).
+            if (syntaxRules[currentLanguage]?.multiChar) {
                 // Try 3-char, then 2-char matches
                 for (const len of [3, 2]) {
                     if (cursorPos >= len) {

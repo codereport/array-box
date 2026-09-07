@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">NARS2000</title>
+  <desc id="desc">A violet hexagonal NARS2000 wordmark</desc>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8b5cf6"/>
+      <stop offset="1" stop-color="#4f46e5"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#g)" d="M64 4 116 34v60l-52 30L12 94V34z"/>
+  <path fill="none" stroke="#c4b5fd" stroke-width="4" d="M64 13 108 39v50l-44 26-44-26V39z"/>
+  <g fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M26 82V46l20 36V46"/>
+    <path d="M56 54c0-6 4-9 11-9s11 4 11 10c0 8-7 13-22 27h23"/>
+    <path d="M89 46v36M90 67l18-21M96 60l14 22"/>
+  </g>
+</svg>

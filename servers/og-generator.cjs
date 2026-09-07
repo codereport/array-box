@@ -60,6 +60,18 @@ const syntaxRules = {
         constants: ['¯'],
         comments: ['⍝'],
     },
+    nars2000: {
+        functions: ['+', '-', '×', '÷', '⌈', '⌊', '|', '!', '○', '*', '⍟', '?', '~',
+            '<', '>', '=', '≠', '≤', '≥', '≡', '≢', '∧', '∨', '⍲', '⍱',
+            '⍴', '⍳', ',', '⍪', '⌽', '⊖', '⍉', '↑', '↓', '⊂', '⊃', '⌷',
+            '⊣', '⊢', '∪', '∩', '⊥', '⊤', '⍋', '⍒', '∊', '⍷', '⍸', '⊆',
+            '⎕', '⍎', '⍕', '⍬', '∆', '∇', '⍞', '⌹', '√', 'π', '§'],
+        monadic: ['/', '\\', '⌿', '⍀', '¨', '⍨', '‼', '⌻', '∂', '∫', '⍦', '⊙'],
+        dyadic: ['∘', '.', '⍤', '⍥', '⍣', '@', '⍠', '⍡', '⍢', '⍫', 'χ'],
+        constants: ['¯', '∞', '∅'],
+        comments: ['⍝'],
+        multiChar: { functions: ['..'], monadic: [], dyadic: [] },
+    },
     tinyapl: {
         functions: ['+', '-', '×', '÷', '*', '⍟', '√', '⌊', '⌈', '⸠', '⌹', '!', '|',
             '⊕', '⊗', '∡', 'ℜ', 'ℑ', '⧺', 'ⵧ', '⊥', '⊤',
@@ -226,7 +238,7 @@ function tokenizeLine(line, lang) {
         }
         
         // Check for number
-        const numMatch = remaining.match(/^¯?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?/i);
+        const numMatch = remaining.match(/^¯?(\d+(?:\.(?!\.)\d*)?|\.\d+)(e[+-]?\d+)?/i);
         if (numMatch) {
             tokens.push({ text: numMatch[0], color: COLORS.purple });
             i += numMatch[0].length;
@@ -243,13 +255,13 @@ function tokenizeLine(line, lang) {
             }
         }
         
-        // For J, try multi-char tokens (3-char, then 2-char) before single-char
-        if (lang === 'j' && syntaxRules.j.multiChar) {
+        // Try language-specific multi-character tokens before single characters.
+        if (rules?.multiChar) {
             let matched = false;
             for (const len of [3, 2]) {
                 if (i + len > line.length) continue;
                 const substr = line.substring(i, i + len);
-                const color = getMultiCharColor(substr, 'j');
+                const color = getMultiCharColor(substr, lang);
                 if (color) {
                     tokens.push({ text: substr, color });
                     i += len;
@@ -409,6 +421,7 @@ const FONTS = {
     bqn: path.join(FONT_DIR, 'BQN386.ttf'),
     uiua: path.join(FONT_DIR, 'Uiua386.ttf'),
     apl: path.join(FONT_DIR, 'Apl385.ttf'),
+    nars2000: path.join(FONT_DIR, 'APL387.ttf'),
     j: path.join(FONT_DIR, 'JetBrainsMono-Regular.ttf'),
     kap: path.join(FONT_DIR, 'APL387.ttf'),
     tinyapl: path.join(FONT_DIR, 'TinyAPL386.ttf'),
@@ -433,6 +446,7 @@ function getLangDisplayName(lang) {
         bqn: 'BQN',
         uiua: 'Uiua',
         apl: 'APL',
+        nars2000: 'NARS2000',
         j: 'J',
         kap: 'Kap',
         tinyapl: 'TinyAPL',
@@ -446,6 +460,7 @@ function getLogoPath(lang) {
         bqn: path.join(__dirname, '..', 'assets', 'bqn.svg'),
         uiua: path.join(__dirname, '..', 'assets', 'uiua.png'),
         apl: path.join(__dirname, '..', 'assets', 'apl.png'),
+        nars2000: path.join(__dirname, '..', 'assets', 'nars2000.svg'),
         j: path.join(__dirname, '..', 'assets', 'j_logo.svg'),
         kap: path.join(__dirname, '..', 'assets', 'kap.png'),
         tinyapl: path.join(__dirname, '..', 'assets', 'tinyapl.svg'),
@@ -470,7 +485,7 @@ function loadLogoAsDataUri(lang) {
 /**
  * Generate an OG image for a permalink
  * @param {string} code - The code snippet
- * @param {string} lang - The language (bqn, uiua, apl, j, kap, tinyapl)
+ * @param {string} lang - The language (bqn, uiua, apl, nars2000, j, kap, tinyapl)
  * @param {string} [result] - Optional result to display (plain text)
  * @param {string} [resultHtml] - Optional HTML result (for TinyAPL tables)
  * @returns {Promise<Buffer>} PNG image buffer
@@ -501,9 +516,9 @@ async function generateOGImage(code, lang, result = null, resultHtml = null) {
     const gap = 20;
     
     // TinyAPL uses tighter line-height (matching .output.tinyapl CSS)
-    // APL result box uses 1.0 to match in-browser .output.apl; train trees get letterSpacing too
+    // APL-family result boxes use 1.0 to match their in-browser output styling.
     const isTreeResult = displayResult && isTrainTree(displayResult, lang);
-    const resultLineHeight = lang === 'tinyapl' ? 0.85 : lang === 'apl' ? 1.0 : 1.2;
+    const resultLineHeight = lang === 'tinyapl' ? 0.85 : (lang === 'apl' || lang === 'nars2000') ? 1.0 : 1.2;
     
     // Header dimensions (logo 80px + gap + text)
     const headerHeight = 80;
@@ -818,7 +833,7 @@ function isTrainTree(text, language) {
         return true;
     }
 
-    if (language === 'apl') {
+    if (language === 'apl' || language === 'nars2000') {
         const lines = text.split('\n');
         for (const line of lines) {
             if (line.includes('┌') && (line.includes('┼') || line.includes('┴'))) return true;
@@ -860,9 +875,9 @@ async function generateVerticalImage(code, lang, result = null, resultHtml = nul
     const gap = 20;
     
     // TinyAPL uses tighter line-height (matching .output.tinyapl CSS)
-    // APL result box uses 1.0 to match in-browser .output.apl; train trees get letterSpacing too
+    // APL-family result boxes use 1.0 to match their in-browser output styling.
     const isTreeResult = displayResult && isTrainTree(displayResult, lang);
-    const resultLineHeight = lang === 'tinyapl' ? 0.85 : lang === 'apl' ? 1.0 : 1.2;
+    const resultLineHeight = lang === 'tinyapl' ? 0.85 : (lang === 'apl' || lang === 'nars2000') ? 1.0 : 1.2;
     
     // Header dimensions - logo 60px, text ~28px fits within logo height
     const logoSize = 60;

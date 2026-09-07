@@ -48,6 +48,7 @@ const defaultStats = {
     languages: {
         bqn: { evaluations: 0, successes: 0, failures: 0 },
         apl: { evaluations: 0, successes: 0, failures: 0 },
+        nars2000: { evaluations: 0, successes: 0, failures: 0 },
         j: { evaluations: 0, successes: 0, failures: 0 },
         uiua: { evaluations: 0, successes: 0, failures: 0 },
         kap: { evaluations: 0, successes: 0, failures: 0 },
@@ -63,8 +64,8 @@ const defaultStats = {
         fiveMin: {
             visitors: [],      // [{timestamp, count}]
             evaluations: [],   // [{timestamp, count}] - total
-            evalsByLang: [],   // [{timestamp, bqn, apl, j, uiua, kap, tinyapl}]
-            successesByLang: [] // [{timestamp, bqn, apl, j, uiua, kap, tinyapl}] - success counts
+            evalsByLang: [],   // [{timestamp, bqn, apl, nars2000, j, uiua, kap, tinyapl}]
+            successesByLang: [] // [{timestamp, bqn, apl, nars2000, j, uiua, kap, tinyapl}] - success counts
         },
         // Hourly buckets for last week
         hourly: {
@@ -106,7 +107,7 @@ function loadStats() {
             stats = JSON.parse(data);
             
             // Ensure all languages exist
-            for (const lang of ['bqn', 'apl', 'j', 'uiua', 'kap', 'tinyapl']) {
+            for (const lang of ['bqn', 'apl', 'nars2000', 'j', 'uiua', 'kap', 'tinyapl']) {
                 if (!stats.languages[lang]) {
                     stats.languages[lang] = { evaluations: 0, successes: 0, failures: 0 };
                 }
@@ -272,7 +273,7 @@ function addToLangBucket(granularity, lang, count = 1) {
     if (lastPoint && lastPoint.timestamp === bucket) {
         lastPoint[lang] = (lastPoint[lang] || 0) + count;
     } else {
-        const newPoint = { timestamp: bucket, bqn: 0, apl: 0, j: 0, uiua: 0, kap: 0, tinyapl: 0 };
+        const newPoint = { timestamp: bucket, bqn: 0, apl: 0, nars2000: 0, j: 0, uiua: 0, kap: 0, tinyapl: 0 };
         newPoint[lang] = count;
         data.push(newPoint);
     }
@@ -289,7 +290,7 @@ function addToSuccessBucket(granularity, lang, count = 1) {
     if (lastPoint && lastPoint.timestamp === bucket) {
         lastPoint[lang] = (lastPoint[lang] || 0) + count;
     } else {
-        const newPoint = { timestamp: bucket, bqn: 0, apl: 0, j: 0, uiua: 0, kap: 0, tinyapl: 0 };
+        const newPoint = { timestamp: bucket, bqn: 0, apl: 0, nars2000: 0, j: 0, uiua: 0, kap: 0, tinyapl: 0 };
         newPoint[lang] = count;
         data.push(newPoint);
     }

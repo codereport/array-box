@@ -11,6 +11,7 @@
  */
 export const assignmentOperators = {
     apl: ['←'],
+    nars2000: ['←'],
     bqn: ['←', '↩', '⇐'],  // define, change, export
     j: ['=.', '=:'],       // local, global assignment
     uiua: ['←', '↚'],      // binding, private binding
@@ -23,6 +24,7 @@ export const assignmentOperators = {
  */
 export const commentTokens = {
     apl: '⍝',
+    nars2000: '⍝',
     bqn: '#',
     j: 'NB.',
     uiua: '#',

@@ -10,6 +10,7 @@
 #   J       – jsoftware/jsource master version.txt (#define jversion)
 #   Kap     – kapdemo.dhsdevelopments.com/downloads.html
 #   TinyAPL – beta.tinyapl.rubenverg.com/run version selector
+#   NARS2000 – nars2000.org recommended download version
 #
 # Usage:
 #   bash scripts/check-language-updates.sh            # normal check
@@ -122,6 +123,19 @@ else
     compare "TinyAPL" "$known" "$latest_tinyapl" "beta.tinyapl.rubenverg.com/run"
 fi
 
+# ── NARS2000 ──────────────────────────────────────────────────
+echo "NARS2000 (nars2000.org recommended version)"
+known=$(read_known nars2000)
+latest_nars2000=$(curl -sfL --max-time 15 -A 'Mozilla/5.0' \
+    "http://www.nars2000.org/download/Download-body.php" 2>/dev/null \
+    | grep -oP '0\.5\.[0-9]+\.[0-9]+' \
+    | head -1 || true)
+if $snapshot_mode; then
+    echo "  Current: ${latest_nars2000:-FETCH_FAILED}"
+else
+    compare "NARS2000" "$known" "$latest_nars2000" "nars2000.org/download"
+fi
+
 echo ""
 
 # ── Snapshot: write fetched versions to known-versions.json ───
@@ -132,7 +146,8 @@ if $snapshot_mode; then
         --arg j "${latest_j:-}" \
         --arg kap "${latest_kap:-}" \
         --arg tinyapl "${latest_tinyapl:-}" \
-        '{cbqn: $cbqn, uiua: $uiua, j: $j, kap: $kap, tinyapl: $tinyapl}' \
+        --arg nars2000 "${latest_nars2000:-}" \
+        '{cbqn: $cbqn, uiua: $uiua, j: $j, kap: $kap, tinyapl: $tinyapl, nars2000: $nars2000}' \
         > "$VERSIONS_FILE"
     echo "Wrote current versions to $VERSIONS_FILE"
     cat "$VERSIONS_FILE"

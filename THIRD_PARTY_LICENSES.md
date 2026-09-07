@@ -191,6 +191,24 @@ Full license text: https://creativecommons.org/licenses/by/4.0/
 
 ---
 
+## NARS2000
+
+The NARS2000 interpreter and its source code are not bundled with ArrayBox. The
+concise NARS2000-specific entries in `src/nars2000-docs.js` were written for
+ArrayBox from the public language reference and link back to the relevant
+official wiki pages.
+
+**Website:** https://www.nars2000.org/
+
+**Documentation source:** https://wiki.nars2000.org/index.php?title=Main_Page
+
+**Source repository:** https://sourceforge.net/p/nars2000/code/HEAD/tree/
+
+The `assets/nars2000.svg` mark is an original ArrayBox identifier and is not an
+official NARS2000 logo.
+
+---
+
 ## TinyAPL
 
 The TinyAPL WASM interpreter in `wasm/tinyapl/` and documentation in `src/tinyapl-docs.js` are derived from the TinyAPL project.

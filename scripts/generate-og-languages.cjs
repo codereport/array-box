@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Generate an OG image showing all supported languages in a 2x3 grid
+ * Generate an OG image showing all seven supported languages in a 4+3 grid
  * with logos and version strings beneath each one.
  * 
  * Uses the same satori + resvg approach as generate-og-default.cjs
@@ -24,10 +24,11 @@ const COLORS = {
     fg: '#F8F8F2',
 };
 
-// Language definitions: 2 rows x 3 cols
+// Language definitions: four on the first row, three on the second.
 const LANGS = [
     // Row 1
     { name: 'APL',     version: 'Dyalog v20.0',     file: 'apl.png' },
+    { name: 'NARS2000', version: '0.5.14.11',       file: 'nars2000.svg' },
     { name: 'BQN',     version: 'CBQN 0.12',        file: 'bqn.svg' },
     { name: 'Uiua',    version: '0.19.1',      file: 'uiua.png' },
     // Row 2
@@ -71,7 +72,7 @@ async function generate() {
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: '300px',
+                    width: '240px',
                     gap: '8px',
                 },
                 children: [
@@ -113,8 +114,8 @@ async function generate() {
     }
 
     // Build grid rows
-    const row1 = LANGS.slice(0, 3).map(langCell);
-    const row2 = LANGS.slice(3, 6).map(langCell);
+    const row1 = LANGS.slice(0, 4).map(langCell);
+    const row2 = LANGS.slice(4).map(langCell);
 
     const gridRow = (cells) => ({
         type: 'div',
@@ -123,7 +124,7 @@ async function generate() {
                 display: 'flex',
                 alignItems: 'flex-start',
                 justifyContent: 'center',
-                gap: '80px',
+                gap: '48px',
             },
             children: cells,
         },

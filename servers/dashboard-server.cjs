@@ -29,6 +29,7 @@ const dashboardHTML = `<!DOCTYPE html>
     <style>
         @font-face { font-family: 'BQN'; src: url('/fonts/BQN386.ttf') format('truetype'); }
         @font-face { font-family: 'APL'; src: url('/fonts/APL387.ttf') format('truetype'); }
+        @font-face { font-family: 'NARS2000'; src: url('/fonts/APL387.ttf') format('truetype'); }
         @font-face { font-family: 'Uiua'; src: url('/fonts/Uiua386.ttf') format('truetype'); }
         @font-face { font-family: 'Kap'; src: url('/fonts/APL387.ttf') format('truetype'); }
         @font-face { font-family: 'TinyAPL'; src: url('/fonts/APL387.ttf') format('truetype'); }
@@ -279,6 +280,7 @@ const dashboardHTML = `<!DOCTYPE html>
         
         .language-card .name.bqn { color: #2b7067; }
         .language-card .name.apl { color: #3cb371; }
+        .language-card .name.nars2000 { color: #8b5cf6; }
         .language-card .name.j { color: #2196f3; }
         .language-card .name.uiua { color: #e54ed0; }
         .language-card .name.kap { color: #ffffff; }
@@ -373,6 +375,7 @@ const dashboardHTML = `<!DOCTYPE html>
         
         .chart-legend .lang-bqn .dot { background: #2b7067; }
         .chart-legend .lang-apl .dot { background: #3cb371; }
+        .chart-legend .lang-nars2000 .dot { background: #8b5cf6; }
         .chart-legend .lang-j .dot { background: #2196f3; }
         .chart-legend .lang-uiua .dot { background: #e54ed0; }
         .chart-legend .lang-kap .dot { background: #ffffff; }
@@ -432,6 +435,7 @@ const dashboardHTML = `<!DOCTYPE html>
         
         .pie-legend .item.bqn .dot { background: #2b7067; }
         .pie-legend .item.apl .dot { background: #3cb371; }
+        .pie-legend .item.nars2000 .dot { background: #8b5cf6; }
         .pie-legend .item.j .dot { background: #2196f3; }
         .pie-legend .item.uiua .dot { background: #e54ed0; }
         .pie-legend .item.kap .dot { background: #ffffff; }
@@ -528,6 +532,7 @@ const dashboardHTML = `<!DOCTYPE html>
         
         .activity-item .badge.bqn { background: rgba(158, 206, 106, 0.2); color: var(--accent-green); }
         .activity-item .badge.apl { background: rgba(187, 154, 247, 0.2); color: var(--accent-purple); }
+        .activity-item .badge.nars2000 { background: rgba(139, 92, 246, 0.2); color: #c4b5fd; }
         .activity-item .badge.j { background: rgba(125, 207, 255, 0.2); color: var(--accent-cyan); }
         .activity-item .badge.uiua { background: rgba(224, 175, 104, 0.2); color: var(--accent-yellow); }
         .activity-item .badge.kap { background: rgba(122, 162, 247, 0.2); color: var(--accent-blue); }
@@ -624,6 +629,7 @@ const dashboardHTML = `<!DOCTYPE html>
         .eval-table .eval-status .dur { font-size: 0.8rem; }
         .eval-table .eval-status .dur.bqn { color: #2b7067; }
         .eval-table .eval-status .dur.apl { color: #3cb371; }
+        .eval-table .eval-status .dur.nars2000 { color: #8b5cf6; }
         .eval-table .eval-status .dur.j { color: #2196f3; }
         .eval-table .eval-status .dur.uiua { color: #e54ed0; }
         .eval-table .eval-status .dur.kap { color: #ffffff; }
@@ -640,6 +646,7 @@ const dashboardHTML = `<!DOCTYPE html>
         
         .eval-table .eval-code.lang-bqn { font-family: 'BQN', monospace; }
         .eval-table .eval-code.lang-apl { font-family: 'APL', monospace; }
+        .eval-table .eval-code.lang-nars2000 { font-family: 'NARS2000', 'APL', monospace; }
         .eval-table .eval-code.lang-j { font-family: 'J', monospace; }
         .eval-table .eval-code.lang-uiua { font-family: 'Uiua', monospace; }
         .eval-table .eval-code.lang-kap { font-family: 'Kap', monospace; }
@@ -685,6 +692,10 @@ const dashboardHTML = `<!DOCTYPE html>
                 <div class="server-indicator" id="srv-apl" title="APL Server (port 8081)">
                     <span class="srv-dot"></span>
                     <span>APL</span>
+                </div>
+                <div class="server-indicator" id="srv-nars2000" title="NARS2000 Bridge (port 8086)">
+                    <span class="srv-dot"></span>
+                    <span>NARS</span>
                 </div>
                 <div class="server-indicator" id="srv-permalink" title="Permalink Server (port 8084)">
                     <span class="srv-dot"></span>
@@ -843,7 +854,7 @@ const dashboardHTML = `<!DOCTYPE html>
         
         // Aggregate time series data by language for current time window
         function aggregateByLanguage(evalsByLang, successesByLang, cutoff) {
-            const langOrder = ['bqn', 'apl', 'tinyapl', 'j', 'uiua', 'kap'];
+            const langOrder = ['bqn', 'apl', 'nars2000', 'tinyapl', 'j', 'uiua', 'kap'];
             const result = {};
             
             for (const lang of langOrder) {
@@ -945,11 +956,12 @@ const dashboardHTML = `<!DOCTYPE html>
         // Update language cards with given language data
         function updateLanguageCards(languages) {
             const languagesGrid = document.getElementById('languagesGrid');
-            const allLanguages = ['bqn', 'apl', 'j', 'uiua', 'kap', 'tinyapl'];
-            const langNames = { bqn: 'BQN', apl: 'APL', j: 'J', uiua: 'Uiua', kap: 'Kap', tinyapl: 'TinyAPL' };
+            const allLanguages = ['bqn', 'apl', 'nars2000', 'j', 'uiua', 'kap', 'tinyapl'];
+            const langNames = { bqn: 'BQN', apl: 'APL', nars2000: 'NARS2000', j: 'J', uiua: 'Uiua', kap: 'Kap', tinyapl: 'TinyAPL' };
             const langLogos = { 
                 bqn: '/assets/bqn.svg', 
                 apl: '/assets/apl.png', 
+                nars2000: '/assets/nars2000.svg',
                 j: '/assets/j_logo.svg', 
                 uiua: '/assets/uiua.png', 
                 kap: '/assets/kap.png', 
@@ -1045,14 +1057,15 @@ const dashboardHTML = `<!DOCTYPE html>
             const colors = {
                 bqn: '#2b7067',
                 apl: '#3cb371',
+                nars2000: '#8b5cf6',
                 j: '#2196f3',
                 uiua: '#e54ed0',
                 kap: '#ffffff',
                 tinyapl: '#94e044'
             };
             
-            const langNames = { bqn: 'BQN', apl: 'APL', j: 'J', uiua: 'Uiua', kap: 'Kap', tinyapl: 'TinyAPL' };
-            const langOrder = ['bqn', 'apl', 'tinyapl', 'j', 'uiua', 'kap'];
+            const langNames = { bqn: 'BQN', apl: 'APL', nars2000: 'NARS2000', j: 'J', uiua: 'Uiua', kap: 'Kap', tinyapl: 'TinyAPL' };
+            const langOrder = ['bqn', 'apl', 'nars2000', 'tinyapl', 'j', 'uiua', 'kap'];
             
             // Calculate total and prepare data
             let total = 0;
@@ -1178,12 +1191,13 @@ const dashboardHTML = `<!DOCTYPE html>
         const langColors = {
             bqn: '#2b7067',
             apl: '#3cb371',
+            nars2000: '#8b5cf6',
             j: '#2196f3',
             uiua: '#e54ed0',
             kap: '#ffffff',
             tinyapl: '#94e044'
         };
-        const langOrder = ['bqn', 'apl', 'tinyapl', 'j', 'uiua', 'kap'];
+        const langOrder = ['bqn', 'apl', 'nars2000', 'tinyapl', 'j', 'uiua', 'kap'];
         
         // Draw the activity chart
         function drawChart() {
@@ -1223,7 +1237,7 @@ const dashboardHTML = `<!DOCTYPE html>
             for (let t = start; t <= now; t += bucketSize) {
                 const bucket = Math.floor(t / bucketSize) * bucketSize;
                 buckets[bucket] = { 
-                    bqn: 0, apl: 0, j: 0, uiua: 0, kap: 0, tinyapl: 0 
+                    bqn: 0, apl: 0, nars2000: 0, j: 0, uiua: 0, kap: 0, tinyapl: 0
                 };
             }
             
@@ -1358,7 +1372,7 @@ const dashboardHTML = `<!DOCTYPE html>
                 })
                 .catch(() => {
                     document.body.classList.add('server-down');
-                    for (const key of ['apl', 'permalink', 'site']) {
+                    for (const key of ['apl', 'nars2000', 'permalink', 'site']) {
                         const el = document.getElementById('srv-' + key);
                         if (el) {
                             el.className = 'server-indicator';

@@ -15,12 +15,12 @@
 
 <img width="2560" height="1440" alt="image" src="https://github.com/user-attachments/assets/9ecdee78-7cf6-4458-841f-f9f347043d02" />
 
-A code editor and runner for array programming languages: **BQN**, **APL**, **J**, **Uiua**, **Kap**, and **TinyAPL**.
+A code editor and runner for seven array programming languages: **APL**, **NARS2000**, **BQN**, **J**, **Uiua**, **Kap**, and **TinyAPL**.
 
 ## Features
 
-- Syntax highlighting for BQN, APL, J, Uiua, Kap, and TinyAPL
-- Keyboard mappings for typing special characters (BQN: `\` prefix, APL/Kap/TinyAPL: `` ` `` prefix)
+- Syntax highlighting for APL, NARS2000, BQN, J, Uiua, Kap, and TinyAPL
+- Keyboard mappings for typing special characters (BQN: `\` prefix; APL/NARS2000/Kap/TinyAPL: `` ` `` prefix)
 - Visual keyboard overlay with glyph documentation
 - Primitive search combo box with fuzzy matching
 - Code formatting and comment toggling
@@ -63,7 +63,7 @@ A code editor and runner for array programming languages: **BQN**, **APL**, **J*
 ## Running the Demo
 
 ```bash
-# Start the server manager (handles APL backend + dashboard + permalinks)
+# Start the server manager (APL, NARS2000 bridge, dashboard, and permalinks)
 node servers/server-manager.cjs
 
 # Open index.html in a browser
@@ -71,7 +71,7 @@ node servers/server-manager.cjs
 
 The dashboard's **Site** indicator checks the deployed application end to end every
 15 seconds. It turns red if `arraybox.dev/config.js` does not match the local
-`config.js`, or if the published tunnel cannot reach the APL or metrics health
+`config.js`, or if the published tunnel cannot reach the APL, NARS2000, or metrics health
 routes. Hover over the indicator for the specific failure. For a different public
 deployment, set `ARRAYBOX_PUBLIC_CONFIG_URL` before starting the server manager.
 
@@ -82,6 +82,31 @@ deployment, set `ARRAYBOX_PUBLIC_CONFIG_URL` before starting the server manager.
   - Kap uses Kotlin/JS for client-side execution
   - TinyAPL and Uiua use WASM for client-side execution
 - **APL** requires a local Dyalog installation and is managed by the server manager
+- **NARS2000** is a native, primarily Windows interpreter. Editing, highlighting,
+  keyboard help, docs, translation, and permalinks work without it; evaluation
+  requires a configured runner or compatible upstream bridge. See
+  [`docs/nars2000-integration.md`](docs/nars2000-integration.md).
+
+### NARS2000 evaluation
+
+The server manager always starts the NARS2000 bridge on port `8086`. Without an
+adapter it reports a degraded health state and returns a precise setup message.
+To enable evaluation, configure exactly one adapter before starting the manager:
+
+```bash
+# Local adapter executable (arguments must be a JSON array)
+export NARS2000_RUNNER=/absolute/path/to/nars2000-arraybox-runner
+export NARS2000_RUNNER_ARGS='["optional-argument"]'
+
+# Or an already-hosted ArrayBox-compatible bridge
+export NARS2000_UPSTREAM_URL=https://nars-host.example/api/nars2000
+
+node servers/server-manager.cjs
+```
+
+The local runner is a small platform-specific wrapper around a real NARS2000
+installation. Its JSON protocol, resource controls, health semantics, and a
+deployment checklist are in the integration guide linked above.
 
 ## Docker Sandbox Mode (Recommended for Shared Use)
 
@@ -122,7 +147,7 @@ git submodule add https://github.com/codereport/array-box
 
 ```javascript
 // Keyboard mappings
-import { createKeyboardHandler, bqnKeymap, aplKeymap, kapKeymap, tinyaplKeymap } from 'array-box/keymap';
+import { createKeyboardHandler, bqnKeymap, aplKeymap, nars2000Keymap, kapKeymap, tinyaplKeymap } from 'array-box/keymap';
 
 // Syntax highlighting
 import { syntaxRules, highlightCode } from 'array-box/syntax';
@@ -161,6 +186,7 @@ element.innerHTML = html;
 **`array-box/keymap`**
 - `bqnKeymap` - BQN character mappings
 - `aplKeymap` - APL character mappings
+- `nars2000Keymap` - NARS2000 US-layout character mappings
 - `kapKeymap` - Kap character mappings
 - `tinyaplKeymap` - TinyAPL character mappings
 - `createKeyboardHandler(element, language)` - Attach keyboard handler
@@ -175,10 +201,10 @@ element.innerHTML = html;
 
 **`array-box/keyboard`**
 - `ArrayKeyboard` - Visual keyboard overlay component
-- `bqnGlyphNames`, `aplGlyphNames`, `jGlyphNames`, `uiuaGlyphNames`, `kapGlyphNames`, `tinyaplGlyphNames` - Glyph name mappings
-- `bqnGlyphDocs`, `aplGlyphDocs`, `jGlyphDocs`, `uiuaGlyphDocs`, `kapGlyphDocs`, `tinyaplGlyphDocs` - Glyph documentation
+- `bqnGlyphNames`, `aplGlyphNames`, `nars2000GlyphNames`, `jGlyphNames`, `uiuaGlyphNames`, `kapGlyphNames`, `tinyaplGlyphNames` - Glyph name mappings
+- `bqnGlyphDocs`, `aplGlyphDocs`, `nars2000GlyphDocs`, `jGlyphDocs`, `uiuaGlyphDocs`, `kapGlyphDocs`, `tinyaplGlyphDocs` - Glyph documentation
 
-**`array-box/bqn-docs`**, **`array-box/uiua-docs`**, **`array-box/j-docs`**
+**`array-box/bqn-docs`**, **`array-box/nars2000-docs`**, **`array-box/uiua-docs`**, **`array-box/j-docs`**
 - Glyph documentation and hover content for each language
 
 **`array-box/theme.css`**
@@ -197,7 +223,7 @@ array-box/
 │   ├── editor-features.js     # Code formatting, comments, history
 │   ├── primitive-translate.js # Cross-language primitive translation
 │   ├── theme.css              # CSS variables and syntax classes
-│   └── *-docs.js              # Glyph docs (bqn, apl, j, uiua, kap, tinyapl)
+│   └── *-docs.js              # Glyph docs (including NARS2000 extensions)
 ├── fonts/                     # Array language fonts (BQN, APL, Uiua, TinyAPL, Kap)
 ├── assets/                    # Language logos
 ├── wasm/
@@ -207,8 +233,9 @@ array-box/
 │   ├── j/                     # J WASM build
 │   └── uiua_wasm.*            # Uiua WASM build
 ├── servers/
-│   ├── server-manager.cjs     # Main orchestrator (starts APL, permalink, dashboard)
+│   ├── server-manager.cjs     # Main orchestrator (starts native bridges and services)
 │   ├── apl-server.cjs         # APL language server (Dyalog)
+│   ├── nars2000-server.cjs    # NARS2000 runner/upstream bridge
 │   ├── permalink-server.cjs   # Permalink and OG meta server
 │   ├── dashboard-server.cjs   # Real-time usage statistics dashboard
 │   ├── api-gateway.cjs        # Reverse proxy for remote deployment

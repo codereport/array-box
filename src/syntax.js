@@ -1,6 +1,6 @@
 /**
  * Syntax highlighting for array languages
- * Provides syntax rules and highlighting functions for BQN, APL, J, and Uiua
+ * Provides syntax rules and highlighting functions for ArrayBox languages.
  */
 
 /**
@@ -82,6 +82,39 @@ export const syntaxRules = {
         ],
         // Numbers pattern
         numberPattern: /^¯?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?/i
+    },
+    nars2000: {
+        // NARS2000 is an Extended APL implementation with additional numeric
+        // functions and calculus/combinatorial operators.
+        stringDelimiter: "'",
+        functions: [
+            '+', '-', '×', '÷', '⌈', '⌊', '|', '!', '○', '*', '⍟', '?', '~',
+            '<', '>', '=', '≠', '≤', '≥', '≡', '≢', '∧', '∨', '⍲', '⍱',
+            '⍴', '⍳', ',', '⍪', '⌽', '⊖', '⍉', '↑', '↓', '⊂', '⊃', '⌷',
+            '⊣', '⊢', '∪', '∩', '⊥', '⊤', '⍋', '⍒', '∊', '⍷', '⍸', '⊆', '⊇',
+            '⎕', '⍎', '⍕', '⍬', '∆', '∇', '⍞', '⌹',
+            // NARS2000 extensions
+            '√', 'π', '§'
+        ],
+        // Operators taking one function operand
+        monadic: [
+            '/', '\\', '⌿', '⍀', '¨', '⍨', '‼', '⌻', '∂', '∫', '⍦', '⊙'
+        ],
+        // Operators taking two operands
+        dyadic: [
+            '∘', '.', '⍤', '⍥', '⍣', '@', '⍠', '⍡', '⍢', '⍫', 'χ'
+        ],
+        constants: ['¯', '∞', '∅'],
+        comments: ['⍝'],
+        multiChar: {
+            functions: ['..'],
+            monadic: [],
+            dyadic: [],
+            comments: []
+        },
+        // NARS2000 also supports exact rational (r) and variable-precision (v)
+        // suffixes in addition to conventional APL decimal/exponent literals.
+        numberPattern: /^¯?(\d+(?:\.(?!\.)\d*)?|\.\d+)((e[+¯-]?\d+)|(r¯?\d+)|(v\d*)|x)?/i
     },
     j: {
         stringDelimiter: "'",
@@ -314,7 +347,7 @@ export function escapeHtml(text) {
 /**
  * Apply syntax highlighting to code
  * @param {string} text - Code to highlight
- * @param {string} language - Language identifier ('bqn', 'apl', 'j', 'uiua')
+ * @param {string} language - Language identifier
  * @returns {string} HTML with syntax highlighting spans
  */
 export function highlightCode(text, language) {
@@ -438,9 +471,9 @@ export function highlightCode(text, language) {
             continue;
         }
         
-        // Check for system functions (⎕Name) in APL-family languages (APL, TinyAPL, Kap)
+        // Check for system functions (⎕Name) in APL-family languages
         // These are highlighted as functions including the leading ⎕
-        if ((language === 'apl' || language === 'tinyapl' || language === 'kap') && char === '⎕') {
+        if ((language === 'apl' || language === 'nars2000' || language === 'tinyapl' || language === 'kap') && char === '⎕') {
             // Match ⎕ followed by alphanumeric identifier (system function name)
             const sysMatch = remainingText.match(/^⎕[A-Za-z][A-Za-z0-9]*/);
             if (sysMatch) {
@@ -547,8 +580,8 @@ export function highlightCode(text, language) {
             }
         }
         
-        // Check for multi-character operators (J language)
-        if (language === 'j' && rules.multiChar) {
+        // Check for language-specific multi-character primitives.
+        if (rules.multiChar) {
             // Try longest matches first (3-char, then 2-char)
             let matched = false;
             
@@ -557,7 +590,7 @@ export function highlightCode(text, language) {
                 const substr = text.substring(i, i + len);
                 
                 // Check comments first (NB.) - capture rest of line as comment
-                if (rules.multiChar.comments && rules.multiChar.comments.includes(substr)) {
+                if (rules.multiChar.comments?.includes(substr)) {
                     const lineEnd = text.indexOf('\n', i);
                     const commentEnd = lineEnd === -1 ? text.length : lineEnd;
                     const commentText = text.substring(i, commentEnd);
@@ -566,19 +599,19 @@ export function highlightCode(text, language) {
                     i = commentEnd;
                     matched = true;
                     break;
-                } else if (rules.multiChar.functions.includes(substr)) {
+                } else if (rules.multiChar.functions?.includes(substr)) {
                     tokens.push({ type: 'function', value: substr });
                     lastGlyphType = 'function';
                     i += len;
                     matched = true;
                     break;
-                } else if (rules.multiChar.monadic.includes(substr)) {
+                } else if (rules.multiChar.monadic?.includes(substr)) {
                     tokens.push({ type: 'monadic', value: substr });
                     lastGlyphType = 'monadic';
                     i += len;
                     matched = true;
                     break;
-                } else if (rules.multiChar.dyadic.includes(substr)) {
+                } else if (rules.multiChar.dyadic?.includes(substr)) {
                     tokens.push({ type: 'dyadic', value: substr });
                     lastGlyphType = 'dyadic';
                     i += len;
@@ -660,7 +693,7 @@ function getTokenCssClass(tokenType, language) {
         if (tokenType === 'dyadic') return 'syntax-uiua-modifier-monadic';
         if (tokenType === 'modifier') return 'syntax-uiua-modifier-dyadic';
     } else {
-        // Other languages (APL, BQN, J, Kap, TinyAPL)
+        // Other languages (APL, NARS2000, BQN, J, Kap, TinyAPL)
         // functions = all functions, monadic = 1-modifiers, dyadic = 2-modifiers
         if (tokenType === 'function') return 'syntax-function';
         if (tokenType === 'monadic') return 'syntax-modifier-monadic';
@@ -674,7 +707,7 @@ function getTokenCssClass(tokenType, language) {
  * Get syntax class for a single symbol
  * This is the single source of truth for syntax classification
  * @param {string} symbol - Single character to classify
- * @param {string} language - Language identifier ('bqn', 'apl', 'j', 'uiua', 'kap')
+ * @param {string} language - Language identifier
  * @returns {string} CSS class name (e.g., 'syntax-function', 'syntax-modifier-monadic', etc.)
  */
 export function getSyntaxClass(symbol, language) {

@@ -7,6 +7,7 @@
  * 
  * Routes:
  *   /api/apl/*   -> APL server (8081)
+ *   /api/nars2000/* -> NARS2000 bridge (8086)
  *   /api/log/*   -> Log server (8082)
  *   /api/p/*     -> Permalink server (8084)
  *   /api/image/* -> OG image server (8084)
@@ -25,6 +26,7 @@ const IS_PRODUCTION = process.argv.includes('--production');
 // Internal service ports (these run locally)
 const SERVICES = {
     apl: { port: 8081, path: '/api/apl' },
+    nars2000: { port: 8086, path: '/api/nars2000' },
     log: { port: 8082, path: '/api/log' },
     permalink: { port: 8084, path: '/api/p' },
     image: { port: 8084, path: '/api/image' }
@@ -127,6 +129,13 @@ function routeRequest(req, res) {
         proxyRequest(req, res, SERVICES.apl.port, targetPath || '/');
         return;
     }
+
+    // NARS2000 bridge: /api/nars2000/eval -> localhost:8086/eval
+    if (pathname.startsWith('/api/nars2000/')) {
+        const targetPath = pathname.replace('/api/nars2000', '') + (parsedUrl.search || '');
+        proxyRequest(req, res, SERVICES.nars2000.port, targetPath || '/');
+        return;
+    }
     
     // Log server: /api/log/* -> localhost:8082/*
     if (pathname.startsWith('/api/log/')) {
@@ -155,7 +164,7 @@ function routeRequest(req, res) {
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ 
         error: 'Not found',
-        hint: 'Available routes: /api/apl/*, /api/log/*, /api/p/*, /api/image/*'
+        hint: 'Available routes: /api/apl/*, /api/nars2000/*, /api/log/*, /api/p/*, /api/image/*'
     }));
 }
 
@@ -172,6 +181,7 @@ server.listen(GATEWAY_PORT, '0.0.0.0', () => {
 ╠═══════════════════════════════════════════════════════════════╣
 ║  Routes:                                                      ║
 ║    /api/apl/*   -> APL server (${SERVICES.apl.port})                        ║
+║    /api/nars2000/* -> NARS2000 bridge (${SERVICES.nars2000.port})                ║
 ║    /api/log/*   -> Log server (${SERVICES.log.port})                        ║
 ║    /api/p/*     -> Permalink server (${SERVICES.permalink.port})                    ║
 ║    /api/image/* -> OG image generator (${SERVICES.image.port})                  ║

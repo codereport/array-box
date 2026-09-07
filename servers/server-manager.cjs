@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Array Box Server Manager
- * Launches APL and J servers with a terminal dashboard
+ * Launches native interpreter bridges and the ArrayBox support services.
  * 
  * Usage: node server-manager.js
  */
@@ -128,6 +128,20 @@ const servers = {
         port: 8081,
         color: ansi.magenta,
         symbol: 'APL',
+        process: null,
+        status: 'stopped',
+        requests: 0,
+        errors: 0,
+        lastRequest: null,
+        startTime: null,
+        executable: null
+    },
+    nars2000: {
+        name: 'NARS2000 Bridge',
+        script: 'nars2000-server.cjs',
+        port: 8086,
+        color: ansi.blue,
+        symbol: 'N2K',
         process: null,
         status: 'stopped',
         requests: 0,
@@ -617,6 +631,8 @@ async function main() {
     // Servers run on internal ports, proxies on external ports
     const aplInternalPort = 8181;
     const aplExternalPort = 8081;
+    const nars2000InternalPort = 8186;
+    const nars2000ExternalPort = 8086;
     
     // J is client-side only (WASM) - no server to start
     
@@ -652,6 +668,41 @@ async function main() {
     });
     aplProc.stderr.on('data', () => {});
     aplProc.on('close', () => { servers.apl.status = 'stopped'; servers.apl.process = null; renderDashboard(); });
+
+    // Start the NARS2000 HTTP bridge. The bridge remains available in a
+    // degraded state when no native runner is configured, so clients receive a
+    // precise setup error instead of a connection failure.
+    servers.nars2000.port = nars2000ExternalPort;
+    const nars2000ScriptPath = path.join(__dirname, 'nars2000-server.cjs');
+    const nars2000Proc = spawn('node', [nars2000ScriptPath, String(nars2000InternalPort)], {
+        stdio: ['ignore', 'pipe', 'pipe'],
+        cwd: __dirname
+    });
+    servers.nars2000.process = nars2000Proc;
+    servers.nars2000.status = 'starting';
+
+    nars2000Proc.stdout.on('data', (data) => {
+        const text = data.toString();
+        const modeMatch = text.match(/NARS2000 adapter mode: (.+)/);
+        if (modeMatch) servers.nars2000.executable = modeMatch[1].trim();
+
+        const portMatch = text.match(/NARS2000 server running on http:\/\/localhost:(\d+)/);
+        if (portMatch) {
+            servers.nars2000.actualPort = parseInt(portMatch[1]);
+            servers.nars2000.status = 'running';
+            servers.nars2000.startTime = Date.now();
+            if (!servers.nars2000.proxyActive && !servers.nars2000.proxyError) {
+                createLoggerProxy('nars2000', nars2000InternalPort, nars2000ExternalPort);
+            }
+            renderDashboard();
+        }
+    });
+    nars2000Proc.stderr.on('data', () => {});
+    nars2000Proc.on('close', () => {
+        servers.nars2000.status = 'stopped';
+        servers.nars2000.process = null;
+        renderDashboard();
+    });
     
     // Kap is client-side only (Kotlin/JS) - no server to start
     

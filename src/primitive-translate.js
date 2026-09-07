@@ -5,7 +5,7 @@
  * When switching languages, corresponding primitives are automatically converted.
  * 
  * Also handles array literal translation across languages:
- *   APL/Kap:    1 2 3    ¯1 2 ¯3    1.5 ¯2.5 3
+ *   APL/NARS2000/Kap: 1 2 3    ¯1 2 ¯3    1.5 ¯2.5 3
  *   BQN:        1‿2‿3   ¯1‿2‿¯3   1.5‿¯2.5‿3
  *   TinyAPL:    1‿2‿3   ¯1‿2‿¯3   1.5‿¯2.5‿3
  *   Uiua:       1_2_3   ¯1_2_¯3   1.5_¯2.5_3
@@ -16,7 +16,8 @@
  * Cross-language primitive mappings based on MONADIC definitions.
  * Each group represents semantically equivalent primitives across languages.
  * 
- * Format: { apl, bqn, uiua, j, kap, tinyapl }
+ * NARS2000 uses the APL entry unless a group explicitly overrides it.
+ * Format: { apl, nars2000?, bqn, uiua, j, kap, tinyapl }
  * null means the language doesn't have a direct equivalent or it differs
  */
 export const primitiveGroups = {
@@ -285,6 +286,7 @@ export const primitiveGroups = {
     // before
     before: {
         apl: '⍛',
+        nars2000: null, // NARS2000 does not define Dyalog's Behind operator
         bqn: '⊸',
         uiua: '⊸',
         j: null,
@@ -316,6 +318,12 @@ const arrayLiteralConfig = {
         negative: '¯',
         // APL: ¯?digits with optional decimal and exponent
         numberPattern: /^¯?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?/i
+    },
+    nars2000: {
+        separator: ' ',
+        negative: '¯',
+        // Includes NARS2000 exact-rational and variable-precision suffixes.
+        numberPattern: /^¯?(\d+(?:\.(?!\.)\d*)?|\.\d+)((e[+¯-]?\d+)|(r¯?\d+)|(v\d*)|x)?/i
     },
     bqn: {
         separator: '‿',
@@ -514,7 +522,7 @@ export function translateArrayLiterals(code, fromLang, toLang) {
  */
 function getStringDelimiters(lang) {
     switch (lang) {
-        case 'apl': case 'j': case 'kap': return ["'"];
+        case 'apl': case 'nars2000': case 'j': case 'kap': return ["'"];
         case 'bqn': case 'uiua': return ['"'];
         case 'tinyapl': return ["'", '"'];
         default: return [];
@@ -526,7 +534,7 @@ function getStringDelimiters(lang) {
  */
 function getCommentStarters(lang) {
     switch (lang) {
-        case 'apl': case 'kap': case 'tinyapl': return ['⍝'];
+        case 'apl': case 'nars2000': case 'kap': case 'tinyapl': return ['⍝'];
         case 'bqn': case 'uiua': return ['#'];
         case 'j': return ['NB.'];
         default: return [];
@@ -586,6 +594,13 @@ function skipComment(code, i, lang, commentStarters) {
     return i;
 }
 
+function getPrimitiveGlyph(group, language) {
+    if (Object.prototype.hasOwnProperty.call(group, language)) {
+        return group[language];
+    }
+    return language === 'nars2000' ? group.apl : undefined;
+}
+
 /**
  * Build translation maps from source language to target language
  * Returns { forward: Map<sourceGlyph, targetGlyph>, backward: Map<targetGlyph, sourceGlyph> }
@@ -595,11 +610,11 @@ function buildTranslationMap(fromLang, toLang) {
     const backward = new Map();
     
     for (const [name, group] of Object.entries(primitiveGroups)) {
-        const fromGlyph = group[fromLang];
-        const toGlyph = group[toLang];
+        const fromGlyph = getPrimitiveGlyph(group, fromLang);
+        const toGlyph = getPrimitiveGlyph(group, toLang);
         
         // Skip if either language doesn't have this primitive
-        if (fromGlyph === null || toGlyph === null) continue;
+        if (fromGlyph == null || toGlyph == null) continue;
         
         // Skip if they're the same glyph (no translation needed)
         if (fromGlyph === toGlyph) continue;
@@ -636,7 +651,7 @@ function getTranslationMap(fromLang, toLang) {
  * Translate code from one array language to another
  * 
  * @param {string} code - Source code to translate
- * @param {string} fromLang - Source language ('apl', 'bqn', 'uiua', 'j', 'kap', 'tinyapl')
+ * @param {string} fromLang - Source language identifier
  * @param {string} toLang - Target language
  * @returns {string} - Translated code
  */
@@ -678,10 +693,10 @@ export function getTranslatablePrimitives(fromLang, toLang) {
     const result = [];
     
     for (const [name, group] of Object.entries(primitiveGroups)) {
-        const fromGlyph = group[fromLang];
-        const toGlyph = group[toLang];
+        const fromGlyph = getPrimitiveGlyph(group, fromLang);
+        const toGlyph = getPrimitiveGlyph(group, toLang);
         
-        if (fromGlyph !== null && toGlyph !== null && fromGlyph !== toGlyph) {
+        if (fromGlyph != null && toGlyph != null && fromGlyph !== toGlyph) {
             result.push({ from: fromGlyph, to: toGlyph, name });
         }
     }

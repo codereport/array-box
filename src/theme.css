@@ -17,6 +17,10 @@
     src: url('../fonts/APL387.ttf') format('truetype');
 }
 @font-face {
+    font-family: 'NARS2000';
+    src: url('../fonts/APL387.ttf') format('truetype');
+}
+@font-face {
     font-family: 'Kap';
     src: url('../fonts/APL387.ttf') format('truetype');
 }
@@ -83,7 +87,7 @@
     --syntax-uiua-modifier-monadic: var(--dracula-yellow);
     --syntax-uiua-modifier-dyadic:  var(--dracula-pink);
     
-    /* Other languages (APL, BQN, J, Kap, TinyAPL) */
+    /* Other languages (APL, NARS2000, BQN, J, Kap, TinyAPL) */
     --syntax-function:         var(--dracula-cyan);
     --syntax-modifier-monadic: var(--dracula-green);
     --syntax-modifier-dyadic:  var(--dracula-yellow);
@@ -121,6 +125,10 @@
 
 .font-apl {
     font-family: 'APL', 'Courier New', monospace;
+}
+
+.font-nars2000 {
+    font-family: 'NARS2000', 'APL', 'Courier New', monospace;
 }
 
 .font-tinyapl {
@@ -360,4 +368,3 @@
     white-space: pre;
     line-height: 1.7;
 }
-

@@ -29,6 +29,7 @@ export { uiuaGlyphDocs, uiuaDocsMeta, getUiuaHoverContent } from './uiua-docs.js
 export { jGlyphDocs, jDocsMeta, getJHoverContent } from './j-docs.js';
 export { kapGlyphDocs, kapDocsMeta, getKapHoverContent } from './kap-docs.js';
 export { aplGlyphDocs, aplDocsMeta, getAplHoverContent } from './apl-docs.js';
+export { nars2000GlyphDocs, nars2000DocsMeta, getNars2000HoverContent } from './nars2000-docs.js';
 export { tinyaplGlyphDocs, tinyaplDocsMeta, getTinyaplHoverContent } from './tinyapl-docs.js';
 
 // Glyph names for BQN (monadic/dyadic names)
@@ -256,6 +257,33 @@ export const aplGlyphNames = {
     // Syntax elements
     '⍺': 'left argument',
     '⍵': 'right argument',
+};
+
+// Glyph names for NARS2000. Most ISO APL primitives share their familiar
+// names; NARS2000's experimental functions and operators are added below.
+export const nars2000GlyphNames = {
+    ...Object.fromEntries(Object.entries(aplGlyphNames).filter(
+        ([glyph]) => !['⌸', '⌺', '⌶', '⍛'].includes(glyph)
+    )),
+    '√': 'square root / root',
+    'π': 'prime factors / number-theoretic function',
+    '§': 'symmetric difference / sets',
+    '..': 'sequence',
+    '‼': 'combinatorial operator',
+    '⌻': 'matrix operator',
+    '∂': 'derivative operator',
+    '∫': 'integral operator',
+    '⍡': 'convolution operator',
+    '⍦': 'multisets operator',
+    '⊙': 'null operator',
+    '⍢': 'dual operator',
+    '⍫': 'commutator operator',
+    '⍭': 'stile tilde',
+    '∞': 'infinity',
+    '∅': 'NaN',
+    'χ': 'axis operator',
+    '⊆': 'subset',
+    '⊇': 'superset'
 };
 
 // Glyph names for Kap (monadic/dyadic names)

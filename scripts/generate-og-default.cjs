@@ -56,6 +56,7 @@ async function generate() {
     // Language logos and names
     const langs = [
         { name: 'APL', file: 'apl.png' },
+        { name: 'NARS2000', file: 'nars2000.svg' },
         { name: 'BQN', file: 'bqn.svg' },
         { name: 'Uiua', file: 'uiua.png' },
         { name: 'J', file: 'j_logo.svg' },
@@ -218,7 +219,7 @@ async function generate() {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                gap: '32px',
+                                gap: '26px',
                                 marginTop: '10px',
                             },
                             children: langRow,

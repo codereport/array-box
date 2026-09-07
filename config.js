@@ -37,6 +37,7 @@ const ArrayBoxConfig = {
             // So we return /api which becomes /api/image/vertical
             const routes = {
                 apl: `${backendUrl}/api/apl`,
+                nars2000: `${backendUrl}/api/nars2000`,
                 log: `${backendUrl}/api/log`,
                 permalink: `${backendUrl}/api`,  // Becomes /api/p when /p is appended
                 image: `${backendUrl}/api`        // Becomes /api/image when /image/vertical is appended
@@ -47,6 +48,7 @@ const ArrayBoxConfig = {
         // Local development: use direct ports
         const localPorts = {
             apl: 'http://localhost:8081',
+            nars2000: 'http://localhost:8086',
             log: 'http://localhost:8082',
             permalink: 'http://localhost:8084',
             image: 'http://localhost:8084'
