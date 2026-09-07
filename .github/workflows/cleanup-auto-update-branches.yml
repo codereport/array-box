@@ -1,0 +1,30 @@
+name: Clean up merged auto-update branches
+
+on:
+  pull_request:
+    types: [closed]
+
+# Deleting a branch updates a Git reference in this repository.
+permissions:
+  contents: write
+
+jobs:
+  delete-branch:
+    # Only touch merged automation PRs whose branch belongs to this repository.
+    # This excludes closed-but-unmerged PRs, forks, and ordinary feature branches.
+    if: >-
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      startsWith(github.event.pull_request.head.ref, 'auto/update-')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Delete merged update branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          gh api \
+            --method DELETE \
+            "repos/${REPOSITORY}/git/refs/heads/${BRANCH}"
