@@ -3255,10 +3255,10 @@ m ← m map:with "http:post" "
 
   ∇ gemini query {
     ⍝ curl with your apikey to see the list of models:
-    ⍝  https://generativelanguage.googleapis.com/v1beta/models?key=AI...
+    ⍝  https://generativelanguage.googleapis.com/v1beta/models?key=YOUR_API_KEY
     model ← \"gemini-2.5-flash-preview-05-20\"
     url ← \"https://generativelanguage.googleapis.com/v1beta/models/\", model, \":generateContent?key=\"
-    apikey ← \"AI..................................VyY\" ⍝ your API key goes here
+    apikey ← env:get \"GEMINI_API_KEY\" ⍝ set this environment variable to your own API key
     target_url ← url, apikey
     input ← \"{\\\"contents\\\":[{\\\"parts\\\":[{\\\"text\\\":\\\"\", query, \"\\\"}]}]}\"
     headrs ← \"Accept\" \"application/json\"
