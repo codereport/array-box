@@ -241,23 +241,23 @@ const dashboardHTML = `<!DOCTYPE html>
         
         .languages-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
             gap: 15px;
         }
         
         .language-card {
             background: var(--bg-primary);
             border-radius: 8px;
-            padding: 15px;
-            display: flex;
+            padding: 12px;
+            display: grid;
+            grid-template-columns: 64px minmax(0, 1fr);
             align-items: center;
-            gap: 15px;
+            gap: 8px;
         }
         
         .language-card .logo {
             width: 64px;
             height: 64px;
-            flex-shrink: 0;
         }
         
         .language-card .logo img {
@@ -267,35 +267,31 @@ const dashboardHTML = `<!DOCTYPE html>
         }
         
         .language-card .info {
-            flex: 1;
+            min-width: 0;
             text-align: center;
         }
-        
-        .language-card .name {
-            font-weight: bold;
-            margin-bottom: 8px;
-            font-size: 1.1rem;
-        }
-        
-        .language-card .name.bqn { color: #2b7067; }
-        .language-card .name.apl { color: #3cb371; }
-        .language-card .name.j { color: #2196f3; }
-        .language-card .name.uiua { color: #e54ed0; }
-        .language-card .name.kap { color: #ffffff; }
-        .language-card .name.tinyapl { color: #94e044; }
-        
+
         .language-card .count {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: bold;
-            margin-bottom: 8px;
+            margin: 5px 0;
+            white-space: nowrap;
         }
         
         .language-card .success-rate {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            font-size: 0.9rem;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 2px;
+            font-size: 0.72rem;
             font-weight: 600;
+        }
+
+        .language-card .success-rate > span {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            white-space: nowrap;
         }
         
         .language-card .success {
@@ -309,12 +305,11 @@ const dashboardHTML = `<!DOCTYPE html>
         }
         
         .language-card .percentage {
-            font-size: 1.8rem;
+            font-size: 1rem;
             font-weight: bold;
             color: #2b7067;  /* BQN green for 95%+ */
             text-shadow: 0 0 10px rgba(43, 112, 103, 0.4);
-            min-width: 70px;
-            text-align: right;
+            white-space: nowrap;
         }
         
         .language-card .percentage.tier-90 {
@@ -335,6 +330,18 @@ const dashboardHTML = `<!DOCTYPE html>
         .language-card .percentage.critical {
             color: #ff4444;  /* Red for <50% */
             text-shadow: 0 0 10px rgba(255, 68, 68, 0.4);
+        }
+
+        .language-card .ratio-bar {
+            grid-column: 1 / -1;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--bg-tertiary);
+            overflow: hidden;
+        }
+
+        .language-card .ratio-bar.has-data {
+            background: linear-gradient(to right, #4ade80 var(--success-percent), #ff4444 var(--success-percent));
         }
         
         .chart-container {
@@ -969,6 +976,7 @@ const dashboardHTML = `<!DOCTYPE html>
                 const successes = langData.successes || 0;
                 const failures = langData.failures || 0;
                 const percentage = total > 0 ? Math.round((successes / total) * 100) : 0;
+                const successPercent = total > 0 ? Math.max(0, Math.min(100, (successes / total) * 100)) : 0;
                 // Color tiers: 95+ BQN green (default), 90-94 APL green, 80-89 TinyAPL green, 50-79 orange, <50 red
                 const percentClass = percentage < 50 ? 'critical' : 
                                     percentage < 80 ? 'low' : 
@@ -980,14 +988,14 @@ const dashboardHTML = `<!DOCTYPE html>
                             <img src="\${langLogos[lang]}" alt="\${langNames[lang]} logo">
                         </div>
                         <div class="info">
-                            <div class="name \${lang}">\${langNames[lang]}</div>
+                            <div class="percentage \${percentClass}">\${percentage}%</div>
                             <div class="count">\${formatNumber(total)}</div>
                             <div class="success-rate">
-                                <span class="success">✓ \${formatNumber(successes)}</span>
-                                <span class="failure">✗ \${formatNumber(failures)}</span>
+                                <span class="success"><span>✓</span><span>\${formatNumber(successes)}</span></span>
+                                <span class="failure"><span>✗</span><span>\${formatNumber(failures)}</span></span>
                             </div>
                         </div>
-                        <div class="percentage \${percentClass}">\${percentage}%</div>
+                        <div class="ratio-bar \${total > 0 ? 'has-data' : ''}" style="--success-percent: \${successPercent}%" aria-hidden="true"></div>
                     </div>
                 \`;
             }).join('');
