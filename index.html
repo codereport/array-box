@@ -212,9 +212,10 @@
         .dropdown-item {
             padding: 22px 30px;
             cursor: pointer;
-            display: flex;
+            display: grid;
+            grid-template-columns: 52px 120px 150px;
             align-items: center;
-            gap: 22px;
+            column-gap: 22px;
             transition: background-color 0.2s;
             font-size: 26px;
             color: var(--text-color);
@@ -237,6 +238,7 @@
             width: 52px;
             height: 52px;
             object-fit: contain;
+            justify-self: center;
         }
 
         .dropdown-item svg {
@@ -246,11 +248,15 @@
 
         .dropdown-item .lang-name {
             font-weight: 500;
+            justify-self: center;
+            text-align: center;
         }
 
         .dropdown-item .lang-version {
             color: #9CA3AF;
             font-size: 21px;
+            justify-self: center;
+            text-align: center;
         }
 
         /* Hide everything else when language picker is open */
