@@ -571,11 +571,15 @@ const dashboardHTML = `<!DOCTYPE html>
             width: 600px;
             padding: 20px;
             overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: none;
             height: 100vh;
             position: sticky;
             top: 0;
             box-sizing: border-box;
         }
+
+        .eval-panel-inner::-webkit-scrollbar { display: none; }
         
         .eval-panel-header {
             display: flex;
@@ -595,6 +599,7 @@ const dashboardHTML = `<!DOCTYPE html>
         .eval-table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
         }
         
         .eval-table th {
@@ -635,6 +640,30 @@ const dashboardHTML = `<!DOCTYPE html>
         .eval-table .eval-status .dur.uiua { color: #e54ed0; }
         .eval-table .eval-status .dur.kap { color: #ffffff; }
         .eval-table .eval-status .dur.tinyapl { color: #94e044; }
+
+        .eval-table .eval-copy {
+            width: 40px;
+            padding-left: 4px;
+            padding-right: 4px;
+            text-align: center;
+        }
+
+        .eval-copy-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            border: 0;
+            border-radius: 4px;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .eval-copy-button:not(:disabled):hover,
+        .eval-copy-button:focus-visible { color: var(--text-primary); background: var(--bg-tertiary); }
+        .eval-copy-button.copied { color: var(--accent-green); }
+        .eval-copy-button:disabled { opacity: 0.4; cursor: default; }
         
         .eval-table .eval-code {
             font-family: monospace;
@@ -656,7 +685,10 @@ const dashboardHTML = `<!DOCTYPE html>
             color: var(--text-muted);
             font-size: 0.8rem;
             white-space: nowrap;
+            width: 100px;
         }
+
+        .eval-table .eval-status { width: 105px; }
         
         .eval-no-data {
             text-align: center;
@@ -1397,10 +1429,10 @@ const dashboardHTML = `<!DOCTYPE html>
             }
             
             let html = '<table class="eval-table">';
-            html += '<thead><tr><th>Time</th><th>Status</th><th>Code</th></tr></thead>';
+            html += '<thead><tr><th class="eval-time">Time</th><th class="eval-status">Status</th><th class="eval-copy" aria-label="Copy code"></th><th>Code</th></tr></thead>';
             html += '<tbody>';
             
-            for (const ev of evals) {
+            for (const [index, ev] of evals.entries()) {
                 const date = new Date(ev.timestamp);
                 let hours = date.getHours();
                 const ampm = hours >= 12 ? 'pm' : 'am';
@@ -1411,7 +1443,7 @@ const dashboardHTML = `<!DOCTYPE html>
                 const lang = ev.language || 'unknown';
                 const success = ev.success;
                 const duration = ev.duration ? ev.duration + 'ms' : '';
-                const code = (ev.code || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const code = (ev.code || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 const icon = success ? '✓' : '✗';
                 const iconClass = success ? 'success' : 'failure';
                 
@@ -1422,6 +1454,9 @@ const dashboardHTML = `<!DOCTYPE html>
                     html += ' <span class="dur ' + lang + '">' + duration + '</span>';
                 }
                 html += '</td>';
+                html += '<td class="eval-copy"><button type="button" class="eval-copy-button" data-eval-index="' + index + '" aria-label="Copy code" title="Copy code"' + (ev.code ? '' : ' disabled') + '>';
+                html += '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>';
+                html += '</button></td>';
                 html += '<td class="eval-code lang-' + lang + '">' + (code || '<em style="color:var(--text-muted)">no code</em>') + '</td>';
                 html += '</tr>';
             }
@@ -1429,6 +1464,54 @@ const dashboardHTML = `<!DOCTYPE html>
             html += '</tbody></table>';
             container.innerHTML = html;
         }
+
+        async function copyEvalCode(code) {
+            if (navigator.clipboard?.writeText) {
+                try {
+                    await navigator.clipboard.writeText(code);
+                    return;
+                } catch (error) {
+                    // The dashboard can also be served over HTTP, where clipboard access may be denied.
+                }
+            }
+
+            const input = document.createElement('textarea');
+            input.value = code;
+            input.setAttribute('readonly', '');
+            input.style.position = 'fixed';
+            input.style.opacity = '0';
+            document.body.appendChild(input);
+            input.select();
+            try {
+                if (!document.execCommand('copy')) throw new Error('Copy failed');
+            } finally {
+                input.remove();
+            }
+        }
+
+        document.getElementById('evalTableContainer').addEventListener('click', async (event) => {
+            const button = event.target.closest('.eval-copy-button');
+            if (!button || button.disabled) return;
+
+            const code = evals[Number(button.dataset.evalIndex)]?.code;
+            if (!code) return;
+
+            try {
+                await copyEvalCode(code);
+                button.classList.add('copied');
+                button.title = 'Copied!';
+                button.setAttribute('aria-label', 'Copied!');
+            } catch (error) {
+                button.title = 'Copy failed';
+                button.setAttribute('aria-label', 'Copy failed');
+                console.error(error);
+            }
+            setTimeout(() => {
+                button.classList.remove('copied');
+                button.title = 'Copy code';
+                button.setAttribute('aria-label', 'Copy code');
+            }, 2000);
+        });
         
         function redrawCharts() {
             if (currentStats) {
