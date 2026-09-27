@@ -2721,6 +2721,9 @@ export class ArrayKeyboard {
             for (const overload of doc.overloads) {
                 html += '<div class="array-keyboard-tooltip-section">';
                 html += `<div class="array-keyboard-tooltip-section-title">${this._escapeHtml(overload.name)}</div>`;
+                if (overload.pattern) {
+                    html += `<div class="array-keyboard-tooltip-example" style="font-family: ${this.fontFamily}">${highlightCode(overload.pattern, this.language)}</div>`;
+                }
                 if (overload.description) {
                     html += `<div class="array-keyboard-tooltip-section-desc">${this._escapeHtml(overload.description)}</div>`;
                 }

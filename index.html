@@ -5329,6 +5329,9 @@
                 for (const overload of doc.overloads) {
                     html += '<div class="f1-doc-tooltip-section">';
                     html += `<div class="f1-doc-tooltip-section-title">${escapeHtml(overload.name)}</div>`;
+                    if (overload.pattern) {
+                        html += `<div class="f1-doc-tooltip-example" style="font-family: ${fontFamily}">${highlightCode(overload.pattern, currentLanguage)}</div>`;
+                    }
                     if (overload.description) {
                         html += `<div class="f1-doc-tooltip-section-desc">${escapeDesc(overload.description)}</div>`;
                     }

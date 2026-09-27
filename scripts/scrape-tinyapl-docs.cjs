@@ -270,6 +270,7 @@ async function scrapeTinyaplDocs() {
                 // Add this primitive as an overload
                 const overload = {
                     name: name,
+                    pattern: pattern,
                     description: description,
                     example: example,
                     docUrl: docUrl
