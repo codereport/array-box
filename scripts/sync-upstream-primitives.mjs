@@ -2,7 +2,7 @@
 /** Refresh upstream hover docs and add newly documented glyphs to search/highlighting. */
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -15,6 +15,7 @@ const uiuaUrl = 'https://raw.githubusercontent.com/uiua-lang/uiua/main/site/prim
 const uiuaFontUrl = 'https://raw.githubusercontent.com/uiua-lang/uiua/main/src/assets/Uiua386.ttf';
 const tinyKeyboardUrl = 'https://raw.githubusercontent.com/RubenVerg/TinyAPL/beta/js/index.ts';
 const fingerprintPath = path.join(root, 'scripts', 'kap-reference-fingerprint.json');
+const kapNamesPath = path.join(root, 'scripts', 'kap-heading-names.json');
 const notes = [];
 
 async function get(url) {
@@ -332,6 +333,15 @@ async function main() {
         notes.push('Kap reference text changed. Review hand-written descriptions in src/kap-docs.js against the upstream reference.');
     }
 
+    // The whole-document fingerprint is useful for prose changes; this smaller
+    // snapshot makes Kap primitive name changes visible in the generated PR.
+    const previousKapNames = existsSync(kapNamesPath) ? JSON.parse(readFileSync(kapNamesPath, 'utf8')).names : {};
+    const kapNames = Object.fromEntries([...headings].map(([glyph, { name }]) => [glyph, name])
+        .sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0));
+    const changedKapNames = Object.entries(kapNames).filter(([glyph, name]) =>
+        previousKapNames[glyph] && previousKapNames[glyph] !== name);
+    writeFileSync(kapNamesPath, JSON.stringify({ source: kapUrl, names: kapNames }, null, 2) + '\n');
+
     const summary = [
         'Automated upstream primitive and documentation sync.', '',
         `- Uiua new glyphs: ${additions.uiua.map(([g]) => g).join(' ') || 'none'}`,
@@ -342,6 +352,7 @@ async function main() {
         `- TinyAPL keyboard keys updated: ${tinyKeyboardChanges.join(', ') || 'none'}`,
         `- BQN new glyphs: ${additions.bqn.map(([g]) => g).join(' ') || 'none'}`,
         `- Kap new glyphs: ${additions.kap.map(([g]) => g).join(' ') || 'none'}`,
+        `- Kap heading names changed: ${changedKapNames.map(([g]) => g).join(' ') || 'none'}`,
         '- Refreshed Uiua, TinyAPL, and BQN hover docs from upstream.',
         '- Checked Kap reference source links and text fingerprint.',
         ...notes.map(note => `- ${note}`), '',
