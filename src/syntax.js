@@ -150,14 +150,16 @@ export const syntaxRules = {
         monadic: [
             '¬', '±', '√', '⌵', '⌈', '⌊', '⧻', '△', '⇡', '⊢', '⊣', '⇌',
             '♭', '¤', '⊚', '⊛', '◴', '⍏', '⍖', '⁅',
-            '⍉', '⋯', '⨪', 'ₑ', '∿', '⍆', '⧆', '◰', '□', '⋕'
+            '⍉', '⋯', '⨪', 'ₑ', '∿', '⍆', '⧆', '◰', '□', '⋕',
+            '𝕍'
         ],
         // Dyadic functions (green) - take 2 array arguments
         functions: [
             '+', '-', '×', '÷', '◿', 'ⁿ', '=', '≠', '<', '>', '≤', '≥',
             '↧', '↥', '∠', '∨', 'ℂ', '⊂', '⊏', '⊡', '↯', '☇',
             '↙', '↘', '↻', '⊗', '∊', '⊟', '▽', '◫', '⤸',
-            '≍', '⌕', '⦷', '⨂', '⊥'
+            '≍', '⌕', '⦷',  '⊥',
+            '⨰', '⨱', '⊨'
         ],
         // 1-modifiers (pink) - take 1 function argument
         // Matches uiuaGlyphs.monadicModifiers from keymap.js (popup source of truth)
@@ -171,7 +173,8 @@ export const syntaxRules = {
         // 2-modifiers (yellow) - take 2+ function arguments
         // Matches uiuaGlyphs.dyadicModifiers from keymap.js (popup source of truth)
         modifier: [
-            '⊃', '⊓', '⍜', '⍢', '⬚', '⨬', '⍣'
+            '⊃', '⊓', '⍜', '⍢', '⬚', '⨬', '⍣',
+            '⍡'
         ],
         // Constants/number literals (purple)
         constants: [
