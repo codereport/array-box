@@ -5114,7 +5114,7 @@
         // Add Ctrl+Space handler to code input
         codeInput.addEventListener('keydown', (e) => {
             // Ctrl+Space to show combo box
-            if (e.ctrlKey && e.key === ' ') {
+            if (e.ctrlKey && (e.code === 'Space' || e.key === ' ')) {
                 e.preventDefault();
                 e.stopPropagation();
 
