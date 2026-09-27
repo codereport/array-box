@@ -34,7 +34,7 @@ export const kapGlyphDocs = {
     "+": {
         "glyph": "+",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#add_conjugate",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L607",
         "monad": {
             "name": "Conjugate",
             "description": "Complex conjugate operation. Reverses the sign of the imaginary part. For real numbers, returns the argument.",
@@ -49,7 +49,7 @@ export const kapGlyphDocs = {
     "-": {
         "glyph": "-",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#subtract_negate",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L638",
         "monad": {
             "name": "Negate",
             "description": "Negate the argument.",
@@ -64,7 +64,7 @@ export const kapGlyphDocs = {
     "×": {
         "glyph": "×",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#multiply_angle",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L665",
         "monad": {
             "name": "Angle (Signum)",
             "description": "For real values, return 1, 0, or -1 if argument is positive, zero, or negative. For complex arguments, return a value with magnitude 1 having the same angle.",
@@ -79,7 +79,7 @@ export const kapGlyphDocs = {
     "÷": {
         "glyph": "÷",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#divide_reciprocal",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L687",
         "monad": {
             "name": "Reciprocal",
             "description": "Return the reciprocal of the argument (1÷A).",
@@ -94,7 +94,7 @@ export const kapGlyphDocs = {
     "|": {
         "glyph": "|",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#mod_magnitude",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L697",
         "monad": {
             "name": "Magnitude",
             "description": "Returns the magnitude of the argument. For real numbers, the absolute value. For complex numbers, the length of the vector from origin.",
@@ -109,7 +109,7 @@ export const kapGlyphDocs = {
     "⋆": {
         "glyph": "⋆",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#power",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L724",
         "monad": {
             "name": "Exponential",
             "description": "Return e to the power of the argument.",
@@ -124,7 +124,7 @@ export const kapGlyphDocs = {
     "⍟": {
         "glyph": "⍟",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#log",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L734",
         "monad": {
             "name": "Natural Logarithm",
             "description": "Return log(A).",
@@ -139,7 +139,7 @@ export const kapGlyphDocs = {
     "√": {
         "glyph": "√",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#square_root",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L928",
         "monad": {
             "name": "Square Root",
             "description": "Computes the square root of the argument.",
@@ -154,7 +154,7 @@ export const kapGlyphDocs = {
     "⌊": {
         "glyph": "⌊",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#min_floor",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L938",
         "monad": {
             "name": "Floor",
             "description": "Returns the largest integer which is less than or equal to the argument.",
@@ -169,7 +169,7 @@ export const kapGlyphDocs = {
     "⌈": {
         "glyph": "⌈",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#max_ceiling",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L951",
         "monad": {
             "name": "Ceiling",
             "description": "Returns the smallest integer which is greater than or equal to the argument.",
@@ -184,7 +184,7 @@ export const kapGlyphDocs = {
     "!": {
         "glyph": "!",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#binomial_gamma",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L964",
         "monad": {
             "name": "Gamma",
             "description": "Computes the result of the gamma function on A.",
@@ -199,7 +199,7 @@ export const kapGlyphDocs = {
     "=": {
         "glyph": "=",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#equals",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L744",
         "monad": {
             "name": "Classify",
             "description": "Return a 1-dimensional array where elements with the same value are mapped to the same number.",
@@ -214,7 +214,7 @@ export const kapGlyphDocs = {
     "≠": {
         "glyph": "≠",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#not_equals",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L767",
         "monad": {
             "name": "Unique Mask",
             "description": "Returns a boolean array where 1 indicates the first occurrence of each unique element.",
@@ -229,7 +229,7 @@ export const kapGlyphDocs = {
     "<": {
         "glyph": "<",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#less_than",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L800",
         "monad": {
             "name": "Increase Rank",
             "description": "Resizes the argument to add a new dimension of size 1 as an initial dimension.",
@@ -244,7 +244,7 @@ export const kapGlyphDocs = {
     ">": {
         "glyph": ">",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#greater_than",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L816",
         "monad": {
             "name": "Decrease Rank",
             "description": "Removes the major axis from the argument, reshaping to multiply first two axes together.",
@@ -259,7 +259,7 @@ export const kapGlyphDocs = {
     "≤": {
         "glyph": "≤",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#less_than_or_equal",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L833",
         "dyad": {
             "name": "Less Than or Equal",
             "description": "Return 1 if A is less than or equal to B.",
@@ -269,7 +269,7 @@ export const kapGlyphDocs = {
     "≥": {
         "glyph": "≥",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#greater_than_or_equal",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L842",
         "dyad": {
             "name": "Greater Than or Equal",
             "description": "Return 1 if A is greater than or equal to B.",
@@ -279,7 +279,7 @@ export const kapGlyphDocs = {
     "∧": {
         "glyph": "∧",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#logical_and",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L851",
         "monad": {
             "name": "Sort Up",
             "description": "Sort the array in ascending order.",
@@ -294,7 +294,7 @@ export const kapGlyphDocs = {
     "∨": {
         "glyph": "∨",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#logical_or",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L875",
         "monad": {
             "name": "Sort Down",
             "description": "Sort the array in descending order.",
@@ -309,7 +309,7 @@ export const kapGlyphDocs = {
     "⍲": {
         "glyph": "⍲",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#logical_nand",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L895",
         "dyad": {
             "name": "Logical Nand",
             "description": "Returns 0 if A and B are both 1, otherwise return 1. Equivalent to ~A∧B.",
@@ -319,7 +319,7 @@ export const kapGlyphDocs = {
     "⍱": {
         "glyph": "⍱",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#logical_nor",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L903",
         "dyad": {
             "name": "Logical Nor",
             "description": "Returns 0 if either A or B is 1, otherwise return 1. Equivalent to ~A∨B.",
@@ -329,7 +329,7 @@ export const kapGlyphDocs = {
     "~": {
         "glyph": "~",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#logical_not_without",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L911",
         "monad": {
             "name": "Logical Not",
             "description": "Returns 1 if the argument is 0, and vice versa. Argument must be 0 or 1.",
@@ -344,7 +344,7 @@ export const kapGlyphDocs = {
     "≡": {
         "glyph": "≡",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#compare_equal_depth",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L976",
         "monad": {
             "name": "Depth",
             "description": "Returns the depth of the argument. The depth is the largest number of recursively nested arrays.",
@@ -359,7 +359,7 @@ export const kapGlyphDocs = {
     "≢": {
         "glyph": "≢",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#compare_not_equals_tally",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L995",
         "monad": {
             "name": "Tally (Major Axis Size)",
             "description": "Return the size of the first dimension. Equivalent to ↑⍴A.",
@@ -374,7 +374,7 @@ export const kapGlyphDocs = {
     "⍴": {
         "glyph": "⍴",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#shape_reshape",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1027",
         "monad": {
             "name": "Shape",
             "description": "Return the shape of the argument as an array containing the size of each dimension.",
@@ -389,7 +389,7 @@ export const kapGlyphDocs = {
     "⍳": {
         "glyph": "⍳",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#index_generator_index_of",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1094",
         "monad": {
             "name": "Index Generator",
             "description": "If scalar, generate 1-dimensional array of A numbers from 0 to A-1. If array, generate array with coordinates.",
@@ -404,7 +404,7 @@ export const kapGlyphDocs = {
     "⍸": {
         "glyph": "⍸",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#where_interval_index",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1688",
         "monad": {
             "name": "Where",
             "description": "Given an array of positive integers, return indexes where nonzero elements exist. Values repeated per integer value.",
@@ -419,7 +419,7 @@ export const kapGlyphDocs = {
     "⊢": {
         "glyph": "⊢",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#identity_right",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1137",
         "monad": {
             "name": "Identity",
             "description": "Returns the argument itself.",
@@ -434,7 +434,7 @@ export const kapGlyphDocs = {
     "⊣": {
         "glyph": "⊣",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#hide_left",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1157",
         "monad": {
             "name": "Hide",
             "description": "Forces evaluation of argument ensuring side effects are called. Returns an empty array that won't be printed in REPL.",
@@ -449,7 +449,7 @@ export const kapGlyphDocs = {
     "⌷": {
         "glyph": "⌷",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#list_to_array_index",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1175",
         "monad": {
             "name": "List to Array",
             "description": "Given an N-tuple, return a 1-dimensional array with its content.",
@@ -464,7 +464,7 @@ export const kapGlyphDocs = {
     "⊂": {
         "glyph": "⊂",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#enclose_partition",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1189",
         "monad": {
             "name": "Enclose",
             "description": "For non-primitive values, return a 0-dimensional array containing the argument. For primitives, returns the value itself.",
@@ -479,7 +479,7 @@ export const kapGlyphDocs = {
     "⊃": {
         "glyph": "⊃",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#disclose_pick",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1213",
         "monad": {
             "name": "Disclose (Mix)",
             "description": "If enclosed (rank 0), returns the array element. For rank 1+, performs mix operation aligning subarrays.",
@@ -494,7 +494,7 @@ export const kapGlyphDocs = {
     ",": {
         "glyph": ",",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#concatenate_ravel",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1265",
         "monad": {
             "name": "Ravel",
             "description": "Return a new array containing the same values reshaped to a single dimension.",
@@ -509,7 +509,7 @@ export const kapGlyphDocs = {
     "⍪": {
         "glyph": "⍪",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#concatenate_first_table",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1279",
         "monad": {
             "name": "Table",
             "description": "Reshape the argument into a 2-dimensional array. For 1D, shape becomes (≢A) 1.",
@@ -524,7 +524,7 @@ export const kapGlyphDocs = {
     "⍮": {
         "glyph": "⍮",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#singleton_pair",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1291",
         "monad": {
             "name": "Singleton",
             "description": "Creates a 1-dimensional array of size 1 containing the argument. Same as ,⊂.",
@@ -539,7 +539,7 @@ export const kapGlyphDocs = {
     "↑": {
         "glyph": "↑",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#take",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1303",
         "monad": {
             "name": "Take First",
             "description": "Returns the first element in the argument. If scalar, returns the argument itself.",
@@ -554,7 +554,7 @@ export const kapGlyphDocs = {
     "↓": {
         "glyph": "↓",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#drop",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1346",
         "monad": {
             "name": "Drop First",
             "description": "Removes one row from the major axis. Equivalent to 1↓A.",
@@ -569,7 +569,7 @@ export const kapGlyphDocs = {
     "?": {
         "glyph": "?",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#roll_deal",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1372",
         "monad": {
             "name": "Roll",
             "description": "For integer > 0, random integer from 0 to value-1. For 0, random float from 0 to 1.",
@@ -584,7 +584,7 @@ export const kapGlyphDocs = {
     "⌽": {
         "glyph": "⌽",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#rotate_reverse",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1389",
         "monad": {
             "name": "Reverse",
             "description": "Reverse the order of elements along the last axis.",
@@ -599,7 +599,7 @@ export const kapGlyphDocs = {
     "⊖": {
         "glyph": "⊖",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#rotate_reverse_vertically",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1478",
         "monad": {
             "name": "Reverse First",
             "description": "Same as ⌽ but operates along axis 0.",
@@ -614,7 +614,7 @@ export const kapGlyphDocs = {
     "⍉": {
         "glyph": "⍉",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#transpose",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1488",
         "monad": {
             "name": "Transpose",
             "description": "Reverses the axes of the right argument. For 2D array, this is matrix transpose.",
@@ -629,7 +629,7 @@ export const kapGlyphDocs = {
     "∊": {
         "glyph": "∊",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#member",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1528",
         "monad": {
             "name": "Enlist",
             "description": "Recursively find all atomic values and return them as a single-dimensional array.",
@@ -644,7 +644,7 @@ export const kapGlyphDocs = {
     "⍷": {
         "glyph": "⍷",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#find",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1558",
         "dyad": {
             "name": "Find",
             "description": "Test entire A against each position in B. Returns boolean array same shape as B with 1 at match start positions.",
@@ -654,7 +654,7 @@ export const kapGlyphDocs = {
     "⍋": {
         "glyph": "⍋",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#grade_up",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1568",
         "monad": {
             "name": "Grade Up",
             "description": "Returns a permutation vector. Indexing into argument with result gives sorted array (ascending).",
@@ -664,7 +664,7 @@ export const kapGlyphDocs = {
     "⍒": {
         "glyph": "⍒",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#grade_down",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1578",
         "monad": {
             "name": "Grade Down",
             "description": "Same as ⍋ but for descending order.",
@@ -674,7 +674,7 @@ export const kapGlyphDocs = {
     "/": {
         "glyph": "/",
         "type": "operator",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#replicate_reduce",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1939",
         "monad": {
             "name": "Reduce",
             "description": "Apply function between elements. Lazy evaluation.",
@@ -689,7 +689,7 @@ export const kapGlyphDocs = {
     "⌿": {
         "glyph": "⌿",
         "type": "operator",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#replicate_reduce_first",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1986",
         "monad": {
             "name": "Reduce First",
             "description": "Same as / but axis defaults to 0. Result is enclosed for rank-1 input (APL-compatible).",
@@ -704,7 +704,7 @@ export const kapGlyphDocs = {
     "\\": {
         "glyph": "\\",
         "type": "operator",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#scan",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2070",
         "monad": {
             "name": "Scan",
             "description": "Like reduce but preserves intermediary results. Computed left-to-right (like BQN/J, unlike APL).",
@@ -714,7 +714,7 @@ export const kapGlyphDocs = {
     "⍀": {
         "glyph": "⍀",
         "type": "operator",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#scan_first",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2087",
         "monad": {
             "name": "Scan First",
             "description": "Same as \\ but scans along axis 0.",
@@ -724,7 +724,7 @@ export const kapGlyphDocs = {
     "¨": {
         "glyph": "¨",
         "type": "operator",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#each",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1924",
         "monad": {
             "name": "Each",
             "description": "Apply function to each element. Result is lazy - function called when value retrieved.",
@@ -734,7 +734,7 @@ export const kapGlyphDocs = {
     "⌻": {
         "glyph": "⌻",
         "type": "operator",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#outer_product",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1999",
         "dyad": {
             "name": "Outer Product",
             "description": "Returns array of all combinations of elements from last axis of A with leading axis of B.",
@@ -744,7 +744,7 @@ export const kapGlyphDocs = {
     "∙": {
         "glyph": "∙",
         "type": "operator",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#inner_product",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2022",
         "dyad": {
             "name": "Inner Product",
             "description": "APL-compatible inner product. Uses middle dot instead of period.",
@@ -754,7 +754,7 @@ export const kapGlyphDocs = {
     "⍨": {
         "glyph": "⍨",
         "type": "operator",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#commute_duplicate",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2028",
         "monad": {
             "name": "Duplicate",
             "description": "Derives monadic function that calls F dyadically with same argument on both sides.",
@@ -769,7 +769,7 @@ export const kapGlyphDocs = {
     "⍣": {
         "glyph": "⍣",
         "type": "operator",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#power_operator",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2052",
         "monad": {
             "name": "Power Operator",
             "description": "Repeatedly apply f. If g is integer, apply f that many times. If g is function, apply until g returns 1.",
@@ -779,7 +779,7 @@ export const kapGlyphDocs = {
     "⍤": {
         "glyph": "⍤",
         "type": "operator",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#rank",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2093",
         "monad": {
             "name": "Rank",
             "description": "Apply function to cells of specified rank. Negative rank is complementary (excludes leading axes).",
@@ -789,7 +789,7 @@ export const kapGlyphDocs = {
     "∘": {
         "glyph": "∘",
         "type": "operator",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#compose",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2223",
         "monad": {
             "name": "Compose",
             "description": "x A∘B y evaluates as x A (B y). A∘B y evaluates as y A (B y).",
@@ -799,7 +799,7 @@ export const kapGlyphDocs = {
     "⍛": {
         "glyph": "⍛",
         "type": "operator",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#inverse_compose",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2228",
         "monad": {
             "name": "Inverse Compose",
             "description": "x A⍛B y evaluates as (A x) B y. A⍛B y evaluates as (A y) B y.",
@@ -809,7 +809,7 @@ export const kapGlyphDocs = {
     "⍥": {
         "glyph": "⍥",
         "type": "operator",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#over",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2233",
         "monad": {
             "name": "Over",
             "description": "x A⍥B y evaluates as (B x) A (B y). Processes arguments with B before acting with A.",
@@ -819,7 +819,7 @@ export const kapGlyphDocs = {
     "⍢": {
         "glyph": "⍢",
         "type": "operator",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#structural_under",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2241",
         "monad": {
             "name": "Structural Under",
             "description": "Call B, apply A to result, then reverse effect of B. Works with non-invertible structural functions.",
@@ -829,7 +829,7 @@ export const kapGlyphDocs = {
     "∵": {
         "glyph": "∵",
         "type": "operator",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#derive_bitwise",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2109",
         "monad": {
             "name": "Derive Bitwise",
             "description": "Derives function performing operation on individual bits. +∵ is xor, ×∵ is and, ∨∵ is or, etc.",
@@ -839,7 +839,7 @@ export const kapGlyphDocs = {
     "∥": {
         "glyph": "∥",
         "type": "operator",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#parallel",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2139",
         "monad": {
             "name": "Parallel",
             "description": "Derives parallel version of function. Currently only works with ¨ (each). Function must be pure.",
@@ -849,7 +849,7 @@ export const kapGlyphDocs = {
     "˝": {
         "glyph": "˝",
         "type": "operator",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#inverse",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2159",
         "monad": {
             "name": "Inverse",
             "description": "Derives functional inverse. F F˝ x = x. For dyadic: x F x F˝ y = y.",
@@ -859,7 +859,7 @@ export const kapGlyphDocs = {
     "⍰": {
         "glyph": "⍰",
         "type": "operator",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#conditional_null",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2175",
         "monad": {
             "name": "Conditional Null",
             "description": "If right argument is null, returns null. Otherwise calls original function. Useful for hashmap lookups.",
@@ -869,7 +869,7 @@ export const kapGlyphDocs = {
     "«": {
         "glyph": "«",
         "type": "syntax",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#fork",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc",
         "monad": {
             "name": "Fork (Left)",
             "description": "Part of fork syntax A«B»C. x A«B»C y evaluates as (x A y) B (x C y).",
@@ -879,7 +879,7 @@ export const kapGlyphDocs = {
     "»": {
         "glyph": "»",
         "type": "syntax",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#fork",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc",
         "monad": {
             "name": "Fork (Right)",
             "description": "Part of fork syntax A«B»C. x A«B»C y evaluates as (x A y) B (x C y).",
@@ -889,7 +889,7 @@ export const kapGlyphDocs = {
     "⊆": {
         "glyph": "⊆",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#nest_partitioned_enclose",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1646",
         "monad": {
             "name": "Nest",
             "description": "APL-compatible nest function.",
@@ -904,7 +904,7 @@ export const kapGlyphDocs = {
     "⊇": {
         "glyph": "⊇",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#select",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1667",
         "dyad": {
             "name": "Select",
             "description": "A is array of coordinates. Return values from B at those coordinates.",
@@ -914,7 +914,7 @@ export const kapGlyphDocs = {
     "⫇": {
         "glyph": "⫇",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#group",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1680",
         "dyad": {
             "name": "Group",
             "description": "A is integers. Group major cells of B by A values. Negative A values drop those cells.",
@@ -924,7 +924,7 @@ export const kapGlyphDocs = {
     "∪": {
         "glyph": "∪",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#unique_union",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1755",
         "monad": {
             "name": "Unique",
             "description": "Return an array of all unique elements in the argument.",
@@ -939,7 +939,7 @@ export const kapGlyphDocs = {
     "∩": {
         "glyph": "∩",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#intersection",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1786",
         "dyad": {
             "name": "Intersection",
             "description": "Returns elements present in both A and B.",
@@ -949,7 +949,7 @@ export const kapGlyphDocs = {
     "⊤": {
         "glyph": "⊤",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#encode",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1770",
         "dyad": {
             "name": "Encode",
             "description": "Compute representation of B in radix system defined by A. Inverse of Decode.",
@@ -959,7 +959,7 @@ export const kapGlyphDocs = {
     "⊥": {
         "glyph": "⊥",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#decode",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1779",
         "dyad": {
             "name": "Decode",
             "description": "Evaluate B in radix system defined by A. Inverse of Encode.",
@@ -969,7 +969,7 @@ export const kapGlyphDocs = {
     "⌸": {
         "glyph": "⌸",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#key",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2191",
         "dyad": {
             "name": "Key",
             "description": "Group values B by keys A. Returns n-by-2 array with unique keys and their grouped values.",
@@ -979,7 +979,7 @@ export const kapGlyphDocs = {
     "⌹": {
         "glyph": "⌹",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#matrix_division",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1793",
         "monad": {
             "name": "Matrix Inverse",
             "description": "Return the inverse of a matrix.",
@@ -994,7 +994,7 @@ export const kapGlyphDocs = {
     "…": {
         "glyph": "…",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#range",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1805",
         "dyad": {
             "name": "Range",
             "description": "Generate sequence from A to B. If arrays, use last of A and first of B as range endpoints.",
@@ -1004,7 +1004,7 @@ export const kapGlyphDocs = {
     "≬": {
         "glyph": "≬",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#create_list",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1836",
         "monad": {
             "name": "Create List",
             "description": "Create an N-tuple containing the elements of the input array.",
@@ -1014,7 +1014,7 @@ export const kapGlyphDocs = {
     "%": {
         "glyph": "%",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#case",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1631",
         "dyad": {
             "name": "Case",
             "description": "A is indices, B is list of arrays same shape as A. Pick value from corresponding subarray for each cell.",
@@ -1024,7 +1024,7 @@ export const kapGlyphDocs = {
     "⍎": {
         "glyph": "⍎",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#parse_number",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1624",
         "monad": {
             "name": "Parse Number",
             "description": "Given a string, attempt to parse it as a number. Raises error if parsing fails.",
@@ -1034,7 +1034,7 @@ export const kapGlyphDocs = {
     "⍕": {
         "glyph": "⍕",
         "type": "function",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#format",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1597",
         "monad": {
             "name": "Format",
             "description": "Returns a string representation of the argument.",
@@ -1049,7 +1049,7 @@ export const kapGlyphDocs = {
     "⍝": {
         "glyph": "⍝",
         "type": "syntax",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#comments",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L218",
         "monad": {
             "name": "Comment",
             "description": "Everything from ⍝ to end of line is a comment.",
@@ -1059,7 +1059,7 @@ export const kapGlyphDocs = {
     "∇": {
         "glyph": "∇",
         "type": "syntax",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#function_definition",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L223",
         "monad": {
             "name": "Function Definition",
             "description": "Define global functions. ∇ header { body }. Header forms: name, name x, x name y, operators.",
@@ -1069,7 +1069,7 @@ export const kapGlyphDocs = {
     "⇐": {
         "glyph": "⇐",
         "type": "syntax",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#local_function",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L266",
         "monad": {
             "name": "Local Function Declaration",
             "description": "Declare lexically scoped local functions. Has access to variables in its scope.",
@@ -1079,7 +1079,7 @@ export const kapGlyphDocs = {
     "λ": {
         "glyph": "λ",
         "type": "syntax",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#lambda",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L286",
         "monad": {
             "name": "Create Function Reference",
             "description": "Create a function reference from a function. Captures lexical bindings.",
@@ -1089,7 +1089,7 @@ export const kapGlyphDocs = {
     "⍞": {
         "glyph": "⍞",
         "type": "syntax",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#apply",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L300",
         "monad": {
             "name": "Apply Function Reference",
             "description": "Call a function given its function reference stored in a variable.",
@@ -1099,7 +1099,7 @@ export const kapGlyphDocs = {
     "←": {
         "glyph": "←",
         "type": "syntax",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#assignment",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc",
         "monad": {
             "name": "Assignment",
             "description": "Assign value to variable. Also supports modified assignment: x F← value becomes x ← x F value.",
@@ -1109,7 +1109,7 @@ export const kapGlyphDocs = {
     "→": {
         "glyph": "→",
         "type": "syntax",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#return",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2569",
         "monad": {
             "name": "Return",
             "description": "Return value from innermost function.",
@@ -1124,7 +1124,7 @@ export const kapGlyphDocs = {
     "⋄": {
         "glyph": "⋄",
         "type": "syntax",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#statement_separator",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc",
         "monad": {
             "name": "Statement Separator",
             "description": "Separate statements. Equivalent to newline.",
@@ -1134,7 +1134,7 @@ export const kapGlyphDocs = {
     "⍬": {
         "glyph": "⍬",
         "type": "syntax",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#zilde",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc",
         "monad": {
             "name": "Zilde (Empty Numeric Vector)",
             "description": "The empty numeric vector.",
@@ -1144,7 +1144,7 @@ export const kapGlyphDocs = {
     "⍺": {
         "glyph": "⍺",
         "type": "syntax",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#left_argument",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc",
         "monad": {
             "name": "Left Argument",
             "description": "In a dfn/dop, represents the left argument.",
@@ -1154,7 +1154,7 @@ export const kapGlyphDocs = {
     "⍵": {
         "glyph": "⍵",
         "type": "syntax",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#right_argument",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc",
         "monad": {
             "name": "Right Argument",
             "description": "In a dfn/dop, represents the right argument.",
@@ -1164,7 +1164,7 @@ export const kapGlyphDocs = {
     "¯": {
         "glyph": "¯",
         "type": "syntax",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#negative",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc",
         "monad": {
             "name": "Negative (High Minus)",
             "description": "Prefix for negative number literals. Not the same as - (negate function).",
@@ -1174,7 +1174,7 @@ export const kapGlyphDocs = {
     "@": {
         "glyph": "@",
         "type": "syntax",
-        "docUrl": "https://kapdemo.dhsdevelopments.com/reference.html#character",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc",
         "monad": {
             "name": "Character Literal",
             "description": "Character literal prefix. @a for 'a', @\\n for newline, @\\u0041 for hex codepoint.",

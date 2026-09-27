@@ -11,7 +11,6 @@
 export const tinyaplDocsMeta = {
     language: "TinyAPL",
     source: "https://beta.tinyapl.rubenverg.com/",
-    scrapedAt: "2026-02-03T20:51:22.541Z",
     version: "latest"
 };
 
@@ -174,7 +173,7 @@ export const tinyaplGlyphDocs = {
     },
     "/": {
             "glyph": "/",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/fold",
             "overloads": [
                     {
@@ -324,7 +323,7 @@ export const tinyaplGlyphDocs = {
     },
     "\\": {
             "glyph": "\\",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_prefixes",
             "overloads": [
                     {
@@ -431,7 +430,7 @@ export const tinyaplGlyphDocs = {
     },
     "¨": {
             "glyph": "¨",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/each",
             "overloads": [
                     {
@@ -450,7 +449,7 @@ export const tinyaplGlyphDocs = {
     },
     "«»": {
             "glyph": "«»",
-            "type": "adverb",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/fork",
             "overloads": [
                     {
@@ -464,6 +463,32 @@ export const tinyaplGlyphDocs = {
             "dyad": {
                     "name": "Fork",
                     "description": "Note that « and » are two separate operators, but only meant to be used together.",
+                    "example": ""
+            }
+    },
+    "µ": {
+            "glyph": "µ",
+            "type": "adverb",
+            "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/function_mean",
+            "overloads": [
+                    {
+                            "name": "Function Mean",
+                            "description": "r is the F mean of the cells of y: r←F˝+/«÷»≢F◡y.",
+                            "example": "",
+                            "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/function_mean",
+                            "valence": "monad"
+                    },
+                    {
+                            "name": "Power Mean",
+                            "description": "n is a numeric scalar. r is the nth power mean of the cells of y:",
+                            "example": "",
+                            "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/power_mean",
+                            "valence": "monad"
+                    }
+            ],
+            "monad": {
+                    "name": "Function Mean",
+                    "description": "r is the F mean of the cells of y: r←F˝+/«÷»≢F◡y.",
                     "example": ""
             }
     },
@@ -538,7 +563,7 @@ export const tinyaplGlyphDocs = {
     },
     "˝": {
             "glyph": "˝",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/inverse",
             "overloads": [
                     {
@@ -619,7 +644,7 @@ export const tinyaplGlyphDocs = {
     },
     "ᐵ": {
             "glyph": "ᐵ",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/each_left",
             "overloads": [
                     {
@@ -638,7 +663,7 @@ export const tinyaplGlyphDocs = {
     },
     "ᑈ": {
             "glyph": "ᑈ",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/each_right",
             "overloads": [
                     {
@@ -657,7 +682,7 @@ export const tinyaplGlyphDocs = {
     },
     "ᑒ": {
             "glyph": "ᑒ",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_contents",
             "overloads": [
                     {
@@ -676,7 +701,7 @@ export const tinyaplGlyphDocs = {
     },
     "ᑣ": {
             "glyph": "ᑣ",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/boxed",
             "overloads": [
                     {
@@ -695,7 +720,7 @@ export const tinyaplGlyphDocs = {
     },
     "ᓗ": {
             "glyph": "ᓗ",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/cells_left",
             "overloads": [
                     {
@@ -714,7 +739,7 @@ export const tinyaplGlyphDocs = {
     },
     "ᓚ": {
             "glyph": "ᓚ",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/cells_right",
             "overloads": [
                     {
@@ -795,7 +820,7 @@ export const tinyaplGlyphDocs = {
     },
     "⁖": {
             "glyph": "⁖",
-            "type": "function",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/valences",
             "overloads": [
                     {
@@ -990,7 +1015,7 @@ export const tinyaplGlyphDocs = {
     },
     "⇽": {
             "glyph": "⇽",
-            "type": "combinator",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/right_fork",
             "overloads": [
                     {
@@ -1009,7 +1034,7 @@ export const tinyaplGlyphDocs = {
     },
     "⇾": {
             "glyph": "⇾",
-            "type": "combinator",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/left_fork",
             "overloads": [
                     {
@@ -1059,7 +1084,7 @@ export const tinyaplGlyphDocs = {
     },
     "∘": {
             "glyph": "∘",
-            "type": "combinator",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/atop",
             "overloads": [
                     {
@@ -1090,7 +1115,7 @@ export const tinyaplGlyphDocs = {
     },
     "∙": {
             "glyph": "∙",
-            "type": "function",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/alternant",
             "overloads": [
                     {
@@ -1295,7 +1320,7 @@ export const tinyaplGlyphDocs = {
     },
     "∵": {
             "glyph": "∵",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/bitwise",
             "overloads": [
                     {
@@ -1333,7 +1358,7 @@ export const tinyaplGlyphDocs = {
     },
     "≈": {
             "glyph": "≈",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/approximate",
             "overloads": [
                     {
@@ -1695,7 +1720,7 @@ export const tinyaplGlyphDocs = {
     },
     "⊞": {
             "glyph": "⊞",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/table",
             "overloads": [
                     {
@@ -1790,7 +1815,7 @@ export const tinyaplGlyphDocs = {
     },
     "⊩": {
             "glyph": "⊩",
-            "type": "function",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/dex",
             "overloads": [
                     {
@@ -1909,7 +1934,7 @@ export const tinyaplGlyphDocs = {
     },
     "⊸": {
             "glyph": "⊸",
-            "type": "combinator",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/left_hook",
             "overloads": [
                     {
@@ -2054,7 +2079,7 @@ export const tinyaplGlyphDocs = {
     },
     "⌓": {
             "glyph": "⌓",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_simple_scalars",
             "overloads": [
                     {
@@ -2092,7 +2117,7 @@ export const tinyaplGlyphDocs = {
     },
     "⌸": {
             "glyph": "⌸",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/key",
             "overloads": [
                     {
@@ -2149,7 +2174,7 @@ export const tinyaplGlyphDocs = {
     },
     "⌺": {
             "glyph": "⌺",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_infixes",
             "overloads": [
                     {
@@ -2361,7 +2386,7 @@ export const tinyaplGlyphDocs = {
     },
     "⍛": {
             "glyph": "⍛",
-            "type": "combinator",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/reverse_atop",
             "overloads": [
                     {
@@ -2475,7 +2500,7 @@ export const tinyaplGlyphDocs = {
     },
     "⍢": {
             "glyph": "⍢",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/under",
             "overloads": [
                     {
@@ -2494,7 +2519,7 @@ export const tinyaplGlyphDocs = {
     },
     "⍣": {
             "glyph": "⍣",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/repeat",
             "overloads": [
                     {
@@ -2520,7 +2545,7 @@ export const tinyaplGlyphDocs = {
     },
     "⍤": {
             "glyph": "⍤",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/at_rank",
             "overloads": [
                     {
@@ -2539,7 +2564,7 @@ export const tinyaplGlyphDocs = {
     },
     "⍥": {
             "glyph": "⍥",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/at_depth",
             "overloads": [
                     {
@@ -2558,7 +2583,7 @@ export const tinyaplGlyphDocs = {
     },
     "⍦": {
             "glyph": "⍦",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/multisets",
             "overloads": [
                     {
@@ -2589,7 +2614,7 @@ export const tinyaplGlyphDocs = {
     },
     "⍨": {
             "glyph": "⍨",
-            "type": "combinator",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/commute",
             "overloads": [
                     {
@@ -2658,7 +2683,7 @@ export const tinyaplGlyphDocs = {
     },
     "⍫": {
             "glyph": "⍫",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/contextual_under",
             "overloads": [
                     {
@@ -2877,12 +2902,12 @@ export const tinyaplGlyphDocs = {
     },
     "⎊": {
             "glyph": "⎊",
-            "type": "function",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/catch",
             "overloads": [
                     {
                             "name": "Catch",
-                            "description": "Run [x]F y. If it succeeds, r is its result; otherwise r is [x]G y.",
+                            "description": "Run \\[x\\]F y. If it succeeds, r is its result; otherwise r is \\[x\\]G y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/catch",
                             "valence": "dyad"
@@ -2890,7 +2915,7 @@ export const tinyaplGlyphDocs = {
             ],
             "dyad": {
                     "name": "Catch",
-                    "description": "Run [x]F y. If it succeeds, r is its result; otherwise r is [x]G y.",
+                    "description": "Run \\[x\\]F y. If it succeeds, r is its result; otherwise r is \\[x\\]G y.",
                     "example": ""
             }
     },
@@ -2922,7 +2947,7 @@ export const tinyaplGlyphDocs = {
     },
     "⑴": {
             "glyph": "⑴",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/origin_one",
             "overloads": [
                     {
@@ -2967,7 +2992,7 @@ export const tinyaplGlyphDocs = {
     },
     "◠": {
             "glyph": "◠",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_scalars",
             "overloads": [
                     {
@@ -2986,7 +3011,7 @@ export const tinyaplGlyphDocs = {
     },
     "◡": {
             "glyph": "◡",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_cells",
             "overloads": [
                     {
@@ -3005,7 +3030,7 @@ export const tinyaplGlyphDocs = {
     },
     "⟜": {
             "glyph": "⟜",
-            "type": "combinator",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/right_hook",
             "overloads": [
                     {
@@ -3024,7 +3049,7 @@ export const tinyaplGlyphDocs = {
     },
     "⤺": {
             "glyph": "⤺",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/backward",
             "overloads": [
                     {
@@ -3043,7 +3068,7 @@ export const tinyaplGlyphDocs = {
     },
     "⥼": {
             "glyph": "⥼",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_right",
             "overloads": [
                     {
@@ -3062,7 +3087,7 @@ export const tinyaplGlyphDocs = {
     },
     "⥽": {
             "glyph": "⥽",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_left",
             "overloads": [
                     {
@@ -3200,7 +3225,7 @@ export const tinyaplGlyphDocs = {
     },
     "⫣": {
             "glyph": "⫣",
-            "type": "function",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/lev",
             "overloads": [
                     {
@@ -3219,7 +3244,7 @@ export const tinyaplGlyphDocs = {
     },
     "⫤": {
             "glyph": "⫤",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/ident",
             "overloads": [
                     {
@@ -3238,7 +3263,7 @@ export const tinyaplGlyphDocs = {
     },
     "⬚": {
             "glyph": "⬚",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/fill",
             "overloads": [
                     {
@@ -3288,7 +3313,7 @@ export const tinyaplGlyphDocs = {
     },
     "⸚": {
             "glyph": "⸚",
-            "type": "function",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/mirror",
             "overloads": [
                     {

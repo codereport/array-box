@@ -581,6 +581,8 @@ export const tinyaplGlyphNames = {
     '⊏': 'first cell select',
     '⊐': 'index of',
     '⬚': 'fill',
+    // Added from upstream documentation; review placement and labels.
+    'µ': 'function mean / power mean',
 };
 
 // Glyph names for J (monadic/dyadic names)
@@ -851,7 +853,6 @@ export const uiuaGlyphNames = {
     '⌕': 'find',
     '⦷': 'mask',
     '∊': 'memberof',
-    '⨂': 'indexin',
     '⊗': 'indexof',
     '◫': 'windows',
     '☇': 'rerank',
@@ -935,7 +936,6 @@ export const uiuaGlyphNames = {
     '⚂': 'random',
     '∂': 'derivative',
     '∫': 'integral',
-    '⩜': 'geometric',
     
     // Syntax
     '‿': 'strand',
@@ -950,6 +950,12 @@ export const uiuaGlyphNames = {
     '@': 'character',
     '$': 'format/system',
     '⸮': 'recur',
+    // Added from upstream documentation; review placement and labels.
+    '⨰': 'inner product',
+    '𝕍': 'multivector',
+    '⨱': 'outer product',
+    '⍡': 'pattern',
+    '⊨': 'validate',
 };
 
 // Default keyboard layout (US QWERTY)
