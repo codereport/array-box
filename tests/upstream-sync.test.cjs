@@ -16,6 +16,31 @@ test('TinyAPL keyboard parser handles shorter rows, escapes, and Prefix sentinel
     assert.equal(parsed.find(row => row.code === 'Backslash').sym, '\\');
 });
 
+test('name audit uses every TinyAPL overload and catches stale labels', async () => {
+    const { documentedNames, findNameDifferences } = await import('../scripts/check-primitive-names.mjs');
+    const docs = {
+        '⌺': {
+            monad: { name: 'On Pairs' },
+            dyad: { name: 'On Infixes' },
+            overloads: [{ name: 'On Infixes' }, { name: 'On Pairs' }],
+        },
+    };
+    assert.deepEqual(documentedNames('tinyapl', docs['⌺']), ['on pairs', 'on infixes']);
+    assert.deepEqual(findNameDifferences('tinyapl', { '⌺': 'stencil' }, docs), [
+        { glyph: '⌺', current: 'stencil', expected: 'on pairs / on infixes', docUrl: undefined },
+    ]);
+});
+
+test('name audit detects duplicate glyph keys before JavaScript overwrites them', async () => {
+    const { duplicateGlyphKeys, removeDuplicateGlyphKeys } = await import('../scripts/check-primitive-names.mjs');
+    const code = "export const kapGlyphNames = {\n    '≬': 'create list',\n    \"≬\": 'between',\n};";
+    assert.deepEqual(duplicateGlyphKeys(code, 'kapGlyphNames'), ['≬']);
+    const fixed = removeDuplicateGlyphKeys(code, 'kapGlyphNames');
+    assert.deepEqual(fixed.removed, ['≬']);
+    assert.match(fixed.code, /'≬': 'create list'/);
+    assert.doesNotMatch(fixed.code, /between/);
+});
+
 test('Uiua unknown classes use argument count or modifier arity', async () => {
     const { classifyUiua } = await load();
     assert.deepEqual(classifyUiua({ class: 'GeometricAlgebra', args: 1 }), ['monadicArray', 'monadic']);

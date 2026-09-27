@@ -11,7 +11,7 @@
     "scrape:bqn": "node scripts/scrape-bqn-docs.cjs",
     "scrape:uiua": "node scripts/scrape-uiua-docs.cjs",
     "scrape:j": "node scripts/scrape-j-docs.cjs",
-    "sync:primitives": "node scripts/sync-upstream-primitives.mjs",
+    "sync:primitives": "node scripts/sync-upstream-primitives.mjs && node scripts/check-primitive-names.mjs --fix",
     "scrape:all": "node scripts/scrape-bqn-docs.cjs && node scripts/scrape-uiua-docs.cjs && node scripts/scrape-j-docs.cjs"
   },
   "exports": {
