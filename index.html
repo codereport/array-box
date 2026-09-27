@@ -1262,12 +1262,12 @@
         <div class="dropdown-item" data-lang="j">
             <img src="assets/j_logo.svg" alt="J">
             <span class="lang-name">J</span>
-            <span class="lang-version">J9.8.0-beta8</span>
+            <span class="lang-version">J9.8.0-beta9</span>
         </div>
         <div class="dropdown-item" data-lang="kap">
             <img src="assets/kap.png" alt="Kap">
             <span class="lang-name">Kap</span>
-            <span class="lang-version">2026-09-22</span>
+            <span class="lang-version">2026-09-27</span>
         </div>
         <div class="dropdown-item" data-lang="tinyapl">
             <img src="assets/tinyapl.svg" alt="TinyAPL">
@@ -5114,7 +5114,7 @@
         // Add Ctrl+Space handler to code input
         codeInput.addEventListener('keydown', (e) => {
             // Ctrl+Space to show combo box
-            if (e.ctrlKey && e.key === ' ') {
+            if (e.ctrlKey && (e.code === 'Space' || e.key === ' ')) {
                 e.preventDefault();
                 e.stopPropagation();
 
@@ -5329,6 +5329,9 @@
                 for (const overload of doc.overloads) {
                     html += '<div class="f1-doc-tooltip-section">';
                     html += `<div class="f1-doc-tooltip-section-title">${escapeHtml(overload.name)}</div>`;
+                    if (overload.pattern) {
+                        html += `<div class="f1-doc-tooltip-example" style="font-family: ${fontFamily}">${highlightCode(overload.pattern, currentLanguage)}</div>`;
+                    }
                     if (overload.description) {
                         html += `<div class="f1-doc-tooltip-section-desc">${escapeDesc(overload.description)}</div>`;
                     }

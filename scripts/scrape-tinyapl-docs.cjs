@@ -176,9 +176,14 @@ function extractExample(body) {
 /**
  * Determine primitive type based on name/content
  */
-function determineType(name, body) {
+function determineType(name, body, pattern = '') {
     const lowerName = name.toLowerCase();
     const lowerBody = body.toLowerCase();
+
+    // Patterns such as r←(Fµ)y explicitly show a function operand.
+    const operands = (pattern.match(/\b[A-Z]\b/g) || []).length;
+    if (operands >= 2) return 'conjunction';
+    if (operands === 1) return 'adverb';
     
     // Operators/modifiers
     if (lowerBody.includes('operator') || lowerBody.includes('adverb') || 
@@ -229,7 +234,7 @@ async function scrapeTinyaplDocs() {
         const primitivesList = await fetchUrl(PRIMITIVES_INDEX_URL, true);
         
         // Process each primitive file
-        for (const file of primitivesList) {
+        for (const file of primitivesList.sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)) {
             if (!file.name.endsWith('.mdx')) continue;
             
             try {
@@ -243,7 +248,7 @@ async function scrapeTinyaplDocs() {
                 const pattern = frontmatter.pattern || '';
                 const description = extractDescription(body);
                 const example = extractExample(body);
-                const type = determineType(name, body);
+                const type = determineType(name, body, pattern);
                 
                 // Check if this is monad vs dyad based on pattern
                 const isMonad = pattern && !pattern.includes('←') && pattern.match(/^[a-z]←[^←]+$/);
@@ -265,6 +270,7 @@ async function scrapeTinyaplDocs() {
                 // Add this primitive as an overload
                 const overload = {
                     name: name,
+                    pattern: pattern,
                     description: description,
                     example: example,
                     docUrl: docUrl
@@ -320,6 +326,9 @@ async function scrapeTinyaplDocs() {
         }
         
         console.log(`\n\nFetched ${fetchedCount} primitives with ${errorCount} errors`);
+        if (fetchedCount === 0 || errorCount > 0) {
+            throw new Error(`Incomplete TinyAPL primitive fetch (${fetchedCount} fetched, ${errorCount} failed)`);
+        }
         
         // Also try to fetch glyph pages for additional info
         console.log('\nFetching glyphs list...');
@@ -327,7 +336,7 @@ async function scrapeTinyaplDocs() {
             const glyphsList = await fetchUrl(GLYPHS_INDEX_URL, true);
             let glyphFetched = 0;
             
-            for (const file of glyphsList) {
+            for (const file of glyphsList.sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)) {
                 if (!file.name.endsWith('.mdx')) continue;
                 
                 try {
@@ -351,13 +360,13 @@ async function scrapeTinyaplDocs() {
                     await new Promise(resolve => setTimeout(resolve, 50));
                     
                 } catch (err) {
-                    // Ignore errors for glyphs - they're supplementary
+                    throw new Error(`Failed to fetch TinyAPL glyph page ${file.name}: ${err.message}`);
                 }
             }
             
             console.log(`Added ${glyphFetched} additional glyphs`);
         } catch (err) {
-            console.log('Could not fetch glyphs list (non-fatal)');
+            throw new Error(`Incomplete TinyAPL glyph fetch: ${err.message}`);
         }
         
     } catch (err) {
@@ -387,7 +396,6 @@ function generateJsModule(glyphDocs) {
 export const tinyaplDocsMeta = {
     language: "TinyAPL",
     source: "https://beta.tinyapl.rubenverg.com/",
-    scrapedAt: "${new Date().toISOString()}",
     version: "latest"
 };
 

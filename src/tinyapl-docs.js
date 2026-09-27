@@ -11,7 +11,6 @@
 export const tinyaplDocsMeta = {
     language: "TinyAPL",
     source: "https://beta.tinyapl.rubenverg.com/",
-    scrapedAt: "2026-02-03T20:51:22.541Z",
     version: "latest"
 };
 
@@ -24,6 +23,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Binomial",
+                            "pattern": "r←x!y",
                             "description": "r is the result of the scalar application of the binomial function, $\\binom y x = \\frac {y!} {x!(y - x)!}$, it represents the ways of picking x things from y things.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/binomial",
@@ -31,6 +31,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Factorial",
+                            "pattern": "r←!y",
                             "description": "r is the result of the scalar application of the factorial function, $y!$.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/factorial",
@@ -55,6 +56,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Exponential",
+                            "pattern": "r←*y",
                             "description": "r is the result of the scalar application of the exponential function, $e^y$.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/exponential",
@@ -62,6 +64,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Power",
+                            "pattern": "r←x*y",
                             "description": "r is the result of the scalar application of the power function, $x^y$.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/power",
@@ -86,6 +89,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Add",
+                            "pattern": "r←x+y",
                             "description": "r is the result of the scalar application of the addition function:",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/add",
@@ -93,6 +97,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Conjugate",
+                            "pattern": "r←+y",
                             "description": "r is the result of the scalar application of the complex conjugate function, that is, if y = a⊕b ($a + ib$), +y is a⊕-b ($a - ib$). Note that this operation is an identity for real numbers.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/conjugate",
@@ -117,6 +122,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Laminate",
+                            "pattern": "r←x,y",
                             "description": "r is an array whose major cells are x and y: r←x⍪○∧y. Supports the fill extra argument, which is used to pad the two arrays to have matching shape.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/laminate",
@@ -124,6 +130,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Ravel",
+                            "pattern": "r←,y",
                             "description": "r is a vector containing the *ravel* of y, that is, all elements of y. The ravel of a dictionary is its values.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/ravel",
@@ -148,6 +155,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Negate",
+                            "pattern": "r←-y",
                             "description": "r is the result of the scalar application of the negation function, $-y$.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/negate",
@@ -155,6 +163,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Subtract",
+                            "pattern": "r←x-y",
                             "description": "r is the result of the scalar application of the subtraction function:",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/subtract",
@@ -174,11 +183,12 @@ export const tinyaplGlyphDocs = {
     },
     "/": {
             "glyph": "/",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/fold",
             "overloads": [
                     {
                             "name": "Fold",
+                            "pattern": "r←x(F/)y",
                             "description": "r is the result of folding the major cells of y with starting value x using F left-to-right. Supports the backward extra argument, which reduces right-to-left.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/fold",
@@ -186,6 +196,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Reduce",
+                            "pattern": "r←(F/)y",
                             "description": "r is the result of reducing the major cells of y using F, left-to-right. Supports the backward extra argument, which reduces right-to-left.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/reduce",
@@ -210,6 +221,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Less Than",
+                            "pattern": "r←x<y",
                             "description": "r is the result of the scalar less-than comparsion of x and y, according to total array ordering. Supports the tolerance extra argument.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/less_than",
@@ -229,6 +241,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Equal To",
+                            "pattern": "r←x=y",
                             "description": "r is the result of the scalar equality comparison of x and y. Supports the tolerance extra argument.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/equal_to",
@@ -248,6 +261,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "First Cell",
+                            "pattern": "r←>y",
                             "description": "r is the first cell of y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/first_cell",
@@ -255,6 +269,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Greater Than",
+                            "pattern": "r←x>y",
                             "description": "r is the result of the scalar greater-than comparison of x and y, according to total array ordering. Supports the tolerance extra argument.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/greater_than",
@@ -279,6 +294,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Deal",
+                            "pattern": "r←x?y",
                             "description": "x must be a natural vector and y must be a natural scalar and ×/x must be less than or equal to y. r is the result of selecting ×/x elements from the numbers 0 to y-1, without repetitions, reshaped to be of shape x. Supports the origin extra argument, which offsets the result by the origin.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/deal",
@@ -286,6 +302,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Roll",
+                            "pattern": "r←?y",
                             "description": "r is the result of the scalar application of the roll function on y, which must be a natural array:",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/roll",
@@ -310,6 +327,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "At",
+                            "pattern": "r←[x]({Fn}@m)y",
                             "description": "If x is provided, the left operand must be a function.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/at",
@@ -324,11 +342,12 @@ export const tinyaplGlyphDocs = {
     },
     "\\": {
             "glyph": "\\",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_prefixes",
             "overloads": [
                     {
                             "name": "On Prefixes",
+                            "pattern": "r←(F\\)y",
                             "description": "r is the result of applying F to each prefix of y. If F is a reduction function, this is a scan. Supports the backward extra argument, which applies F to suffixes of y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_prefixes",
@@ -348,6 +367,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Case Fold",
+                            "pattern": "r←|y",
                             "description": "r is the scalar application of the case fold function, which converts Unicode chracters to their \"case folded\" equivalent, which makes them suitable for caseless comparison.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/case_fold",
@@ -355,6 +375,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Magnitude",
+                            "pattern": "r←|y",
                             "description": "r is the result of the scalar application of the magnitude function, $\\left| y \\right|$. For real numbers, this is the absolute value, for complex numbers it is the length of the line that connects the origin and y in the cartesian complex plane.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/magnitude",
@@ -362,6 +383,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Remainder",
+                            "pattern": "r←x|y",
                             "description": "r is the result of the scalar application of the remainder function, $y \\mod x$. If x is 0, r is y, otherwise r is y-x×⌊y÷x. Supports the tolerance extra argument for the comparison.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/remainder",
@@ -386,6 +408,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Difference",
+                            "pattern": "r←x~y",
                             "description": "r is the difference of the major cells of x and y, i.e. the cells of x that don't appear in y: r←x⌿⍨~x∊y. The difference of two dictionaries is the dictionary with keys that appear in x but not in y. Supports the tolerance extra argument for the comparison.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/difference",
@@ -393,6 +416,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Not",
+                            "pattern": "r←~y",
                             "description": "r is the result of the scalar application of the (probabilistic) not function, $1 - y$.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/not",
@@ -417,6 +441,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Symmetric Difference",
+                            "pattern": "r←x§y",
                             "description": "r is the symmetric difference of the major cells of x and y, that is, the cells of x that don't appear in y and the cells of y that don't appear in x: r←(x~y)⍪y~x. The symmetric difference of two dictionaries is the dictionary with keys that appear in x but not in y and with keys that appear in y but not in x. Supports the tolerance extra argument for the comparison.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/symmetric_difference",
@@ -431,11 +456,12 @@ export const tinyaplGlyphDocs = {
     },
     "¨": {
             "glyph": "¨",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/each",
             "overloads": [
                     {
                             "name": "Each",
+                            "pattern": "r←[x](F¨)y",
                             "description": "If x is not provided, r is the result of applying F to each element of y, under disclosing it.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/each",
@@ -450,11 +476,12 @@ export const tinyaplGlyphDocs = {
     },
     "«»": {
             "glyph": "«»",
-            "type": "adverb",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/fork",
             "overloads": [
                     {
                             "name": "Fork",
+                            "pattern": "r←[x](F«G»H)y",
                             "description": "Note that « and » are two separate operators, but only meant to be used together.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/fork",
@@ -467,6 +494,34 @@ export const tinyaplGlyphDocs = {
                     "example": ""
             }
     },
+    "µ": {
+            "glyph": "µ",
+            "type": "adverb",
+            "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/function_mean",
+            "overloads": [
+                    {
+                            "name": "Function Mean",
+                            "pattern": "r←(Fµ)y",
+                            "description": "r is the F mean of the cells of y: r←F˝+/«÷»≢F◡y.",
+                            "example": "",
+                            "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/function_mean",
+                            "valence": "monad"
+                    },
+                    {
+                            "name": "Power Mean",
+                            "pattern": "r←(nµ)y",
+                            "description": "n is a numeric scalar. r is the nth power mean of the cells of y:",
+                            "example": "",
+                            "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/power_mean",
+                            "valence": "monad"
+                    }
+            ],
+            "monad": {
+                    "name": "Function Mean",
+                    "description": "r is the F mean of the cells of y: r←F˝+/«÷»≢F◡y.",
+                    "example": ""
+            }
+    },
     "×": {
             "glyph": "×",
             "type": "function",
@@ -474,6 +529,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Case",
+                            "pattern": "r←×y",
                             "description": "r is the scalar application of the case function, which returns 1 for uppercase characters, ¯1 for lowercase characters and 0 for all other characters.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/case",
@@ -481,6 +537,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Direction",
+                            "pattern": "r←×y",
                             "description": "r is the result of the scalar application of the direction function:",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/direction",
@@ -488,6 +545,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Multiply",
+                            "pattern": "r←x×y",
                             "description": "r is the result of the scalar application of the multiplication function, $x \\times y$.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/multiply",
@@ -512,6 +570,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Divide",
+                            "pattern": "r←x÷y",
                             "description": "r is the result of the scalar application of the division function, $\\frac x y$. Fails if y is 0, unless x is also 0 in which case the result is 1.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/divide",
@@ -519,6 +578,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Reciprocal",
+                            "pattern": "r←÷y",
                             "description": "r is the result of the scalar application of the reciprocal function, $\\frac 1 y$. Fails if y is 0.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/reciprocal",
@@ -538,11 +598,12 @@ export const tinyaplGlyphDocs = {
     },
     "˝": {
             "glyph": "˝",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/inverse",
             "overloads": [
                     {
                             "name": "Inverse",
+                            "pattern": "r←[x](F˝)y",
                             "description": "r is the result of calling the inverse of F on \\[x and\\] y. Each function can have up to six inverses:",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/inverse",
@@ -562,6 +623,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Rank",
+                            "pattern": "r←ϼy",
                             "description": "r is a natural describing the *rank* of y, i.e. the number of dimensions: r←≢⍴y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/rank",
@@ -569,6 +631,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Rerank",
+                            "pattern": "r←xϼy",
                             "description": "x must be a natural. r is the result of changing the rank of y to be x:",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/rerank",
@@ -593,6 +656,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "From Pairs",
+                            "pattern": "r←߹y",
                             "description": "r is the dictionary with entries taken from y, which is a nested vector containing either two-element vectors (as created by Pair), or (singleton) dictionaries (as created by Key Value Pair).",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/from_pairs",
@@ -600,6 +664,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Key-Value Pair",
+                            "pattern": "r←x߹y",
                             "description": "r is a dictionary with a single key x and value y: r←⟨x:y⟩.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/key_value_pair",
@@ -619,11 +684,12 @@ export const tinyaplGlyphDocs = {
     },
     "ᐵ": {
             "glyph": "ᐵ",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/each_left",
             "overloads": [
                     {
                             "name": "Each Left",
+                            "pattern": "r←x(Fᐵ)y",
                             "description": "r is the result of calling F on each element of x and y as a whole: r←x F⍥¯1‿∞ y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/each_left",
@@ -638,11 +704,12 @@ export const tinyaplGlyphDocs = {
     },
     "ᑈ": {
             "glyph": "ᑈ",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/each_right",
             "overloads": [
                     {
                             "name": "Each Right",
+                            "pattern": "r←x(Fᑈ)y",
                             "description": "r is the result of calling F on x as a whole and each element of y: r←x F⍥∞‿¯1 y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/each_right",
@@ -657,11 +724,12 @@ export const tinyaplGlyphDocs = {
     },
     "ᑒ": {
             "glyph": "ᑒ",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_contents",
             "overloads": [
                     {
                             "name": "On Contents",
+                            "pattern": "r←[x](Fᑒ)y",
                             "description": "r is the result of applying F to the disclose of \\[x and\\] y, only if they're scalars.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_contents",
@@ -676,11 +744,12 @@ export const tinyaplGlyphDocs = {
     },
     "ᑣ": {
             "glyph": "ᑣ",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/boxed",
             "overloads": [
                     {
                             "name": "Boxed",
+                            "pattern": "r←[x](Fᑣ)y",
                             "description": "r is the result of calling F on \\[x and\\] y, and then enclosing the output: r←[x] ⊂∘F y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/boxed",
@@ -695,11 +764,12 @@ export const tinyaplGlyphDocs = {
     },
     "ᓗ": {
             "glyph": "ᓗ",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/cells_left",
             "overloads": [
                     {
                             "name": "Cells Left",
+                            "pattern": "r←x(Fᓗ)y",
                             "description": "r is the result of calling F on each major cell of x and y as a whole: r←x F⍤¯1‿∞ y. Supports the fill extra argument, which is used to pad the results of F to have matching shape.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/cells_left",
@@ -714,11 +784,12 @@ export const tinyaplGlyphDocs = {
     },
     "ᓚ": {
             "glyph": "ᓚ",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/cells_right",
             "overloads": [
                     {
                             "name": "Cells Right",
+                            "pattern": "r←x(Fᓚ)y",
                             "description": "r is the result of calling F on x as a whole and each major cell of y: r←x F⍤∞‿¯1 y. Supports the fill extra argument, which is used to pad the results of F to have matching shape.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/cells_right",
@@ -738,6 +809,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "From Inverted Table",
+                            "pattern": "r←‥y",
                             "description": "r is a dictionary created from the inverted table y, i.e. a two-element vector containing the keys and values: r←‥ᑒ/y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/from_inverted_table",
@@ -745,6 +817,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "From Keys And Values",
+                            "pattern": "r←x‥y",
                             "description": "r is a dictionary with keys taken from x and values taken from y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/from_keys_and_values",
@@ -769,6 +842,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "One Range",
+                            "pattern": "r←…y",
                             "description": "r is the range starting at 1 and ending at y: r←1…y. Supports the backward extra argument, which reverses the order of the numbers.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/one_range",
@@ -776,6 +850,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Range",
+                            "pattern": "r←x…y",
                             "description": "r is the range defined by x and y, which must be natural scalars or vectors and must have the same shape: r←x+ᑈ⍳yⵧx. Supports the backward extra argument, which reverses the order of the numbers.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/range",
@@ -795,11 +870,12 @@ export const tinyaplGlyphDocs = {
     },
     "⁖": {
             "glyph": "⁖",
-            "type": "function",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/valences",
             "overloads": [
                     {
                             "name": "Valences",
+                            "pattern": "r←[x](F⁖G)y",
                             "description": "If x is not provided, r is F y; if x is provided, r is x G y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/valences",
@@ -819,6 +895,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Imaginary Part",
+                            "pattern": "r←ℑy",
                             "description": "r is the result of the scalar application of the imaginary part function, $\\mathop{\\text{Im}} y$.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/imaginary_part",
@@ -838,6 +915,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Real Part",
+                            "pattern": "r←ℜy",
                             "description": "r is the result of the scalar application of the real part function, $\\mathop{\\text{Re}} y$.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/real_part",
@@ -857,6 +935,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Mix",
+                            "pattern": "r←↑y",
                             "description": "r is an array built using cells from the nested array y: r←⊃⍤0 y. Supports the fill extra argument, which is used to pad the arrays to have matching shape.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/mix",
@@ -864,6 +943,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Take",
+                            "pattern": "r←x↑y",
                             "description": "x must be a scalar or vector of integers. r is the result of taking from each axis of y as many elements as specified by the corresponding element of x. If x is positive, the first x elements are taken; if x is negative, the last x elements are taken; if x is zero, no element is taken. Supports tbe backward extra argument, which negates x.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/take",
@@ -888,6 +968,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Drop",
+                            "pattern": "r←x↓y",
                             "description": "x must be a scalar or vector of integers. r is the result of removing from each axis of y as many elements as specified by the corresponding element of x. If x is positive, the first x elements are removed; if x is negative, the last x elements are removed; if x is zero, no element is removed. Supports the backward extra argument, which negates x.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/drop",
@@ -895,6 +976,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Key-Value Pairs",
+                            "pattern": "r←↓d",
                             "description": "r is a nested vector containing the key-value pairs of dictionary d, as two-element vectors.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/key_value_pairs",
@@ -902,6 +984,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Major Cells",
+                            "pattern": "r←↓y",
                             "description": "r is a nested vector containing the major cells of y: r←⊂⍤¯1 y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/major_cells",
@@ -926,6 +1009,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Raises",
+                            "pattern": "r←x↗y",
                             "description": "r is the result of the scalar application of the raises (swapped power) function, $y^x$.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/raises",
@@ -933,6 +1017,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Square",
+                            "pattern": "r←↗y",
                             "description": "r is the result of the scalar application of the square function, $y^2$.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/square",
@@ -957,6 +1042,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Maximal",
+                            "pattern": "r←x↾y",
                             "description": "r is the greater array between x and y, according to total array ordering.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/maximal",
@@ -976,6 +1062,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Minimal",
+                            "pattern": "r←x⇂y",
                             "description": "r is the lesser array between x and y, according to total array ordering.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/minimal",
@@ -990,11 +1077,12 @@ export const tinyaplGlyphDocs = {
     },
     "⇽": {
             "glyph": "⇽",
-            "type": "combinator",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/right_fork",
             "overloads": [
                     {
                             "name": "Right Fork",
+                            "pattern": "r←[x](F⇽G)y",
                             "description": "If x is not provided, r is y F (G y); if x is provided, r is x F (x G y).",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/right_fork",
@@ -1009,11 +1097,12 @@ export const tinyaplGlyphDocs = {
     },
     "⇾": {
             "glyph": "⇾",
-            "type": "combinator",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/left_fork",
             "overloads": [
                     {
                             "name": "Left Fork",
+                            "pattern": "r←[x](F⇾G)y",
                             "description": "If x is not provided, r is (F y) G y; if x is provided, r is (x F y) G y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/left_fork",
@@ -1033,6 +1122,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Element Of",
+                            "pattern": "r←x∊y",
                             "description": "r is whether each corresponding cell of x is in the major cells of y. Supports the tolerance extra argument for the comparisons.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/element_of",
@@ -1040,6 +1130,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Enlist",
+                            "pattern": "r←∊y",
                             "description": "r is a vector containing all simple scalars that appear in y, traveling through layers of nesting. Enlisting a dictionary enlists its values.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/enlist",
@@ -1059,11 +1150,12 @@ export const tinyaplGlyphDocs = {
     },
     "∘": {
             "glyph": "∘",
-            "type": "combinator",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/atop",
             "overloads": [
                     {
                             "name": "Atop",
+                            "pattern": "r←[x](F∘G)y",
                             "description": "If x is not provided, r is F (G y); if x is provided, r is F (x G y).",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/atop",
@@ -1071,6 +1163,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Bind",
+                            "pattern": "r←({Fn}∘{Gm})y",
                             "description": "Exactly one of the operands is an array and exactly one of the operands is a function. If n is provided, r is n G y; if m is provided, r is y F m.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/bind",
@@ -1090,11 +1183,12 @@ export const tinyaplGlyphDocs = {
     },
     "∙": {
             "glyph": "∙",
-            "type": "function",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/alternant",
             "overloads": [
                     {
                             "name": "Alternant",
+                            "pattern": "r←(F∙G)y",
                             "description": "Applies to matrices of y. F should be a reduction function. r is the alternant, i.e. the generalized determinant, of y, using F and G. If y is a 1x1 matrix, it returns its element. Otherwie, the alternant is computed by finding the minors of y, which are the submatrices formed by deleting each column in order and the first row; next the same alternant is applied to each minor; lastly the subalt...",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/alternant",
@@ -1102,6 +1196,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Inner Product",
+                            "pattern": "r←x(F∙G)y",
                             "description": "F should be a reduction function. r is the result of the generalized inner product of x and y: combine major cells of x with minor cells of y using G and reduce the result using F: r←x F⍤(G⍤0⍤¯1)⍤1‿99 y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/inner_product",
@@ -1126,6 +1221,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Root",
+                            "pattern": "r←x√y",
                             "description": "r is the result of the scalar application of the root function, $\\sqrt[x] y$.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/root",
@@ -1133,6 +1229,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Square Root",
+                            "pattern": "r←√y",
                             "description": "r is the result of the scalar application of the square root function, $\\sqrt y$.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/square_root",
@@ -1157,6 +1254,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Arctangent",
+                            "pattern": "r←x∡y",
                             "description": "r is the result of the dyadic arctangent (atan2) of x and y, where (confusingly) x is the $y$ coordinate and y is the $x$ coordinate: r←∡y⊕x",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/arctangent",
@@ -1164,6 +1262,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Phase",
+                            "pattern": "r←∡y",
                             "description": "r is the result of the scalar application of the phase function, $\\mathop{\\text{Arg}} y$.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/phase",
@@ -1188,6 +1287,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "And",
+                            "pattern": "r←x∧y",
                             "description": "r is the result of the scalar application of the probabilistic and function, $b \\land c$: r←x×y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/and",
@@ -1195,6 +1295,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Promote",
+                            "pattern": "r←∧y",
                             "description": "r is y with a 1-length leading axis introduced.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/promote",
@@ -1219,6 +1320,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Demote",
+                            "pattern": "r←∨y",
                             "description": "r is y with the two leading axes combined in an axis with size equal to the product of the sizes of two axes that are combined.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/demote",
@@ -1226,6 +1328,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Or",
+                            "pattern": "r←x∨y",
                             "description": "r is the result of the scalar application of the probabilistic or function, $b \\lor c$: r←x+y-x×y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/or",
@@ -1250,6 +1353,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Intersection",
+                            "pattern": "r←x∩y",
                             "description": "r is the intersection of the major cells of x and y, i.e. the cells of x that appear in y: r←x⌿⍨x∊y. The intersection of two dictionaries is the left-biased intersection of the entries. Supports the tolerance extra argument for the comparison.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/intersection",
@@ -1269,6 +1373,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Union",
+                            "pattern": "r←x∪y",
                             "description": "r is the union of the major cells of x and y, i.e. all cells of x followed by all cells of y not in x: r←x⍪y⌿⍨~y∊x. The union of two dictionaries is the left-biased join of the entries: r←x⍪⍨y. Supports the tolerance extra argument for the comparison.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/union",
@@ -1276,6 +1381,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Unique",
+                            "pattern": "r←∪y",
                             "description": "r is the unique major cells of y, i.e. duplicate cells are removed: r←y⌿⍨≠y. Supports the tolerance extra argument for the comparison.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/unique",
@@ -1295,11 +1401,12 @@ export const tinyaplGlyphDocs = {
     },
     "∵": {
             "glyph": "∵",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/bitwise",
             "overloads": [
                     {
                             "name": "Bitwise",
+                            "pattern": "r←[x](F∵)y",
                             "description": "F is a function that either accepts boolean vectors and returns a scalar, or both accepts boolean vectors and returns a number vector and accepts boolean scalars and returns a boolean scalar; applies to simple scalars of x and y which are integers.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/bitwise",
@@ -1319,6 +1426,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Empty Dictionary",
+                            "pattern": "r←∻",
                             "description": "r is the empty dictionary, ⟨:⟩.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/empty_dictionary",
@@ -1333,11 +1441,12 @@ export const tinyaplGlyphDocs = {
     },
     "≈": {
             "glyph": "≈",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/approximate",
             "overloads": [
                     {
                             "name": "Approximate",
+                            "pattern": "r←[x](F≈{Gm})y",
                             "description": "tolerance is [x]Gy or m. F is called with comparison tolerance tolerance: r←[x]F⦋\"tolerance\":[x]{Gm}⫤y⦌y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/approximate",
@@ -1357,6 +1466,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Not Equal To",
+                            "pattern": "r←x≠y",
                             "description": "r is the result of the scalar not-equality comparsion of x and y: r←~x=y. Supports the tolerance extra argument.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/not_equal_to",
@@ -1364,6 +1474,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Nub Sieve",
+                            "pattern": "r←≠y",
                             "description": "r is the nub sieve of the major cells y, i.e. a boolean mask that indicates if it's the first time that a cell appears. Supports the tolerance extra argument.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/nub_sieve",
@@ -1388,6 +1499,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Depth",
+                            "pattern": "r←≡y",
                             "description": "r is a natural describing the *depth* of y:",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/depth",
@@ -1395,6 +1507,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Identical",
+                            "pattern": "r←x≡y",
                             "description": "r is whether the two arrays x and y are exactly equal. Supports the tolerance extra argument.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/identical",
@@ -1419,6 +1532,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Not Identical",
+                            "pattern": "r←x≢y",
                             "description": "r is whether x and y are not exactly equal: r←~x≡y. Supports the tolerance extra argument.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/not_identical",
@@ -1426,6 +1540,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Tally",
+                            "pattern": "r←≢y",
                             "description": "r is the amount of major cells of y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/tally",
@@ -1450,6 +1565,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Less Than or Equal To",
+                            "pattern": "r←x≤y",
                             "description": "r is result of the scalar application of the less-than-or-equals comparsion of x and y: r←(x=y)∨x<y. Supports the tolerance extra argument.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/less_than_or_equal_to",
@@ -1469,6 +1585,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Greater Than or Equal To",
+                            "pattern": "r←x≥y",
                             "description": "r is the result of the scalar greater-than-or-equals comparison: r←(x=y)∨x>y. Supports the tolerance extra argument.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/greater_than_or_equal_to",
@@ -1476,6 +1593,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Last Cell",
+                            "pattern": "r←≥y",
                             "description": "r is the last cell of y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/last_cell",
@@ -1500,6 +1618,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Enclose",
+                            "pattern": "r←⊂y",
                             "description": "If y is a simple scalar, r is y; otherwise y is a scalar box containing y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/enclose",
@@ -1507,6 +1626,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Partitioned Enclose",
+                            "pattern": "r←x⊂y",
                             "description": "x is a vector of naturals, of length either equal to or one more than the tally of y. r is a nested vector created by inserting partitions between the major cells of y as specified by x: ones create a new partition and zeros continue the previous partition; higher numbers introduce extra empty partitions as well. Cells before a partition are dropped.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/partitioned_enclose",
@@ -1531,6 +1651,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "First",
+                            "pattern": "r←⊃y",
                             "description": "r is the first element of y. Supports the fill extra argument, which is returned instead when y is empty.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/first",
@@ -1538,6 +1659,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Keys",
+                            "pattern": "r←⊃d",
                             "description": "r is a vector containing the keys of the dictionary d.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/keys",
@@ -1545,6 +1667,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Pick",
+                            "pattern": "r←x⊃y",
                             "description": "x must be a vector of integers of depth at most two. r is the result of repeatedly indexing and disclosing y using the indices from x.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/pick",
@@ -1569,6 +1692,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Nest",
+                            "pattern": "r←⊆y",
                             "description": "If y is a simple array, r is ⊂y; otherwise r is y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/nest",
@@ -1576,6 +1700,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Partition",
+                            "pattern": "r←x⊆y",
                             "description": "x is a vector of naturals, with length equal to the tally of y. r is a nested vector containing major cells of y, in groups marked by consecutive equal values of x, dropping ones that corerspond to a zero.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/partition",
@@ -1600,6 +1725,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "From",
+                            "pattern": "r←x⊇y",
                             "description": "If y is an array, x must be a either a simple array of integers or a array of nested simple arrays of integers; if x is simple, r is the major cells of y selected by the indices x (negative indices select from the end); if x is nested, r is an array with the same shape as x where each entry is the element indexed by the corresponding entry of x in y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/from",
@@ -1607,6 +1733,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Last",
+                            "pattern": "r←⊇y",
                             "description": "r is the last element of y, in ravel order: r←⊃⌽,y. Supports the fill extra argument, which is returned instead when y is empty.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/last",
@@ -1614,6 +1741,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Values",
+                            "pattern": "r←⊇d",
                             "description": "r is a vector containing the values of the dictionary d.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/values",
@@ -1638,6 +1766,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Cartesian",
+                            "pattern": "r←x⊕y",
                             "description": "r is the result of the scalar application of the cartesian function, $x + iy$.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/cartesian",
@@ -1645,6 +1774,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Pure Imaginary",
+                            "pattern": "r←⊕y",
                             "description": "r is the result of the scalar application of the pure imaginary function, $iy$.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/pure_imaginary",
@@ -1669,6 +1799,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Polar",
+                            "pattern": "r←x⊗y",
                             "description": "r is the result of the scalar application of the polar function, $xe^{iy}$. It returns a complex number with magnitude x and phase y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/polar",
@@ -1676,6 +1807,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Unit Polar",
+                            "pattern": "r←⊗y",
                             "description": "r is the result of the scalar application of the unit polar function, $e^{iy}$. It returns a complex number with magnitude 1 and phase y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/unit_polar",
@@ -1695,11 +1827,12 @@ export const tinyaplGlyphDocs = {
     },
     "⊞": {
             "glyph": "⊞",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/table",
             "overloads": [
                     {
                             "name": "Table",
+                            "pattern": "r←x(F⊞)y",
                             "description": "r is the result of the (flat) outer product of x and y using F: r←x F⍤0⍤0‿∞ y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/table",
@@ -1719,6 +1852,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Right",
+                            "pattern": "r←[x]⊢y",
                             "description": "r is y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/right",
@@ -1738,6 +1872,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Left",
+                            "pattern": "r←[x]⊣y",
                             "description": "If x is provided, r is x; otherwise r is y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/left",
@@ -1757,6 +1892,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Encode",
+                            "pattern": "r←[x]⊤y",
                             "description": "If x is not provided, it defaults to the scalar 2.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/encode",
@@ -1776,6 +1912,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Decode",
+                            "pattern": "r←[x]⊥y",
                             "description": "If x is not provided, it defaults to the scalar 2. If x is a scalar, it is reshaped to the shape of y. Operates on vectors of x and y. The vector y is interpreted in the mixed base defined by x, which is read as a list of weights: each value of y is multiplied with the corresponding value from ⌽×/↟¯1↓1⍪⌽x and summed. Supports the backward extra argument, which reverses the vectors of y before d...",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/decode",
@@ -1790,11 +1927,12 @@ export const tinyaplGlyphDocs = {
     },
     "⊩": {
             "glyph": "⊩",
-            "type": "function",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/dex",
             "overloads": [
                     {
                             "name": "Dex",
+                            "pattern": "r←[x](F⊩G)y",
                             "description": "If x is not provided, r is G y; if x is provided, r is x G y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/dex",
@@ -1814,6 +1952,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Precedes",
+                            "pattern": "r←x⊲y",
                             "description": "r is whether x is less than y according to total array ordering. Supports the tolerance extra argument.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/precedes",
@@ -1833,6 +1972,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Succeeds",
+                            "pattern": "r←x⊳y",
                             "description": "r is whether x is greater than y according to total array ordering. Supports the tolerance extra argument.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/succeeds",
@@ -1852,6 +1992,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Precedes Or Identical",
+                            "pattern": "r←x⊴y",
                             "description": "r is whether x is less than y according to total array ordering, or x is exactly equal to y. Supports the tolerance extra argument.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/precedes_or_identical",
@@ -1859,6 +2000,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Sort Up",
+                            "pattern": "r←⊴y",
                             "description": "r is the ascending sort of the major cells of y: r←y⍋y. Supports the tolerance extra argument for the comparisons; supports the backward extra argument, which returns the Sort Down of y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/sort_up",
@@ -1883,6 +2025,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Sort Down",
+                            "pattern": "r←⊵y",
                             "description": "r is the descending sort of the major cells of y: r←y⍒y. Supports the tolerance extra argument for the comparisons; supports the backward extra argument, which returns the Sort Up of y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/sort_down",
@@ -1890,6 +2033,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Succeeds Or Identical",
+                            "pattern": "r←x⊵y",
                             "description": "r is whether x is greater than y according to total array ordering, or x is exactly equal to y. Supports the tolerance extra argument.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/succeeds_or_identical",
@@ -1909,11 +2053,12 @@ export const tinyaplGlyphDocs = {
     },
     "⊸": {
             "glyph": "⊸",
-            "type": "combinator",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/left_hook",
             "overloads": [
                     {
                             "name": "Left Hook",
+                            "pattern": "r←[x](F⊸G)y",
                             "description": "If x is not provided, r is (F y) G y; if x is provided, r is (F x) G y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/left_hook",
@@ -1933,6 +2078,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Count",
+                            "pattern": "r←x⋵y",
                             "description": "r is the counts of the corresponding cells of x in the major cells of y. Supports the tolerance extra argument for the comparisons.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/count",
@@ -1940,6 +2086,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Histogram",
+                            "pattern": "r←⋵y",
                             "description": "r is the counts in the positions indicated by the indices in y. It is the equivalent of ⍸⍣¯1 in other APLs. Supports the origin extra argument, which is used to shift the indices in the input.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/histogram",
@@ -1964,6 +2111,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Mask",
+                            "pattern": "r←x⋷y",
                             "description": "r is a natural array with the same shape as y; each occurence of x in y is marked with an unique number in all positions; overlapping matches are ignored. Supports the tolerance extra argument for the comparisons.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/mask",
@@ -1983,6 +2131,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Ceiling",
+                            "pattern": "r←⌈y",
                             "description": "r is the result of the scalar application of the ceiling function, $\\left\\lceil y \\right\\rceil$. For complex y, see Floor and define r←-⌊-y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/ceiling",
@@ -1990,6 +2139,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Maximum",
+                            "pattern": "r←x⌈y",
                             "description": "r is the result of the scalar application of the maximum function, $\\max(x, y)$, which returns the largest argument as defined by total array ordering.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/maximum",
@@ -1997,6 +2147,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Uppercase",
+                            "pattern": "r←⌈y",
                             "description": "r is the scalar application of the uppercase function, which converts Unicode chracters to their uppercase equivalent, if applicable.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/uppercase",
@@ -2021,6 +2172,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Floor",
+                            "pattern": "r←⌊y",
                             "description": "r is the result of the scalar application of the floor function, $\\left\\lfloor y \\right\\rfloor$.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/floor",
@@ -2028,6 +2180,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Lowercase",
+                            "pattern": "r←⌊y",
                             "description": "r is the scalar application of the lowercase function, which converts Unicode chracters to their lowercase equivalent, if applicable.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/lowercase",
@@ -2035,6 +2188,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Minimum",
+                            "pattern": "r←x⌊y",
                             "description": "r is the result of the scalar application of the minimum function, $\\min(x, y)$, which returns the smaller argument as described by total array ordering.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/minimum",
@@ -2054,11 +2208,12 @@ export const tinyaplGlyphDocs = {
     },
     "⌓": {
             "glyph": "⌓",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_simple_scalars",
             "overloads": [
                     {
                             "name": "On Simple Scalars",
+                            "pattern": "r←[x](F⌓)y",
                             "description": "r is the result of applying F to simple scalars of \\[x and\\] y: r←[x] F⍥0 y",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_simple_scalars",
@@ -2078,6 +2233,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Index",
+                            "pattern": "r←x⌷y",
                             "description": "If y is an array, x is a vector of integers with length less than or equal to the rank of y, and depth at most two. r is the selection of cells from axes of y, where nested entries of x indicate that multiple cells are selected, and negative x indicates indexing from the end.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/index",
@@ -2092,11 +2248,12 @@ export const tinyaplGlyphDocs = {
     },
     "⌸": {
             "glyph": "⌸",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/key",
             "overloads": [
                     {
                             "name": "Key",
+                            "pattern": "r←[x](F⌸)y",
                             "description": "If x is provided, let k be the major cells of x and v be the major cells of y; if x is not provided, let k be the major cells of y and v be ⍳≢y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/key",
@@ -2104,6 +2261,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Key With Vocabulary",
+                            "pattern": "r←[x](n⌸)y",
                             "description": "",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/key_vocabulary",
@@ -2123,6 +2281,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Matrix Divide",
+                            "pattern": "r←x⌹y",
                             "description": "x and y are matrices, r is the result of the matrix division between x and y, that is, y+/∙×r (the matrix product of y and r) is x.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/matrix_divide",
@@ -2130,6 +2289,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Matrix Inverse",
+                            "pattern": "r←⌹y",
                             "description": "Applies to matrices of y. If y is a matrix, r is the left inverse of the matrix which satisfies the property that r+/∙×y (the matrix product of r and y) is an identity matrix. If y is a vector, r is ∨⌹⍉∧y. If y is a scalar, r is ÷y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/matrix_inverse",
@@ -2149,11 +2309,12 @@ export const tinyaplGlyphDocs = {
     },
     "⌺": {
             "glyph": "⌺",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_infixes",
             "overloads": [
                     {
                             "name": "On Infixes",
+                            "pattern": "r←x(F⌺)y",
                             "description": "x is a scalar integer, vector of integers or matrix. r is the result of applying F to *infixes* of y as defined by x:",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_infixes",
@@ -2161,6 +2322,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "On Pairs",
+                            "pattern": "r←(F⌺)y",
                             "description": "r is the result of applying F to each adjacent pair of y, passed as the left and right argument.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_pairs",
@@ -2185,6 +2347,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Reverse",
+                            "pattern": "r←⌽y",
                             "description": "r is the major cells of y in reverse order.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/reverse",
@@ -2192,6 +2355,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Rotate",
+                            "pattern": "r←x⌽y",
                             "description": "x must be a scalar or vector of integers. r is the result of rotating each axis of y by the amount specified by the corresponding item of x. If x is positive, the first x elements are moved to the back; if x is negative, the last x elements are moved to the front; if x is zero, no rotation is performed.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/rotate",
@@ -2216,6 +2380,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Replicate",
+                            "pattern": "r←x⌿y",
                             "description": "x is a vector of naturals with length equal to the tally of y. r is an array containing major cells y in the multiplicity indicated by the corresponding element of x. This means that cells that correspond to a 0 don't appear in r, cells that correspond to a 1 appear once, cells that correspond to a 2 appear twice, et cetera.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/replicate",
@@ -2235,6 +2400,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Inverted Table",
+                            "pattern": "r←⍉d",
                             "description": "r is the inverted table constructed from dictionary d, i.e. a two-element nested vector containing a vector of the keys of d and a vector of the values of d.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/inverted_table",
@@ -2242,6 +2408,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Transpose",
+                            "pattern": "r←[x]⍉y",
                             "description": "x must be a vector of naturals, and each item must be at most the rank of y. If x is not provided, it is set to ¯1.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/transpose",
@@ -2266,6 +2433,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Grade Up",
+                            "pattern": "r←⍋y",
                             "description": "If y is an array, r is the indices that would sort the major cells of y in ascending order according to total array ordering. Grading is stable, that is, the indices of two cells that are equal appear in r in the same order as the cells themselves. Supports the origin extra argument, which offsets the result by the origin.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/grade_up",
@@ -2273,6 +2441,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Sort By Up",
+                            "pattern": "r←x⍋y",
                             "description": "r is the major cells of x sorted according to the ascending grade of y: r←x⊇⍨⍋y. Supports the tolerance extra argument for the comparisons; supports the backward extra argument, which returns the Sort By Down of y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/sort_by_up",
@@ -2297,6 +2466,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Execute",
+                            "pattern": "r←⍎y",
                             "description": "y must be a string or array of strings. r is the result of evaluating the APL expressions in the strings y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/execute",
@@ -2316,6 +2486,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Grade Down",
+                            "pattern": "r←⍒y",
                             "description": "If y is an array, r is the indices that would sort the major cells of y in descending order according to total array ordering. Grading is stable, that is, the indices of two cells that are equal appear in r in the same order as the cells themselves. Supports the origin extra argument, which offsets the result by the origin; supports the tolerance extra argument for the comparisons.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/grade_down",
@@ -2323,6 +2494,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Sort By Down",
+                            "pattern": "r←x⍒y",
                             "description": "r is the major cells of x sorted according to the descending grade of y: r←x⊇⍨⍒y. Supports the tolerance extra argument for the comparisons; supports the backward extra argument, which returns the Sort By Up of y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/sort_by_down",
@@ -2347,6 +2519,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Format",
+                            "pattern": "r←⍕y",
                             "description": "r is the stringified version of y, as it appears in the REPL or when printed. Note that this representation cannot be passed directly to Execute, because character vectors are represented as raw strings and not as executable code.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/format",
@@ -2361,11 +2534,12 @@ export const tinyaplGlyphDocs = {
     },
     "⍛": {
             "glyph": "⍛",
-            "type": "combinator",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/reverse_atop",
             "overloads": [
                     {
                             "name": "Reverse Atop",
+                            "pattern": "r←[x](F⍛G)y",
                             "description": "If x is not provided, r is G (F y); if x is provided, r is G (x F y).",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/reverse_atop",
@@ -2373,6 +2547,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Reverse Bind",
+                            "pattern": "r←({Fn}⍛{Gm})y",
                             "description": "Exactly one of the operands is an array and exactly one of the operands is a function. If n is provided, r is y G n; if m is provided, r is m F y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/reverse_bind",
@@ -2397,6 +2572,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Default Reverse Bind",
+                            "pattern": "r←[x]({Fn}⍜{Gm})y",
                             "description": "Exactly one of the arguments is an array and exactly one of the arguments is a function. If x is provided, r is x A y, where A is the function operand. If x is not provided, if n is provided, r is y G n; if m is provided, r is m F y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/default_reverse_bind",
@@ -2404,6 +2580,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Reverse Over",
+                            "pattern": "r←[x](F⍜G)y",
                             "description": "If x is not provided, r is G (F y); if x is provided, r is (F x) G (F y).",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/reverse_over",
@@ -2423,6 +2600,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Character Input",
+                            "pattern": "r←⍞",
                             "description": "A line of input is read. r is that line, as a character vector.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/character_input",
@@ -2430,6 +2608,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Standard Error",
+                            "pattern": "⍞←y",
                             "description": "y is printed to standard error without a newline.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/standard_error",
@@ -2449,6 +2628,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Logarithm",
+                            "pattern": "r←x⍟y",
                             "description": "r is the result of the scalar application of the logarithm in base function, $\\log_x y$. Fails if x is 1, unless y is also 1 in which case the result is 1. Fails if y is 0.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/logarithm",
@@ -2456,6 +2636,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Natural Logarithm",
+                            "pattern": "r←⍟y",
                             "description": "r is the result of the scalar application of the natural logarithm function, $\\ln y$.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/natural_logarithm",
@@ -2475,11 +2656,12 @@ export const tinyaplGlyphDocs = {
     },
     "⍢": {
             "glyph": "⍢",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/under",
             "overloads": [
                     {
                             "name": "Under",
+                            "pattern": "r←[x]({Fn}⍢G)y",
                             "description": "G is a structural monadic function, i.e. a function that only reorders the argument without changing or depending on the elements' values, except for their ordering. r is the result of applying G, calling \\[x∘\\]F, or n⍨ on the reordered elements and then undo the reordering. If the result of F/n⍨ is scalar, the result is repeated for all substituted elements of the result.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/under",
@@ -2494,11 +2676,12 @@ export const tinyaplGlyphDocs = {
     },
     "⍣": {
             "glyph": "⍣",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/repeat",
             "overloads": [
                     {
                             "name": "Repeat",
+                            "pattern": "r←[x](F⍣m)y",
                             "description": "If m is positive, r is the result of calling \\[x∘\\]F m times, starting from y. If m is negative, r is the result of calling \\[x∘\\]F˝ -m times, starting from y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/repeat",
@@ -2506,6 +2689,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Until",
+                            "pattern": "r←[x](F⍣G)y",
                             "description": "r is the result of calling \\[x∘\\]F on y until G called with the result of the last two executions is 1, starting with y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/until",
@@ -2520,11 +2704,12 @@ export const tinyaplGlyphDocs = {
     },
     "⍤": {
             "glyph": "⍤",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/at_rank",
             "overloads": [
                     {
                             "name": "At Rank",
+                            "pattern": "r←[x](F⍤m)y",
                             "description": "m must be a 1-, 2-, or 3-element integer vector. Define three numbers a, b and c: if m is ⟨d⟩, a, b, and c are d; if m is ⟨d⋄e⟩, a and c are e, and b is d; if m is ⟨d⋄e⋄f⟩, a is d, b is e and c is f.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/at_rank",
@@ -2539,11 +2724,12 @@ export const tinyaplGlyphDocs = {
     },
     "⍥": {
             "glyph": "⍥",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/at_depth",
             "overloads": [
                     {
                             "name": "At Depth",
+                            "pattern": "r←[x](F⍥m)y",
                             "description": "m must be a 1-, 2-, or 3-element integer vector. Define three numbers a, b and c: if m is ⟨d⟩, a, b, and c are d; if m is ⟨d⋄e⟩, a and c are e, and b is d; if m is ⟨d⋄e⋄f⟩, a is d, b is e and c is f.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/at_depth",
@@ -2558,11 +2744,12 @@ export const tinyaplGlyphDocs = {
     },
     "⍦": {
             "glyph": "⍦",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/multisets",
             "overloads": [
                     {
                             "name": "Multisets",
+                            "pattern": "r←x(F⍦)y",
                             "description": "r is the result of applying F to the multisets x and y: each cell of x and y is paired with its occurrence count; F is applied; the counts are removed.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/multisets",
@@ -2570,6 +2757,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "On Counts",
+                            "pattern": "r←(F⍦)y",
                             "description": "r is the result of applying F to the occurrence count of the major cells of y, which is defined as a vector of the same length as y where each element is the amount of times the corresponding cell of y appears in the array before that place.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_counts",
@@ -2589,11 +2777,12 @@ export const tinyaplGlyphDocs = {
     },
     "⍨": {
             "glyph": "⍨",
-            "type": "combinator",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/commute",
             "overloads": [
                     {
                             "name": "Commute",
+                            "pattern": "r←x(F⍨)y",
                             "description": "r is y F x.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/commute",
@@ -2601,6 +2790,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Constant",
+                            "pattern": "r←[x](n⍨)y",
                             "description": "r is n.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/constant",
@@ -2608,6 +2798,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Duplicate",
+                            "pattern": "r←(F⍨)y",
                             "description": "r is y F y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/duplicate",
@@ -2632,6 +2823,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Catenate",
+                            "pattern": "r←x⍪y",
                             "description": "If x and y are arrays:",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/catenate",
@@ -2639,6 +2831,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Join",
+                            "pattern": "r←⍪y",
                             "description": "r is the result of concatenating the boxes in y: r←⍬⍪∘⊃/y. Supports the fill extra argument, which sets a separator.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/join",
@@ -2658,11 +2851,12 @@ export const tinyaplGlyphDocs = {
     },
     "⍫": {
             "glyph": "⍫",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/contextual_under",
             "overloads": [
                     {
                             "name": "Contextual Under",
+                            "pattern": "r←[x]({Fn}⍫G)y",
                             "description": "G is a monadic function with a contextual under. r is the result of applying G storing context, calling \\[x∘\\]F, or n⍨ on the result and then undoing G with the context.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/contextual_under",
@@ -2682,6 +2876,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Empty Vector",
+                            "pattern": "r←⍬",
                             "description": "r is the empty vector, ⟨⟩.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/empty_vector",
@@ -2701,6 +2896,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Pair",
+                            "pattern": "r←x⍮y",
                             "description": "r is a vector containing x and y: r←⟨x⋄y⟩.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/pair",
@@ -2708,6 +2904,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Singleton",
+                            "pattern": "r←⍮y",
                             "description": "r is a singleton vector containing y: r←⟨y⟩.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/singleton",
@@ -2732,6 +2929,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Nor",
+                            "pattern": "r←b⍱c",
                             "description": "r is the result of the scalar application of the nor function, $b \\overline\\lor c$.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/nor",
@@ -2751,6 +2949,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Nand",
+                            "pattern": "r←b⍲c",
                             "description": "r is the result of the scalar application of the nand function, $b \\overline\\land c$.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/nand",
@@ -2770,6 +2969,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Index Generator",
+                            "pattern": "r←⍳y",
                             "description": "y is a scalar or vector of naturals. r is an array with the shape y where each item is a scalar or vector containing its index in the array. Supports the origin extra argument, which offsets the result by the origin; supports the backward extra argument, which reverses the order of the indices.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/index_generator",
@@ -2777,6 +2977,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Index Of",
+                            "pattern": "r←x⍳y",
                             "description": "r is the index of corresponding cells of y in the major cells of x. If a cell of y does not appear in the cells of x, the corresponding element of r is the tally of x. Supports the origin extra argument, which offsets the result by the origin; supports the tolerance extra argument for the comparisons; supports the backward extra argument, which returns the last index; supports the fill extra ar...",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/index_of",
@@ -2801,6 +3002,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Reshape",
+                            "pattern": "r←x⍴y",
                             "description": "x must be a vector of integers. Either all elements are natural, or exactly one of them is ¯1 and all others are natural.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/reshape",
@@ -2808,6 +3010,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Shape",
+                            "pattern": "r←⍴y",
                             "description": "r is a vector of naturals describing the *shape* of y, i.e. how many elements are present in each dimension. The shape of a dictionary is the singleton of its size.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/shape",
@@ -2832,6 +3035,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Find",
+                            "pattern": "r←x⍷y",
                             "description": "r is a boolean array with the same shape as y indicating whether at the corresponding position there is the beginning of a subarray that is equal to x. Supports the tolerance extra argument for the comparisons; supports the backward extra argument, which marks the biggest coordinate instead of the smallest.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/find",
@@ -2851,6 +3055,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Interval Index",
+                            "pattern": "r←x⍸y",
                             "description": "r is the index of each corresponding cell of y in the intervals defined by the major cells of x, which is assumed to be sorted: cells of y before all cells of x are labeled 0, cells of y between the first cell and the second cell of x are labeled 1, ..., cells of y after all cells of x are labeled ≢x. Supports the origin extra argument, which offsets the result by the origin.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/interval_index",
@@ -2858,6 +3063,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Where",
+                            "pattern": "r←⍸y",
                             "description": "y is an array of naturals. r is a vector containing all the indices of the elements of y, with a multiplicity equal to the element itself. This means that a 0 corresponds to that index not appearing in r, a 1 appearing once, a 2 appearing twice, et cetera. Supports the origin extra argument, which offsets the result by the origin.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/where",
@@ -2877,12 +3083,13 @@ export const tinyaplGlyphDocs = {
     },
     "⎊": {
             "glyph": "⎊",
-            "type": "function",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/catch",
             "overloads": [
                     {
                             "name": "Catch",
-                            "description": "Run [x]F y. If it succeeds, r is its result; otherwise r is [x]G y.",
+                            "pattern": "r←[x](F⎊G)y",
+                            "description": "Run \\[x\\]F y. If it succeeds, r is its result; otherwise r is \\[x\\]G y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/catch",
                             "valence": "dyad"
@@ -2890,7 +3097,7 @@ export const tinyaplGlyphDocs = {
             ],
             "dyad": {
                     "name": "Catch",
-                    "description": "Run [x]F y. If it succeeds, r is its result; otherwise r is [x]G y.",
+                    "description": "Run \\[x\\]F y. If it succeeds, r is its result; otherwise r is \\[x\\]G y.",
                     "example": ""
             }
     },
@@ -2901,6 +3108,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Array Input",
+                            "pattern": "r←⎕",
                             "description": "A line of input is read. r is the result of evaluating that line.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/array_input",
@@ -2908,6 +3116,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Standard Output",
+                            "pattern": "⎕←y",
                             "description": "y is printed to standard output with a newline.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/standard_output",
@@ -2922,11 +3131,12 @@ export const tinyaplGlyphDocs = {
     },
     "⑴": {
             "glyph": "⑴",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/origin_one",
             "overloads": [
                     {
                             "name": "Origin One",
+                            "pattern": "r←[x]F⑴y",
                             "description": "F is called with index origin 1: r←[x]F⦋\"origin\":1⦌y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/origin_one",
@@ -2946,6 +3156,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Default Bind",
+                            "pattern": "r←[x]({Fn}○{Gm})y",
                             "description": "Exactly one of the arguments is an array and exactly one of the arguments is a function. If x is provided, r is x A y, where A is the function operand. If x is not provided, if n is provided, r is n G y; if m is provided, r is y F m.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/default_bind",
@@ -2953,6 +3164,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Over",
+                            "pattern": "r←[x](F○G)y",
                             "description": "If x is not provided, r is F (G y); if x is provided, r is (G x) F (G y).",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/over",
@@ -2967,11 +3179,12 @@ export const tinyaplGlyphDocs = {
     },
     "◠": {
             "glyph": "◠",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_scalars",
             "overloads": [
                     {
                             "name": "On Scalars",
+                            "pattern": "r←[x](F◠)y",
                             "description": "r is the result of applying F to scalars of \\[x and\\] y: r←[x] F⍤0 y. Supports the fill extra argument, which is used to pad the results of F to have matching shape.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_scalars",
@@ -2986,11 +3199,12 @@ export const tinyaplGlyphDocs = {
     },
     "◡": {
             "glyph": "◡",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_cells",
             "overloads": [
                     {
                             "name": "On Cells",
+                            "pattern": "r←[x](F◡)y",
                             "description": "r is the result of applying F to major cells of \\[x and\\] y: r←[x] F⍤¯1 y. Supports the fill extra argument, which is used to pad the results of F to have matching shape.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_cells",
@@ -3005,11 +3219,12 @@ export const tinyaplGlyphDocs = {
     },
     "⟜": {
             "glyph": "⟜",
-            "type": "combinator",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/right_hook",
             "overloads": [
                     {
                             "name": "Right Hook",
+                            "pattern": "r←[x](F⟜G)y",
                             "description": "If x is not provided, r is y F (G y); if x is provided, r is x F (G y).",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/right_hook",
@@ -3024,11 +3239,12 @@ export const tinyaplGlyphDocs = {
     },
     "⤺": {
             "glyph": "⤺",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/backward",
             "overloads": [
                     {
                             "name": "Backward",
+                            "pattern": "r←[x]F⤺y",
                             "description": "F is called backwards: r←[x]F⦋\"backward\":1⦌y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/backward",
@@ -3043,11 +3259,12 @@ export const tinyaplGlyphDocs = {
     },
     "⥼": {
             "glyph": "⥼",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_right",
             "overloads": [
                     {
                             "name": "On Right",
+                            "pattern": "r←[x](F⥼)y",
                             "description": "r is F y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_right",
@@ -3062,11 +3279,12 @@ export const tinyaplGlyphDocs = {
     },
     "⥽": {
             "glyph": "⥽",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_left",
             "overloads": [
                     {
                             "name": "On Left",
+                            "pattern": "r←[x](F⥽)y",
                             "description": "If x is provided, r is F x; otherwise r is F y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/on_left",
@@ -3086,6 +3304,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Increment",
+                            "pattern": "r←⧺y",
                             "description": "r is one more than y: r←y+1.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/increment",
@@ -3105,6 +3324,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Raise",
+                            "pattern": "r←[x]⨳y",
                             "description": "x must be a scalar natural. y must be a character vector. If x is not provided, it defaults to 1.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/raise",
@@ -3124,6 +3344,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Least Common Multiple",
+                            "pattern": "r←x⩓y",
                             "description": "r is the result of the scalar application of the LCM function, $\\mathop{\\text{lcm}}(x, y)$: r←x×y÷x⩔y. Supports the tolerance extra argument.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/least_common_multiple",
@@ -3131,6 +3352,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Numerator",
+                            "pattern": "r←⩓y",
                             "description": "r is the result of the scalar application of the numerator function: r←1⩓y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/numerator",
@@ -3155,6 +3377,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Denominator",
+                            "pattern": "r←⩔y",
                             "description": "r is the result of the scalar application of the denominator function: r←y÷⍨⩓y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/denominator",
@@ -3162,6 +3385,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Greatest Common Divisor",
+                            "pattern": "r←x⩔y",
                             "description": "r is the result of the scalar application of the GCD function, $\\mathop{\\text{gcd}}(x, y)$.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/greatest_common_divisor",
@@ -3186,6 +3410,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Group",
+                            "pattern": "r←x⫇y",
                             "description": "x is a vector of integers, with length equal to the tally of y. r is a nested vector containing major cells of y, in the positions marked by corresponding entries in x. Cells that correspond to a negative number are dropped from r. Supports the origin extra argument, which offsets x by the origin.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/group",
@@ -3200,11 +3425,12 @@ export const tinyaplGlyphDocs = {
     },
     "⫣": {
             "glyph": "⫣",
-            "type": "function",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/lev",
             "overloads": [
                     {
                             "name": "Lev",
+                            "pattern": "r←[x](F⫣G)y",
                             "description": "If x is not provided, r is F y; if x is provided, r is x F y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/lev",
@@ -3219,11 +3445,12 @@ export const tinyaplGlyphDocs = {
     },
     "⫤": {
             "glyph": "⫤",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/ident",
             "overloads": [
                     {
                             "name": "Ident",
+                            "pattern": "r←[x](F⫤)y",
                             "description": "If x is not provided, r is F y; if x is provided, r is x F y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/ident",
@@ -3238,11 +3465,12 @@ export const tinyaplGlyphDocs = {
     },
     "⬚": {
             "glyph": "⬚",
-            "type": "function",
+            "type": "adverb",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/fill",
             "overloads": [
                     {
                             "name": "Fill",
+                            "pattern": "r←[x](F⬚{Gm})y",
                             "description": "fill is [x]Gy or m. F is called with fill fill: r←[x]F⦋\"fill\":[x]{Gm}⫤y⦌y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/fill",
@@ -3262,6 +3490,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Decrement",
+                            "pattern": "r←ⵧy",
                             "description": "r is one less than y: r←y-1.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/decrement",
@@ -3269,6 +3498,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Span",
+                            "pattern": "r←xⵧy",
                             "description": "r is the length of the inclusive range between x and y: r←1+x-y.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/span",
@@ -3288,11 +3518,12 @@ export const tinyaplGlyphDocs = {
     },
     "⸚": {
             "glyph": "⸚",
-            "type": "function",
+            "type": "conjunction",
             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/mirror",
             "overloads": [
                     {
                             "name": "Mirror",
+                            "pattern": "r←x(F⸚G)y",
                             "description": "r is (y G x) F (x G y).",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/mirror",
@@ -3312,6 +3543,7 @@ export const tinyaplGlyphDocs = {
             "overloads": [
                     {
                             "name": "Round",
+                            "pattern": "r←⸠y",
                             "description": "r is the result of the scalar application of the round function, $\\left[ y \\right]$. For real arguments, ⸠y is ⌊y+0.5, for complex arguments ⸠a⊕b is a⊕○⸠b.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/round",
@@ -3319,6 +3551,7 @@ export const tinyaplGlyphDocs = {
                     },
                     {
                             "name": "Round To Nearest",
+                            "pattern": "r←x⸠y",
                             "description": "r is the result of the scalar application of the round-to-nearest function, $x \\left[ \\frac y x \\right]$: r←x×⸠y÷x.",
                             "example": "",
                             "docUrl": "https://beta.tinyapl.rubenverg.com/docs/primitive/round_to_nearest",

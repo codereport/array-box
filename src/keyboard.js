@@ -44,17 +44,17 @@ export const bqnGlyphNames = {
     '⌊': 'floor / minimum',
     '⌈': 'ceiling / maximum',
     '|': 'absolute value / modulus',
-    '¬': 'not / span',
+    '¬': 'logical not / span',
     
     // Logic/Comparison
-    '∧': 'sort up / and',
-    '∨': 'sort down / or',
-    '<': 'enclose / less than',
+    '∧': 'sort up / logical and',
+    '∨': 'sort down / logical or',
+    '<': 'enclose / lesser than',
     '>': 'merge / greater than',
-    '≠': 'length / not equals',
-    '=': 'rank / equals',
-    '≤': 'less than or equal',
-    '≥': 'greater than or equal',
+    '≠': 'length / not equal to',
+    '=': 'rank / equal to',
+    '≤': 'lesser than or equal to',
+    '≥': 'greater than or equal to',
     '≡': 'depth / match',
     '≢': 'shape / not match',
     
@@ -93,17 +93,17 @@ export const bqnGlyphNames = {
     '¨': 'each',
     '⌜': 'table',
     '⁼': 'undo',
-    '´': 'fold',
-    '˝': 'insert',
-    '`': 'scan',
+    '´': 'fold / fold with initial',
+    '˝': 'insert / insert with initial',
+    '`': 'scan / scan with initial',
     
     // 2-modifiers (yellow)
-    '∘': 'atop',
-    '○': 'over',
-    '⊸': 'before / bind',
-    '⟜': 'after / bind',
+    '∘': 'atop / dyadic atop',
+    '○': 'atop / over',
+    '⊸': 'bind left / before',
+    '⟜': 'bind / after',
     '⌾': 'under',
-    '⊘': 'valences',
+    '⊘': 'valences / dyadic valences',
     '◶': 'choose',
     '⎉': 'rank',
     '⚇': 'depth',
@@ -112,11 +112,11 @@ export const bqnGlyphNames = {
     
     // Constants/Special
     '∞': 'infinity',
-    '¯': 'negative',
+    '¯': 'minus',
     'π': 'pi',
     '←': 'define',
-    '⇐': 'export',
-    '↩': 'change',
+    '⇐': 'export definition / export names',
+    '↩': 'change / modify',
     '⋄': 'separator',
     '·': 'nothing',
     '→': 'return',
@@ -125,15 +125,15 @@ export const bqnGlyphNames = {
     '•': 'system',
     
     // Strand/list
-    '⟨': 'list start',
-    '⟩': 'list end',
+    '⟨': 'begin list',
+    '⟩': 'end list',
     '‿': 'strand',
     
     // Syntax elements
     '#': 'comment',
     '@': 'null character',
     '?': 'predicate',
-    '.': 'field access',
+    '.': 'namespace field',
     
     // Special names
     '𝕨': 'left argument',
@@ -141,12 +141,12 @@ export const bqnGlyphNames = {
     '𝕩': 'right argument',
     '𝕏': 'Right argument (function)',
     '𝕤': 'self reference',
-    '𝕊': 'Self reference (function)',
+    '𝕊': 'current function',
     '𝕗': 'left operand',
-    '𝔽': 'Left operand (function)',
+    '𝔽': 'modifier left operand',
     '𝕘': 'right operand',
-    '𝔾': 'Right operand (function)',
-    '𝕣': 'modifier self-reference',
+    '𝔾': '2-modifier right operand',
+    '𝕣': 'current modifier',
 };
 
 // Glyph names for Dyalog APL (monadic/dyadic names)
@@ -259,7 +259,7 @@ export const aplGlyphNames = {
 };
 
 // Glyph names for Kap (monadic/dyadic names)
-// Based on official Kap reference (https://kapdemo.dhsdevelopments.com/reference.html)
+// Based on official Kap reference (https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc)
 export const kapGlyphNames = {
     // Scalar/Arithmetic
     '+': 'conjugate / add',
@@ -365,9 +365,6 @@ export const kapGlyphNames = {
     '⋄': 'statement sep',
     '⍝': 'comment',
     '⌸': 'key',
-    '⌹': 'matrix inv / matrix div',
-    '…': 'range',
-    '≬': 'between',
     '⍺': 'left arg',
     '⍵': 'right arg',
     '¯': 'negative / high minus',
@@ -375,6 +372,9 @@ export const kapGlyphNames = {
     '⍠': 'variant',
     '⍙': 'delta underbar',
     '_': 'underscore',
+    '∆': 'delta',
+    '⌶': 'i-beam',
+    '○': 'circle',
     
     // Kap-specific
     '⟦': 'open list',
@@ -391,19 +391,19 @@ export const tinyaplGlyphNames = {
     // Arithmetic
     '+': 'conjugate / add',
     '-': 'negate / subtract',
-    '×': 'direction / multiply',
+    '×': 'case / multiply / direction',
     '÷': 'reciprocal / divide',
     '*': 'exponential / power',
-    '⍟': 'natural log / logarithm',
+    '⍟': 'natural logarithm / logarithm',
     '√': 'square root / root',
-    '⌊': 'floor / minimum',
-    '⌈': 'ceiling / maximum',
+    '⌊': 'floor / minimum / lowercase',
+    '⌈': 'ceiling / maximum / uppercase',
     '⸠': 'round / round to nearest',
     '⌹': 'matrix inverse / matrix divide',
     '!': 'factorial / binomial',
-    '|': 'magnitude / remainder',
-    '∨': 'gcd / or / demote',
-    '∧': 'lcm / and / promote',
+    '|': 'case fold / remainder / magnitude',
+    '∨': 'demote / or',
+    '∧': 'promote / and',
     '⩓': 'numerator / least common multiple',
     '⩔': 'denominator / greatest common divisor',
     '⍲': 'nand',
@@ -422,17 +422,17 @@ export const tinyaplGlyphNames = {
     '⊤': 'encode',
     
     // Comparison
-    '=': 'equals',
-    '≠': 'not equals / nub sieve',
+    '=': 'equal to',
+    '≠': 'nub sieve / not equal to',
     '<': 'less than',
-    '≤': 'less or equal',
-    '≥': 'greater or equal',
-    '>': 'greater than / first cell',
+    '≤': 'less than or equal to',
+    '≥': 'last cell / greater than or equal to',
+    '>': 'first cell / greater than',
     '≡': 'depth / identical',
     '≢': 'tally / not identical',
     '⊲': 'precedes',
-    '⊴': 'precedes or identical / sort up',
-    '⊵': 'succeeds or identical / sort down',
+    '⊴': 'sort up / precedes or identical',
+    '⊵': 'sort down / succeeds or identical',
     '⊳': 'succeeds',
     '≈': 'approximate',
     
@@ -453,17 +453,17 @@ export const tinyaplGlyphNames = {
     
     // Array creation
     '?': 'roll / deal',
-    '…': 'range',
-    '⍮': 'pair / singleton',
-    '‥': 'from keys and values / from inverted table',
-    '߹': 'key-value pair / from pairs',
+    '…': 'one range / range',
+    '⍮': 'singleton / pair',
+    '‥': 'from inverted table / from keys and values',
+    '߹': 'from pairs / key-value pair',
     
     // Dictionary
     '∻': 'empty dictionary',
     
     // Manipulation
     '↑': 'mix / take',
-    '↓': 'major cells / drop / key-value pairs',
+    '↓': 'key-value pairs / drop / major cells',
     '⊂': 'enclose / partitioned enclose',
     '⊆': 'nest / partition',
     '⫇': 'group',
@@ -473,14 +473,14 @@ export const tinyaplGlyphNames = {
     ',': 'ravel / laminate',
     '⍪': 'join / catenate',
     '⌽': 'reverse / rotate',
-    '⍉': 'transpose / inverted table',
+    '⍉': 'inverted table / transpose',
     
     // Lookup
     '⊃': 'first / pick / keys',
     '⊇': 'last / from / values',
     '⌷': 'index',
-    '⊢': 'right / identity',
-    '⊣': 'left / identity',
+    '⊢': 'right',
+    '⊣': 'left',
     
     // Misc
     '⍎': 'execute',
@@ -493,27 +493,27 @@ export const tinyaplGlyphNames = {
     
     // Operators (1-modifiers)
     '/': 'reduce / fold',
-    '\\': 'reduce back / fold back',
+    '\\': 'on prefixes',
     '↟': 'on prefixes / on outfixes',
     '↡': 'on suffixes / on infixes',
     '¨': 'each',
-    'ᐵ': 'each right',
-    'ᑈ': 'each left',
+    'ᐵ': 'each left',
+    'ᑈ': 'each right',
     'ᑣ': 'boxed',
     'ᑒ': 'on contents',
     '⍣': 'repeat / until',
-    '∙': 'inner product / alternant',
+    '∙': 'alternant / inner product',
     '⊞': 'table',
-    '⍤': 'at rank / atop',
+    '⍤': 'at rank',
     '◡': 'on cells',
     '◠': 'on scalars',
     'ᓗ': 'cells left',
     'ᓚ': 'cells right',
-    '⍥': 'at depth / over',
+    '⍥': 'at depth',
     '⌓': 'on simple scalars',
     '@': 'at',
     '⌸': 'key / key with vocabulary',
-    '⌺': 'stencil',
+    '⌺': 'on pairs / on infixes',
     '⁖': 'valences',
     '⍢': 'under',
     '∵': 'bitwise',
@@ -521,12 +521,12 @@ export const tinyaplGlyphNames = {
     '˝': 'inverse',
     '⥼': 'on right',
     '⥽': 'on left',
-    '⍦': 'multisets / on counts',
+    '⍦': 'on counts / multisets',
     
     // Combinators (2-modifiers)
-    '⍨': 'constant / commute / duplicate',
-    '∘': 'bind / after',
-    '⍛': 'default bind / before',
+    '⍨': 'duplicate / commute / constant',
+    '∘': 'bind / atop',
+    '⍛': 'reverse bind / reverse atop',
     '⊸': 'left hook',
     '⟜': 'right hook',
     '⸚': 'mirror',
@@ -560,7 +560,7 @@ export const tinyaplGlyphNames = {
     '⏨': 'exponent notation',
     'ᴊ': 'complex notation',
     '∞': 'infinity',
-    '⎕': 'quad / array input / standard output',
+    '⎕': 'array input / standard output',
     '⍞': 'character input / standard error',
     '⑴': 'origin one',
     '⤺': 'backward',
@@ -581,6 +581,13 @@ export const tinyaplGlyphNames = {
     '⊏': 'first cell select',
     '⊐': 'index of',
     '⬚': 'fill',
+    '¯': 'negative sign',
+    '‿': 'strand',
+    '∆': 'delta',
+    '∠': 'angle',
+    '⍙': 'delta underbar',
+    // Added from upstream documentation; review placement and labels.
+    'µ': 'function mean / power mean',
 };
 
 // Glyph names for J (monadic/dyadic names)
@@ -851,8 +858,7 @@ export const uiuaGlyphNames = {
     '⌕': 'find',
     '⦷': 'mask',
     '∊': 'memberof',
-    '⨂': 'indexin',
-    '⊗': 'indexof',
+    '⊗': 'indexin',
     '◫': 'windows',
     '☇': 'rerank',
     '⊥': 'base',
@@ -935,7 +941,6 @@ export const uiuaGlyphNames = {
     '⚂': 'random',
     '∂': 'derivative',
     '∫': 'integral',
-    '⩜': 'geometric',
     
     // Syntax
     '‿': 'strand',
@@ -944,12 +949,18 @@ export const uiuaGlyphNames = {
     '~': 'import',
     '|': 'signature',
     '#': 'comment',
-    '?': 'stack trace',
+    '?': 'args',
     '!': 'assert',
     '``': 'format string',
     '@': 'character',
     '$': 'format/system',
     '⸮': 'recur',
+    // Added from upstream documentation; review placement and labels.
+    '⨰': 'inner product',
+    '𝕍': 'multivector',
+    '⨱': 'outer product',
+    '⍡': 'pattern',
+    '⊨': 'validate',
 };
 
 // Default keyboard layout (US QWERTY)
@@ -2707,6 +2718,9 @@ export class ArrayKeyboard {
             for (const overload of doc.overloads) {
                 html += '<div class="array-keyboard-tooltip-section">';
                 html += `<div class="array-keyboard-tooltip-section-title">${this._escapeHtml(overload.name)}</div>`;
+                if (overload.pattern) {
+                    html += `<div class="array-keyboard-tooltip-example" style="font-family: ${this.fontFamily}">${highlightCode(overload.pattern, this.language)}</div>`;
+                }
                 if (overload.description) {
                     html += `<div class="array-keyboard-tooltip-section-desc">${this._escapeHtml(overload.description)}</div>`;
                 }

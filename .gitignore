@@ -25,3 +25,7 @@ wasm/uiua_wasm_bg.wasm.d.ts
 
 # Local config overrides
 config.local.js
+
+# Local upstream sync report and Python cache
+upstream-sync-summary.md
+scripts/__pycache__/

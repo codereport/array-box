@@ -212,7 +212,7 @@ export const kapKeymap = {
  */
 export const tinyaplKeyboard = [
     // Numbers row
-    { code: 'Backquote', sym: '`', symS: '~', symP: '⋄', symPS: '⍨', symPP: undefined, symPPS: '⌺' },
+    { code: 'Backquote', sym: '`', symS: '~', symP: undefined, symPS: '⍨', symPP: '⋄', symPPS: '⌺' },
     { code: 'Digit1', sym: '1', symS: '!', symP: '¨', symPS: '⨳', symPP: undefined, symPPS: '⑴' },
     { code: 'Digit2', sym: '2', symS: '@', symP: '¯', symPS: undefined, symPP: undefined, symPPS: undefined },
     { code: 'Digit3', sym: '3', symS: '#', symP: '˝', symPS: '⍒', symPP: '⍫', symPPS: undefined },
@@ -232,8 +232,8 @@ export const tinyaplKeyboard = [
     { code: 'KeyE', sym: 'e', symS: 'E', symP: '∊', symPS: '⍷', symPP: '⋵', symPPS: '⋷' },
     { code: 'KeyR', sym: 'r', symS: 'R', symP: '⍴', symPS: '√', symPP: 'ϼ', symPPS: 'ℜ' },
     { code: 'KeyT', sym: 't', symS: 'T', symP: '⊞', symPS: '⍨', symPP: '߹', symPPS: '‥' },
-    { code: 'KeyY', sym: 'y', symS: 'Y', symP: '↑', symPS: undefined, symPP: 'ᓚ', symPPS: '⥽' },
-    { code: 'KeyU', sym: 'u', symS: 'U', symP: '↓', symPS: undefined, symPP: 'ᓗ', symPPS: '⥼' },
+    { code: 'KeyY', sym: 'y', symS: 'Y', symP: '↑', symPS: '↟', symPP: 'ᓚ', symPPS: '⥽' },
+    { code: 'KeyU', sym: 'u', symS: 'U', symP: '↓', symPS: '↡', symPP: 'ᓗ', symPPS: '⥼' },
     { code: 'KeyI', sym: 'i', symS: 'I', symP: '⍳', symPS: '⍸', symPP: '…', symPPS: 'ℑ' },
     { code: 'KeyO', sym: 'o', symS: 'O', symP: '○', symPS: '⍥', symPP: '⍜', symPPS: undefined },
     { code: 'KeyP', sym: 'p', symS: 'P', symP: '◡', symPS: '◠', symPP: '⏨', symPPS: '⌓' },
@@ -241,7 +241,7 @@ export const tinyaplKeyboard = [
     { code: 'BracketRight', sym: ']', symS: '}', symP: '→', symPS: '⟩', symPP: '⦆', symPPS: '⦄' },
     
     // Home row
-    { code: 'KeyA', sym: 'a', symS: 'A', symP: '⍺', symPS: '⍶', symPP: 'ɛ', symPPS: undefined },
+    { code: 'KeyA', sym: 'a', symS: 'A', symP: '⍺', symPS: '⍶', symPP: 'ɛ', symPPS: 'µ' },
     { code: 'KeyS', sym: 's', symS: 'S', symP: '⌈', symPS: '§', symPP: '↾', symPPS: undefined },
     { code: 'KeyD', sym: 'd', symS: 'D', symP: '⌊', symPS: '⸠', symPP: '⇂', symPPS: '⩔' },
     { code: 'KeyF', sym: 'f', symS: 'F', symP: '⍛', symPS: '∡', symPP: '∠', symPPS: undefined },
@@ -267,7 +267,7 @@ export const tinyaplKeyboard = [
     { code: 'Slash', sym: '/', symS: '?', symP: '⌿', symPS: undefined, symPP: undefined, symPPS: '⍰' },
     
     // Space
-    { code: 'Space', sym: 'Space', symS: 'Space', symP: '‿', symPS: undefined, symPP: undefined, symPPS: undefined }
+    { code: 'Space', sym: 'Space', symS: 'Space', symP: '‿', symPS: '`', symPP: undefined, symPPS: undefined }
 ];
 
 /**
@@ -309,7 +309,7 @@ export const tinyaplGlyphs = {
     monadic: [
         '/', '\\', '¨', 'ᐵ', 'ᑈ', 'ᑣ', 'ᑒ', '∙', '⊞', '◡', '◠',
         'ᓗ', 'ᓚ', '⌓', '⌸', '⌺', '∵', '⫤',
-        '˝', '⥼', '⥽', '⍦', '⑴', '⤺'
+        '˝', '⥼', '⥽', '⍦', '⑴', '⤺', 'µ'
     ],
     // Conjunctions (yellow) - 2-modifiers/combinators
     dyadic: [
@@ -340,7 +340,8 @@ export const uiuaGlyphs = {
     ],
     // Monadic Array - Operate on a single array
     monadicArray: [
-        '⧻', '△', '⇡', '⊢', '⊣', '⇌', '♭', '¤', '⋯', '⍉', '⍆', '⍏', '⍖', '⊚', '◴', '⊛', '⧆', '◰', '□', '⋕'
+        '⧻', '△', '⇡', '⊢', '⊣', '⇌', '♭', '¤', '⋯', '⍉', '⍆', '⍏', '⍖', '⊚', '◴', '⊛', '⧆', '◰', '□', '⋕',
+        '𝕍'
     ],
     // Dyadic Pervasive - Operate on every pair of elements in two arrays
     dyadicPervasive: [
@@ -348,7 +349,8 @@ export const uiuaGlyphs = {
     ],
     // Dyadic Array - Operate on two arrays
     dyadicArray: [
-        '≍', '⊟', '⊂', '⊏', '⊡', '↯', '☇', '↙', '↘', '↻', '⤸', '▽', '⌕', '⦷', '∊', '⨂', '⊗', '◫', '⊥'
+        '≍', '⊟', '⊂', '⊏', '⊡', '↯', '☇', '↙', '↘', '↻', '⤸', '▽', '⌕', '⦷', '∊',  '⊗', '◫', '⊥',
+        '⨰', '⨱', '⊨'
     ],
     // 1-Modifiers (monadic modifiers) - Take 1 function argument
     monadicModifiers: [
@@ -360,7 +362,8 @@ export const uiuaGlyphs = {
     ],
     // 2-Modifiers (dyadic modifiers) - Take 2+ function arguments
     dyadicModifiers: [
-        '⊃', '⊓', '⍜', '⍢', '⬚', '⨬', '⍣'
+        '⊃', '⊓', '⍜', '⍢', '⬚', '⨬', '⍣',
+        '⍡'
     ],
     // Constants - Symbolic constants
     constants: [
@@ -626,12 +629,12 @@ export function createKeyboardHandler(inputElement, language) {
                     if (DEBUG) console.log('TinyAPL prefix level:', prefixLevel);
                     return;
                 } else {
-                    // Third press - insert the separator (⋄) which is symP for Backquote
+                    // Third press resolves the double-prefix Backquote mapping.
                     e.preventDefault();
                     prefixLevel = 0;
                     const entry = keymap[e.code];
-                    if (entry && entry.symP) {
-                        insertText(inputElement, entry.symP);
+                    if (entry && entry.symPP) {
+                        insertText(inputElement, entry.symPP);
                     }
                     return;
                 }

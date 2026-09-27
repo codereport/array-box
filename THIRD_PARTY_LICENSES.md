@@ -65,7 +65,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ## Uiua
 
-The Uiua WASM interpreter in `wasm/` is built from source from the Uiua project and runs entirely client-side. The primitive documentation in `src/uiua-docs.js` is also derived from the Uiua project.
+The Uiua WASM interpreter in `wasm/` is built from source from the Uiua project and runs entirely client-side. The primitive documentation in `src/uiua-docs.js` and font in `fonts/Uiua386.ttf` are also derived from the Uiua project.
 
 **Build script:** `scripts/update-uiua-wasm.sh`  
 **Documentation source:** https://www.uiua.org/docs  
