@@ -186,6 +186,38 @@ element.innerHTML = html;
 - Syntax highlighting classes (`.syntax-function`, `.syntax-monadic`, etc.)
 - Font-face declarations for array language fonts
 
+## Keeping primitives and hover docs current
+
+Run `npm run sync:primitives` to refresh Uiua, TinyAPL, and BQN hover docs, add newly
+documented glyphs to keyboard search, and compare Kap's reference page with the
+local docs. It also syncs Uiua's bundled font and TinyAPL's keyboard layout.
+Then run `python3 scripts/check-missing-primitives.py` to check the
+local keyboard, syntax, name, and hover-doc tables. The sync needs internet
+access and Node 22. Its sources are [Uiua's primitive JSON](https://github.com/uiua-lang/uiua/blob/main/site/primitives.json),
+[TinyAPL's beta MDX pages](https://github.com/RubenVerg/TinyAPL/tree/beta/docs/pages),
+[BQN's help index](https://mlochbaum.github.io/BQN/help/), and
+[Kap's reference source](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc).
+
+The [scheduled workflow](.github/workflows/sync-upstream-primitives.yml) runs
+daily and opens or updates a review PR when tracked files change. It uses the
+same `PAT_REPO` secret as the language update workflows. Uiua's structured
+classes support automatic search and syntax categories. TinyAPL's MDX pages
+support automatic hover docs and search labels, and its keyboard table updates
+input mappings. New TinyAPL syntax categories still need review. Kap's reference
+has no structured primitive feed: the sync adds simple entries for new
+single-glyph headings, links hover text to the reference source, and flags text
+changes through a reference fingerprint. Review Kap's hand-written
+descriptions when that fingerprint changes.
+
+Uiua `main` and TinyAPL `beta` may be newer than the bundled runtimes, so
+review generated PRs against the runtime version before merging.
+
+BQN help pages have HTML parsing, so review generated doc changes. The J wiki
+currently returns HTTP 403 to its scraper (`npm run scrape:j`), so J docs need
+manual review until a machine-readable or accessible source is available.
+Dyalog APL docs are hand-written here and have no automated upstream sync.
+Runtime version updates are handled by the separate language update workflow.
+
 ## Project Structure
 
 ```
