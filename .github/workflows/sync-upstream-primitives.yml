@@ -1,0 +1,74 @@
+name: Sync upstream primitives and docs
+
+on:
+  schedule:
+    - cron: '30 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync-upstream-primitives
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check for a generated update awaiting review
+        id: review
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$(gh pr list --state open --label primitive-sync-review --limit 1 --json number --jq 'length')" -gt 0 ]; then
+            echo 'pending=true' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Refresh upstream docs and glyphs
+        if: steps.review.outputs.pending != 'true'
+        run: node scripts/sync-upstream-primitives.mjs
+
+      - name: Check local primitive references
+        if: steps.review.outputs.pending != 'true'
+        run: python3 scripts/check-missing-primitives.py
+
+      - name: Prepare pull request body
+        if: steps.review.outputs.pending != 'true'
+        id: body
+        shell: bash
+        run: |
+          {
+            echo 'body<<__EOF__'
+            cat upstream-sync-summary.md
+            echo '__EOF__'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Open or update pull request
+        if: steps.review.outputs.pending != 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.PAT_REPO }}
+          branch: auto/update-primitives
+          delete-branch: true
+          commit-message: 'Sync upstream primitives and docs'
+          title: 'Sync upstream primitives and docs'
+          body: ${{ steps.body.outputs.body }}
+          add-paths: |
+            src/keyboard.js
+            src/keymap.js
+            src/syntax.js
+            src/uiua-docs.js
+            src/tinyapl-docs.js
+            src/bqn-docs.js
+            src/kap-docs.js
+            fonts/Uiua386.ttf
+            scripts/kap-reference-fingerprint.json
