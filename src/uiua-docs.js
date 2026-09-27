@@ -35,7 +35,7 @@ export const uiuaGlyphDocs = {
         "name": "absolute value",
         "description": "Get the absolute value of a number",
         "signature": "1 → 1",
-        "docUrl": "https://www.uiua.org/docs/absolute-value"
+        "docUrl": "https://www.uiua.org/docs/absolute%20value"
     },
     "+": {
         "glyph": "+",
@@ -355,7 +355,7 @@ export const uiuaGlyphDocs = {
         "name": "greater or equal",
         "description": "Compare for greater than or equal",
         "signature": "2 → 1",
-        "docUrl": "https://www.uiua.org/docs/greater-or-equal"
+        "docUrl": "https://www.uiua.org/docs/greater%20or%20equal"
     },
     ">": {
         "glyph": ">",
@@ -363,7 +363,7 @@ export const uiuaGlyphDocs = {
         "name": "greater than",
         "description": "Compare for greater than",
         "signature": "2 → 1",
-        "docUrl": "https://www.uiua.org/docs/greater-than"
+        "docUrl": "https://www.uiua.org/docs/greater%20than"
     },
     "⊕": {
         "glyph": "⊕",
@@ -403,7 +403,7 @@ export const uiuaGlyphDocs = {
         "name": "inner product",
         "description": "Take the inner product of two multivectors",
         "signature": "2 → 1",
-        "docUrl": "https://www.uiua.org/docs/inner-product"
+        "docUrl": "https://www.uiua.org/docs/inner%20product"
     },
     "∫": {
         "glyph": "∫",
@@ -459,7 +459,7 @@ export const uiuaGlyphDocs = {
         "name": "less or equal",
         "description": "Compare for less than or equal",
         "signature": "2 → 1",
-        "docUrl": "https://www.uiua.org/docs/less-or-equal"
+        "docUrl": "https://www.uiua.org/docs/less%20or%20equal"
     },
     "<": {
         "glyph": "<",
@@ -467,7 +467,7 @@ export const uiuaGlyphDocs = {
         "name": "less than",
         "description": "Compare for less than",
         "signature": "2 → 1",
-        "docUrl": "https://www.uiua.org/docs/less-than"
+        "docUrl": "https://www.uiua.org/docs/less%20than"
     },
     "⦷": {
         "glyph": "⦷",
@@ -555,7 +555,7 @@ export const uiuaGlyphDocs = {
         "name": "not equals",
         "description": "Compare for inequality",
         "signature": "2 → 1",
-        "docUrl": "https://www.uiua.org/docs/not-equals"
+        "docUrl": "https://www.uiua.org/docs/not%20equals"
     },
     "⌅": {
         "glyph": "⌅",
@@ -611,7 +611,7 @@ export const uiuaGlyphDocs = {
         "name": "outer product",
         "description": "Take the outer product of two multivectors",
         "signature": "2 → 1",
-        "docUrl": "https://www.uiua.org/docs/outer-product"
+        "docUrl": "https://www.uiua.org/docs/outer%20product"
     },
     "⋕": {
         "glyph": "⋕",

@@ -88,9 +88,9 @@ function classToType(className) {
  * Generate documentation URL for a primitive
  */
 function getDocUrl(name) {
-    // Convert name to URL-friendly format
-    const urlName = name.replace(/ /g, '-').toLowerCase();
-    return `https://www.uiua.org/docs/${urlName}`;
+    // Uiua's docs route searches by primitive name. A hyphen is interpreted
+    // as the subtract glyph, so names with spaces must keep those spaces.
+    return `https://www.uiua.org/docs/${encodeURIComponent(name.toLowerCase())}`;
 }
 
 /**
