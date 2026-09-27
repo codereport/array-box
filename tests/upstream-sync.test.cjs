@@ -44,3 +44,23 @@ test('Kap source headings produce live source-line hover links', async () => {
     assert.match(updated, /reference\.asciidoc\?display=source#L76/);
     assert.match(updated, /"\?": \{ "docUrl": "https:\/\/codeberg\.org\/loke\/array\/src\/branch\/master\/docs\/reference\.asciidoc" \}/);
 });
+
+test('TinyAPL updated prefix mappings insert the expected glyphs', async () => {
+    const { createKeyboardHandler } = await import('../src/keymap.js');
+    const handlers = {};
+    const input = {
+        value: '', selectionStart: 0, selectionEnd: 0,
+        addEventListener: (name, handler) => { handlers[name] = handler; },
+        removeEventListener: () => {},
+        dispatchEvent: () => {},
+    };
+    createKeyboardHandler(input, 'tinyapl');
+    const press = (code, key, shiftKey = false) => handlers.keydown({
+        code, key, shiftKey, getModifierState: () => shiftKey,
+        preventDefault: () => {}, ctrlKey: false, altKey: false, metaKey: false,
+    });
+    press('Backquote', '`'); press('Backquote', '`'); press('Backquote', '`');
+    assert.equal(input.value, '⋄');
+    press('Backquote', '`'); press('Backquote', '`'); press('KeyA', 'A', true);
+    assert.equal(input.value, '⋄µ');
+});

@@ -309,7 +309,7 @@ export const tinyaplGlyphs = {
     monadic: [
         '/', '\\', '¨', 'ᐵ', 'ᑈ', 'ᑣ', 'ᑒ', '∙', '⊞', '◡', '◠',
         'ᓗ', 'ᓚ', '⌓', '⌸', '⌺', '∵', '⫤',
-        '˝', '⥼', '⥽', '⍦', '⑴', '⤺'
+        '˝', '⥼', '⥽', '⍦', '⑴', '⤺', 'µ'
     ],
     // Conjunctions (yellow) - 2-modifiers/combinators
     dyadic: [
@@ -629,12 +629,12 @@ export function createKeyboardHandler(inputElement, language) {
                     if (DEBUG) console.log('TinyAPL prefix level:', prefixLevel);
                     return;
                 } else {
-                    // Third press - insert the separator (⋄) which is symP for Backquote
+                    // Third press resolves the double-prefix Backquote mapping.
                     e.preventDefault();
                     prefixLevel = 0;
                     const entry = keymap[e.code];
-                    if (entry && entry.symP) {
-                        insertText(inputElement, entry.symP);
+                    if (entry && entry.symPP) {
+                        insertText(inputElement, entry.symPP);
                     }
                     return;
                 }

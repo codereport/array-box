@@ -2,7 +2,7 @@
  * Kap Primitive Documentation
  * 
  * Hand-crafted from official Kap reference documentation
- * Source: https://kapdemo.dhsdevelopments.com/reference.html
+ * Source: https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc
  * Created: 2026-01-28
  * 
  * LICENSE ATTRIBUTION:
@@ -15,7 +15,7 @@
 
 export const kapDocsMeta = {
     "language": "Kap",
-    "source": "https://kapdemo.dhsdevelopments.com/reference.html",
+    "source": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc",
     "createdAt": "2026-01-28",
     "version": "1.0.0"
 };

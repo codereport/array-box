@@ -259,7 +259,7 @@ export const aplGlyphNames = {
 };
 
 // Glyph names for Kap (monadic/dyadic names)
-// Based on official Kap reference (https://kapdemo.dhsdevelopments.com/reference.html)
+// Based on official Kap reference (https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc)
 export const kapGlyphNames = {
     // Scalar/Arithmetic
     '+': 'conjugate / add',
@@ -375,6 +375,9 @@ export const kapGlyphNames = {
     '⍠': 'variant',
     '⍙': 'delta underbar',
     '_': 'underscore',
+    '∆': 'delta',
+    '⌶': 'i-beam',
+    '○': 'circle',
     
     // Kap-specific
     '⟦': 'open list',
@@ -581,6 +584,11 @@ export const tinyaplGlyphNames = {
     '⊏': 'first cell select',
     '⊐': 'index of',
     '⬚': 'fill',
+    '¯': 'negative sign',
+    '‿': 'strand',
+    '∆': 'delta',
+    '∠': 'angle',
+    '⍙': 'delta underbar',
     // Added from upstream documentation; review placement and labels.
     'µ': 'function mean / power mean',
 };
@@ -853,7 +861,7 @@ export const uiuaGlyphNames = {
     '⌕': 'find',
     '⦷': 'mask',
     '∊': 'memberof',
-    '⊗': 'indexof',
+    '⊗': 'indexin',
     '◫': 'windows',
     '☇': 'rerank',
     '⊥': 'base',

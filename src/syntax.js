@@ -265,7 +265,7 @@ export const syntaxRules = {
             '/', '\\', '¨', 'ᐵ', 'ᑈ', 'ᑣ', 'ᑒ', '∙', '⊞', '◡', '◠',
             'ᓗ', 'ᓚ', '⌓', '⌸', '⌺', '∵', '⫤',
             // New in 0.13
-            '˝', '⥼', '⥽', '⍦', '⑴', '⤺'
+            '˝', '⥼', '⥽', '⍦', '⑴', '⤺', 'µ'
         ],
         // 2-modifiers (yellow) - combinators/conjunctions
         dyadic: [
