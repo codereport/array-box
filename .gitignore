@@ -3,6 +3,9 @@
 # Node modules
 node_modules/
 
+# Python cache directories
+__pycache__/
+
 # Rust build artifacts
 uiua-wasm/target/
 uiua-wasm/Cargo.lock
@@ -26,6 +29,5 @@ wasm/uiua_wasm_bg.wasm.d.ts
 # Local config overrides
 config.local.js
 
-# Local upstream sync report and Python cache
+# Local upstream sync report
 upstream-sync-summary.md
-scripts/__pycache__/
