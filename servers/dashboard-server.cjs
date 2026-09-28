@@ -940,18 +940,15 @@ const dashboardHTML = `<!DOCTYPE html>
             return aggregateByLanguage(chartData.evalsByLang, chartData.successesByLang, cutoff);
         }
         
-        // Fetch time series data for specific range
-        async function fetchTimeSeriesForRange(range) {
-            try {
-                const response = await fetch('/timeseries?range=' + range);
-                const data = await response.json();
-                chartData = data;
-                drawChart();
-                // Update pie chart and language cards with filtered data
-                updateFilteredComponents();
-            } catch (e) {
-                console.error('Error fetching time series:', e);
-            }
+        // Use the current stats snapshot for the selected range
+        function updateTimeSeries() {
+            if (!currentStats?.timeSeries) return;
+            const granularity = ['1h', '3h', '6h', '12h', '24h'].includes(currentTimeRange)
+                ? 'fiveMin'
+                : currentTimeRange === '1w' ? 'hourly' : 'daily';
+            chartData = currentStats.timeSeries[granularity] || chartData;
+            drawChart();
+            updateFilteredComponents();
         }
         
         // Get time range label for display
@@ -1051,15 +1048,7 @@ const dashboardHTML = `<!DOCTYPE html>
                 }
             }
             
-            // Update chart data from the appropriate time series
-            if (['1h', '3h', '6h', '12h', '24h'].includes(currentTimeRange) && data.timeSeries?.fiveMin) {
-                chartData = data.timeSeries.fiveMin;
-            }
-            // For other ranges, we fetch separately to avoid sending too much data via SSE
-            drawChart();
-            
-            // Update pie chart and language cards with time-filtered data
-            updateFilteredComponents();
+            updateTimeSeries();
         }
         
         // Draw the pie chart
@@ -1583,15 +1572,7 @@ const dashboardHTML = `<!DOCTYPE html>
         // Handle time range selection
         document.getElementById('timeRange').addEventListener('change', (e) => {
             currentTimeRange = e.target.value;
-            if (['1h', '3h', '6h', '12h', '24h'].includes(currentTimeRange) && currentStats?.timeSeries?.fiveMin) {
-                // Use data already in memory for short ranges
-                chartData = currentStats.timeSeries.fiveMin;
-                drawChart();
-                updateFilteredComponents();
-            } else {
-                // Fetch data for other ranges (this will also update filtered components)
-                fetchTimeSeriesForRange(currentTimeRange);
-            }
+            updateTimeSeries();
         });
 
         // Handle view mode selection
