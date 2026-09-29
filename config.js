@@ -10,7 +10,7 @@
  */
 
 const ArrayBoxConfig = {
-    BACKEND_URL: 'https://cio-mind-statistics-concepts.trycloudflare.com',
+    BACKEND_URL: 'https://crossword-hdtv-calendar-estimated.trycloudflare.com',
     
     // Example configurations:
     // BACKEND_URL: 'https://arraybox.your-domain.com',     // Custom domain with Cloudflare Tunnel
