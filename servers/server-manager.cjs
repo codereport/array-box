@@ -243,6 +243,9 @@ function centerText(text, width = null) {
 
 // Render the dashboard
 function renderDashboard() {
+    // The live terminal dashboard would otherwise fill background-service logs.
+    if (!process.stdout.isTTY) return;
+
     const width = getTerminalWidth();
     const now = Date.now();
     
