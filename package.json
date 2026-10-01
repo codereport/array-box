@@ -5,6 +5,7 @@
   "type": "module",
   "main": "./src/keymap.js",
   "scripts": {
+    "serve:public": "bash scripts/serve-public.sh",
     "test": "node --test tests/*.test.cjs && node tests/run-tests.js",
     "test:health": "node --test tests/health-checks.test.cjs",
     "test:install": "npx playwright install chromium",
