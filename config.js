@@ -10,7 +10,7 @@
  */
 
 const ArrayBoxConfig = {
-    BACKEND_URL: 'https://carolina-vinyl-piece-speaks.trycloudflare.com',
+    BACKEND_URL: 'https://while-instantly-souls-staying.trycloudflare.com',
     
     // Example configurations:
     // BACKEND_URL: 'https://arraybox.your-domain.com',     // Custom domain with Cloudflare Tunnel
