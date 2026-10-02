@@ -725,7 +725,7 @@ const dashboardHTML = `<!DOCTYPE html>
                 <span class="text">Connecting...</span>
             </div>
             <div class="server-indicators" id="serverIndicators">
-                <div class="server-indicator" id="srv-apl" title="APL Server (port 8081)">
+                <div class="server-indicator" id="srv-apl" title="APL availability: local server and public website route">
                     <span class="srv-dot"></span>
                     <span>APL</span>
                 </div>
@@ -1369,40 +1369,48 @@ const dashboardHTML = `<!DOCTYPE html>
         }
         
         // Server health check
-        function fetchServerStatus() {
-            fetch('/servers')
-                .then(res => {
-                    if (!res.ok) throw new Error('Health check returned HTTP ' + res.status);
-                    return res.json();
-                })
-                .then(data => {
-                    let anyDown = false;
-                    for (const [key, info] of Object.entries(data)) {
-                        const el = document.getElementById('srv-' + key);
-                        if (el) {
-                            el.className = 'server-indicator ' + info.status;
-                            const port = info.port ? ' (port ' + info.port + ')' : '';
-                            const detail = info.detail ? ' - ' + info.detail : '';
-                            el.title = info.name + port + ' - ' + info.status.toUpperCase() + detail;
-                        }
-                        if (info.status === 'down') anyDown = true;
+        let healthCheckInProgress = false;
+        async function fetchServerStatus() {
+            if (healthCheckInProgress) return;
+            healthCheckInProgress = true;
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 10000);
+            try {
+                const res = await fetch('/servers', { signal: controller.signal, cache: 'no-store' });
+                if (!res.ok) throw new Error('Health check returned HTTP ' + res.status);
+                const data = await res.json();
+                let anyDown = false;
+                for (const [key, info] of Object.entries(data)) {
+                    const el = document.getElementById('srv-' + key);
+                    if (el) {
+                        el.className = 'server-indicator ' + info.status;
+                        const port = info.port ? ' (port ' + info.port + ')' : '';
+                        const detail = info.detail ? ' - ' + info.detail : '';
+                        el.title = info.name + port + ' - ' + info.status.toUpperCase() + detail;
                     }
-                    const siteOnlyDown = data.site?.status === 'down'
-                        && data.apl?.status === 'up'
-                        && data.permalink?.status === 'up';
-                    document.body.classList.toggle('site-only-down', siteOnlyDown);
-                    document.body.classList.toggle('server-down', anyDown && !siteOnlyDown);
-                })
-                .catch(() => {
-                    document.body.classList.remove('site-only-down');
-                    document.body.classList.add('server-down');
-                    for (const key of ['apl', 'permalink', 'site']) {
-                        const el = document.getElementById('srv-' + key);
-                        if (el) {
-                            el.className = 'server-indicator';
-                        }
+                    if (info.status === 'down') anyDown = true;
+                }
+                const siteOnlyDown = data.site?.status === 'down'
+                    && data.apl?.status === 'up'
+                    && data.permalink?.status === 'up';
+                document.body.classList.toggle('site-only-down', siteOnlyDown);
+                document.body.classList.toggle('server-down', anyDown && !siteOnlyDown);
+            } catch (error) {
+                document.body.classList.remove('site-only-down');
+                document.body.classList.add('server-down');
+                for (const key of ['apl', 'permalink', 'site']) {
+                    const el = document.getElementById('srv-' + key);
+                    if (el) {
+                        el.className = 'server-indicator down';
+                        el.title = error.name === 'AbortError'
+                            ? 'Health check timed out; availability could not be confirmed'
+                            : 'Health check unavailable: ' + error.message;
                     }
-                });
+                }
+            } finally {
+                clearTimeout(timeout);
+                healthCheckInProgress = false;
+            }
         }
         
         // Evals
@@ -1551,7 +1559,6 @@ const dashboardHTML = `<!DOCTYPE html>
                 const status = document.getElementById('connectionStatus');
                 status.className = 'connection-status connected';
                 status.querySelector('.text').textContent = 'Live';
-                document.body.classList.remove('server-down', 'site-only-down');
                 fetchServerStatus();
             };
             

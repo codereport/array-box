@@ -5,6 +5,7 @@ const path = require('node:path');
 const test = require('node:test');
 
 const {
+    checkDashboardServices,
     checkLocalService,
     checkPublicBackend,
     extractBackendUrl
@@ -23,6 +24,18 @@ function withLocalConfig(backendUrl, callback) {
     const configPath = path.join(dir, 'config.js');
     fs.writeFileSync(configPath, `const ArrayBoxConfig = { BACKEND_URL: '${backendUrl}' };`);
     return callback(configPath).finally(() => fs.rmSync(dir, { recursive: true, force: true }));
+}
+
+const BACKEND_URL = 'https://new-tunnel.trycloudflare.com';
+
+function healthyDashboardFetch(overrides = {}) {
+    return async (url, options) => {
+        if (overrides[url]) return overrides[url](options);
+        if (url.endsWith('/config.js')) {
+            return response(`const ArrayBoxConfig = { BACKEND_URL: '${BACKEND_URL}' };`);
+        }
+        return response(JSON.stringify({ status: 'ok' }));
+    };
 }
 
 test('extractBackendUrl ignores later commented examples', () => {
@@ -127,5 +140,109 @@ test('public check passes only when published config, APL, and metrics routes ar
         });
 
         assert.equal(result.status, 'up');
+    });
+});
+
+test('dashboard marks APL down when Cloudflare returns 530 despite a healthy local server', async () => {
+    await withLocalConfig(BACKEND_URL, async (localConfigPath) => {
+        const result = await checkDashboardServices({
+            localConfigPath,
+            fetchImpl: healthyDashboardFetch({
+                [`${BACKEND_URL}/api/apl/health`]: () => response('error code: 1033', 530),
+                [`${BACKEND_URL}/api/log/health`]: () => response('error code: 1033', 530)
+            })
+        });
+
+        assert.equal(result.apl.status, 'down');
+        assert.equal(result.apl.localStatus, 'up');
+        assert.equal(result.apl.publicStatus, 'down');
+        assert.match(result.apl.detail, /Public APL health check failed: HTTP 530/);
+        assert.equal(result.site.status, 'down');
+        assert.equal(result.permalink.status, 'up');
+    });
+});
+
+test('dashboard restores APL to green after the public tunnel recovers', async () => {
+    await withLocalConfig(BACKEND_URL, async (localConfigPath) => {
+        let offline = true;
+        const options = {
+            localConfigPath,
+            fetchImpl: healthyDashboardFetch({
+                [`${BACKEND_URL}/api/apl/health`]: () => {
+                    if (offline) throw new TypeError('fetch failed');
+                    return response(JSON.stringify({ status: 'ok' }));
+                }
+            })
+        };
+
+        assert.equal((await checkDashboardServices(options)).apl.status, 'down');
+        offline = false;
+        const recovered = await checkDashboardServices(options);
+        assert.equal(recovered.apl.status, 'up');
+        assert.equal(recovered.apl.publicStatus, 'up');
+        assert.equal(recovered.site.status, 'up');
+    });
+});
+
+test('dashboard does not mark APL down when only public metrics fail', async () => {
+    await withLocalConfig(BACKEND_URL, async (localConfigPath) => {
+        const result = await checkDashboardServices({
+            localConfigPath,
+            fetchImpl: healthyDashboardFetch({
+                [`${BACKEND_URL}/api/log/health`]: () => response('not found', 404)
+            })
+        });
+
+        assert.equal(result.apl.status, 'up');
+        assert.equal(result.site.status, 'down');
+        assert.match(result.site.detail, /metrics: HTTP 404/);
+    });
+});
+
+test('dashboard marks APL down if the published configuration cannot be checked', async () => {
+    await withLocalConfig(BACKEND_URL, async (localConfigPath) => {
+        const result = await checkDashboardServices({
+            localConfigPath,
+            fetchImpl: healthyDashboardFetch({
+                'https://arraybox.dev/config.js': () => { throw new TypeError('fetch failed'); }
+            })
+        });
+
+        assert.equal(result.apl.status, 'down');
+        assert.equal(result.apl.localStatus, 'up');
+        assert.match(result.apl.detail, /Could not read the published config.js/);
+    });
+});
+
+test('dashboard times out an unresponsive public APL route', async () => {
+    await withLocalConfig(BACKEND_URL, async (localConfigPath) => {
+        const result = await checkDashboardServices({
+            localConfigPath,
+            timeoutMs: 20,
+            fetchImpl: healthyDashboardFetch({
+                [`${BACKEND_URL}/api/apl/health`]: ({ signal }) => new Promise((resolve, reject) => {
+                    signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')), { once: true });
+                })
+            })
+        });
+
+        assert.equal(result.apl.status, 'down');
+        assert.match(result.apl.detail, /Public APL health check failed: timed out after 20ms/);
+    });
+});
+
+test('dashboard still marks APL down if its local server fails', async () => {
+    await withLocalConfig(BACKEND_URL, async (localConfigPath) => {
+        const result = await checkDashboardServices({
+            localConfigPath,
+            fetchImpl: healthyDashboardFetch({
+                'http://127.0.0.1:8081/health': () => response('unavailable', 503)
+            })
+        });
+
+        assert.equal(result.apl.status, 'down');
+        assert.equal(result.apl.localStatus, 'down');
+        assert.equal(result.apl.publicStatus, 'up');
+        assert.match(result.apl.detail, /Local health check failed: HTTP 503/);
     });
 });

@@ -84,7 +84,14 @@ async function checkLocalService({ name, port, path: healthPath = '/health', fet
     }
 }
 
-async function checkPublicBackend({
+function publicFailure(detail) {
+    return {
+        apl: status('APL', false, detail),
+        site: status('Site', false, detail)
+    };
+}
+
+async function checkPublishedServices({
     publicConfigUrl = DEFAULT_PUBLIC_CONFIG_URL,
     localConfigPath = DEFAULT_LOCAL_CONFIG_PATH,
     fetchImpl,
@@ -96,11 +103,11 @@ async function checkPublicBackend({
             extractBackendUrl(fs.readFileSync(localConfigPath, 'utf8'))
         );
     } catch (error) {
-        return status('Site', false, `Could not read local config.js: ${error.message}`);
+        return publicFailure(`Could not read local config.js: ${error.message}`);
     }
 
     if (!expectedBackendUrl) {
-        return status('Site', false, 'Local config.js has no production BACKEND_URL');
+        return publicFailure('Local config.js has no production BACKEND_URL');
     }
 
     let deployedBackendUrl;
@@ -108,28 +115,36 @@ async function checkPublicBackend({
         const deployedConfig = await fetchText(publicConfigUrl, { fetchImpl, timeoutMs });
         deployedBackendUrl = normalizeBackendUrl(extractBackendUrl(deployedConfig));
     } catch (error) {
-        return status('Site', false, `Could not read the published config.js: ${error.message}`);
+        return publicFailure(`Could not read the published config.js: ${error.message}`);
     }
 
     if (deployedBackendUrl !== expectedBackendUrl) {
-        return status(
-            'Site',
-            false,
+        return publicFailure(
             `Published config.js is stale (published: ${deployedBackendUrl || 'null'}, local: ${expectedBackendUrl})`
         );
     }
 
-    try {
-        await Promise.all([
-            checkJsonHealth(`${deployedBackendUrl}/api/apl/health`, { fetchImpl, timeoutMs })
-                .catch((error) => { throw new Error(`APL: ${error.message}`); }),
-            checkJsonHealth(`${deployedBackendUrl}/api/log/health`, { fetchImpl, timeoutMs })
-                .catch((error) => { throw new Error(`metrics: ${error.message}`); })
-        ]);
-        return status('Site', true, 'Published config, APL, and metrics routes are healthy');
-    } catch (error) {
-        return status('Site', false, `Public backend route failed: ${error.message}`);
-    }
+    const [aplResult, metricsResult] = await Promise.allSettled([
+        checkJsonHealth(`${deployedBackendUrl}/api/apl/health`, { fetchImpl, timeoutMs }),
+        checkJsonHealth(`${deployedBackendUrl}/api/log/health`, { fetchImpl, timeoutMs })
+    ]);
+    const failures = [];
+    if (aplResult.status === 'rejected') failures.push(`APL: ${aplResult.reason.message}`);
+    if (metricsResult.status === 'rejected') failures.push(`metrics: ${metricsResult.reason.message}`);
+
+    return {
+        apl: status('APL', aplResult.status === 'fulfilled', aplResult.status === 'fulfilled'
+            ? 'Public APL health check passed'
+            : `Public APL health check failed: ${aplResult.reason.message}`),
+        site: status('Site', failures.length === 0, failures.length === 0
+            ? 'Published config, APL, and metrics routes are healthy'
+            : `Public backend route failed: ${failures.join('; ')}`)
+    };
+}
+
+async function checkPublicBackend(options = {}) {
+    const { site } = await checkPublishedServices(options);
+    return site;
 }
 
 async function checkDashboardServices(options = {}) {
@@ -138,17 +153,25 @@ async function checkDashboardServices(options = {}) {
         timeoutMs: options.timeoutMs || DEFAULT_TIMEOUT_MS
     };
 
-    const [apl, permalink, site] = await Promise.all([
+    const [localApl, permalink, published] = await Promise.all([
         checkLocalService({ name: 'APL', port: 8081, ...shared }),
         checkLocalService({ name: 'Permalink', port: 8084, ...shared }),
-        checkPublicBackend({
+        checkPublishedServices({
             publicConfigUrl: options.publicConfigUrl,
             localConfigPath: options.localConfigPath,
             ...shared
         })
     ]);
 
-    return { apl, permalink, site };
+    const apl = {
+        ...localApl,
+        status: localApl.status === 'up' && published.apl.status === 'up' ? 'up' : 'down',
+        detail: `${localApl.detail}; ${published.apl.detail}`,
+        localStatus: localApl.status,
+        publicStatus: published.apl.status
+    };
+
+    return { apl, permalink, site: published.site };
 }
 
 module.exports = {

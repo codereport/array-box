@@ -2766,6 +2766,8 @@
                 logo: 'assets/apl.png',
                 fontClass: 'apl',
                 evaluate: async (code) => {
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), 15000);
                     try {
                         // Connect to APL server
                         const response = await fetch(`${ArrayBoxConfig.getServiceUrl('apl')}/eval`, {
@@ -2773,10 +2775,17 @@
                             headers: {
                                 'Content-Type': 'application/json',
                             },
-                            body: JSON.stringify({ code: code })
+                            body: JSON.stringify({ code: code }),
+                            signal: controller.signal
                         });
 
                         if (!response.ok) {
+                            if (response.status >= 502) {
+                                return {
+                                    success: false,
+                                    output: 'Cannot connect to the APL server. Please try again shortly.'
+                                };
+                            }
                             throw new Error(`Server error: ${response.status}`);
                         }
 
@@ -2788,16 +2797,24 @@
                             output: isError ? humanizeAplError(rawOutput) : rawOutput
                         };
                     } catch (error) {
-                        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                        if (error.name === 'AbortError') {
                             return {
                                 success: false,
-                                output: `Dyalog APL server is not available currently.`
+                                output: 'Connection to the APL server timed out. Please try again shortly.'
+                            };
+                        }
+                        if (error instanceof TypeError || error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                            return {
+                                success: false,
+                                output: 'Cannot connect to the APL server. Please try again shortly.'
                             };
                         }
                         return {
                             success: false,
                             output: error.message || String(error)
                         };
+                    } finally {
+                        clearTimeout(timeout);
                     }
                 }
             },
