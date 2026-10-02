@@ -67,6 +67,10 @@ const dashboardHTML = `<!DOCTYPE html>
             transition: background 0.3s ease;
         }
         
+        body.site-only-down {
+            background: #FF9A4E;
+        }
+
         body.server-down {
             background: #cc0000;
         }
@@ -1383,9 +1387,14 @@ const dashboardHTML = `<!DOCTYPE html>
                         }
                         if (info.status === 'down') anyDown = true;
                     }
-                    document.body.classList.toggle('server-down', anyDown);
+                    const siteOnlyDown = data.site?.status === 'down'
+                        && data.apl?.status === 'up'
+                        && data.permalink?.status === 'up';
+                    document.body.classList.toggle('site-only-down', siteOnlyDown);
+                    document.body.classList.toggle('server-down', anyDown && !siteOnlyDown);
                 })
                 .catch(() => {
+                    document.body.classList.remove('site-only-down');
                     document.body.classList.add('server-down');
                     for (const key of ['apl', 'permalink', 'site']) {
                         const el = document.getElementById('srv-' + key);
@@ -1542,7 +1551,7 @@ const dashboardHTML = `<!DOCTYPE html>
                 const status = document.getElementById('connectionStatus');
                 status.className = 'connection-status connected';
                 status.querySelector('.text').textContent = 'Live';
-                document.body.classList.remove('server-down');
+                document.body.classList.remove('server-down', 'site-only-down');
                 fetchServerStatus();
             };
             
@@ -1559,6 +1568,7 @@ const dashboardHTML = `<!DOCTYPE html>
                 const status = document.getElementById('connectionStatus');
                 status.className = 'connection-status disconnected';
                 status.querySelector('.text').textContent = 'Reconnecting...';
+                document.body.classList.remove('site-only-down');
                 document.body.classList.add('server-down');
                 
                 // Reconnect after 3 seconds

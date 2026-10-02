@@ -485,6 +485,34 @@
             color: var(--error-color);
         }
 
+        .evaluation-help-tip {
+            display: block;
+            width: fit-content;
+            max-width: 100%;
+            margin-top: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(14px, 0.65em, 24px);
+            font-weight: 600;
+            line-height: 1.4;
+            white-space: normal;
+            background: linear-gradient(90deg, #ff6b6b, #FF9A4E, #ffe066, #94e044, #5ccfff, #bb9af7, #ff6b6b);
+            background-size: 200% 100%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            animation: help-tip-rainbow 4s linear infinite;
+        }
+
+        @keyframes help-tip-rainbow {
+            to { background-position: -200% 0; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .evaluation-help-tip {
+                animation: none;
+            }
+        }
+
         /* Loading indicator for long-running evaluations */
         .loading-indicator {
             position: absolute;
@@ -4293,6 +4321,12 @@
             } else {
                 output.textContent = result.output;
                 output.style.textAlign = '';
+            }
+            if (!result.success && /help/i.test(code)) {
+                const helpTip = document.createElement('div');
+                helpTip.className = 'evaluation-help-tip';
+                helpTip.textContent = 'Tip: Ctrl + H for Help';
+                output.appendChild(helpTip);
             }
             output.className = `output show ${langConfig.fontClass} ${result.success ? '' : 'error'}`;
 
