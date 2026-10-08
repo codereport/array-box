@@ -173,9 +173,12 @@ async function main(fix = false) {
     writeReview(review);
     const summaryPath = path.join(root, 'upstream-sync-summary.md');
     if (fix && existsSync(summaryPath)) {
-        appendFileSync(summaryPath, '\nPrimitive search label corrections:\n' + corrected.map(([language, rows]) =>
-            `- ${language}: ${rows.length} (${rows.map(({ glyph }) => glyph).join(' ') || 'none'})`).join('\n') +
-            (removedDuplicates.length ? `\n- Duplicate glyph keys removed: ${removedDuplicates.join('; ')}` : '') + '\n');
+        const corrections = corrected.filter(([, rows]) => rows.length).map(([language, rows]) =>
+            `- ${language}: ${rows.length} (${rows.map(({ glyph }) => glyph).join(' ')})`);
+        if (removedDuplicates.length) corrections.push(`- Duplicate glyph keys removed: ${removedDuplicates.join('; ')}`);
+        if (corrections.length) {
+            appendFileSync(summaryPath, '\nPrimitive search label corrections:\n' + corrections.join('\n') + '\n');
+        }
     }
     if (unsynced) process.exitCode = 1;
 }

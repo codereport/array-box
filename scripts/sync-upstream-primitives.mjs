@@ -242,10 +242,15 @@ async function main() {
     const headings = kapHeadings(kapSource);
     const tinyKeyboardRows = parseTinyKeyboard(tinyKeyboardSource);
     const { uiuaGlyphDocs: previousUiuaDocs } = await import('../src/uiua-docs.js?before-sync');
+    const previousDocsCode = new Map(['uiua', 'tinyapl', 'bqn'].map(lang =>
+        [lang, readFileSync(src(`${lang}-docs.js`), 'utf8')]));
 
-    for (const lang of ['uiua', 'tinyapl', 'bqn']) {
+    for (const lang of previousDocsCode.keys()) {
         execFileSync(process.execPath, [path.join(root, 'scripts', `scrape-${lang}-docs.cjs`)], { stdio: 'inherit' });
     }
+    const languageNames = { uiua: 'Uiua', tinyapl: 'TinyAPL', bqn: 'BQN' };
+    const changedDocs = [...previousDocsCode].filter(([lang, code]) =>
+        code !== readFileSync(src(`${lang}-docs.js`), 'utf8')).map(([lang]) => languageNames[lang]);
 
     const [{ uiuaGlyphDocs }, { tinyaplGlyphDocs }, { bqnGlyphDocs }, keyboard, keymap, { syntaxRules }] = await Promise.all([
         import('../src/uiua-docs.js?after-sync'), import('../src/tinyapl-docs.js'), import('../src/bqn-docs.js'),
@@ -312,7 +317,9 @@ async function main() {
     if (additions.bqn.length) notes.push('Review new BQN glyphs against its keyboard layout.');
 
     let kapDocsCode = readFileSync(src('kap-docs.js'), 'utf8');
-    kapDocsCode = fixKapLinks(kapDocsCode, headings);
+    const updatedKapDocsCode = fixKapLinks(kapDocsCode, headings);
+    const kapLinksChanged = updatedKapDocsCode !== kapDocsCode;
+    kapDocsCode = updatedKapDocsCode;
     const { kapGlyphDocs } = await import('../src/kap-docs.js');
     for (const [glyph, { line, name }] of headings) {
         if (!kapGlyphDocs[glyph]) {
@@ -342,20 +349,23 @@ async function main() {
         previousKapNames[glyph] && previousKapNames[glyph] !== name);
     writeFileSync(kapNamesPath, JSON.stringify({ source: kapUrl, names: kapNames }, null, 2) + '\n');
 
+    const changes = [
+        additions.uiua.length && `- Uiua new glyphs: ${additions.uiua.map(([g]) => g).join(' ')}`,
+        retiredUiua.length && `- Uiua retired glyphs: ${retiredUiua.join(' ')}`,
+        renamedUiua.length && `- Uiua renamed primitives: ${renamedUiua.map(([g]) => g).join(' ')}`,
+        fontChanged && '- Updated Uiua font.',
+        additions.tinyapl.length && `- TinyAPL new glyphs: ${additions.tinyapl.map(([g]) => g).join(' ')}`,
+        tinyKeyboardChanges.length && `- TinyAPL keyboard keys updated: ${tinyKeyboardChanges.join(', ')}`,
+        additions.bqn.length && `- BQN new glyphs: ${additions.bqn.map(([g]) => g).join(' ')}`,
+        additions.kap.length && `- Kap new glyphs: ${additions.kap.map(([g]) => g).join(' ')}`,
+        changedKapNames.length && `- Kap heading names changed: ${changedKapNames.map(([g]) => g).join(' ')}`,
+        changedDocs.length && `- Refreshed ${changedDocs.join(', ')} hover docs from upstream.`,
+        kapLinksChanged && '- Updated Kap reference source links.',
+        ...notes.map(note => `- ${note}`),
+    ].filter(Boolean);
     const summary = [
         'Automated upstream primitive and documentation sync.', '',
-        `- Uiua new glyphs: ${additions.uiua.map(([g]) => g).join(' ') || 'none'}`,
-        `- Uiua retired glyphs: ${retiredUiua.join(' ') || 'none'}`,
-        `- Uiua renamed primitives: ${renamedUiua.map(([g]) => g).join(' ') || 'none'}`,
-        `- Uiua font updated: ${fontChanged ? 'yes' : 'no'}`,
-        `- TinyAPL new glyphs: ${additions.tinyapl.map(([g]) => g).join(' ') || 'none'}`,
-        `- TinyAPL keyboard keys updated: ${tinyKeyboardChanges.join(', ') || 'none'}`,
-        `- BQN new glyphs: ${additions.bqn.map(([g]) => g).join(' ') || 'none'}`,
-        `- Kap new glyphs: ${additions.kap.map(([g]) => g).join(' ') || 'none'}`,
-        `- Kap heading names changed: ${changedKapNames.map(([g]) => g).join(' ') || 'none'}`,
-        '- Refreshed Uiua, TinyAPL, and BQN hover docs from upstream.',
-        '- Checked Kap reference source links and text fingerprint.',
-        ...notes.map(note => `- ${note}`), '',
+        ...changes, '',
         'Sources: https://github.com/uiua-lang/uiua/blob/main/site/primitives.json, https://github.com/RubenVerg/TinyAPL/tree/beta/docs/pages, https://mlochbaum.github.io/BQN/help/, https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc',
     ].join('\n');
     writeFileSync(path.join(root, 'upstream-sync-summary.md'), summary + '\n');

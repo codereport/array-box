@@ -40,8 +40,6 @@ jobs:
           {
             echo 'body<<__EOF__'
             cat upstream-sync-summary.md
-            echo
-            echo 'Primitive search names are checked against refreshed Uiua, TinyAPL, and BQN docs. Review remaining Kap, J, and APL label differences in scripts/primitive-name-review.md.'
             echo '__EOF__'
           } >> "$GITHUB_OUTPUT"
 
