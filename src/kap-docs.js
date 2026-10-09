@@ -374,7 +374,7 @@ export const kapGlyphDocs = {
     "⍴": {
         "glyph": "⍴",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1044",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1051",
         "monad": {
             "name": "Shape",
             "description": "Return the shape of the argument as an array containing the size of each dimension.",
@@ -389,7 +389,7 @@ export const kapGlyphDocs = {
     "⍳": {
         "glyph": "⍳",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1111",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1118",
         "monad": {
             "name": "Index Generator",
             "description": "If scalar, generate 1-dimensional array of A numbers from 0 to A-1. If array, generate array with coordinates.",
@@ -404,7 +404,7 @@ export const kapGlyphDocs = {
     "⍸": {
         "glyph": "⍸",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1705",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1731",
         "monad": {
             "name": "Where",
             "description": "Given an array of positive integers, return indexes where nonzero elements exist. Values repeated per integer value.",
@@ -419,7 +419,7 @@ export const kapGlyphDocs = {
     "⊢": {
         "glyph": "⊢",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1154",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1161",
         "monad": {
             "name": "Identity",
             "description": "Returns the argument itself.",
@@ -434,7 +434,7 @@ export const kapGlyphDocs = {
     "⊣": {
         "glyph": "⊣",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1174",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1181",
         "monad": {
             "name": "Hide",
             "description": "Forces evaluation of argument ensuring side effects are called. Returns an empty array that won't be printed in REPL.",
@@ -449,7 +449,7 @@ export const kapGlyphDocs = {
     "⌷": {
         "glyph": "⌷",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1192",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1199",
         "monad": {
             "name": "List to Array",
             "description": "Given an N-tuple, return a 1-dimensional array with its content.",
@@ -464,7 +464,7 @@ export const kapGlyphDocs = {
     "⊂": {
         "glyph": "⊂",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1206",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1213",
         "monad": {
             "name": "Enclose",
             "description": "For non-primitive values, return a 0-dimensional array containing the argument. For primitives, returns the value itself.",
@@ -479,7 +479,7 @@ export const kapGlyphDocs = {
     "⊃": {
         "glyph": "⊃",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1230",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1237",
         "monad": {
             "name": "Disclose (Mix)",
             "description": "If enclosed (rank 0), returns the array element. For rank 1+, performs mix operation aligning subarrays.",
@@ -494,7 +494,7 @@ export const kapGlyphDocs = {
     ",": {
         "glyph": ",",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1282",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1289",
         "monad": {
             "name": "Ravel",
             "description": "Return a new array containing the same values reshaped to a single dimension.",
@@ -509,7 +509,7 @@ export const kapGlyphDocs = {
     "⍪": {
         "glyph": "⍪",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1296",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1303",
         "monad": {
             "name": "Table",
             "description": "Reshape the argument into a 2-dimensional array. For 1D, shape becomes (≢A) 1.",
@@ -524,7 +524,7 @@ export const kapGlyphDocs = {
     "⍮": {
         "glyph": "⍮",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1308",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1315",
         "monad": {
             "name": "Singleton",
             "description": "Creates a 1-dimensional array of size 1 containing the argument. Same as ,⊂.",
@@ -539,7 +539,7 @@ export const kapGlyphDocs = {
     "↑": {
         "glyph": "↑",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1320",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1327",
         "monad": {
             "name": "Take First",
             "description": "Returns the first element in the argument. If scalar, returns the argument itself.",
@@ -554,7 +554,7 @@ export const kapGlyphDocs = {
     "↓": {
         "glyph": "↓",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1363",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1379",
         "monad": {
             "name": "Drop First",
             "description": "Removes one row from the major axis. Equivalent to 1↓A.",
@@ -569,7 +569,7 @@ export const kapGlyphDocs = {
     "?": {
         "glyph": "?",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1389",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1415",
         "monad": {
             "name": "Roll",
             "description": "For integer > 0, random integer from 0 to value-1. For 0, random float from 0 to 1.",
@@ -584,7 +584,7 @@ export const kapGlyphDocs = {
     "⌽": {
         "glyph": "⌽",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1406",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1432",
         "monad": {
             "name": "Reverse",
             "description": "Reverse the order of elements along the last axis.",
@@ -599,7 +599,7 @@ export const kapGlyphDocs = {
     "⊖": {
         "glyph": "⊖",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1495",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1521",
         "monad": {
             "name": "Reverse First",
             "description": "Same as ⌽ but operates along axis 0.",
@@ -614,7 +614,7 @@ export const kapGlyphDocs = {
     "⍉": {
         "glyph": "⍉",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1505",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1531",
         "monad": {
             "name": "Transpose",
             "description": "Reverses the axes of the right argument. For 2D array, this is matrix transpose.",
@@ -629,7 +629,7 @@ export const kapGlyphDocs = {
     "∊": {
         "glyph": "∊",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1545",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1571",
         "monad": {
             "name": "Enlist",
             "description": "Recursively find all atomic values and return them as a single-dimensional array.",
@@ -644,7 +644,7 @@ export const kapGlyphDocs = {
     "⍷": {
         "glyph": "⍷",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1575",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1601",
         "dyad": {
             "name": "Find",
             "description": "Test entire A against each position in B. Returns boolean array same shape as B with 1 at match start positions.",
@@ -654,7 +654,7 @@ export const kapGlyphDocs = {
     "⍋": {
         "glyph": "⍋",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1585",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1611",
         "monad": {
             "name": "Grade Up",
             "description": "Returns a permutation vector. Indexing into argument with result gives sorted array (ascending).",
@@ -664,7 +664,7 @@ export const kapGlyphDocs = {
     "⍒": {
         "glyph": "⍒",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1595",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1621",
         "monad": {
             "name": "Grade Down",
             "description": "Same as ⍋ but for descending order.",
@@ -674,7 +674,7 @@ export const kapGlyphDocs = {
     "/": {
         "glyph": "/",
         "type": "operator",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1956",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1982",
         "monad": {
             "name": "Reduce",
             "description": "Apply function between elements. Lazy evaluation.",
@@ -689,7 +689,7 @@ export const kapGlyphDocs = {
     "⌿": {
         "glyph": "⌿",
         "type": "operator",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2003",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2029",
         "monad": {
             "name": "Reduce First",
             "description": "Same as / but axis defaults to 0. Result is enclosed for rank-1 input (APL-compatible).",
@@ -704,7 +704,7 @@ export const kapGlyphDocs = {
     "\\": {
         "glyph": "\\",
         "type": "operator",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2087",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2113",
         "monad": {
             "name": "Scan",
             "description": "Like reduce but preserves intermediary results. Computed left-to-right (like BQN/J, unlike APL).",
@@ -714,7 +714,7 @@ export const kapGlyphDocs = {
     "⍀": {
         "glyph": "⍀",
         "type": "operator",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2104",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2130",
         "monad": {
             "name": "Scan First",
             "description": "Same as \\ but scans along axis 0.",
@@ -724,7 +724,7 @@ export const kapGlyphDocs = {
     "¨": {
         "glyph": "¨",
         "type": "operator",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1941",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1967",
         "monad": {
             "name": "Each",
             "description": "Apply function to each element. Result is lazy - function called when value retrieved.",
@@ -734,7 +734,7 @@ export const kapGlyphDocs = {
     "⌻": {
         "glyph": "⌻",
         "type": "operator",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2016",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2042",
         "dyad": {
             "name": "Outer Product",
             "description": "Returns array of all combinations of elements from last axis of A with leading axis of B.",
@@ -744,7 +744,7 @@ export const kapGlyphDocs = {
     "∙": {
         "glyph": "∙",
         "type": "operator",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2039",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2065",
         "dyad": {
             "name": "Inner Product",
             "description": "APL-compatible inner product. Uses middle dot instead of period.",
@@ -754,7 +754,7 @@ export const kapGlyphDocs = {
     "⍨": {
         "glyph": "⍨",
         "type": "operator",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2045",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2071",
         "monad": {
             "name": "Duplicate",
             "description": "Derives monadic function that calls F dyadically with same argument on both sides.",
@@ -769,7 +769,7 @@ export const kapGlyphDocs = {
     "⍣": {
         "glyph": "⍣",
         "type": "operator",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2069",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2095",
         "monad": {
             "name": "Power Operator",
             "description": "Repeatedly apply f. If g is integer, apply f that many times. If g is function, apply until g returns 1.",
@@ -779,7 +779,7 @@ export const kapGlyphDocs = {
     "⍤": {
         "glyph": "⍤",
         "type": "operator",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2110",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2136",
         "monad": {
             "name": "Rank",
             "description": "Apply function to cells of specified rank. Negative rank is complementary (excludes leading axes).",
@@ -789,7 +789,7 @@ export const kapGlyphDocs = {
     "∘": {
         "glyph": "∘",
         "type": "operator",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2240",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2266",
         "monad": {
             "name": "Compose",
             "description": "x A∘B y evaluates as x A (B y). A∘B y evaluates as y A (B y).",
@@ -799,7 +799,7 @@ export const kapGlyphDocs = {
     "⍛": {
         "glyph": "⍛",
         "type": "operator",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2245",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2271",
         "monad": {
             "name": "Inverse Compose",
             "description": "x A⍛B y evaluates as (A x) B y. A⍛B y evaluates as (A y) B y.",
@@ -809,7 +809,7 @@ export const kapGlyphDocs = {
     "⍥": {
         "glyph": "⍥",
         "type": "operator",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2250",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2276",
         "monad": {
             "name": "Over",
             "description": "x A⍥B y evaluates as (B x) A (B y). Processes arguments with B before acting with A.",
@@ -819,7 +819,7 @@ export const kapGlyphDocs = {
     "⍢": {
         "glyph": "⍢",
         "type": "operator",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2258",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2284",
         "monad": {
             "name": "Structural Under",
             "description": "Call B, apply A to result, then reverse effect of B. Works with non-invertible structural functions.",
@@ -829,7 +829,7 @@ export const kapGlyphDocs = {
     "∵": {
         "glyph": "∵",
         "type": "operator",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2126",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2152",
         "monad": {
             "name": "Derive Bitwise",
             "description": "Derives function performing operation on individual bits. +∵ is xor, ×∵ is and, ∨∵ is or, etc.",
@@ -839,7 +839,7 @@ export const kapGlyphDocs = {
     "∥": {
         "glyph": "∥",
         "type": "operator",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2156",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2182",
         "monad": {
             "name": "Parallel",
             "description": "Derives parallel version of function. Currently only works with ¨ (each). Function must be pure.",
@@ -849,7 +849,7 @@ export const kapGlyphDocs = {
     "˝": {
         "glyph": "˝",
         "type": "operator",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2176",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2202",
         "monad": {
             "name": "Inverse",
             "description": "Derives functional inverse. F F˝ x = x. For dyadic: x F x F˝ y = y.",
@@ -859,7 +859,7 @@ export const kapGlyphDocs = {
     "⍰": {
         "glyph": "⍰",
         "type": "operator",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2192",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2218",
         "monad": {
             "name": "Conditional Null",
             "description": "If right argument is null, returns null. Otherwise calls original function. Useful for hashmap lookups.",
@@ -889,7 +889,7 @@ export const kapGlyphDocs = {
     "⊆": {
         "glyph": "⊆",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1663",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1689",
         "monad": {
             "name": "Nest",
             "description": "APL-compatible nest function.",
@@ -904,7 +904,7 @@ export const kapGlyphDocs = {
     "⊇": {
         "glyph": "⊇",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1684",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1710",
         "dyad": {
             "name": "Select",
             "description": "A is array of coordinates. Return values from B at those coordinates.",
@@ -914,7 +914,7 @@ export const kapGlyphDocs = {
     "⫇": {
         "glyph": "⫇",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1697",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1723",
         "dyad": {
             "name": "Group",
             "description": "A is integers. Group major cells of B by A values. Negative A values drop those cells.",
@@ -924,7 +924,7 @@ export const kapGlyphDocs = {
     "∪": {
         "glyph": "∪",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1772",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1798",
         "monad": {
             "name": "Unique",
             "description": "Return an array of all unique elements in the argument.",
@@ -939,7 +939,7 @@ export const kapGlyphDocs = {
     "∩": {
         "glyph": "∩",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1803",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1829",
         "dyad": {
             "name": "Intersection",
             "description": "Returns elements present in both A and B.",
@@ -949,7 +949,7 @@ export const kapGlyphDocs = {
     "⊤": {
         "glyph": "⊤",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1787",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1813",
         "dyad": {
             "name": "Encode",
             "description": "Compute representation of B in radix system defined by A. Inverse of Decode.",
@@ -959,7 +959,7 @@ export const kapGlyphDocs = {
     "⊥": {
         "glyph": "⊥",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1796",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1822",
         "dyad": {
             "name": "Decode",
             "description": "Evaluate B in radix system defined by A. Inverse of Encode.",
@@ -969,7 +969,7 @@ export const kapGlyphDocs = {
     "⌸": {
         "glyph": "⌸",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2208",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2234",
         "dyad": {
             "name": "Key",
             "description": "Group values B by keys A. Returns n-by-2 array with unique keys and their grouped values.",
@@ -979,7 +979,7 @@ export const kapGlyphDocs = {
     "⌹": {
         "glyph": "⌹",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1810",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1836",
         "monad": {
             "name": "Matrix Inverse",
             "description": "Return the inverse of a matrix.",
@@ -994,7 +994,7 @@ export const kapGlyphDocs = {
     "…": {
         "glyph": "…",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1822",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1848",
         "dyad": {
             "name": "Range",
             "description": "Generate sequence from A to B. If arrays, use last of A and first of B as range endpoints.",
@@ -1004,7 +1004,7 @@ export const kapGlyphDocs = {
     "≬": {
         "glyph": "≬",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1853",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1879",
         "monad": {
             "name": "Create List",
             "description": "Create an N-tuple containing the elements of the input array.",
@@ -1014,7 +1014,7 @@ export const kapGlyphDocs = {
     "%": {
         "glyph": "%",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1648",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1674",
         "dyad": {
             "name": "Case",
             "description": "A is indices, B is list of arrays same shape as A. Pick value from corresponding subarray for each cell.",
@@ -1024,7 +1024,7 @@ export const kapGlyphDocs = {
     "⍎": {
         "glyph": "⍎",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1641",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1667",
         "monad": {
             "name": "Parse Number",
             "description": "Given a string, attempt to parse it as a number. Raises error if parsing fails.",
@@ -1034,7 +1034,7 @@ export const kapGlyphDocs = {
     "⍕": {
         "glyph": "⍕",
         "type": "function",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1614",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1640",
         "monad": {
             "name": "Format",
             "description": "Returns a string representation of the argument.",
@@ -1109,7 +1109,7 @@ export const kapGlyphDocs = {
     "→": {
         "glyph": "→",
         "type": "syntax",
-        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2586",
+        "docUrl": "https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2612",
         "monad": {
             "name": "Return",
             "description": "Return value from innermost function.",
