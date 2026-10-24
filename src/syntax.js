@@ -100,6 +100,8 @@ export const syntaxRules = {
         ],
         // Comparison verbs (also functions)
         comparison: ['<', '>', '='],
+        // Noun primitives (purple)
+        constants: ['a.', 'a:'],
         // Multi-char tokens for J - digraphs ending in . or :
         multiChar: {
             // Verbs with . suffix
@@ -569,6 +571,12 @@ export function highlightCode(text, language) {
                     i = commentEnd;
                     matched = true;
                     break;
+                } else if (rules.constants && rules.constants.includes(substr) && !isPartOfIdentifier) {
+                    tokens.push({ type: 'number', value: substr });
+                    lastGlyphType = 'number';
+                    i += len;
+                    matched = true;
+                    break;
                 } else if (rules.multiChar.functions.includes(substr)) {
                     tokens.push({ type: 'function', value: substr });
                     lastGlyphType = 'function';
@@ -791,7 +799,9 @@ export function highlightTrainTreeGlyphs(text, language = 'apl') {
                 if (i + len > text.length) continue;
                 const substr = text.substring(i, i + len);
                 let cls = null;
-                if (rules.multiChar.functions && rules.multiChar.functions.includes(substr)) {
+                if (rules.constants && rules.constants.includes(substr)) {
+                    cls = 'syntax-number';
+                } else if (rules.multiChar.functions && rules.multiChar.functions.includes(substr)) {
                     cls = 'syntax-function';
                 } else if (rules.multiChar.monadic && rules.multiChar.monadic.includes(substr)) {
                     cls = 'syntax-modifier-monadic';
