@@ -2794,7 +2794,8 @@
                         const isError = data.success === false;
                         return {
                             success: data.success !== false,
-                            output: isError ? humanizeAplError(rawOutput) : rawOutput
+                            output: isError ? humanizeAplError(rawOutput) : rawOutput,
+                            isAplFunction: !isError && data.isAplFunction === true
                         };
                     } catch (error) {
                         if (error.name === 'AbortError') {
@@ -4309,7 +4310,8 @@
             if (result.outputHtml) {
                 output.innerHTML = result.outputHtml;
                 output.style.textAlign = '';
-            } else if (currentLanguage === 'apl' && isTrainTree(result.output, 'apl')) {
+            } else if (currentLanguage === 'apl' && (isTrainTree(result.output, 'apl') ||
+                (result.isAplFunction && /[┌┐└┘─│]/.test(result.output)))) {
                 const { html: explainHtml, groups: explainGroups } = renderAplExplainTree(code, result.output);
                 output.innerHTML = `<span style="display:inline-block;text-align:left" id="explainTreeRoot">${explainHtml}</span>`;
                 output.style.textAlign = 'center';

@@ -519,10 +519,11 @@ function aplSystemFunctionLength(chars, start) {
  * Only the glyph sets differ.
  *
  * @param {string} src
- * @returns {object[]}
+ * @param {boolean} returnTree - Return the parsed tree instead of hover groups
+ * @returns {object[]|object|null}
  */
-function parseAplExprGroups(src) {
-    if (!src || !src.trim()) return [];
+function parseAplExprGroups(src, returnTree = false) {
+    if (!src || !src.trim()) return returnTree ? null : [];
 
     // If the entire expression is wrapped in outer parens — e.g. "(+/÷≠)" —
     // strip them so the inner train is parsed as individual tokens.
@@ -639,7 +640,7 @@ function parseAplExprGroups(src) {
         dervs.push(cur);
     }
 
-    if (dervs.length === 0) return [];
+    if (dervs.length === 0) return returnTree ? null : [];
 
     // Step 3: Build train (right-recursive fork/atop — same rules as BQN)
     function makeTrain(ds) {
@@ -666,6 +667,7 @@ function parseAplExprGroups(src) {
     }
 
     const trainRoot = makeTrain(dervs);
+    if (returnTree) return trainRoot;
 
     // Step 4: Walk tree to extract groups
     const groups = [];
@@ -737,6 +739,114 @@ function parseAplExprGroups(src) {
 
     extractGroups(trainRoot, 0);
     return groups;
+}
+
+// Safe3's locked covers appear as opaque objects (e.g. ∇sûre_execute), which
+// prevents Dyalog's normal train-tree formatter from recognizing the function.
+const APL_COVER_GLYPHS = {
+    NL: '⎕NL', FX: '⎕FX', power: '⍣', execute: '⍎', format: '⍕',
+    ibeam: '⌶', NS: '⎕NS', VGET: '⎕VGET', VSET: '⎕VSET',
+};
+
+function aplDisplayTree(expression) {
+    const root = parseAplExprGroups(expression, true);
+    if (!root) return null;
+    const chars = [...expression];
+    const columns = new Set(root.cols);
+    // Never draw a partial parse: named functions and unsupported syntax keep
+    // their text representation instead of silently losing components.
+    if (chars.some((ch, c) => !columns.has(c) && !/[\s()]/.test(ch))) return null;
+    return { root, chars };
+}
+
+function layoutAplDisplayTree(node, chars, depth = 0) {
+    const label = node => node.text ?? node.cols.map(c => chars[c]).join('');
+    if (depth > 50) throw new Error('Function tree is too deep');
+    if (node.type === 'func') {
+        const text = label(node);
+        const parsed = aplDisplayTree(text);
+        const nested = parsed && (parsed.root.type !== 'func' ||
+            (text.startsWith('(') && text.endsWith(')'))) ? parsed : null;
+        if (nested) return layoutAplDisplayTree(nested.root, nested.chars, depth + 1);
+        const width = [...text].length;
+        return { lines: [text], width, anchor: Math.floor((width - 1) / 2) };
+    }
+
+    const children = node.type === '1-mod' ? [node.operand]
+        : node.type === '2-mod' ? [node.left, node.right]
+        : node.type === 'atop' ? [node.f, node.g] : [node.f, node.g, node.h];
+    const layouts = children.map(child => layoutAplDisplayTree(child, chars, depth + 1));
+    const offsets = [];
+    let width = 0;
+    for (const child of layouts) {
+        offsets.push(width);
+        width += child.width + 1;
+    }
+    width--;
+    const anchors = layouts.map((child, i) => offsets[i] + child.anchor);
+    const anchor = node.type === '1-mod' ? anchors[0] + 2
+        : node.type === 'fork' ? anchors[1] : Math.floor((anchors[0] + anchors.at(-1)) / 2);
+    const modifier = node.modifier ? label(node.modifier) : '';
+    width = Math.max(width, anchor + [...modifier].length);
+    const height = Math.max(...layouts.map(child => child.lines.length));
+    const lines = Array.from({ length: height }, (_, r) => layouts.map((child, i) =>
+        (child.lines[r] || '').padEnd(child.width) + (i < layouts.length - 1 ? ' ' : '')
+    ).join('').trimEnd());
+
+    const connector = Array(width).fill(' ');
+    const lastAnchor = node.type === '1-mod' ? anchor : anchors.at(-1);
+    for (let c = anchors[0]; c <= lastAnchor; c++) connector[c] = '─';
+    connector[anchors[0]] = '┌';
+    connector[lastAnchor] = node.type === '1-mod' ? '┘' : '┐';
+    if (node.type !== '1-mod') connector[anchor] = node.type === 'fork' ? '┼' : '┴';
+    lines.unshift(connector.join('').trimEnd());
+    if (modifier) lines.unshift(' '.repeat(anchor) + modifier);
+    return { lines, width, anchor };
+}
+
+/** Format the interpreter's structured function result, preserving its grouping. */
+export function formatAplFunctionOutput(output, representation, source = '') {
+    const sourceFallback = () => {
+        // An opaque function may have no traversable representation. A complete
+        // primitive expression supplied by the user still preserves its grouping.
+        if (!/∇sûre_(?:NL|FX|power|execute|format|ibeam|NS|VGET|VSET)\b/.test(output)) return output;
+        const parsed = aplDisplayTree(source);
+        return parsed && parsed.root.type !== 'func'
+            ? layoutAplDisplayTree(parsed.root, parsed.chars).lines.join('\n') : output;
+    };
+    let replaced = false;
+    function decode(value, depth = 0) {
+        if (depth > 50 || !Array.isArray(value) || value.length !== 2) throw new Error('Invalid function tree');
+        if (value[0] === 'leaf' && typeof value[1] === 'string') {
+            if (!value[1]) throw new Error('Missing function component');
+            // Safe3's power cover can bind a namespace to its function operand.
+            const name = value[1].trim().replace(/^#\.Safe3\.\[Namespace\]\s*\.\s*/, '');
+            const cover = name.match(/^∇(?:[#\w∆⍙]+\.)*sûre_(NL|FX|power|execute|format|ibeam|NS|VGET|VSET)$/);
+            if (cover) replaced = true;
+            return { type: 'func', text: cover ? APL_COVER_GLYPHS[cover[1]] : value[1] };
+        }
+        if (value[0] !== 'tree' || !Array.isArray(value[1]) || ![2, 3].includes(value[1].length)) {
+            throw new Error('Unsupported function tree');
+        }
+        const parts = value[1].map(part => decode(part, depth + 1));
+        if (parts.length === 2 && APL_MOD1_GLYPHS.has(parts[1].text)) {
+            return { type: '1-mod', operand: parts[0], modifier: parts[1] };
+        }
+        if (parts.length === 3 && APL_MOD2_GLYPHS.has(parts[1].text)) {
+            return { type: '2-mod', left: parts[0], modifier: parts[1], right: parts[2] };
+        }
+        if (parts[1].text === '[') throw new Error('Axis display is unsupported');
+        return parts.length === 2 ? { type: 'atop', f: parts[0], g: parts[1] }
+            : { type: 'fork', f: parts[0], g: parts[1], h: parts[2] };
+    }
+    try {
+        if (!representation) return sourceFallback();
+        const root = decode(representation);
+        if (!replaced) return sourceFallback();
+        return layoutAplDisplayTree(root, []).lines.join('\n');
+    } catch {
+        try { return sourceFallback(); } catch { return output; }
+    }
 }
 
 /**

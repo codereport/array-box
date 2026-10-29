@@ -108,7 +108,11 @@ function validateAPLCode(code) {
 async function executeAPLCodeSandbox(code) {
     try {
         // Let the sandbox find the Dyalog path itself (handles symlinks properly)
-        const result = await sandbox.executeInSandbox('apl', code);
+        const { aplFunctionTree, ...result } = await sandbox.executeInSandbox('apl', code);
+        if (result.success && result.isAplFunction) {
+            const { formatAplFunctionOutput } = await import('../src/explain-tree.js');
+            result.output = formatAplFunctionOutput(result.output, aplFunctionTree, code);
+        }
         return result;  // Return full result with success flag
     } catch (e) {
         if (e.message === 'SANDBOX_UNAVAILABLE' || e.message === 'DYALOG_NOT_FOUND') {

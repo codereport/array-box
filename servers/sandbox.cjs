@@ -14,6 +14,7 @@
 
 const { spawn, execSync } = require('child_process');
 const path = require('path');
+const { extractAplFunctionResult } = require('./apl-output.cjs');
 
 // Configuration
 const CONFIG = {
@@ -289,6 +290,7 @@ function createAplMarkers() {
     return {
         start: `___ARRAYBOX_START_${id}___`,
         end: `___ARRAYBOX_END_${id}___`,
+        function: `___ARRAYBOX_FUNCTION_${id}___`,
         reset: `___ARRAYBOX_RESET_${id}___`
     };
 }
@@ -722,11 +724,12 @@ async function executeWithWarmContainer(language, code, options = {}) {
                     
                     // Preserve leading/trailing spaces (box-drawing alignment); only strip newlines at edges; normalize \r
                     result = lines.map(l => l.replace(/\r/g, '')).join('\n').replace(/^\n+|\n+$/g, '');
+                    const functionResult = extractAplFunctionResult(result, aplMarkers.function);
                     
                     // Result may be an error message (e.g. "ERROR 206: Undefined name") from stdout
                     resolve({
-                        success: !isAplErrorOutput(result),
-                        output: result,
+                        success: !isAplErrorOutput(functionResult.output),
+                        ...functionResult,
                         warm: true
                     });
                     
@@ -759,7 +762,7 @@ async function executeWithWarmContainer(language, code, options = {}) {
             
             // Build Safe3.Exec call wrapped in :Trap to catch security errors
             // Without :Trap, ⎕SIGNAL from Safe3 would prevent end markers from printing
-            input = `]boxing on -s=min -trains=tree\n)SIC\n⎕←'${aplMarkers.start}'\n:Trap 0 ⋄ ⎕←Safe3.Exec '${escapedCode}' ⋄ :Else ⋄ ⎕←⎕DMX.EM,': ',⎕DMX.Message ⋄ :EndTrap\n)SIC\n⎕←'${aplMarkers.end}'\n⎕←'${aplMarkers.reset}'\n`;
+            input = `]boxing on -s=min -trains=tree\n)SIC\n⎕←'${aplMarkers.start}'\n:Trap 0 ⋄ ⎕←Safe3.Exec '${escapedCode}' ⋄ :If 2=Safe3.⎕NC'LastResultTree' ⋄ :AndIf Safe3.LastResultIsFunction ⋄ ⍞←'${aplMarkers.function}',Safe3.LastResultTree,⎕UCS 10 ⋄ :EndIf ⋄ :Else ⋄ ⎕←⎕DMX.EM,': ',⎕DMX.Message ⋄ :EndTrap\n)SIC\n⎕←'${aplMarkers.end}'\n⎕←'${aplMarkers.reset}'\n`;
         }
         
         // Set timeout
@@ -884,6 +887,7 @@ function executeInSandbox(language, code, options = {}) {
         let stderr = '';
         let timedOut = false;
         let finished = false;
+        const aplMarkers = createAplMarkers();
         
         container.stdout.on('data', (data) => {
             stdout += data.toString();
@@ -945,9 +949,10 @@ function executeInSandbox(language, code, options = {}) {
                     output = error;
                 }
                 
+                const functionResult = extractAplFunctionResult(output || error, aplMarkers.function);
                 resolve({
                     success: exitCode === 0 && !error.includes('Error'),
-                    output: output || error,
+                    ...functionResult,
                     exitCode
                 });
             }
@@ -967,7 +972,7 @@ function executeInSandbox(language, code, options = {}) {
         
         // Load Safe3, configure timeout, enable boxing, execute safely
         // Wrap in :Trap to catch security errors and still produce output
-        let input = `⎕FIX 'file:///opt/Safe3.dyalog'\nSafe3.DefaultTimeout←${timeoutSeconds}\n]boxing on -s=min -trains=tree\n:Trap 0 ⋄ ⎕←Safe3.Exec '${escapedCode}' ⋄ :Else ⋄ ⎕←⎕DMX.EM,': ',⎕DMX.Message ⋄ :EndTrap\n`;
+        let input = `⎕FIX 'file:///opt/Safe3.dyalog'\nSafe3.DefaultTimeout←${timeoutSeconds}\n]boxing on -s=min -trains=tree\n:Trap 0 ⋄ ⎕←Safe3.Exec '${escapedCode}' ⋄ :If 2=Safe3.⎕NC'LastResultTree' ⋄ :AndIf Safe3.LastResultIsFunction ⋄ ⍞←'${aplMarkers.function}',Safe3.LastResultTree,⎕UCS 10 ⋄ :EndIf ⋄ :Else ⋄ ⎕←⎕DMX.EM,': ',⎕DMX.Message ⋄ :EndTrap\n`;
         
         container.stdin.write(input);
         container.stdin.end();

@@ -28,12 +28,20 @@
     debug←0
     monitor←0
     tasks←⍬ ⍬
+    DescribeResult←{
+        (0=≢⍴⍵)∧1=≡⍵:'leaf'(,⍕⍵) ⍝ Encapsulated (possibly locked) function
+        326≠⎕DR ⍵:'leaf'(,⍕⍵)
+        1≠≢⍴⍵:'leaf'(,⍕⍵)
+        'tree'(∇¨⍵)
+    }
     ∇ r←{space_timeout}Exec expr;ExCovers;dmx;space;tid;timeout;shy;thread
     ⍝ returns result
     ⍝ if shy, throws 6
     ⍝ if timed out, throws 10
     ⍝ if illegal token, throws 11
     ⍝ if user's code causes error, throws 200+⎕EN
+      LastResultIsFunction←0 ⍝ Display metadata; evaluation still uses the injected covers
+      LastResultTree←''
       :If 900⌶⍬ ⍝ monadic?
           space_timeout←⍬
       :EndIf
@@ -54,7 +62,11 @@
               ⎕TSYNC thread
               ExCovers space  ⍝ remove injected covers
               :If 3 4∊⍨⎕NC'space.résult'
+                  LastResultIsFunction←1
                   r←space.(⎕EX⊢⎕OR)'résult'
+                  :Trap 0 ⍝ Unsupported display metadata must not change the result
+                      LastResultTree←1 ⎕JSON DescribeResult r
+                  :EndTrap
               :Else
                   r←space.(⎕EX⊢⎕VGET)'résult'
               :EndIf
