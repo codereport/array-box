@@ -1,4 +1,4 @@
-import { highlightTrainTreeGlyphs } from './syntax.js';
+import { highlightCode, highlightTrainTreeGlyphs } from './syntax.js';
 
 /**
  * Interactive explain-tree renderer for BQN, APL, and J train expressions.
@@ -503,6 +503,14 @@ function aplSyntaxClass(ch) {
     return null;
 }
 
+// Match the same system-function identifiers as the input highlighter.
+// These names contain only BMP characters, so their length is also their column width.
+function aplSystemFunctionLength(chars, start) {
+    if (chars[start] !== '⎕') return 0;
+    const match = chars.slice(start).join('').match(/^⎕[A-Za-z][A-Za-z0-9]*/);
+    return match ? match[0].length : 0;
+}
+
 /**
  * Parse an APL source expression and return hover groups.
  *
@@ -556,6 +564,15 @@ function parseAplExprGroups(src) {
                 i++;
             }
             tokens.push({ type: 'func', cols });
+            continue;
+        }
+
+        // Keep the whole system-function name in one operand and hover group.
+        const systemFunctionLength = aplSystemFunctionLength(chars, i);
+        if (systemFunctionLength) {
+            const cols = Array.from({ length: systemFunctionLength }, (_, c) => i + c + colOffset);
+            tokens.push({ type: 'func', cols });
+            i += systemFunctionLength;
             continue;
         }
 
@@ -748,17 +765,8 @@ export function renderAplExplainTree(source, treeText) {
 
     if (hoverGroups.length === 0) {
         // No parseable groups: just prepend source plainly and highlight the tree
-        const sourceHtml = [...source].map(ch => {
-            const cls = aplSyntaxClass(ch);
-            return cls ? `<span class="${cls}">${esc(ch)}</span>` : esc(ch);
-        }).join('');
-        const treeHtml = treeLines.map(line => {
-            return [...line].map(ch => {
-                const singleGlyph = !BOX_CHARS.has(ch) && ch !== ' ';
-                const cls = singleGlyph ? aplSyntaxClass(ch) : null;
-                return cls ? `<span class="${cls}">${esc(ch)}</span>` : esc(ch);
-            }).join('');
-        }).join('\n');
+        const sourceHtml = highlightCode(source, 'apl');
+        const treeHtml = treeLines.map(line => highlightCode(line, 'apl')).join('\n');
         return { html: centerPad + sourceHtml + '\n' + treeHtml, groups: [] };
     }
 
@@ -785,10 +793,13 @@ export function renderAplExplainTree(source, treeText) {
 
         if (r === 0) {
             // Row 0: source expression — interactive spans
+            let systemFunctionEnd = 0;
             for (let c = 0; c < row.length; c++) {
                 const ch = row[c];
                 const groupIds = colToGroups.get(c);
-                const syntaxClass = aplSyntaxClass(ch);
+                const systemFunctionLength = aplSystemFunctionLength(row, c);
+                if (systemFunctionLength) systemFunctionEnd = c + systemFunctionLength;
+                const syntaxClass = c < systemFunctionEnd ? 'syntax-function' : aplSyntaxClass(ch);
                 const classes = ['explain-source-char', syntaxClass].filter(Boolean).join(' ');
                 if (groupIds && groupIds.length > 0) {
                     html += `<span class="${classes}" data-col="${c}" data-groups="${groupIds.join(',')}">${esc(ch)}</span>`;
@@ -798,16 +809,7 @@ export function renderAplExplainTree(source, treeText) {
             }
         } else {
             // Rows 1+: tree connector rows — plain APL syntax highlighting
-            for (let c = 0; c < row.length; c++) {
-                const ch = row[c];
-                const singleGlyph = !BOX_CHARS.has(ch) && ch !== ' ';
-                const syntaxClass = singleGlyph ? aplSyntaxClass(ch) : null;
-                if (syntaxClass) {
-                    html += `<span class="${syntaxClass}">${esc(ch)}</span>`;
-                } else {
-                    html += esc(ch);
-                }
-            }
+            html = highlightCode(treeLines[r - 1], 'apl');
         }
 
         htmlRows.push(r === 0 ? centerPad + html : html);
