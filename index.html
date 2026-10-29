@@ -5245,7 +5245,7 @@
         }
 
         /**
-         * Find the glyph at or before the cursor position
+         * Find the selected glyph, otherwise the glyph at or before the cursor
          * Returns { glyph, position } or null if no glyph found
          */
         function findGlyphAtCursor() {
@@ -5256,6 +5256,17 @@
 
             const allGlyphs = getAllGlyphs(currentLanguage);
             const glyphDocs = glyphDocsByLanguage[currentLanguage] || {};
+
+            // Prefer an explicitly selected glyph, regardless of selection direction.
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0 && !selection.isCollapsed) {
+                const range = selection.getRangeAt(0);
+                const selectedGlyph = range.toString();
+                if (codeInput.contains(range.commonAncestorContainer) &&
+                    allGlyphs.has(selectedGlyph) && glyphDocs[selectedGlyph]) {
+                    return { glyph: selectedGlyph, position: getCursorOffset() };
+                }
+            }
 
             // For J language, try to match multi-char tokens first (looking at chars before cursor)
             if (currentLanguage === 'j') {
