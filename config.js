@@ -10,7 +10,7 @@
  */
 
 const ArrayBoxConfig = {
-    BACKEND_URL: 'https://maximize-residential-bloom-premium.trycloudflare.com',
+    BACKEND_URL: 'https://maps-passion-provide-element.trycloudflare.com',
     
     // Example configurations:
     // BACKEND_URL: 'https://arraybox.your-domain.com',     // Custom domain with Cloudflare Tunnel
