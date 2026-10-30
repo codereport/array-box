@@ -69,6 +69,11 @@ node servers/server-manager.cjs
 # Open index.html in a browser
 ```
 
+Run `npm run serve:public` to start the backend, API gateway, and a Cloudflare
+quick tunnel. It stops this checkout's previous Array Box launcher, servers, and
+tunnel before starting a fresh stack. By default it updates, commits, and pushes `config.js`;
+use `-- --no-deploy` to skip deployment or `-- --check` for read-only checks.
+
 The dashboard checks availability every 15 seconds. **APL** turns green only when
 both the local APL server and the published website's APL health route respond
 successfully, so a disconnected tunnel turns it red even if Dyalog is running.

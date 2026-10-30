@@ -19,9 +19,9 @@ usage() {
     cat <<'EOF'
 Usage: npm run serve:public -- [options]
 
-Starts the Array Box servers, production API gateway, and a Cloudflare quick
-tunnel. By default it also updates config.js, commits only that file, and
-pushes the commit to the current branch's upstream.
+Restarts this checkout's Array Box servers, production API gateway, and
+Cloudflare quick tunnel. By default it also updates config.js, commits only
+that file, and pushes the commit to the current branch's upstream.
 
 Options:
   --no-deploy  Start the stack and tunnel without changing or pushing config.js
@@ -71,20 +71,19 @@ export ENABLE_CEF=0 DYALOG_NOPOPUPS=1
 
 cleanup() {
     local status=$?
-    local index pid
+    local pid
 
     trap - EXIT INT TERM
     if (( ${#managed_pids[@]} > 0 )); then
         log "Stopping processes started by this launcher..."
-        for (( index=${#managed_pids[@]}-1; index>=0; index-- )); do
-            pid="${managed_pids[$index]}"
-            if kill -0 "$pid" 2>/dev/null; then
-                kill -TERM "$pid" 2>/dev/null || true
-            fi
-        done
-        for pid in "${managed_pids[@]}"; do
-            wait "$pid" 2>/dev/null || true
-        done
+        if node "$repo_dir/scripts/stop-public-processes.cjs" --pids "${managed_pids[@]}"; then
+            for pid in "${managed_pids[@]}"; do
+                wait "$pid" 2>/dev/null || true
+            done
+        else
+            warn "Could not stop all processes started by this launcher."
+            (( status != 0 )) || status=1
+        fi
     fi
     exit "$status"
 }
@@ -179,72 +178,60 @@ if [[ "$check_only" == true ]]; then
     exit 0
 fi
 
-if pgrep -x cloudflared >/dev/null 2>&1; then
-    die "A cloudflared process is already running. Stop the old tunnel before launching a new one."
-fi
+# Finish preflight work before interrupting a running stack.
+node scripts/check-public-prerequisites.cjs --prepare
+node scripts/stop-public-processes.cjs --exclude "$$"
 
-if backends_healthy; then
-    log "Backend servers are already healthy; reusing them."
-else
-    occupied_ports=()
-    for port in 8081 8082 8084 8085 8181; do
-        if port_is_listening "$port"; then
-            occupied_ports+=("$port")
-        fi
-    done
-    if (( ${#occupied_ports[@]} > 0 )); then
-        die "The backend is unhealthy but these required ports are occupied: ${occupied_ports[*]}"
+occupied_ports=()
+for port in 3000 8081 8082 8084 8085 8181; do
+    if port_is_listening "$port"; then
+        occupied_ports+=("$port")
     fi
-
-    # A first Docker image build can take longer than the backend startup deadline.
-    node scripts/check-public-prerequisites.cjs --prepare
-    : > "$manager_error_log"
-    : > "$manager_log"
-    log "Starting backend servers in sandbox mode..."
-    node servers/server-manager.cjs --sandbox >"$manager_log" 2>"$manager_error_log" &
-    manager_pid=$!
-    register_process "backend servers" "$manager_pid"
-
-    deadline=$((SECONDS + 45))
-    until backends_healthy; do
-        kill -0 "$manager_pid" 2>/dev/null || {
-            show_backend_failure
-            die "Backend server manager exited during startup."
-        }
-        (( SECONDS < deadline )) || {
-            show_backend_failure
-            die "Backend servers did not become healthy within 45 seconds."
-        }
-        sleep 1
-    done
-    log "Backend servers are healthy."
+done
+if (( ${#occupied_ports[@]} > 0 )); then
+    die "Required ports are occupied by other processes: ${occupied_ports[*]}"
 fi
 
-if gateway_healthy; then
-    log "API gateway is already healthy; reusing it."
-else
-    port_is_listening 3000 && die "Port 3000 is occupied by something other than a healthy Array Box gateway."
+: > "$manager_error_log"
+: > "$manager_log"
+log "Starting backend servers in sandbox mode..."
+node servers/server-manager.cjs --sandbox >"$manager_log" 2>"$manager_error_log" &
+manager_pid=$!
+register_process "backend servers" "$manager_pid"
 
-    : > "$gateway_log"
-    log "Starting production API gateway..."
-    node servers/api-gateway.cjs 3000 --production >"$gateway_log" 2>&1 &
-    gateway_pid=$!
-    register_process "API gateway" "$gateway_pid"
+deadline=$((SECONDS + 45))
+until backends_healthy; do
+    kill -0 "$manager_pid" 2>/dev/null || {
+        show_backend_failure
+        die "Backend server manager exited during startup."
+    }
+    (( SECONDS < deadline )) || {
+        show_backend_failure
+        die "Backend servers did not become healthy within 45 seconds."
+    }
+    sleep 1
+done
+log "Backend servers are healthy."
 
-    deadline=$((SECONDS + 20))
-    until gateway_healthy; do
-        kill -0 "$gateway_pid" 2>/dev/null || {
-            tail -n 30 "$gateway_log" >&2 || true
-            die "API gateway exited during startup."
-        }
-        (( SECONDS < deadline )) || {
-            tail -n 30 "$gateway_log" >&2 || true
-            die "API gateway did not become healthy within 20 seconds."
-        }
-        sleep 1
-    done
-    log "API gateway is healthy."
-fi
+: > "$gateway_log"
+log "Starting production API gateway..."
+node servers/api-gateway.cjs 3000 --production >"$gateway_log" 2>&1 &
+gateway_pid=$!
+register_process "API gateway" "$gateway_pid"
+
+deadline=$((SECONDS + 20))
+until gateway_healthy; do
+    kill -0 "$gateway_pid" 2>/dev/null || {
+        tail -n 30 "$gateway_log" >&2 || true
+        die "API gateway exited during startup."
+    }
+    (( SECONDS < deadline )) || {
+        tail -n 30 "$gateway_log" >&2 || true
+        die "API gateway did not become healthy within 20 seconds."
+    }
+    sleep 1
+done
+log "API gateway is healthy."
 
 : > "$tunnel_log"
 log "Starting Cloudflare quick tunnel over HTTP/2..."
