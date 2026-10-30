@@ -10,7 +10,7 @@
  */
 
 const ArrayBoxConfig = {
-    BACKEND_URL: 'https://just-enforcement-sapphire-however.trycloudflare.com',
+    BACKEND_URL: 'https://maximize-residential-bloom-premium.trycloudflare.com',
     
     // Example configurations:
     // BACKEND_URL: 'https://arraybox.your-domain.com',     // Custom domain with Cloudflare Tunnel
