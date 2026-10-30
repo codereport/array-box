@@ -79,8 +79,8 @@ test('ordinary output, quoted cover names, and unsupported trees remain unchange
     }
 });
 
-for (const warm of [true, false]) {
-    test(`${warm ? 'warm' : 'cold'} sandbox transports function metadata separately from output`, async () => {
+for (const [warm, metadataStream] of [[true, 'stdout'], [true, 'stderr'], [false, 'stdout'], [false, 'stderr']]) {
+    test(`${warm ? 'warm' : 'cold'} sandbox transports function metadata on ${metadataStream} separately from output`, async () => {
         const child = new EventEmitter();
         child.stdout = new EventEmitter();
         child.stderr = new EventEmitter();
@@ -94,10 +94,12 @@ for (const warm of [true, false]) {
         };
         function reply() {
             const marker = input.match(/___ARRAYBOX_FUNCTION_[a-z0-9]+___/)[0];
-            const payload = `${OUTPUT}\n${marker}${JSON.stringify(REPRESENTATION)}`;
+            const metadata = `${marker}${JSON.stringify(REPRESENTATION)}`;
+            const payload = metadataStream === 'stdout' ? `${OUTPUT}\n${metadata}` : OUTPUT;
             const stdout = warm
                 ? `${input.match(/___ARRAYBOX_START_[a-z0-9]+___/)[0]}\n${payload}\n${input.match(/___ARRAYBOX_END_[a-z0-9]+___/)[0]}\n${input.match(/___ARRAYBOX_RESET_[a-z0-9]+___/)[0]}\n`
                 : payload;
+            if (metadataStream === 'stderr') child.stderr.emit('data', Buffer.from(`${metadata}\n`));
             child.stdout.emit('data', Buffer.from(stdout));
             if (!warm) child.emit('close', 0);
         }

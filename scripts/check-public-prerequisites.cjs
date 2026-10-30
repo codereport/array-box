@@ -19,7 +19,7 @@ let apl = null;
 for (const candidate of candidates) {
     const result = spawnSync(candidate, [], {
         input: 'exit 0\n', encoding: 'utf8', timeout: 3000,
-        env: { ...process.env, ENABLE_CEF: '0', DYALOG_NOPOPUPS: '1' }
+        env: { ...process.env, DYALOG_NETCORE: '0', ENABLE_CEF: '0', DYALOG_NOPOPUPS: '1' }
     });
     if (result.status === 0) {
         apl = candidate;

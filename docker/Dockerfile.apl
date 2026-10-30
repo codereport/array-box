@@ -29,6 +29,9 @@ COPY Safe3.dyalog /opt/Safe3.dyalog
 # Set up environment
 ENV HOME="/home/sandbox"
 ENV DYALOG_NOPOPUPS="1"
+# Array Box uses native APL only; avoid loading host .NET or GUI runtimes.
+ENV DYALOG_NETCORE="0"
+ENV ENABLE_CEF="0"
 
 # Switch to sandbox user
 USER sandbox

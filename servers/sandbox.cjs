@@ -949,7 +949,9 @@ function executeInSandbox(language, code, options = {}) {
                     output = error;
                 }
                 
-                const functionResult = extractAplFunctionResult(output || error, aplMarkers.function);
+                // ⍞ metadata can arrive on stderr even when the result is on stdout.
+                const metadata = stderr.split('\n').filter(line => line.trimStart().startsWith(aplMarkers.function));
+                const functionResult = extractAplFunctionResult([output || error, ...metadata].join('\n'), aplMarkers.function);
                 resolve({
                     success: exitCode === 0 && !error.includes('Error'),
                     ...functionResult,

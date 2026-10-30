@@ -39,7 +39,10 @@ function findAPLExecutable() {
     
     for (const cmd of candidates) {
         try {
-            execSync(`echo "exit 0" | "${cmd}" 2>/dev/null`, { timeout: 3000, stdio: 'ignore' });
+            execSync(`echo "exit 0" | "${cmd}" 2>/dev/null`, {
+                timeout: 3000, stdio: 'ignore',
+                env: { ...process.env, DYALOG_NETCORE: '0', ENABLE_CEF: '0', DYALOG_NOPOPUPS: '1' }
+            });
             return cmd;
         } catch (e) {
             // Try next candidate
@@ -163,6 +166,8 @@ function executeAPLCodeDirect(code) {
             stdio: ['pipe', 'pipe', 'pipe'],
             env: { 
                 ...process.env, 
+                DYALOG_NETCORE: '0',
+                ENABLE_CEF: '0',
                 DYALOG_NOPOPUPS: '1'
             }
         });
