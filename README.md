@@ -48,8 +48,15 @@ A code editor and runner for array programming languages: **BQN**, **APL**, **J*
 | `Ctrl+I`             | Copy vertical image to clipboard |
 | `Ctrl+F`             | Format code (no evaluation)      |
 | `Ctrl+/`             | Toggle comment                   |
-| `Ctrl+Shift+Up/Down` | Cycle through input history      |
+| `Ctrl+Shift+Up/Down` | Add cursor above/below           |
+| `Ctrl+Shift+Left/Right` | Select words at every cursor  |
+| `Escape`             | Return to one cursor             |
+| `Alt+Up/Down`        | Cycle through input history      |
 | `F1`                 | Show docs for glyph at cursor    |
+
+With multiple cursors, typing, glyph prefixes, deletion, and pasting edit every
+selection. Arrow keys move every cursor; hold `Shift` to select or `Ctrl` to move
+by word. `Ctrl+Z` undoes a multi-cursor edit and `Ctrl+Shift+Z` or `Ctrl+Y` redoes it.
 
 #### Keyboard Mode
 

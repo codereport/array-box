@@ -479,6 +479,10 @@ export const jGlyphs = {
 export function insertText(element, text) {
     // Check if it's a contenteditable element
     if (element.contentEditable === 'true') {
+        // Let editor features apply programmatic glyph insertion to every selection.
+        if (!element.dispatchEvent(new InputEvent('beforeinput', {
+            inputType: 'insertText', data: text, bubbles: true, cancelable: true
+        }))) return;
         const sel = window.getSelection();
         if (sel.rangeCount > 0) {
             const range = sel.getRangeAt(0);

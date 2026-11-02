@@ -309,10 +309,34 @@
             outline: none;
         }
 
+        .multi-cursor-overlay {
+            position: absolute;
+            pointer-events: none;
+            overflow: hidden;
+            border-radius: 14px;
+        }
+
+        .multi-cursor-caret, .multi-cursor-selection {
+            position: absolute;
+        }
+
+        .multi-cursor-caret {
+            background: #10b981;
+        }
+
+        .multi-cursor-selection {
+            background: rgba(139, 233, 253, 0.25);
+        }
+
         .code-input:empty:before {
             content: attr(data-placeholder);
             color: #6b7280;
             pointer-events: none;
+        }
+
+        /* Keep the final empty line measurable without adding text to the code. */
+        .code-input::after {
+            content: '\200b';
         }
 
         .code-input.bqn {
@@ -1407,6 +1431,18 @@
                 </div>
                 <div class="help-row">
                     <span class="help-key">ctrl + shift + ↑ ↓</span>
+                    <span class="help-desc">add cursor above / below</span>
+                </div>
+                <div class="help-row">
+                    <span class="help-key">ctrl + shift + ← →</span>
+                    <span class="help-desc">select words at every cursor</span>
+                </div>
+                <div class="help-row">
+                    <span class="help-key">esc</span>
+                    <span class="help-desc">return to one cursor</span>
+                </div>
+                <div class="help-row">
+                    <span class="help-key">alt + ↑ ↓</span>
                     <span class="help-desc">cycle through input history</span>
                 </div>
                 <div class="help-row">
@@ -2325,6 +2361,7 @@
                   renderJExplainTree, J_COMBINATOR_INFO } from './src/explain-tree.js';
         import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames, jGlyphNames, tinyaplGlyphNames, bqnGlyphDocs, uiuaGlyphDocs, jGlyphDocs, kapGlyphDocs, aplGlyphDocs, tinyaplGlyphDocs } from './src/keyboard.js';
         import { createEditorFeaturesManager, toggleComment, commentTokens, autoExpandWidthForCodeAndResult } from './src/editor-features.js';
+        import { createMultiCursorEditor } from './src/multi-cursor.js';
         import { translatePrimitives, translateArrayLiterals, clearTranslationCache } from './src/primitive-translate.js';
         import { primitiveMap, compareLanguages, lookupPrimitive, parsePrimitives, getPrimitiveName, getEquivalent, hasValence, isScalar, getAvailableRanks, getDefaultRank } from './src/primitive-compare.js';
 
@@ -3653,7 +3690,7 @@
             }
 
             // Ctrl+Up/Down to switch languages (works globally)
-            // Skip if Shift is pressed - that's for input history cycling
+            // Skip if Shift is pressed - that's for adding cursors
             if (e.ctrlKey && !e.shiftKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
                 e.preventDefault();
                 const currentIndex = languageOrder.indexOf(currentLanguage);
@@ -3762,6 +3799,7 @@
         });
 
         function switchLanguage(lang) {
+            multiCursor.reset();
             const oldLang = currentLanguage;
 
             // Translate primitives and array literals in the code before switching
@@ -4221,15 +4259,14 @@
                 highlightAnimationFrame = null;
             }
 
-            const cursorPos = getCursorPosition();
+            const selections = multiCursor.captureSelection();
             const text = getInputText();
             const highlighted = highlightCode(text, currentLanguage);
 
             // Only update if content actually changed
             if (codeInput.innerHTML !== highlighted) {
                 codeInput.innerHTML = highlighted;
-                // Restore cursor position
-                setCursorPosition(codeInput, cursorPos);
+                multiCursor.restoreSelection(selections);
             }
         }
 
@@ -4249,15 +4286,14 @@
             // Debounce: wait 50ms after last keystroke before highlighting
             highlightTimeout = setTimeout(() => {
                 highlightAnimationFrame = requestAnimationFrame(() => {
-                    const cursorPos = getCursorPosition();
+                    const selections = multiCursor.captureSelection();
                     const text = getInputText();
                     const highlighted = highlightCode(text, currentLanguage);
 
                     // Only update if content actually changed
                     if (codeInput.innerHTML !== highlighted) {
                         codeInput.innerHTML = highlighted;
-                        // Restore cursor position
-                        setCursorPosition(codeInput, cursorPos);
+                        multiCursor.restoreSelection(selections);
                     }
 
                     highlightAnimationFrame = null;
@@ -4444,6 +4480,7 @@
 
         // Set the input text and apply syntax highlighting, preserving cursor position
         function setInputText(text) {
+            multiCursor.reset();
             const cursorOffset = getCursorOffset();
             codeInput.textContent = text;
             // Use immediate highlighting to prevent flicker when cycling history
@@ -4519,6 +4556,11 @@
         );
         editorFeatures.init();
 
+        const multiCursor = createMultiCursorEditor(codeInput, {
+            getText: getInputText,
+            renderText: text => { codeInput.innerHTML = highlightCode(text, currentLanguage); }
+        });
+
         // Keyboard shortcuts for code input
         codeInput.addEventListener('keydown', (e) => {
             // Don't interfere with IME/Compose key input
@@ -4556,6 +4598,7 @@
             // Ctrl+/ to toggle comment
             if (e.ctrlKey && e.key === '/') {
                 e.preventDefault();
+                multiCursor.reset();
                 const text = getInputText();
                 const selStart = getCursorOffset();
                 const sel = window.getSelection();
@@ -4579,8 +4622,8 @@
                 return;
             }
 
-            // Ctrl+Shift+Up to go to previous input in history
-            if (e.ctrlKey && e.shiftKey && e.key === 'ArrowUp') {
+            // Alt+Up to go to previous input in history
+            if (e.altKey && !e.ctrlKey && !e.shiftKey && e.key === 'ArrowUp') {
                 e.preventDefault();
                 if (codeHistory.length === 0) return;
 
@@ -4606,8 +4649,8 @@
                 return;
             }
 
-            // Ctrl+Shift+Down to go to next input in history
-            if (e.ctrlKey && e.shiftKey && e.key === 'ArrowDown') {
+            // Alt+Down to go to next input in history
+            if (e.altKey && !e.ctrlKey && !e.shiftKey && e.key === 'ArrowDown') {
                 e.preventDefault();
                 if (historyIndex === -1) return; // Not browsing history
 
