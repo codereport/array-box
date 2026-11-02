@@ -7,7 +7,7 @@ const path = require('node:path');
 const test = require('node:test');
 const { setTimeout: delay } = require('node:timers/promises');
 
-const { stopExistingProcesses, stopProcessTrees } = require('../scripts/stop-public-processes.cjs');
+const { stopBackgroundService, stopExistingProcesses, stopProcessTrees } = require('../scripts/stop-public-processes.cjs');
 
 async function fixture(t) {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'arraybox-processes-'));
@@ -40,6 +40,62 @@ async function fixture(t) {
 }
 
 const idle = "console.log('ready'); setInterval(() => {}, 1000);";
+
+function serviceProbe(overrides = {}, stopResult = { status: 0 }) {
+    const properties = {
+        LoadState: 'loaded', ActiveState: 'active', WorkingDirectory: fs.realpathSync(__dirname),
+        MainPID: '0', ControlGroup: '/app.slice/arraybox.service', ...overrides
+    };
+    const calls = [];
+    return {
+        calls,
+        systemctl: args => {
+            calls.push(args);
+            return args[0] === 'show'
+                ? { status: 0, stdout: Object.entries(properties).map(([key, value]) => `${key}=${value}`).join('\n') }
+                : stopResult;
+        }
+    };
+}
+
+for (const state of ['active', 'activating']) {
+    test(`restart explicitly stops an ${state} service, including a pending automatic restart`, () => {
+        const probe = serviceProbe({ ActiveState: state });
+        stopBackgroundService({ repoDir: fs.realpathSync(__dirname), log: () => {}, ...probe });
+        assert.deepEqual(probe.calls.at(-1), ['stop', 'arraybox.service']);
+    });
+}
+
+for (const properties of [
+    { LoadState: 'not-found' }, { ActiveState: 'inactive' }, { ActiveState: 'failed' },
+    { WorkingDirectory: os.tmpdir() }
+]) {
+    test(`restart leaves an absent, stopped, or unrelated service alone: ${JSON.stringify(properties)}`, () => {
+        const probe = serviceProbe(properties);
+        stopBackgroundService({ repoDir: fs.realpathSync(__dirname), log: () => {}, ...probe });
+        assert.equal(probe.calls.length, 1);
+    });
+}
+
+test('restart works without systemctl or a user systemd manager', () => {
+    for (const result of [{ status: null, error: { code: 'ENOENT' } }, { status: 1 }]) {
+        const calls = [];
+        stopBackgroundService({
+            repoDir: fs.realpathSync(__dirname),
+            systemctl: args => { calls.push(args); return result; }
+        });
+        assert.equal(calls.length, 1);
+    }
+});
+
+test('service startup preserves its own launcher and wrappers in the same cgroup', () => {
+    const group = fs.readFileSync('/proc/self/cgroup', 'utf8').trim().split('\n')[0].split(':')[2];
+    for (const properties of [{ MainPID: String(process.pid) }, { ControlGroup: group }]) {
+        const probe = serviceProbe(properties);
+        stopBackgroundService({ repoDir: fs.realpathSync(__dirname), excludePid: process.pid, ...probe });
+        assert.equal(probe.calls.length, 1);
+    }
+});
 
 test('restart stops existing servers and the port-3000 tunnel while preserving other processes', async t => {
     const { dir, start } = await fixture(t);
@@ -161,9 +217,44 @@ kill -0 "$pid" 2>/dev/null
     write('bin/sleep', '#!/bin/sh\nexec /usr/bin/sleep 0.05\n', 0o755);
     // Unrelated tunnels must not prevent startup; any deployment attempt must fail.
     write('bin/pgrep', '#!/bin/sh\nexit 0\n', 0o755);
+    write('bin/systemctl', `#!/usr/bin/env node
+        const fs = require('node:fs');
+        const path = require('node:path');
+        const stateFile = path.join(process.env.ARRAYBOX_TEST_DIR, 'service.json');
+        const [scope, command, unit] = process.argv.slice(2);
+        if (scope !== '--user' || unit !== 'arraybox.service') process.exit(1);
+        if (!fs.existsSync(stateFile)) process.exit(1);
+        const service = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
+        if (command === 'show') {
+            console.log(Object.entries(service).map(([key, value]) => key + '=' + value).join('\\n'));
+        } else if (command === 'stop') {
+            if (process.env.ARRAYBOX_TEST_FAIL_STOP) {
+                console.error('Service stop failed');
+                process.exit(1);
+            }
+            fs.writeFileSync(stateFile, JSON.stringify({ ...service, ActiveState: 'inactive', MainPID: 0 }));
+            fs.writeFileSync(path.join(process.env.ARRAYBOX_TEST_DIR, 'service-stopped'), 'stopped');
+            if (Number(service.MainPID)) process.kill(Number(service.MainPID), 'SIGTERM');
+            (async () => {
+                const deadline = Date.now() + 5000;
+                while (Number(service.MainPID) && Date.now() < deadline) {
+                    try {
+                        const stat = fs.readFileSync('/proc/' + service.MainPID + '/stat', 'utf8');
+                        if (['Z', 'X'].includes(stat.slice(stat.lastIndexOf(')') + 2).split(' ')[0])) break;
+                    } catch { break; }
+                    await new Promise(resolve => setTimeout(resolve, 20));
+                }
+            })();
+        } else process.exit(1);
+    `, 0o755);
     for (const command of ['docker', 'git']) write(`bin/${command}`, '#!/bin/sh\nexit 1\n', 0o755);
     return {
         start,
+        configureService: (properties = {}) => write('service.json', JSON.stringify({
+            LoadState: 'loaded', ActiveState: 'active', WorkingDirectory: dir,
+            MainPID: 0, ControlGroup: '/app.slice/arraybox.service', ...properties
+        })),
+        serviceStopped: () => fs.existsSync(path.join(dir, 'service-stopped')),
         launch: (args = [], overrides = {}) => start('scripts/serve-public.sh', null, {
             executable: 'bash', args: ['--no-deploy', ...args],
             env: {
@@ -234,6 +325,60 @@ test('launcher refuses ports occupied by unrelated processes', { timeout: 10000 
     assert.match(launcher.output, /Required ports are occupied by other processes: 3000/);
     assert.ok(isAlive(unrelated.pid));
     assert.ok(!fs.existsSync(path.join(stateDir, 'manager.pid')));
+});
+
+test('launcher stops the background service before replacing it and cancels its automatic restart', { timeout: 15000 }, async t => {
+    const { launch, pids, configureService, serviceStopped } = await launcherFixture(t);
+    const original = await launch();
+    await waitForPublicStack(original);
+    const originalPids = pids();
+    configureService({ MainPID: original.pid });
+    let restart;
+    original.once('exit', () => {
+        restart = setTimeout(() => {
+            if (!serviceStopped()) void launch();
+        }, 100);
+    });
+    t.after(() => clearTimeout(restart));
+
+    const check = await launch(['--check']);
+    assert.deepEqual(await check.completion, [0, null], check.output);
+    assert.equal(serviceStopped(), false);
+    const failedPreflight = await launch([], { ARRAYBOX_TEST_FAIL_PREPARE: '1' });
+    assert.deepEqual(await failedPreflight.completion, [1, null], failedPreflight.output);
+    assert.equal(serviceStopped(), false);
+    assert.ok(originalPids.every(isAlive));
+
+    const replacement = await launch();
+    await waitForPublicStack(replacement);
+    await delay(300);
+    assert.equal(serviceStopped(), true, replacement.output);
+    assert.ok(originalPids.every(pid => !isAlive(pid)), replacement.output);
+    assert.ok(pids().every(isAlive));
+    assert.equal(replacement.exitCode, null);
+    assert.equal(replacement.signalCode, null);
+});
+
+test('launcher cancels a pending service restart even when the old launcher has already exited', { timeout: 10000 }, async t => {
+    const { launch, configureService, serviceStopped } = await launcherFixture(t);
+    configureService({ ActiveState: 'activating', MainPID: 0 });
+    const launcher = await launch();
+    await waitForPublicStack(launcher);
+    assert.equal(serviceStopped(), true, launcher.output);
+});
+
+test('launcher preserves the existing stack if stopping its service fails', { timeout: 10000 }, async t => {
+    const { launch, pids, configureService, serviceStopped } = await launcherFixture(t);
+    const original = await launch();
+    await waitForPublicStack(original);
+    const originalPids = pids();
+    configureService({ MainPID: original.pid });
+    const replacement = await launch([], { ARRAYBOX_TEST_FAIL_STOP: '1' });
+    assert.deepEqual(await replacement.completion, [1, null], replacement.output);
+    assert.match(replacement.output, /Could not stop arraybox.service: Service stop failed/);
+    assert.equal(serviceStopped(), false);
+    assert.ok(originalPids.every(isAlive));
+    assert.equal(original.exitCode, null);
 });
 
 test('launcher cleans up the backend and its children when gateway startup fails', { timeout: 10000 }, async t => {

@@ -1,6 +1,7 @@
 // Stop an old public stack, including children left behind by its launcher.
 const fs = require('node:fs');
 const path = require('node:path');
+const { spawnSync } = require('node:child_process');
 const { setTimeout: delay } = require('node:timers/promises');
 
 const stackScripts = new Set([
@@ -68,6 +69,54 @@ function signal(proc, name) {
     }
 }
 
+function stopBackgroundService({
+    repoDir,
+    excludePid,
+    log = console.log,
+    systemctl = args => spawnSync('systemctl', ['--user', ...args], {
+        encoding: 'utf8', timeout: 30000
+    })
+}) {
+    const unit = 'arraybox.service';
+    const result = systemctl([
+        'show', unit, '--property=LoadState,ActiveState,WorkingDirectory,MainPID,ControlGroup'
+    ]);
+    // systemd and its user manager are optional; an absent service needs no cleanup.
+    if (result.status !== 0) return;
+    const properties = Object.fromEntries(result.stdout.trim().split('\n').map(line => {
+        const index = line.indexOf('=');
+        return [line.slice(0, index), line.slice(index + 1)];
+    }));
+    if (properties.LoadState !== 'loaded'
+        || !['active', 'activating', 'reloading', 'deactivating'].includes(properties.ActiveState)) return;
+    try {
+        if (fs.realpathSync(properties.WorkingDirectory) !== repoDir) return;
+    } catch {
+        return;
+    }
+
+    // The launcher also runs inside this service. Never stop our own cgroup,
+    // including when ExecStart wraps the launcher in npm or another process.
+    if (excludePid) {
+        if (Number(properties.MainPID) === excludePid) return;
+        const group = properties.ControlGroup;
+        if (group) {
+            const groups = fs.readFileSync(`/proc/${excludePid}/cgroup`, 'utf8')
+                .trim().split('\n').map(line => line.slice(line.lastIndexOf(':') + 1));
+            if (groups.some(current => current === group || current.startsWith(`${group}/`))) return;
+        }
+    }
+
+    // An explicit stop cancels Restart=on-failure, including a pending restart
+    // with no live MainPID. Killing the process directly leaves that restart armed.
+    log(`Stopping background ${unit} before replacing the public stack...`);
+    const stopped = systemctl(['stop', unit]);
+    if (stopped.status !== 0) {
+        const detail = (stopped.stderr || stopped.error?.message || stopped.signal || '').trim();
+        throw new Error(`Could not stop ${unit}${detail ? `: ${detail}` : '.'}`);
+    }
+}
+
 async function stopProcessTrees(pids, {
     processes = listProcesses(),
     excludePid,
@@ -121,12 +170,14 @@ async function stopProcessTrees(pids, {
 
 async function stopExistingProcesses({ repoDir, excludePid, ...options }) {
     repoDir = fs.realpathSync(repoDir);
+    stopBackgroundService({ repoDir, excludePid, log: options.log });
+    // Refresh after systemd finishes stopping the old launcher's process tree.
     const processes = listProcesses();
     const pids = processes.filter(proc => belongsToStack(proc, repoDir)).map(proc => proc.pid);
     await stopProcessTrees(pids, { ...options, processes, excludePid });
 }
 
-module.exports = { stopExistingProcesses, stopProcessTrees };
+module.exports = { stopBackgroundService, stopExistingProcesses, stopProcessTrees };
 
 if (require.main === module) {
     const [mode, ...args] = process.argv.slice(2);

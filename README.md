@@ -71,7 +71,9 @@ node servers/server-manager.cjs
 
 Run `npm run serve:public` to start the backend, API gateway, and a Cloudflare
 quick tunnel. It stops this checkout's previous Array Box launcher, servers, and
-tunnel before starting a fresh stack. By default it updates, commits, and pushes `config.js`;
+tunnel before starting a fresh stack. If this checkout is running through the
+`arraybox.service` user service, it stops that service first so systemd cannot
+restart it over the new stack. By default it updates, commits, and pushes `config.js`;
 use `-- --no-deploy` to skip deployment or `-- --check` for read-only checks.
 
 The dashboard checks availability every 15 seconds. **APL** turns green only when
