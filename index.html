@@ -311,9 +311,29 @@
 
         .multi-cursor-overlay {
             position: absolute;
+            z-index: 0;
             pointer-events: none;
             overflow: hidden;
             border-radius: 14px;
+            background: var(--input-bg);
+        }
+
+        .code-input.multi-cursor-active {
+            position: relative;
+            z-index: 1;
+            background: transparent;
+            caret-color: transparent;
+        }
+
+        .code-input.multi-cursor-active::selection,
+        .code-input.multi-cursor-active *::selection {
+            background: transparent;
+            color: #fff;
+        }
+
+        .code-input::highlight(arraybox-multi-selection),
+        .code-input *::highlight(arraybox-multi-selection) {
+            color: #fff;
         }
 
         .multi-cursor-caret, .multi-cursor-selection {
@@ -325,18 +345,13 @@
         }
 
         .multi-cursor-selection {
-            background: rgba(139, 233, 253, 0.25);
+            background: var(--dracula-red);
         }
 
         .code-input:empty:before {
             content: attr(data-placeholder);
             color: #6b7280;
             pointer-events: none;
-        }
-
-        /* Keep the final empty line measurable without adding text to the code. */
-        .code-input::after {
-            content: '\200b';
         }
 
         .code-input.bqn {
@@ -4192,7 +4207,15 @@
         function getInputText() {
             // Use innerText to properly handle line breaks from <br> elements
             // Normalize non-breaking spaces (U+00A0) to regular spaces
-            return (codeInput.innerText || '').replace(/\u00A0/g, ' ');
+            const text = (codeInput.innerText || '').replace(/\u00A0/g, ' ');
+            // This final <br> gives a trailing empty line a real, deletable line box.
+            return codeInput.lastChild?.hasAttribute?.('data-editor-trailing-line')
+                ? text.replace(/\n$/, '') : text;
+        }
+
+        function highlightInputText(text) {
+            return highlightCode(text, currentLanguage) +
+                (text.endsWith('\n') ? '<br data-editor-trailing-line="">' : '');
         }
 
         // Set cursor position in contenteditable div
@@ -4261,7 +4284,7 @@
 
             const selections = multiCursor.captureSelection();
             const text = getInputText();
-            const highlighted = highlightCode(text, currentLanguage);
+            const highlighted = highlightInputText(text);
 
             // Only update if content actually changed
             if (codeInput.innerHTML !== highlighted) {
@@ -4288,7 +4311,7 @@
                 highlightAnimationFrame = requestAnimationFrame(() => {
                     const selections = multiCursor.captureSelection();
                     const text = getInputText();
-                    const highlighted = highlightCode(text, currentLanguage);
+                    const highlighted = highlightInputText(text);
 
                     // Only update if content actually changed
                     if (codeInput.innerHTML !== highlighted) {
@@ -4558,7 +4581,7 @@
 
         const multiCursor = createMultiCursorEditor(codeInput, {
             getText: getInputText,
-            renderText: text => { codeInput.innerHTML = highlightCode(text, currentLanguage); }
+            renderText: text => { codeInput.innerHTML = highlightInputText(text); }
         });
 
         // Keyboard shortcuts for code input

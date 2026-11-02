@@ -7,9 +7,13 @@ export function createMultiCursorEditor(input, { getText, renderText }) {
     let internalInput = false;
     const undo = [];
     const redo = [];
+    const graphemes = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
     const overlay = document.createElement('div');
+    const selectionHighlight = new Highlight();
+    CSS.highlights.set('arraybox-multi-selection', selectionHighlight);
     overlay.className = 'multi-cursor-overlay';
     overlay.setAttribute('aria-hidden', 'true');
+    overlay.hidden = true;
     input.after(overlay);
 
     function offset(node, position) {
@@ -83,6 +87,9 @@ export function createMultiCursorEditor(input, { getText, renderText }) {
         cursors = null;
         addingColumn = null;
         overlay.replaceChildren();
+        overlay.hidden = true;
+        input.classList.remove('multi-cursor-active');
+        selectionHighlight.clear();
     }
 
     function reset() {
@@ -92,51 +99,75 @@ export function createMultiCursorEditor(input, { getText, renderText }) {
 
     function draw() {
         overlay.replaceChildren();
-        if (!cursors || document.activeElement !== input) return;
+        selectionHighlight.clear();
+        const active = !!cursors && document.activeElement === input;
+        input.classList.toggle('multi-cursor-active', active);
+        overlay.hidden = !active;
+        if (!active) return;
         overlay.style.left = `${input.offsetLeft}px`;
         overlay.style.top = `${input.offsetTop}px`;
         overlay.style.width = `${input.offsetWidth}px`;
         overlay.style.height = `${input.offsetHeight}px`;
         const bounds = input.getBoundingClientRect();
-        function rectangle(rect, className, caret = false) {
+        const style = getComputedStyle(input);
+        const lineHeight = parseFloat(style.lineHeight);
+        const text = getText();
+        const contentLeft = input.clientLeft + parseFloat(style.paddingLeft) - input.scrollLeft;
+        const contentTop = input.clientTop + parseFloat(style.paddingTop) - input.scrollTop;
+        const lineStarts = [0];
+        for (let i = 0; i < text.length; i++) {
+            if (text[i] === '\n') lineStarts.push(i + 1);
+        }
+        const lineAt = position => lineStarts.findLastIndex(start => start <= position);
+        function rectangle(left, line, width, className) {
             const element = document.createElement('span');
             element.className = className;
             Object.assign(element.style, {
-                left: `${rect.left - bounds.left}px`, top: `${rect.top - bounds.top}px`,
-                width: `${caret ? 2 : rect.width}px`, height: `${rect.height}px`
+                left: `${left}px`, top: `${contentTop + line * lineHeight}px`,
+                width: `${width}px`, height: `${lineHeight}px`
             });
             overlay.append(element);
         }
-        for (const cursor of cursors.slice(1)) {
+
+        function caretLeft(position) {
             const range = document.createRange();
-            range.setStart(...point(Math.min(cursor.anchor, cursor.head)));
-            range.setEnd(...point(Math.max(cursor.anchor, cursor.head)));
-            if (!range.collapsed) {
-                for (const rect of range.getClientRects()) rectangle(rect, 'multi-cursor-selection');
-            }
-            range.setStart(...point(cursor.head));
+            range.setStart(...point(position));
             range.collapse(true);
             let rect = range.getClientRects()[0];
-            // A collapsed range on an empty line may have no box in Chromium.
-            if (!rect && cursor.head < getText().length) {
-                range.setEnd(...point(cursor.head + 1));
+            if (!rect && position < text.length) {
+                range.setEnd(...point(position + 1));
                 rect = range.getClientRects()[0];
             }
-            if (!rect && cursor.head > 0) {
-                range.setStart(...point(cursor.head - 1));
-                range.setEnd(...point(cursor.head));
-                const previous = [...range.getClientRects()].at(-1);
-                if (previous) {
-                    const style = getComputedStyle(input);
-                    const newline = getText()[cursor.head - 1] === '\n';
-                    rect = {
-                        left: newline ? bounds.left + input.clientLeft + parseFloat(style.paddingLeft) - input.scrollLeft : previous.right,
-                        top: previous.top + (newline ? parseFloat(style.lineHeight) : 0),
-                        height: previous.height
-                    };
+            if (rect) return rect.left - bounds.left;
+            if (position > 0 && text[position - 1] !== '\n') {
+                range.setStart(...point(position - 1));
+                range.setEnd(...point(position));
+                const previous = range.getBoundingClientRect();
+                if (previous.height) return previous.right - bounds.left;
+            }
+            return contentLeft;
+        }
+
+        for (const cursor of cursors) {
+            const start = Math.min(cursor.anchor, cursor.head);
+            const end = Math.max(cursor.anchor, cursor.head);
+            if (start !== end) {
+                const range = document.createRange();
+                range.setStart(...point(start));
+                range.setEnd(...point(end));
+                selectionHighlight.add(range.cloneRange());
+                // One rectangle per logical line avoids overlapping token boxes.
+                for (let line = lineAt(start); line <= lineAt(end); line++) {
+                    const segmentStart = Math.max(start, lineStarts[line]);
+                    const segmentEnd = Math.min(end, (lineStarts[line + 1] ?? text.length + 1) - 1);
+                    if (segmentStart >= end) break;
+                    range.setStart(...point(segmentStart));
+                    range.setEnd(...point(segmentEnd));
+                    const rect = range.getBoundingClientRect();
+                    rectangle(caretLeft(segmentStart), line, Math.max(2, rect.width), 'multi-cursor-selection');
                 }
             }
-            if (rect) rectangle(rect, 'multi-cursor-caret', true);
+            rectangle(caretLeft(cursor.head), lineAt(cursor.head), 2, 'multi-cursor-caret');
         }
     }
 
@@ -183,6 +214,20 @@ export function createMultiCursorEditor(input, { getText, renderText }) {
     }
 
     function travel(cursor, direction, granularity, extend) {
+        // Native movement can skip a trailing newline with no rendered glyph box.
+        if (granularity === 'character') {
+            const backwards = direction === 'backward';
+            if (!extend && cursor.anchor !== cursor.head) {
+                const head = backwards ? Math.min(cursor.anchor, cursor.head) : Math.max(cursor.anchor, cursor.head);
+                return { anchor: head, head };
+            }
+            const text = getText();
+            const segment = backwards
+                ? [...graphemes.segment(text.slice(0, cursor.head))].at(-1)?.segment
+                : graphemes.segment(text.slice(cursor.head))[Symbol.iterator]().next().value?.segment;
+            const head = cursor.head + (backwards ? -1 : 1) * (segment?.length || 0);
+            return { anchor: extend ? cursor.anchor : head, head };
+        }
         select(cursor);
         window.getSelection().modify(extend ? 'extend' : 'move', direction, granularity);
         return readSelection();
@@ -265,10 +310,13 @@ export function createMultiCursorEditor(input, { getText, renderText }) {
     }, true);
 
     input.addEventListener('beforeinput', event => {
-        if (!cursors || event.isComposing) return;
-        if (['insertText', 'insertReplacementText', 'insertLineBreak', 'insertParagraph'].includes(event.inputType)) {
+        if (event.isComposing) return;
+        if (['insertLineBreak', 'insertParagraph'].includes(event.inputType)) {
             event.preventDefault();
-            replaceSelections(event.inputType === 'insertLineBreak' || event.inputType === 'insertParagraph' ? '\n' : event.data || '');
+            replaceSelections('\n');
+        } else if (cursors && ['insertText', 'insertReplacementText'].includes(event.inputType)) {
+            event.preventDefault();
+            replaceSelections(event.data || '');
         }
     });
 
