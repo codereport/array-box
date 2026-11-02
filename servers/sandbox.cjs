@@ -287,7 +287,11 @@ function createAplMarkers() {
         reset: `___ARRAYBOX_RESET_${id}___`
     };
 }
-const APL_RESET_MARKER = '__RESET_DONE__';
+// Echoed input contains the same marker text. Only a complete marker line is
+// evidence that the interpreter has executed the command on that stream.
+function hasAplMarker(output, marker) {
+    return output.split('\n').slice(0, -1).some(line => line.replace(/\r$/, '') === marker);
+}
 
 function filterAplErrorOutput(stdout, stderr, code, markers = null) {
     const codeLines = new Set(code.split('\n').map(l => l.trim()).filter(l => l));
@@ -530,8 +534,6 @@ async function executeWithWarmContainer(language, code, options = {}) {
         let resolved = false;
         let aplMarkers = null;
         let aplCodeLines = null;  // Lines to filter as echoed input (the wrapped code, not original)
-        let aplSawStart = false;
-        let resetDone = false;
         let errorCheckTimeout = null;
         
         let onData;
@@ -540,12 +542,6 @@ async function executeWithWarmContainer(language, code, options = {}) {
         const clearTimers = () => {
             if (timeoutId) clearTimeout(timeoutId);
             if (errorCheckTimeout) clearTimeout(errorCheckTimeout);
-        };
-        
-        const finalizeReset = () => {
-            if (resetDone) return;
-            resetDone = true;
-            cleanup();
         };
         
         const resolveAplError = () => {
@@ -565,54 +561,44 @@ async function executeWithWarmContainer(language, code, options = {}) {
             });
             
             // Reset APL state - use a marker to know when cleanup is done
+            const resetMarker = aplMarkers ? aplMarkers.reset : '___ARRAYBOX_RESET___';
             let resetOutput = '';
+            let resetStderr = '';
+            let resetTimeout;
+            const finishReset = () => {
+                container.stdout.removeListener('data', onResetData);
+                container.stderr.removeListener('data', onResetStderr);
+                clearTimeout(resetTimeout);
+                container.busy = false;
+            };
+            const checkReset = () => {
+                if (hasAplMarker(resetOutput, resetMarker) && hasAplMarker(resetStderr, resetMarker)) {
+                    finishReset();
+                }
+            };
             
             const onResetData = (data) => {
                 const str = data.toString();
                 resetOutput += str;
-                if (resetOutput.includes(APL_RESET_MARKER)) {
-                    container.stdout.removeListener('data', onResetData);
-                    container.stderr.removeListener('data', onResetStderr);
-                    container.busy = false;  // Now safe for next request
-                }
+                checkReset();
             };
             const onResetStderr = (data) => {
                 const str = data.toString();
-                resetOutput += str; // Check stderr for marker too
-                 if (resetOutput.includes(APL_RESET_MARKER)) {
-                    container.stdout.removeListener('data', onResetData);
-                    container.stderr.removeListener('data', onResetStderr);
-                    container.busy = false;  // Now safe for next request
-                }
+                resetStderr += str;
+                checkReset();
             };
             
             container.stdout.on('data', onResetData);
             container.stderr.on('data', onResetStderr);
+
+            // Fallback timeout in case marker never arrives
+            resetTimeout = setTimeout(finishReset, 2000);
             
             // Exit suspension, clear workspace, print marker
             // Use expression to clear vars instead of )CLEAR command to avoid pipe issues
             // We must escape the reset marker to prevent it from being interpreted if inside a string
             // Use )SIC to clear state indicator completely - CRITICAL for error recovery
-            const resetMarker = aplMarkers ? aplMarkers.reset : '___ARRAYBOX_RESET___';
-            container.stdin.write(`\n)SIC\n⎕EX ⎕NL ¯1\n⎕←'${resetMarker}'\n`);
-            
-            // Fallback timeout in case marker never arrives
-            setTimeout(() => {
-                container.stdout.removeListener('data', onResetData);
-                container.stderr.removeListener('data', onResetStderr);
-                container.busy = false;
-            }, 2000);
-        };
-        
-        const checkAplMarkers = () => {
-            if (language !== 'apl' || !aplMarkers) return;
-            const combined = `${output}\n${stderrOutput}`;
-            if (!aplSawStart && combined.includes(aplMarkers.start)) {
-                aplSawStart = true;
-            }
-            if (aplSawStart && resolved && combined.includes(aplMarkers.reset)) {
-                finalizeReset();
-            }
+            container.stdin.write(`\n)SIC\n⎕EX ⎕NL ¯1\n⎕←'${resetMarker}' ⋄ ⍞←(⎕UCS 10),'${resetMarker}',⎕UCS 10\n`);
         };
         
         const extractAplResult = () => {
@@ -631,7 +617,7 @@ async function executeWithWarmContainer(language, code, options = {}) {
         
         onStderr = (data) => {
             stderrOutput += data.toString();
-            checkAplMarkers();
+            checkAplCompletion();
             
             // For APL, if we detect an error, return quickly
             if (language === 'apl' && stderrOutput.includes('ERROR') && !errorCheckTimeout && !resolved) {
@@ -642,20 +628,18 @@ async function executeWithWarmContainer(language, code, options = {}) {
             }
         };
         
-        onData = (data) => {
-            output += data.toString();
-            checkAplMarkers();
-            
+        const checkAplCompletion = () => {
             if (language === 'apl' && isAplErrorOutput(output) && !errorCheckTimeout && !resolved) {
                 errorCheckTimeout = setTimeout(() => {
                     resolveAplError();
                 }, 100);
             }
             
-            // Check for APL marker-based completion
-            if (!resolved && language === 'apl' && aplMarkers && aplSawStart) {
-                const combined = `${output}\n${stderrOutput}`;
-                if (combined.includes(aplMarkers.end)) {
+            // Drain both pipes before returning or reusing the container. Their
+            // data events can arrive in either order, including partial echoes.
+            if (!resolved && language === 'apl' && aplMarkers) {
+                if (hasAplMarker(output, aplMarkers.start) && hasAplMarker(output, aplMarkers.end) &&
+                    hasAplMarker(output, aplMarkers.reset) && hasAplMarker(stderrOutput, aplMarkers.reset)) {
                     resolved = true;
                     clearTimers();
                     let result = extractAplResult();
@@ -726,11 +710,14 @@ async function executeWithWarmContainer(language, code, options = {}) {
                         warm: true
                     });
                     
-                    if (combined.includes(aplMarkers.reset)) {
-                        finalizeReset();
-                    }
+                    cleanup();
                 }
             }
+        };
+
+        onData = (data) => {
+            output += data.toString();
+            checkAplCompletion();
         };
         
         container.stdout.on('data', onData);
@@ -755,7 +742,9 @@ async function executeWithWarmContainer(language, code, options = {}) {
             
             // Build Safe3.Exec call wrapped in :Trap to catch security errors
             // Without :Trap, ⎕SIGNAL from Safe3 would prevent end markers from printing
-            input = `]boxing on -s=min -trains=tree\n)SIC\n⎕←'${aplMarkers.start}'\n:Trap 0 ⋄ ⎕←Safe3.Exec '${escapedCode}' ⋄ :If 2=Safe3.⎕NC'LastResultTree' ⋄ :AndIf Safe3.LastResultIsFunction ⋄ ⍞←'${aplMarkers.function}',Safe3.LastResultTree,⎕UCS 10 ⋄ :EndIf ⋄ :Else ⋄ ⎕←⎕DMX.EM,': ',⎕DMX.Message ⋄ :EndTrap\n)SIC\n⎕←'${aplMarkers.end}'\n⎕←'${aplMarkers.reset}'\n`;
+            // Emit reset on both pipes; the leading newline separates the stderr
+            // marker from user output written with ⍞ without a final newline.
+            input = `]boxing on -s=min -trains=tree\n)SIC\n⎕←'${aplMarkers.start}'\n:Trap 0 ⋄ ⎕←Safe3.Exec '${escapedCode}' ⋄ :If 2=Safe3.⎕NC'LastResultTree' ⋄ :AndIf Safe3.LastResultIsFunction ⋄ ⍞←'${aplMarkers.function}',Safe3.LastResultTree,⎕UCS 10 ⋄ :EndIf ⋄ :Else ⋄ ⎕←⎕DMX.EM,': ',⎕DMX.Message ⋄ :EndTrap\n)SIC\n⎕←'${aplMarkers.end}'\n⎕←'${aplMarkers.reset}' ⋄ ⍞←(⎕UCS 10),'${aplMarkers.reset}',⎕UCS 10\n`;
         }
         
         // Set timeout
