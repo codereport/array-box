@@ -166,8 +166,9 @@ export function createMultiCursorEditor(input, { getText, renderText }) {
                     const rect = range.getBoundingClientRect();
                     rectangle(caretLeft(segmentStart), line, Math.max(2, rect.width), 'multi-cursor-selection');
                 }
+            } else {
+                rectangle(caretLeft(cursor.head), lineAt(cursor.head), 2, 'multi-cursor-caret');
             }
-            rectangle(caretLeft(cursor.head), lineAt(cursor.head), 2, 'multi-cursor-caret');
         }
     }
 

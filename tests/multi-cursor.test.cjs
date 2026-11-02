@@ -190,6 +190,11 @@ test('selection appearance uses solid touching red bands, white text, and identi
     await setCode(page, text, 0);
     await page.keyboard.press('Control+Shift+ArrowDown');
     await page.keyboard.press('Control+Shift+ArrowDown');
+    const insertionCarets = await page.locator('.multi-cursor-caret').evaluateAll(elements =>
+        elements.map(element => {
+            const rect = element.getBoundingClientRect();
+            return { width: rect.width, height: rect.height };
+        }));
     await page.keyboard.press('Shift+End');
     await page.evaluate(() => document.fonts.ready);
     const appearance = await page.evaluate(() => {
@@ -213,13 +218,14 @@ test('selection appearance uses solid touching red bands, white text, and identi
         };
     });
     assert.equal(appearance.bands.length, 3); // Multiple syntax spans share one band.
-    assert.equal(appearance.carets.length, 3); // Includes the primary cursor.
+    assert.equal(appearance.carets.length, 0);
+    assert.equal(insertionCarets.length, 3); // Includes the primary cursor.
     for (const [i, band] of appearance.bands.entries()) {
         assert.equal(band.background, 'rgb(255, 85, 85)');
         assert.equal(band.height, appearance.lineHeight);
         if (i > 0) assert.equal(band.top, appearance.bands[i - 1].bottom);
     }
-    for (const caret of appearance.carets) {
+    for (const caret of insertionCarets) {
         assert.equal(caret.width, 2);
         assert.equal(caret.height, appearance.lineHeight);
     }
@@ -231,6 +237,9 @@ test('selection appearance uses solid touching red bands, white text, and identi
     if (process.env.ARRAYBOX_MULTI_CURSOR_SCREENSHOT) {
         await page.locator('#codeInput').screenshot({ path: process.env.ARRAYBOX_MULTI_CURSOR_SCREENSHOT });
     }
+    await page.keyboard.press('ArrowRight');
+    assert.equal(await page.locator('.multi-cursor-selection').count(), 0);
+    assert.equal(await page.locator('.multi-cursor-caret').count(), 3);
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('.multi-cursor-active').count(), 0);
     assert.equal(await page.evaluate(() => CSS.highlights.get('arraybox-multi-selection').size), 0);
