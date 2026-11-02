@@ -178,22 +178,15 @@ const END_MARKER = '___ARRAYBOX_END_' + Math.random().toString(36).slice(2) + '_
 /**
  * Prepare multi-line APL code for embedding in a single-quoted APL string.
  * - Escapes single quotes (' → '')
- * - Joins lines with ⋄ (diamond), stripping comments so they don't swallow the ⋄
- * - Preserves comments on the last line (they're harmless at the end)
+ * - Strips comments from every line so trailing comment-only lines don't become statements
+ * - Joins the remaining lines with ⋄ (diamond)
  */
 function escapeAplCode(code) {
     const lines = code.split('\n');
     const processed = [];
-    for (let i = 0; i < lines.length; i++) {
-        let line = lines[i].trimEnd();
-        if (!line) continue; // skip blank lines
-        // For all lines except the last non-blank one, strip trailing comments
-        // so that joining with ⋄ doesn't put the next statement inside a comment.
-        // A comment starts at ⍝ that is outside a string literal.
-        if (i < lines.length - 1) {
-            line = stripAplComment(line);
-            if (!line) continue; // line was only a comment
-        }
+    for (const sourceLine of lines) {
+        const line = stripAplComment(sourceLine).trimEnd();
+        if (!line) continue; // skip blank and comment-only lines
         processed.push(line);
     }
     // Escape single quotes for APL string embedding, then join with ⋄

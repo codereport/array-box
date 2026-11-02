@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 const { test } = require('node:test');
 const { EventEmitter } = require('node:events');
 const { readFileSync } = require('node:fs');
+const { createRequire } = require('node:module');
 const path = require('node:path');
 const vm = require('node:vm');
 const { extractAplFunctionResult } = require('../servers/apl-output.cjs');
@@ -12,6 +13,29 @@ const OUTPUT = ' ⊃∘⌽  +⍥ ∇sûre_execute  ⊃';
 const REPRESENTATION = tree(leaf('⊃∘⌽'), tree(leaf('+'), leaf('⍥'), leaf('∇sûre_execute')), leaf('⊃'));
 const EXPECTED = ' ┌───┼──┐\n ∘   ⍥  ⊃\n┌┴┐ ┌┴┐\n⊃ ⌽ + ⍎';
 const MARKER = '___ARRAYBOX_FUNCTION_test___';
+
+test('APL evaluation strips trailing comments and preserves comment glyphs inside strings', () => {
+    const filename = path.resolve(__dirname, '../servers/sandbox.cjs');
+    const context = {
+        module: { exports: {} }, __dirname: path.dirname(filename), require: createRequire(filename),
+        process: { on() {} }, setTimeout() {}
+    };
+    vm.runInNewContext(readFileSync(filename, 'utf8'), context, { filename });
+    const cases = [
+        ['1+2 ⍝ result', '1+2'],
+        ['a←1 ⍝ setup\na+2 ⍝ result', 'a←1 ⋄ a+2'],
+        ['1+2\n⍝ trailing comment', '1+2'],
+        ['1+2\n  ⍝ first\n\n  ⍝ last\n  ', '1+2'],
+        ['⍝ header\r\n1+2 ⍝ result\r\n⍝ footer', '1+2'],
+        ["⍝ comment with an unmatched ' quote", ''],
+        ["'⍝' ⍝ result", "''⍝''"],
+        ["'it''s ⍝ text' ⍝ result", "''it''''s ⍝ text''"],
+        ["'a' '⍝' 'b'", "''a'' ''⍝'' ''b''"]
+    ];
+    for (const [code, expected] of cases) {
+        assert.equal(context.escapeAplCode(code), expected, code);
+    }
+});
 
 test('function-result metadata preserves the raw output and tree grouping', () => {
     assert.deepEqual(extractAplFunctionResult(`${OUTPUT}\n${MARKER}${JSON.stringify(REPRESENTATION)}`, MARKER), {
@@ -119,7 +143,9 @@ for (const [warm, metadataStream] of [[true, 'stdout'], [true, 'stderr'], [false
         };
         vm.runInNewContext(readFileSync(filename, 'utf8') + '\ngetWarmContainer = async () => container;', context, { filename });
         module.exports.CONFIG.useWarmContainers = warm;
-        const result = await module.exports.executeInSandbox('apl', '(⊃∘⌽+⍥⍎⊃)', { dyalogPath: '/test/dyalog' });
+        const code = '(⊃∘⌽+⍥⍎⊃) ⍝ result\n⍝ trailing comment';
+        const result = await module.exports.executeInSandbox('apl', code, { dyalogPath: '/test/dyalog' });
+        assert.ok(input.includes("Safe3.Exec '(⊃∘⌽+⍥⍎⊃)'"), 'Only executable code must reach Safe3');
         assert.equal(result.success, true);
         assert.equal(result.output.trim(), OUTPUT.trim());
         assert.equal(result.isAplFunction, true);
