@@ -330,6 +330,24 @@ export function createMultiCursorEditor(input, { getText, renderText }) {
 
     for (const type of ['copy', 'cut']) {
         input.addEventListener(type, event => {
+            const selections = captureSelection();
+            if (type === 'cut' && selections.every(cursor => cursor.anchor === cursor.head)) {
+                const text = getText();
+                if (!text) return;
+                const starts = [...new Set(selections.map(cursor =>
+                    cursor.head === 0 ? 0 : text.lastIndexOf('\n', cursor.head - 1) + 1))]
+                    .sort((a, b) => a - b);
+                const lines = starts.map(start => ({ start, end: text.indexOf('\n', start) }));
+                event.preventDefault();
+                event.clipboardData.setData('text/plain', lines.map(({ start, end }) =>
+                    text.slice(start, end < 0 ? text.length : end) + '\n').join(''));
+                replaceSelections('', lines.map(({ start, end }) => ({
+                    // The last line owns the preceding newline when it has no following one.
+                    anchor: end < 0 && start > 0 ? start - 1 : start,
+                    head: end < 0 ? text.length : end + 1
+                })));
+                return;
+            }
             if (!cursors) return;
             const text = getText();
             const selected = [...cursors].sort((a, b) => Math.min(a.anchor, a.head) - Math.min(b.anchor, b.head))

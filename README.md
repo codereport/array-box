@@ -48,6 +48,7 @@ A code editor and runner for array programming languages: **BQN**, **APL**, **J*
 | `Ctrl+I`             | Copy vertical image to clipboard |
 | `Ctrl+F`             | Format code (no evaluation)      |
 | `Ctrl+/`             | Toggle comment                   |
+| `Ctrl+X`             | Cut selection or current line    |
 | `Ctrl+Shift+Up/Down` | Add cursor above/below           |
 | `Ctrl+Shift+Left/Right` | Select words at every cursor  |
 | `Escape`             | Return to one cursor             |
