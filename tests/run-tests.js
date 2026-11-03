@@ -6,7 +6,7 @@
  * evaluates in each language via Playwright (headless browser).
  *
  * Usage:  node tests/run-tests.js
- *         npm test
+ *         npm run test:primitives
  */
 
 import { chromium } from 'playwright';
