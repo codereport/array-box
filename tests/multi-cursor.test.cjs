@@ -190,8 +190,9 @@ test('selection appearance uses solid touching red bands, white text, and identi
     await setCode(page, text, 0);
     await page.keyboard.press('Control+Shift+ArrowDown');
     await page.keyboard.press('Control+Shift+ArrowDown');
-    const insertionCarets = await page.locator('.multi-cursor-caret').evaluateAll(elements =>
-        elements.map(element => {
+    // Query and measure together so a redraw cannot detach the nodes in between.
+    const insertionCarets = await page.evaluate(() =>
+        [...document.querySelectorAll('.multi-cursor-caret')].map(element => {
             const rect = element.getBoundingClientRect();
             return { width: rect.width, height: rect.height };
         }));
