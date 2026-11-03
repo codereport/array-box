@@ -59,3 +59,16 @@ declare(:export fromHex)
 }
 
 declare(:export execcmd)
+
+∇ pattern subdirs root {
+	p ← if (isLocallyBound 'pattern) {pattern} else {λ{1}}
+	recurse ⇐ {
+		path ← ⍵
+		(names types) ← ⊂₀ :type readdir ⍵
+		matchedNames ← (path,"/",)¨ (0≢⍞p)¨⍛/ (types=:file)/names
+		(,/{p recurse path,"/",⍵}¨ (types=:directory)/names) , matchedNames
+	}
+	p recurse {(0⍳⍨@/=⍵)↓⍵}⍢⌽ root
+}
+
+declare(:export subdirs)
