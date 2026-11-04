@@ -29,24 +29,24 @@ async function openEditor(t, language = 'apl') {
     return page;
 }
 
-async function setCode(page, text, offset) {
-    await page.evaluate(async ({ text, offset }) => {
+async function setCode(page, text, offset, head = offset) {
+    await page.evaluate(async ({ text, offset, head }) => {
         const { highlightCode } = await import('/src/syntax.js');
         const input = document.getElementById('codeInput');
         input.dispatchEvent(new Event('pointerdown'));
         input.innerHTML = highlightCode(text, input.classList[1]);
         input.focus();
-        const walker = document.createTreeWalker(input, NodeFilter.SHOW_TEXT);
-        let node;
-        while ((node = walker.nextNode())) {
-            if (offset <= node.length) {
-                window.getSelection().setPosition(node, offset);
-                return;
+        function point(position) {
+            const walker = document.createTreeWalker(input, NodeFilter.SHOW_TEXT);
+            let node;
+            while ((node = walker.nextNode())) {
+                if (position <= node.length) return [node, position];
+                position -= node.length;
             }
-            offset -= node.length;
+            return [input, input.childNodes.length];
         }
-        window.getSelection().setPosition(input, input.childNodes.length);
-    }, { text, offset });
+        window.getSelection().setBaseAndExtent(...point(offset), ...point(head));
+    }, { text, offset, head });
 }
 
 async function expectText(page, text) {
@@ -268,4 +268,154 @@ test('deleting at multiple cursors leaves no undeletable trailing line', async t
     });
     assert.equal(remaining.text, 'Da 18\nDa 18\nDa 18');
     assert.equal(remaining.after, 'none');
+});
+
+test('tapping Shift inverts the selection and highlights every exact occurrence', async t => {
+    const page = await openEditor(t);
+    const text = 'value+value\nvalue Value';
+    await setCode(page, text, 6, 11);
+    const initial = await page.locator('#codeInput').evaluate(input => ({
+        background: getComputedStyle(input, '::selection').backgroundColor,
+        color: getComputedStyle(input, '::selection').color
+    }));
+    assert.deepEqual(initial, { background: 'rgb(255, 85, 85)', color: 'rgb(255, 255, 255)' });
+    await page.keyboard.press('Shift');
+    const appearance = await page.evaluate(() => {
+        const input = document.getElementById('codeInput');
+        return {
+            ranges: [...CSS.highlights.get('arraybox-multi-selection')].map(range => range.toString()),
+            backgrounds: [...document.querySelectorAll('.multi-cursor-selection')].map(band =>
+                getComputedStyle(band).backgroundColor),
+            colors: [input, ...input.querySelectorAll('span')].map(element =>
+                getComputedStyle(element, '::highlight(arraybox-multi-selection)').color),
+            primaryColor: getComputedStyle(input, '::selection').color
+        };
+    });
+    assert.deepEqual(appearance.ranges, ['value', 'value', 'value']);
+    assert.deepEqual(appearance.backgrounds, Array(3).fill('rgb(255, 255, 255)'));
+    assert.ok(appearance.colors.every(color => color === 'rgb(255, 85, 85)'));
+    assert.equal(appearance.primaryColor, 'rgb(255, 85, 85)');
+    await expectText(page, text);
+    if (process.env.ARRAYBOX_OCCURRENCE_SCREENSHOT) {
+        await page.locator('#codeInput').screenshot({ path: process.env.ARRAYBOX_OCCURRENCE_SCREENSHOT });
+    }
+    await page.keyboard.type('new');
+    await page.waitForTimeout(100);
+    await page.keyboard.type('Name');
+    await expectText(page, 'newName+newName\nnewName Value');
+    assert.equal(await page.locator('.multi-cursor-caret').count(), 3);
+});
+
+test('Backspace and Delete replace all matches and keep later typing linked', async t => {
+    const page = await openEditor(t);
+    for (const key of ['Backspace', 'Delete']) {
+        await setCode(page, 'name:name\nname', 0, 4);
+        await page.keyboard.press('Shift');
+        await page.keyboard.press(key);
+        await expectText(page, ':\n');
+        await page.keyboard.type('x');
+        await expectText(page, 'x:x\nx');
+    }
+});
+
+test('paste replaces matches across syntax spans and undo/redo restores their selections', async t => {
+    const page = await openEditor(t);
+    const text = 'a+1 a+1\na+1';
+    await setCode(page, text, 4, 7);
+    await page.keyboard.press('Shift');
+    await page.evaluate(() => {
+        const clipboardData = new DataTransfer();
+        clipboardData.setData('text/plain', '<b>\r\n𝕩');
+        document.getElementById('codeInput').dispatchEvent(new ClipboardEvent('paste', {
+            clipboardData, bubbles: true, cancelable: true
+        }));
+    });
+    const replaced = '<b>\n𝕩 <b>\n𝕩\n<b>\n𝕩';
+    await expectText(page, replaced);
+    assert.equal(await page.locator('#codeInput b').count(), 0);
+    await page.keyboard.press('Control+z');
+    await expectText(page, text);
+    assert.equal(await page.evaluate(() => CSS.highlights.get('arraybox-multi-selection').size), 3);
+    assert.equal(await page.locator('#codeInput.occurrence-edit-active').count(), 1);
+    assert.equal(await page.evaluate(() => window.getSelection().toString()), 'a+1');
+    await page.keyboard.press('Control+Shift+z');
+    await expectText(page, replaced);
+    assert.equal(await page.locator('.multi-cursor-caret').count(), 3);
+    await page.keyboard.press('Control+z');
+    await page.keyboard.type('z');
+    await expectText(page, 'z z\nz');
+});
+
+test('backwards matches preserve the original cursor when Escape exits editing', async t => {
+    const page = await openEditor(t, 'bqn');
+    await setCode(page, '𝕩+𝕩\n𝕩', 5, 3);
+    await page.keyboard.press('Shift');
+    assert.equal(await page.evaluate(() => CSS.highlights.get('arraybox-multi-selection').size), 3);
+    await page.keyboard.type('𝕨');
+    await expectText(page, '𝕨+𝕨\n𝕨');
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('.occurrence-edit-active').count(), 0);
+    assert.equal(await page.evaluate(() => CSS.highlights.get('arraybox-multi-selection').size), 0);
+    await page.keyboard.type('!');
+    await expectText(page, '𝕨+𝕨!\n𝕨');
+    await setCode(page, '𝕩+𝕩', 0, 2);
+    await page.keyboard.press('Shift');
+    await page.locator('#codeInput').click();
+    assert.equal(await page.locator('.occurrence-edit-active').count(), 0);
+});
+
+test('a unique match inverts and empty selections do not activate occurrence editing', async t => {
+    const page = await openEditor(t);
+    await setCode(page, 'unique', 0, 6);
+    await page.keyboard.press('Shift');
+    assert.equal(await page.locator('#codeInput.occurrence-edit-active').count(), 1);
+    assert.equal(await page.locator('.multi-cursor-selection').count(), 1);
+    await page.keyboard.type('only');
+    await expectText(page, 'only');
+    await page.keyboard.press('Control+z');
+    await expectText(page, 'onl');
+    await page.keyboard.press('Escape');
+    await setCode(page, 'empty', 2);
+    await page.keyboard.press('Shift');
+    assert.equal(await page.locator('.occurrence-edit-active').count(), 0);
+    await expectText(page, 'empty');
+});
+
+test('literal matching handles punctuation, multiline text, and overlapping occurrences', async t => {
+    const page = await openEditor(t);
+    for (const [text, anchor, head, expected] of [
+        ['.* .* .x', 0, 2, 'X X .x'],
+        ['ab\ncd ab\ncd', 0, 5, 'X X'],
+        ['banana ana', 3, 6, 'banX X'],
+        ['aaaaaa', 2, 4, 'XXX']
+    ]) {
+        await setCode(page, text, anchor, head);
+        await page.keyboard.press('Shift');
+        await page.keyboard.type('X');
+        await expectText(page, expected);
+    }
+});
+
+test('Shift shortcuts and uppercase typing do not activate matching selections', async t => {
+    const page = await openEditor(t);
+    await setCode(page, 'word word', 0, 1);
+    await page.keyboard.press('Shift+ArrowRight');
+    assert.equal(await page.evaluate(() => window.getSelection().toString()), 'wo');
+    assert.equal(await page.locator('.occurrence-edit-active').count(), 0);
+    await page.keyboard.press('Shift+A');
+    await expectText(page, 'Ard word');
+    assert.equal(await page.locator('.occurrence-edit-active').count(), 0);
+
+    // A modifier chord must not arm a later Shift release either.
+    await setCode(page, 'word word', 0, 4);
+    await page.keyboard.press('Control+Shift');
+    assert.equal(await page.locator('.occurrence-edit-active').count(), 0);
+    // Selecting with a held Shift still activates only on a separate tap.
+    await setCode(page, 'word word', 0);
+    await page.keyboard.down('Shift');
+    for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowRight');
+    await page.keyboard.up('Shift');
+    assert.equal(await page.locator('.occurrence-edit-active').count(), 0);
+    await page.keyboard.press('Shift');
+    assert.equal(await page.locator('.multi-cursor-selection').count(), 2);
 });
