@@ -186,8 +186,8 @@ export const syntaxRules = {
         comments: [
             '#'
         ],
-        // Subscript characters (should inherit color from preceding glyph)
-        subscripts: '₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎ₐₑₒₓₔₕₖₗₘₙₚₛₜ',
+        // Numeric and sided subscripts (inherit color from preceding glyph)
+        subscripts: '₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎ₐₑₒₓₔₕₖₗₘₙₚₛₜ⌞⌟',
         // Numbers pattern — _ is Uiua's array separator (2_3 ≡ [2 3])
         numberPattern: /^¯?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?(_¯?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?)*/i
     },
