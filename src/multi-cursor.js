@@ -3,6 +3,8 @@
  */
 export function createMultiCursorEditor(input, { getText, renderText }) {
     let cursors = null;
+    let occurrenceMode = false;
+    let shiftSelection = null;
     let addingColumn = null;
     let internalInput = false;
     const undo = [];
@@ -78,17 +80,20 @@ export function createMultiCursorEditor(input, { getText, renderText }) {
 
     function restoreSelection(selections) {
         const normalized = normalize(selections);
-        cursors = normalized.length > 1 ? normalized : null;
+        cursors = normalized.length > 1 || occurrenceMode ? normalized : null;
         select(normalized[0]);
         draw();
     }
 
     function clear() {
         cursors = null;
+        occurrenceMode = false;
+        shiftSelection = null;
         addingColumn = null;
         overlay.replaceChildren();
         overlay.hidden = true;
-        input.classList.remove('multi-cursor-active');
+        input.classList.remove('multi-cursor-active', 'occurrence-edit-active');
+        overlay.classList.remove('occurrence-edit-active');
         selectionHighlight.clear();
     }
 
@@ -102,6 +107,8 @@ export function createMultiCursorEditor(input, { getText, renderText }) {
         selectionHighlight.clear();
         const active = !!cursors && document.activeElement === input;
         input.classList.toggle('multi-cursor-active', active);
+        input.classList.toggle('occurrence-edit-active', active && occurrenceMode);
+        overlay.classList.toggle('occurrence-edit-active', active && occurrenceMode);
         overlay.hidden = !active;
         if (!active) return;
         overlay.style.left = `${input.offsetLeft}px`;
@@ -173,7 +180,7 @@ export function createMultiCursorEditor(input, { getText, renderText }) {
     }
 
     function snapshot() {
-        return { text: getText(), selections: captureSelection() };
+        return { text: getText(), selections: captureSelection(), occurrenceMode };
     }
 
     function write(text, selections) {
@@ -255,12 +262,37 @@ export function createMultiCursorEditor(input, { getText, renderText }) {
         restoreSelection([...selections, { anchor: head, head }]);
     }
 
+    function selectOccurrences(primary) {
+        const text = getText();
+        const start = Math.min(primary.anchor, primary.head);
+        const end = Math.max(primary.anchor, primary.head);
+        const needle = text.slice(start, end);
+        if (!needle) return;
+        const selections = [primary];
+        const backwards = primary.head < primary.anchor;
+        function find(from, limit) {
+            for (let at = text.indexOf(needle, from); at >= 0 && at + needle.length <= limit;
+                at = text.indexOf(needle, at + needle.length)) {
+                selections.push(backwards
+                    ? { anchor: at + needle.length, head: at }
+                    : { anchor: at, head: at + needle.length });
+            }
+        }
+        // Keep the original selection when matches overlap it; edit each character once.
+        find(0, start);
+        find(end, text.length);
+        renderText(text);
+        occurrenceMode = true;
+        restoreSelection(selections);
+    }
+
     function history(backwards) {
         const source = backwards ? undo : redo;
         const target = backwards ? redo : undo;
         if (!source.length) return false;
         target.push(snapshot());
         const state = source.pop();
+        occurrenceMode = state.occurrenceMode;
         write(state.text, state.selections);
         return true;
     }
@@ -268,6 +300,15 @@ export function createMultiCursorEditor(input, { getText, renderText }) {
     // Capture before the app's evaluation, language-switch, and prefix handlers.
     input.addEventListener('keydown', event => {
         if (event.isComposing || event.keyCode === 229) return;
+        if (event.key === 'Shift') {
+            if (!event.repeat) {
+                const primary = readSelection();
+                shiftSelection = !cursors && !event.ctrlKey && !event.altKey && !event.metaKey &&
+                    primary.anchor !== primary.head ? primary : null;
+            }
+        } else {
+            shiftSelection = null;
+        }
         let handled = false;
         if (event.ctrlKey && event.shiftKey && !event.altKey && !event.metaKey &&
             ['ArrowUp', 'ArrowDown'].includes(event.key)) {
@@ -309,6 +350,19 @@ export function createMultiCursorEditor(input, { getText, renderText }) {
             event.stopImmediatePropagation();
         }
     }, true);
+
+    input.addEventListener('keyup', event => {
+        if (event.key !== 'Shift') return;
+        const pending = shiftSelection;
+        shiftSelection = null;
+        if (!pending || event.isComposing || event.ctrlKey || event.altKey || event.metaKey ||
+            document.activeElement !== input) return;
+        const primary = readSelection();
+        // A tap activates matching; Shift+arrows, Shift+Enter and capital letters stay native.
+        if (primary.anchor === pending.anchor && primary.head === pending.head) {
+            selectOccurrences(primary);
+        }
+    });
 
     input.addEventListener('beforeinput', event => {
         if (event.isComposing) return;
@@ -366,7 +420,10 @@ export function createMultiCursorEditor(input, { getText, renderText }) {
     });
     input.addEventListener('scroll', draw);
     input.addEventListener('focus', draw);
-    input.addEventListener('blur', draw);
+    input.addEventListener('blur', () => {
+        shiftSelection = null;
+        draw();
+    });
     window.addEventListener('resize', draw);
     new ResizeObserver(draw).observe(input);
     document.addEventListener('selectionchange', () => {

@@ -51,6 +51,7 @@ A code editor and runner for array programming languages: **BQN**, **APL**, **J*
 | `Ctrl+X`             | Cut selection or current line    |
 | `Ctrl+Shift+Up/Down` | Add cursor above/below           |
 | `Ctrl+Shift+Left/Right` | Select words at every cursor  |
+| Tap `Shift` with text selected | Edit every exact match |
 | `Escape`             | Return to one cursor             |
 | `Alt+Up/Down`        | Cycle through input history      |
 | `F1`                 | Show docs for glyph at cursor    |
@@ -58,6 +59,12 @@ A code editor and runner for array programming languages: **BQN**, **APL**, **J*
 With multiple cursors, typing, glyph prefixes, deletion, and pasting edit every
 selection. Arrow keys move every cursor; hold `Shift` to select or `Ctrl` to move
 by word. `Ctrl+Z` undoes a multi-cursor edit and `Ctrl+Shift+Z` or `Ctrl+Y` redoes it.
+
+Select text, then tap and release `Shift` to select every exact, case-sensitive
+occurrence in the editor. The selections switch from white text on red to red
+text on white. Typing, `Backspace`, `Delete`, and `Ctrl+V` edit all matches, and
+continued typing stays linked at every location. Press `Escape` or click in the
+editor to return to normal editing. Shift shortcuts still work normally.
 
 #### Keyboard Mode
 

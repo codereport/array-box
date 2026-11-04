@@ -348,6 +348,21 @@
             background: var(--dracula-red);
         }
 
+        .code-input.occurrence-edit-active::selection,
+        .code-input.occurrence-edit-active *::selection,
+        .code-input.occurrence-edit-active::highlight(arraybox-multi-selection),
+        .code-input.occurrence-edit-active *::highlight(arraybox-multi-selection) {
+            color: var(--dracula-red);
+        }
+
+        .multi-cursor-overlay.occurrence-edit-active .multi-cursor-selection {
+            background: #fff;
+        }
+
+        .multi-cursor-overlay.occurrence-edit-active .multi-cursor-caret {
+            background: var(--dracula-red);
+        }
+
         .code-input:empty:before {
             content: attr(data-placeholder);
             color: #6b7280;
@@ -1451,6 +1466,10 @@
                 <div class="help-row">
                     <span class="help-key">ctrl + shift + ← →</span>
                     <span class="help-desc">select words at every cursor</span>
+                </div>
+                <div class="help-row">
+                    <span class="help-key">tap shift with selection</span>
+                    <span class="help-desc">edit all matching occurrences</span>
                 </div>
                 <div class="help-row">
                     <span class="help-key">esc</span>
