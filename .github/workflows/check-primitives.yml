@@ -24,6 +24,7 @@ jobs:
   primitive-tests:
     name: Primitive comparison tests
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
@@ -38,7 +39,11 @@ jobs:
         run: npm ci
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        timeout-minutes: 5
+        run: |
+          # Avoid APT hangs when falling back from the Azure Ubuntu mirror.
+          echo 'https://archive.ubuntu.com/ubuntu/' | sudo tee /etc/apt/apt-mirrors.txt
+          npx playwright install --with-deps chromium
 
       - name: Run primitive tests
         run: npm run test:primitives
