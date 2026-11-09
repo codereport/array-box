@@ -70,10 +70,52 @@ test('TinyAPL nested and longer trains follow fork/atop rules and empty tines', 
 test('TinyAPL strings, data, opaque functions, and unsupported syntax retain ordinary output', async () => {
     const { formatTinyaplFunctionTree } = await load();
     for (const value of [null, { type: 'array', repr: MIRROR }, { type: 'adverb', repr: '/' },
-        fn('+'), fn('{⍵+1}'), fn('(+'), fn('((+)¨)unknown'), fn('⦅2 ⋄ + ⋄ ⊢⦆'),
+        fn('+'), fn('{⍵+1}'), fn('(+'), fn('((+)¨)unknown'), fn('⦅2 ⋄ _A ⋄ ⊢⦆'),
         fn('⦅+ ⋄ _A⦆'), fn('⦅+'), fn('⦅⦆'), fn('('.repeat(100) + '+' + ')'.repeat(100))]) {
         assert.equal(formatTinyaplFunctionTree(value), null, JSON.stringify(value));
     }
+});
+
+test('TinyAPL array tines render the complete evaluated train from issue #243', async () => {
+    const { formatTinyaplFunctionTree, renderTinyaplExplainTree, TINYAPL_COMBINATOR_INFO } = await load();
+    const tree = formatTinyaplFunctionTree(fn('⦅(⌊)/ ⋄ ¯2 ⋄ ((((⍕)¨)⍛(⍪))⍛(⍎))⌺ ⋄ ⊢⦆'));
+    assert.ok(tree);
+    assert.equal(tree.source, '⦅⌊/¯2⍕¨⍛⍪⍛⍎⌺⊢⦆');
+    assert.deepEqual(tree.groups.map(group => group.type), ['1-mod', '1-mod', '2-mod', '2-mod', '1-mod', 'fork', 'atop']);
+    const fork = tree.groups.find(group => group.type === 'fork');
+    assert.deepEqual(fork.parts[0], { role: 'f', cols: [3, 4] });
+    assert.equal(fork.combinator, 'fork-left-array');
+    assert.equal(TINYAPL_COMBINATOR_INFO[fork.combinator].monad, '⦅a⋄G⋄H⦆ y ≡ a G (H y)');
+    assert.match(tree.text, /¯2/);
+    for (const glyph of ['⌊', '/', '⍕', '¨', '⍛', '⍪', '⍎', '⌺', '⊢']) {
+        assert.ok(tree.text.includes(glyph), glyph);
+    }
+    const { html } = renderTinyaplExplainTree(tree);
+    assert.match(html, /syntax-number[^>]*data-col="3" data-groups="5,6">¯/);
+    assert.match(html, /syntax-number[^>]*data-col="4" data-groups="5,6">2/);
+});
+
+test('TinyAPL array trains preserve literal tines and distinguish binding from constants', async () => {
+    const { formatTinyaplFunctionTree, TINYAPL_COMBINATOR_INFO } = await load();
+    for (const [repr, source, combinator] of [
+        ['⦅2 ⋄ +⦆', '⦅2+⦆', 'atop-left-array'],
+        ['⦅+ ⋄ 2⦆', '⦅+2⦆', 'atop-right-array'],
+        ['⦅2 ⋄ 3⦆', '⦅2⋄3⦆', 'atop-arrays'],
+        ['⦅2 ⋄ + ⋄ ⊢⦆', '⦅2+⊢⦆', 'fork-left-array'],
+        ['⦅⊢ ⋄ + ⋄ 2⦆', '⦅⊢+2⦆', 'fork-right-array'],
+        ['⦅2 ⋄ + ⋄ 3⦆', '⦅2+3⦆', 'fork-arrays'],
+        ['⦅+ ⋄ 2 ⋄ ⊢⦆', '⦅+2⊢⦆', 'fork-constant'],
+        ['⦅⟨1 ⋄ 2⟩ ⋄ , ⋄ ⊢⦆', '⦅⟨1 ⋄ 2⟩,⊢⦆', 'fork-left-array'],
+        ['⦅"ab" ⋄ , ⋄ ⊢⦆', '⦅"ab",⊢⦆', 'fork-left-array'],
+    ]) {
+        const tree = formatTinyaplFunctionTree(fn(repr));
+        assert.ok(tree, repr);
+        assert.equal(tree.source, source, repr);
+        assert.equal(tree.groups.at(-1).combinator, combinator, repr);
+        assert.ok(TINYAPL_COMBINATOR_INFO[combinator], repr);
+    }
+    assert.equal(TINYAPL_COMBINATOR_INFO['atop-left-array'].dyad, null);
+    assert.equal(TINYAPL_COMBINATOR_INFO['atop-right-array'].dyad, null);
 });
 
 test('TinyAPL compact trains preserve empty tines without adding diamonds around named operands', async () => {

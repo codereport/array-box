@@ -12,6 +12,41 @@ export const TINYAPL_COMBINATOR_INFO = {
         monad: '⦅F⋄G⦆ y ≡ F (G y)',
         dyad: 'x ⦅F⋄G⦆ y ≡ F (x G y)',
     },
+    'atop-left-array': {
+        name: '2-train (left binding)',
+        monad: '⦅a⋄G⦆ y ≡ a G y',
+        dyad: null,
+    },
+    'atop-right-array': {
+        name: '2-train (right binding)',
+        monad: '⦅F⋄b⦆ y ≡ y F b',
+        dyad: null,
+    },
+    'atop-arrays': {
+        name: '2-train (constant)',
+        monad: '⦅a⋄b⦆ y ≡ a',
+        dyad: 'x ⦅a⋄b⦆ y ≡ a',
+    },
+    'fork-left-array': {
+        name: '3-train (left array)',
+        monad: '⦅a⋄G⋄H⦆ y ≡ a G (H y)',
+        dyad: 'x ⦅a⋄G⋄H⦆ y ≡ a G (x H y)',
+    },
+    'fork-right-array': {
+        name: '3-train (right array)',
+        monad: '⦅F⋄G⋄c⦆ y ≡ (F y) G c',
+        dyad: 'x ⦅F⋄G⋄c⦆ y ≡ (x F y) G c',
+    },
+    'fork-arrays': {
+        name: '3-train (constant)',
+        monad: '⦅a⋄G⋄c⦆ y ≡ a G c',
+        dyad: 'x ⦅a⋄G⋄c⦆ y ≡ a G c',
+    },
+    'fork-constant': {
+        name: '3-train (constant middle tine)',
+        monad: '⦅F⋄b⋄H⦆ y ≡ b (outer tines are ignored)',
+        dyad: 'x ⦅F⋄b⋄H⦆ y ≡ b (outer tines are ignored)',
+    },
     '1-mod': {
         name: 'Adverb application',
         monad: '(F A) y',
@@ -69,7 +104,7 @@ function parseRepresentation(representation) {
     }
 
     function train(tines) {
-        if (!tines.length || tines.some(tine => tine && tine.kind !== 'function')) {
+        if (!tines.length || tines.some(tine => tine && !['function', 'array'].includes(tine.kind))) {
             throw new Error('Unsupported train tines');
         }
         function build(ts) {
@@ -221,7 +256,21 @@ export function formatTinyaplFunctionTree(value) {
                 : [['f', node.f], ['g', node.g], ['h', node.h]];
             const parts = children.map(([role, child]) => ({ role, cols: collect(child, depth + 1) }));
             const cols = parts.flatMap(part => part.cols);
-            groups.push({ id: groups.length, type: node.type, cols, junctionRow: -depth, parts });
+            // Array tines bind arguments or produce constants. Keep the same
+            // diagram geometry, but explain TinyAPL's actual train semantics.
+            let combinator = node.type;
+            if (node.type === 'atop') {
+                if (node.f.kind === 'array') {
+                    combinator = node.g.kind === 'array' ? 'atop-arrays' : 'atop-left-array';
+                } else if (node.g.kind === 'array') combinator = 'atop-right-array';
+            } else if (node.type === 'fork') {
+                if (node.g.kind === 'array') combinator = 'fork-constant';
+                else if (node.f.kind === 'array') {
+                    combinator = node.h.kind === 'array' ? 'fork-arrays' : 'fork-left-array';
+                } else if (node.h.kind === 'array') combinator = 'fork-right-array';
+            }
+            groups.push({ id: groups.length, type: node.type, cols, junctionRow: -depth, parts,
+                ...(combinator !== node.type ? { combinator } : {}) });
             return cols;
         }
         collect(root);

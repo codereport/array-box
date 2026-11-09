@@ -5681,7 +5681,7 @@
             const group  = groups[innermostId];
             if (!group) return;
 
-            const info = (root._combinatorInfo || BQN_COMBINATOR_INFO)[group.type];
+            const info = (root._combinatorInfo || BQN_COMBINATOR_INFO)[group.combinator ?? group.type];
             if (!info) return;
 
             const labels = root._tooltipLabels || { monad: '𝕩', dyad: '𝕨𝕩' };

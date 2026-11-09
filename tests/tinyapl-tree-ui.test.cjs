@@ -17,8 +17,11 @@ export async function newContext(input, output) { write = output; return 1; }
 export async function runCode(ctx, code) {
     if (code === '"code text"') return { type: 'array', shown: '⍮¨⸚⦅≠⊆⊢⦆' };
     if (code === '"earth" Ms "empty"') return { type: 'array', shown: '┌──┬──┐\\n│ar│mp│\\n└──┴──┘' };
-    if (code === 'Unsupported') return { type: 'function', repr: '⦅2 ⋄ + ⋄ ⊢⦆' };
+    if (code === 'Unsupported') return { type: 'function', repr: '⦅2 ⋄ _A ⋄ ⊢⦆' };
     if (code === 'EmptyTines') return { type: 'function', repr: '⦅(+)/ ⋄  ⋄ | ⋄  ⋄ (-)⌺ ⋄ (-)∘(a)⦆' };
+    if (code === '⦅⌊/¯2⍕¨⍛⍪⍛⍎⌺⊢⦆') return { type: 'function', repr: '⦅(⌊)/ ⋄ ¯2 ⋄ ((((⍕)¨)⍛(⍪))⍛(⍎))⌺ ⋄ ⊢⦆' };
+    if (code === '⦅2+⦆') return { type: 'function', repr: '⦅2 ⋄ +⦆' };
+    if (code === '⦅+2⊢⦆') return { type: 'function', repr: '⦅+ ⋄ 2 ⋄ ⊢⦆' };
     if (code.startsWith('⎕')) await write('<before>\\n');
     return { type: 'function', repr: '((⍮)¨)⸚(⦅≠ ⋄ ⊆ ⋄ ⊢⦆)' };
 }
@@ -94,12 +97,39 @@ test('TinyAPL function trees preserve stdout and leave text, arrays, and unsuppo
     for (const [code, text] of [
         ['"code text"', '⍮¨⸚⦅≠⊆⊢⦆'],
         ['"earth" Ms "empty"', '┌──┬──┐\n│ar│mp│\n└──┴──┘'],
-        ['Unsupported', '⦅2 ⋄ + ⋄ ⊢⦆'],
+        ['Unsupported', '⦅2 ⋄ _A ⋄ ⊢⦆'],
     ]) {
         await evaluate(page, code);
         assert.equal(await page.locator('#explainTreeRoot').count(), 0);
         assert.equal(await page.locator('#output').textContent(), text);
         assert.equal(await page.locator('#output').evaluate(output => output.classList.contains('train-tree')), false);
+    }
+});
+
+test('TinyAPL numeric tines render complete interactive trees with array-aware explanations', async t => {
+    const page = await openEditor(t);
+    await evaluate(page, '⦅⌊/¯2⍕¨⍛⍪⍛⍎⌺⊢⦆');
+    assert.equal(await page.locator('#output').evaluate(output => output.classList.contains('train-tree')), true);
+    assert.equal(await page.locator('#explainTreeRoot .explain-source-char').allTextContents()
+        .then(chars => chars.join('')), '⦅⌊/¯2⍕¨⍛⍪⍛⍎⌺⊢⦆');
+    assert.equal(await page.locator('#explainTreeRoot .syntax-number.explain-source-char').allTextContents()
+        .then(chars => chars.join('')), '¯2');
+    await page.locator('#explainTreeRoot [data-col="4"]').hover();
+    await page.locator('#explainTooltip.show').waitFor();
+    assert.equal(await page.locator('#explainTooltipName').textContent(), '3-train (left array)');
+    assert.ok((await page.locator('#explainTooltipPattern').textContent()).includes('a G (H y)'));
+    assert.equal(await page.locator('#explainTreeRoot .explain-role-tine').allTextContents()
+        .then(chars => chars.join('')), '¯2⊢');
+
+    for (const [code, name, pattern] of [
+        ['⦅2+⦆', '2-train (left binding)', '⦅a⋄G⦆ y ≡ a G y'],
+        ['⦅+2⊢⦆', '3-train (constant middle tine)', 'outer tines are ignored'],
+    ]) {
+        await evaluate(page, code);
+        await page.locator('#explainTreeRoot [data-col="1"]').hover();
+        await page.locator('#explainTooltip.show').waitFor();
+        assert.equal(await page.locator('#explainTooltipName').textContent(), name);
+        assert.ok((await page.locator('#explainTooltipPattern').textContent()).includes(pattern));
     }
 });
 
