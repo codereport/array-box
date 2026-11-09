@@ -76,6 +76,24 @@ test('TinyAPL strings, data, opaque functions, and unsupported syntax retain ord
     }
 });
 
+test('TinyAPL compact trains preserve empty tines without adding diamonds around named operands', async () => {
+    const { formatTinyaplFunctionTree, renderTinyaplExplainTree } = await load();
+    // Actual interpreter representation of issue #242's ⦅+/·|·-⌺-∘\'a\'⦆.
+    const tree = formatTinyaplFunctionTree(fn('⦅(+)/ ⋄  ⋄ | ⋄  ⋄ (-)⌺ ⋄ (-)∘(a)⦆'));
+    assert.equal(tree.source, '⦅+/·|·-⌺-∘a⦆');
+    assert.equal(tree.text, '  ┌─┴─┐\n  / ┌─┴──┐\n┌─┘ |   ┌┴─┐\n+       ⌺  ∘\n      ┌─┘ ┌┴┐\n      -   - a');
+    assert.deepEqual(tree.groups.at(-1).cols, [1, 2, 4, 6, 7, 8, 9, 10]);
+    assert.ok(!renderTinyaplExplainTree(tree).html.includes('⋄'));
+
+    for (const [repr, source] of [
+        ['⦅Foo ⋄  ⋄ Bar ⋄ +⦆', '⦅Foo·Bar+⦆'],
+        ['⦅Foo ⋄ (+)∘(Bar)⦆', '⦅Foo+∘Bar⦆'],
+        ['⦅(Foo)∘(+) ⋄ Bar⦆', '⦅Foo∘+Bar⦆'],
+    ]) {
+        assert.equal(formatTinyaplFunctionTree(fn(repr)).source, source);
+    }
+});
+
 test('TinyAPL literal operands escape HTML and do not create fake modifier groups', async () => {
     const { formatTinyaplFunctionTree, renderTinyaplExplainTree } = await load();
     const tree = formatTinyaplFunctionTree(fn('("<script>⸚⍘"</script>")∘(+)'));

@@ -170,17 +170,25 @@ export function formatTinyaplFunctionTree(value) {
         const chars = [];
         const classes = [];
         const append = text => chars.push(...text);
-        const containsName = node => node?.named ||
-            ['operand', 'left', 'right', 'f', 'g', 'h'].some(key => node?.[key] && containsName(node[key]));
+        const edgeCharacter = (node, last = false) => {
+            if (!node) return '·';
+            if (node.trainTines) return last ? '⦆' : '⦅';
+            if (node.type === 'func') return [...node.text].at(last ? -1 : 0);
+            if (!last) return edgeCharacter(node.operand ?? node.left);
+            if (node.type === '1-mod') return edgeCharacter(node.modifier, true);
+            return !node.right.trainTines && node.right.type !== 'func' ? ')'
+                : edgeCharacter(node.right, true);
+        };
+        const identifierChar = ch => /[\p{L}\p{N}_∆⍙]/u.test(ch);
         function emit(node) {
             if (node.trainTines) {
                 append('⦅');
                 // Adjacent names would merge into one identifier in a compact train.
-                const separated = node.trainTines.some(tine => containsName(tine));
                 node.trainTines.forEach((tine, i) => {
-                    if (separated && i) append('⋄');
+                    if (i && identifierChar(edgeCharacter(node.trainTines[i - 1], true)) &&
+                        identifierChar(edgeCharacter(tine))) append('⋄');
                     if (tine) emit(tine);
-                    else if (!separated) append('·');
+                    else append('·');
                 });
                 append('⦆');
             } else if (node.type === 'func') {

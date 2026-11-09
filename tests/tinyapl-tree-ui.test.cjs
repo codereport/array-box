@@ -18,6 +18,7 @@ export async function runCode(ctx, code) {
     if (code === '"code text"') return { type: 'array', shown: '⍮¨⸚⦅≠⊆⊢⦆' };
     if (code === '"earth" Ms "empty"') return { type: 'array', shown: '┌──┬──┐\\n│ar│mp│\\n└──┴──┘' };
     if (code === 'Unsupported') return { type: 'function', repr: '⦅2 ⋄ + ⋄ ⊢⦆' };
+    if (code === 'EmptyTines') return { type: 'function', repr: '⦅(+)/ ⋄  ⋄ | ⋄  ⋄ (-)⌺ ⋄ (-)∘(a)⦆' };
     if (code.startsWith('⎕')) await write('<before>\\n');
     return { type: 'function', repr: '((⍮)¨)⸚(⦅≠ ⋄ ⊆ ⋄ ⊢⦆)' };
 }
@@ -100,4 +101,15 @@ test('TinyAPL function trees preserve stdout and leave text, arrays, and unsuppo
         assert.equal(await page.locator('#output').textContent(), text);
         assert.equal(await page.locator('#output').evaluate(output => output.classList.contains('train-tree')), false);
     }
+});
+
+test('TinyAPL trains display empty tines as middle dots without extra diamonds', async t => {
+    const page = await openEditor(t);
+    await evaluate(page, 'EmptyTines');
+    assert.equal(await page.locator('#explainTreeRoot .explain-source-char').allTextContents()
+        .then(chars => chars.join('')), '⦅+/·|·-⌺-∘a⦆');
+    await page.locator('#explainTreeRoot [data-col="4"]').hover();
+    await page.locator('#explainTooltip.show').waitFor();
+    assert.equal(await page.locator('#explainTooltipName').textContent(), '2-train (atop)');
+    assert.equal(await page.locator('#explainTreeRoot .explain-role-center').textContent(), '|');
 });
