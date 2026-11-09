@@ -749,7 +749,7 @@ export function getSyntaxClass(symbol, language) {
  *    Boxed arrays never place ┼ on a ┌-line.
  *
  * @param {string} text     - the raw output text
- * @param {string} language - 'j' | 'apl' (other languages return false)
+ * @param {string} language - 'j' | 'apl' | 'tinyapl' (other languages return false)
  */
 export function isTrainTree(text, language) {
     if (!text || typeof text !== 'string') return false;
@@ -768,13 +768,15 @@ export function isTrainTree(text, language) {
         return true;
     }
 
-    if (language === 'apl') {
+    if (language === 'apl' || language === 'tinyapl') {
         // APL fork trees use ┼ at wide junctions (┌─┼─┐) or ┴ at narrow ones (┌┴┐).
         // In boxed arrays ┼ only appears on ├-lines and ┴ only on └-lines,
         // so neither ever shares a line with ┌.
+        // TinyAPL adverb trees also put ┌ and ┘ on the same connector line.
         const lines = text.split('\n');
         for (const line of lines) {
-            if (line.includes('┌') && (line.includes('┼') || line.includes('┴'))) return true;
+            if (line.includes('┌') && (line.includes('┼') || line.includes('┴') ||
+                (language === 'tinyapl' && line.includes('┘')))) return true;
         }
         return false;
     }

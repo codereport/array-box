@@ -759,15 +759,15 @@ function aplDisplayTree(expression) {
     return { root, chars };
 }
 
-function layoutAplDisplayTree(node, chars, depth = 0) {
+export function layoutFunctionTree(node, chars = [], depth = 0, parseLeaf = aplDisplayTree) {
     const label = node => node.text ?? node.cols.map(c => chars[c]).join('');
     if (depth > 50) throw new Error('Function tree is too deep');
     if (node.type === 'func') {
         const text = label(node);
-        const parsed = aplDisplayTree(text);
+        const parsed = parseLeaf?.(text);
         const nested = parsed && (parsed.root.type !== 'func' ||
             (text.startsWith('(') && text.endsWith(')'))) ? parsed : null;
-        if (nested) return layoutAplDisplayTree(nested.root, nested.chars, depth + 1);
+        if (nested) return layoutFunctionTree(nested.root, nested.chars, depth + 1, parseLeaf);
         const width = [...text].length;
         return { lines: [text], width, anchor: Math.floor((width - 1) / 2) };
     }
@@ -775,7 +775,7 @@ function layoutAplDisplayTree(node, chars, depth = 0) {
     const children = node.type === '1-mod' ? [node.operand]
         : node.type === '2-mod' ? [node.left, node.right]
         : node.type === 'atop' ? [node.f, node.g] : [node.f, node.g, node.h];
-    const layouts = children.map(child => layoutAplDisplayTree(child, chars, depth + 1));
+    const layouts = children.map(child => layoutFunctionTree(child, chars, depth + 1, parseLeaf));
     const offsets = [];
     let width = 0;
     for (const child of layouts) {
@@ -812,7 +812,7 @@ export function formatAplFunctionOutput(output, representation, source = '') {
         if (!/∇sûre_(?:NL|FX|power|execute|format|ibeam|NS|VGET|VSET)\b/.test(output)) return output;
         const parsed = aplDisplayTree(source);
         return parsed && parsed.root.type !== 'func'
-            ? layoutAplDisplayTree(parsed.root, parsed.chars).lines.join('\n') : output;
+            ? layoutFunctionTree(parsed.root, parsed.chars).lines.join('\n') : output;
     };
     let replaced = false;
     function decode(value, depth = 0) {
@@ -843,7 +843,7 @@ export function formatAplFunctionOutput(output, representation, source = '') {
         if (!representation) return sourceFallback();
         const root = decode(representation);
         if (!replaced) return sourceFallback();
-        return layoutAplDisplayTree(root, []).lines.join('\n');
+        return layoutFunctionTree(root).lines.join('\n');
     } catch {
         try { return sourceFallback(); } catch { return output; }
     }
@@ -861,6 +861,11 @@ export function formatAplFunctionOutput(output, representation, source = '') {
  * @returns {{ html: string, groups: object[] }}
  */
 export function renderAplExplainTree(source, treeText) {
+    return renderFunctionExplainTree(source, treeText, parseAplExprGroups(source));
+}
+
+/** Render an evaluated function tree with source columns supplied by its parser. */
+export function renderFunctionExplainTree(source, treeText, hoverGroups, language = 'apl', sourceClasses = []) {
     const treeLines = treeText.split('\n');
     while (treeLines.length > 0 && treeLines[treeLines.length - 1].trim() === '') treeLines.pop();
 
@@ -871,12 +876,10 @@ export function renderAplExplainTree(source, treeText) {
 
     const rows = [source, ...treeLines];
 
-    const hoverGroups = parseAplExprGroups(source);
-
     if (hoverGroups.length === 0) {
         // No parseable groups: just prepend source plainly and highlight the tree
-        const sourceHtml = highlightCode(source, 'apl');
-        const treeHtml = treeLines.map(line => highlightCode(line, 'apl')).join('\n');
+        const sourceHtml = highlightCode(source, language);
+        const treeHtml = treeLines.map(line => highlightCode(line, language)).join('\n');
         return { html: centerPad + sourceHtml + '\n' + treeHtml, groups: [] };
     }
 
@@ -909,7 +912,9 @@ export function renderAplExplainTree(source, treeText) {
                 const groupIds = colToGroups.get(c);
                 const systemFunctionLength = aplSystemFunctionLength(row, c);
                 if (systemFunctionLength) systemFunctionEnd = c + systemFunctionLength;
-                const syntaxClass = c < systemFunctionEnd ? 'syntax-function' : aplSyntaxClass(ch);
+                const syntaxClass = language === 'apl'
+                    ? (c < systemFunctionEnd ? 'syntax-function' : aplSyntaxClass(ch))
+                    : sourceClasses[c];
                 const classes = ['explain-source-char', syntaxClass].filter(Boolean).join(' ');
                 if (groupIds && groupIds.length > 0) {
                     html += `<span class="${classes}" data-col="${c}" data-groups="${groupIds.join(',')}">${esc(ch)}</span>`;
@@ -918,8 +923,8 @@ export function renderAplExplainTree(source, treeText) {
                 }
             }
         } else {
-            // Rows 1+: tree connector rows — plain APL syntax highlighting
-            html = highlightCode(treeLines[r - 1], 'apl');
+            // Rows 1+: syntax-highlight labels while leaving connectors plain.
+            html = highlightCode(treeLines[r - 1], language);
         }
 
         htmlRows.push(r === 0 ? centerPad + html : html);

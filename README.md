@@ -28,6 +28,8 @@ A code editor and runner for array programming languages: **BQN**, **APL**, **J*
 - Permalinks for sharing code snippets
 - Copy code as vertical image to clipboard
 - Inline documentation tooltips for glyphs
+- Interactive function trees for TinyAPL trains and derived functions, including
+  named function results, with syntax colors, hover explanations, and image export
 - Primitive translation when switching languages
 - Dark theme (Dracula-style palette)
 

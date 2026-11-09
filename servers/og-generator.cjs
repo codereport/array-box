@@ -500,10 +500,10 @@ async function generateOGImage(code, lang, result = null, resultHtml = null) {
     const boxBorder = 3;  // Border width on boxes
     const gap = 20;
     
-    // TinyAPL uses tighter line-height (matching .output.tinyapl CSS)
+    // Keep TinyAPL arrays tight; function trees use the same rows as APL trees.
     // APL result box uses 1.0 to match in-browser .output.apl; train trees get letterSpacing too
     const isTreeResult = displayResult && isTrainTree(displayResult, lang);
-    const resultLineHeight = lang === 'tinyapl' ? 0.85 : lang === 'apl' ? 1.0 : 1.2;
+    const resultLineHeight = lang === 'tinyapl' ? (isTreeResult ? 1.2 : 0.85) : lang === 'apl' ? 1.0 : 1.2;
     
     // Header dimensions (logo 80px + gap + text)
     const headerHeight = 80;
@@ -818,10 +818,11 @@ function isTrainTree(text, language) {
         return true;
     }
 
-    if (language === 'apl') {
+    if (language === 'apl' || language === 'tinyapl') {
         const lines = text.split('\n');
         for (const line of lines) {
-            if (line.includes('┌') && (line.includes('┼') || line.includes('┴'))) return true;
+            if (line.includes('┌') && (line.includes('┼') || line.includes('┴') ||
+                (language === 'tinyapl' && line.includes('┘')))) return true;
         }
         return false;
     }
@@ -859,10 +860,10 @@ async function generateVerticalImage(code, lang, result = null, resultHtml = nul
     const boxBorder = 3;  // Border width on boxes
     const gap = 20;
     
-    // TinyAPL uses tighter line-height (matching .output.tinyapl CSS)
+    // Keep TinyAPL arrays tight; function trees use the same rows as APL trees.
     // APL result box uses 1.0 to match in-browser .output.apl; train trees get letterSpacing too
     const isTreeResult = displayResult && isTrainTree(displayResult, lang);
-    const resultLineHeight = lang === 'tinyapl' ? 0.85 : lang === 'apl' ? 1.0 : 1.2;
+    const resultLineHeight = lang === 'tinyapl' ? (isTreeResult ? 1.2 : 0.85) : lang === 'apl' ? 1.0 : 1.2;
     
     // Header dimensions - logo 60px, text ~28px fits within logo height
     const logoSize = 60;

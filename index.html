@@ -416,6 +416,9 @@
         .output.tinyapl {
             line-height: 0.85;
         }
+        .output.tinyapl.train-tree {
+            line-height: 1.13;
+        }
         .output.apl {
             line-height: 1.13;
         }
@@ -1815,6 +1818,8 @@
 
     <!-- TinyAPL WASM Loader -->
     <script type="module">
+        import { formatTinyaplFunctionTree } from './src/tinyapl-tree.js';
+
         // Load TinyAPL WASM module from local files
         let tinyaplReady = false;
         let tinyaplLoadError = null;
@@ -1972,8 +1977,9 @@
                 const hasErrorInBuffer = errorBuffer && TINYAPL_ERROR_PATTERNS.some(p => p.test(errorBuffer));
 
                 if (success && !hasErrorInBuffer) {
-                    // Use the module's show() function for pretty-printing
-                    let output = await tinyaplModule.show(value);
+                    // Draw supported function values; use show() for all other output.
+                    const functionTree = formatTinyaplFunctionTree(value);
+                    let output = functionTree ? functionTree.text : await tinyaplModule.show(value);
                     console.log('[TinyAPL] show() output:', output);
 
                     // Prepend any stdout output (from ⎕← in user code)
@@ -1992,7 +1998,10 @@
 
                     return {
                         success: true,
-                        output: output
+                        output: output,
+                        ...(functionTree ? {
+                            tinyaplFunctionTree: { ...functionTree, stdout: outputBuffer }
+                        } : {})
                     };
                 } else {
                     // Format the error with show()
@@ -2393,6 +2402,7 @@
         import { renderBqnExplainTree, BQN_COMBINATOR_INFO,
                   renderAplExplainTree, APL_COMBINATOR_INFO,
                   renderJExplainTree, J_COMBINATOR_INFO } from './src/explain-tree.js';
+        import { renderTinyaplExplainTree, TINYAPL_COMBINATOR_INFO } from './src/tinyapl-tree.js';
         import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames, jGlyphNames, tinyaplGlyphNames, bqnGlyphDocs, uiuaGlyphDocs, jGlyphDocs, kapGlyphDocs, aplGlyphDocs, tinyaplGlyphDocs } from './src/keyboard.js';
         import { createEditorFeaturesManager, toggleComment, commentTokens, autoExpandWidthForCodeAndResult } from './src/editor-features.js';
         import { createMultiCursorEditor } from './src/multi-cursor.js';
@@ -4384,8 +4394,20 @@
                 setInputText(result.formatted.trim());
             }
 
-            // Use HTML rendering if available (TinyAPL fancy arrays), or train tree glyph highlighting
-            if (result.outputHtml) {
+            // Function metadata distinguishes TinyAPL trees from strings and boxed arrays.
+            if (result.tinyaplFunctionTree) {
+                const tree = result.tinyaplFunctionTree;
+                const { html: explainHtml, groups: explainGroups } = renderTinyaplExplainTree(tree);
+                const stdoutHtml = tree.stdout ? escapeHtml(tree.stdout.replace(/\n$/, '')) + '\n' : '';
+                output.innerHTML = stdoutHtml + `<span style="display:inline-block;text-align:left" id="explainTreeRoot">${explainHtml}</span>`;
+                output.style.textAlign = 'center';
+                const explainRoot = document.getElementById('explainTreeRoot');
+                if (explainRoot) {
+                    explainRoot._explainGroups = explainGroups;
+                    explainRoot._combinatorInfo = TINYAPL_COMBINATOR_INFO;
+                    explainRoot._tooltipLabels = { monad: 'y', dyad: 'x y' };
+                }
+            } else if (result.outputHtml) {
                 output.innerHTML = result.outputHtml;
                 output.style.textAlign = '';
             } else if (currentLanguage === 'apl' && (isTrainTree(result.output, 'apl') ||
@@ -4425,7 +4447,7 @@
                 helpTip.textContent = 'Tip: Ctrl + H for Help';
                 output.appendChild(helpTip);
             }
-            output.className = `output show ${langConfig.fontClass} ${result.success ? '' : 'error'}`;
+            output.className = `output show ${langConfig.fontClass} ${result.success ? '' : 'error'}${result.tinyaplFunctionTree ? ' train-tree' : ''}`;
 
             // Dynamically adjust font size first, then calculate width once at final size
             requestAnimationFrame(() => {
