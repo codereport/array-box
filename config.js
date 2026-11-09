@@ -10,7 +10,7 @@
  */
 
 const ArrayBoxConfig = {
-    BACKEND_URL: 'https://engine-buying-acrylic-teeth.trycloudflare.com',
+    BACKEND_URL: 'https://franchise-emails-voices-msgstr.trycloudflare.com',
     
     // Example configurations:
     // BACKEND_URL: 'https://arraybox.your-domain.com',     // Custom domain with Cloudflare Tunnel
