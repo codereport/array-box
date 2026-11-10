@@ -842,7 +842,7 @@
             font-family: 'JetBrains Mono', monospace;
             font-variant-ligatures: none;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
         }
 
         .help-screen.show {
@@ -856,8 +856,20 @@
             letter-spacing: 0.5px;
         }
 
-        .help-screen .help-content {
-            max-width: 600px;
+        .help-screen .help-inner {
+            width: 100%;
+            max-width: 1280px;
+            margin-block: auto;
+        }
+
+        .help-screen .help-columns {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            column-gap: 64px;
+        }
+
+        .help-screen .help-column {
+            min-width: 0;
         }
 
         .help-screen .help-section {
@@ -896,6 +908,19 @@
             left: 80px;
             color: #4b5563;
             font-size: 15px;
+        }
+
+        @media (max-width: 1100px) {
+            .help-screen { padding: 36px 32px 76px; }
+            .help-screen .help-inner { max-width: 640px; }
+            .help-screen .help-columns { grid-template-columns: 1fr; }
+            .help-screen .help-footer { bottom: 24px; left: 32px; }
+        }
+
+        @media (max-width: 600px) {
+            .help-screen .help-row { font-size: 14px; gap: 12px; }
+            .help-screen .help-key { min-width: 0; flex: 0 0 44%; }
+            .help-screen .help-desc { min-width: 0; }
         }
 
         /* Fonts screen */
@@ -1415,93 +1440,99 @@
             <div class="help-content">
             <div class="help-section">
                 <div class="help-section-title">box mode</div>
-                <div class="help-row">
-                    <span class="help-key">space or type</span>
-                    <span class="help-desc">select arraybox</span>
-                </div>
-                <div class="help-row">
-                    <span class="help-key">enter</span>
-                    <span class="help-desc">evaluate code</span>
-                </div>
-                <div class="help-row">
-                    <span class="help-key">shift + enter</span>
-                    <span class="help-desc">evaluate selection</span>
-                </div>
-                <div class="help-row">
-                    <span class="help-key">shift + enter</span>
-                    <span class="help-desc">insert newline</span>
-                </div>
-                <div class="help-row">
-                    <span class="help-key">ctrl + shift + enter</span>
-                    <span class="help-desc">evaluation tree (TinyAPL; selection or all)</span>
-                </div>
-                <div class="help-row">
-                    <span class="help-key">ctrl + shift + e</span>
-                    <span class="help-desc">expand all (evaluation tree)</span>
-                </div>
-                <div class="help-row">
-                    <span class="help-key">ctrl + shift + r</span>
-                    <span class="help-desc">reset (evaluation tree)</span>
-                </div>
-                <div class="help-row">
-                    <span class="help-key">ctrl + p</span>
-                    <span class="help-desc">show language picker</span>
-                </div>
-                <div class="help-row">
-                    <span class="help-key">ctrl + ↑ ↓</span>
-                    <span class="help-desc">switch language</span>
-                </div>
-                <div class="help-row">
-                    <span class="help-key">ctrl + k</span>
-                    <span class="help-desc">toggle keyboard overlay</span>
-                </div>
-                <div class="help-row">
-                    <span class="help-key">ctrl + b</span>
-                    <span class="help-desc">show fonts</span>
-                </div>
-                <div class="help-row">
-                    <span class="help-key">ctrl + space</span>
-                    <span class="help-desc">open primitive search</span>
-                </div>
-                <div class="help-row">
-                    <span class="help-key">ctrl + l</span>
-                    <span class="help-desc">create permalink (copy URL)</span>
-                </div>
-                <div class="help-row">
-                    <span class="help-key">ctrl + f</span>
-                    <span class="help-desc">format code (no evaluation)</span>
-                </div>
-                <div class="help-row">
-                    <span class="help-key">ctrl + /</span>
-                    <span class="help-desc">toggle comment</span>
-                </div>
-                <div class="help-row">
-                    <span class="help-key">ctrl + shift + ↑ ↓</span>
-                    <span class="help-desc">add cursor above / below</span>
-                </div>
-                <div class="help-row">
-                    <span class="help-key">ctrl + shift + ← →</span>
-                    <span class="help-desc">select words at every cursor</span>
-                </div>
-                <div class="help-row">
-                    <span class="help-key">tap shift with selection</span>
-                    <span class="help-desc">edit all matching occurrences</span>
-                </div>
-                <div class="help-row">
-                    <span class="help-key">esc</span>
-                    <span class="help-desc">return to one cursor</span>
-                </div>
-                <div class="help-row">
-                    <span class="help-key">alt + ↑ ↓</span>
-                    <span class="help-desc">cycle through input history</span>
-                </div>
-                <div class="help-row">
-                    <span class="help-key">f1</span>
-                    <span class="help-desc">show docs for glyph at cursor</span>
-                </div>
-                <div class="help-row">
-                    <span class="help-key">ctrl + shift + c</span>
-                    <span class="help-desc">compare primitives across languages</span>
+                <div class="help-columns">
+                    <div class="help-column">
+                        <div class="help-row">
+                            <span class="help-key">space or type</span>
+                            <span class="help-desc">select arraybox</span>
+                        </div>
+                        <div class="help-row">
+                            <span class="help-key">enter</span>
+                            <span class="help-desc">evaluate code</span>
+                        </div>
+                        <div class="help-row">
+                            <span class="help-key">shift + enter</span>
+                            <span class="help-desc">evaluate selection</span>
+                        </div>
+                        <div class="help-row">
+                            <span class="help-key">shift + enter</span>
+                            <span class="help-desc">insert newline</span>
+                        </div>
+                        <div class="help-row">
+                            <span class="help-key">ctrl + p</span>
+                            <span class="help-desc">show language picker</span>
+                        </div>
+                        <div class="help-row">
+                            <span class="help-key">ctrl + ↑ ↓</span>
+                            <span class="help-desc">switch language</span>
+                        </div>
+                        <div class="help-row">
+                            <span class="help-key">ctrl + k</span>
+                            <span class="help-desc">toggle keyboard overlay</span>
+                        </div>
+                        <div class="help-row">
+                            <span class="help-key">ctrl + b</span>
+                            <span class="help-desc">show fonts</span>
+                        </div>
+                        <div class="help-row">
+                            <span class="help-key">ctrl + space</span>
+                            <span class="help-desc">open primitive search</span>
+                        </div>
+                        <div class="help-row">
+                            <span class="help-key">ctrl + l</span>
+                            <span class="help-desc">create permalink (copy URL)</span>
+                        </div>
+                        <div class="help-row">
+                            <span class="help-key">ctrl + f</span>
+                            <span class="help-desc">format code (no evaluation)</span>
+                        </div>
+                    </div>
+                    <div class="help-column">
+                        <div class="help-row">
+                            <span class="help-key">ctrl + /</span>
+                            <span class="help-desc">toggle comment</span>
+                        </div>
+                        <div class="help-row">
+                            <span class="help-key">ctrl + shift + ↑ ↓</span>
+                            <span class="help-desc">add cursor above / below</span>
+                        </div>
+                        <div class="help-row">
+                            <span class="help-key">ctrl + shift + ← →</span>
+                            <span class="help-desc">select words at every cursor</span>
+                        </div>
+                        <div class="help-row">
+                            <span class="help-key">shift edit</span>
+                            <span class="help-desc">edit all matching occurrences</span>
+                        </div>
+                        <div class="help-row">
+                            <span class="help-key">esc</span>
+                            <span class="help-desc">return to one cursor</span>
+                        </div>
+                        <div class="help-row">
+                            <span class="help-key">alt + ↑ ↓</span>
+                            <span class="help-desc">cycle through input history</span>
+                        </div>
+                        <div class="help-row">
+                            <span class="help-key">f1</span>
+                            <span class="help-desc">show docs for glyph at cursor</span>
+                        </div>
+                        <div class="help-row">
+                            <span class="help-key">ctrl + shift + c</span>
+                            <span class="help-desc">compare primitives</span>
+                        </div>
+                        <div class="help-row">
+                            <span class="help-key">ctrl + shift + enter</span>
+                            <span class="help-desc">evaluation tree</span>
+                        </div>
+                        <div class="help-row">
+                            <span class="help-key">ctrl + shift + e</span>
+                            <span class="help-desc">expand all (evaluation tree)</span>
+                        </div>
+                        <div class="help-row">
+                            <span class="help-key">ctrl + shift + r</span>
+                            <span class="help-desc">reset (evaluation tree)</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
