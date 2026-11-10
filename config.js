@@ -10,7 +10,7 @@
  */
 
 const ArrayBoxConfig = {
-    BACKEND_URL: 'https://franchise-emails-voices-msgstr.trycloudflare.com',
+    BACKEND_URL: 'https://technician-axis-desktops-updating.trycloudflare.com',
     
     // Example configurations:
     // BACKEND_URL: 'https://arraybox.your-domain.com',     // Custom domain with Cloudflare Tunnel
