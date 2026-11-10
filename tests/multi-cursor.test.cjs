@@ -53,6 +53,67 @@ async function expectText(page, text) {
     assert.equal(await page.locator('#codeInput').textContent(), text);
 }
 
+test('deleting the final character keeps a single empty input line', async t => {
+    const page = await openEditor(t);
+    await setCode(page, '', 0);
+    await page.evaluate(() => document.fonts.ready);
+    const emptyHeight = (await page.locator('#codeInput').boundingBox()).height;
+
+    for (const [text, key, offset] of [
+        ['a', 'Backspace', 1], ['+', 'Backspace', 1], ['𝕩', 'Backspace', 2],
+        ['a', 'Delete', 0], ['a', 'Control+Backspace', 1],
+    ]) {
+        await setCode(page, text, offset);
+        await page.keyboard.press(key);
+        await page.waitForTimeout(100); // Wait for the debounced syntax renderer.
+        const cleared = await page.locator('#codeInput').evaluate(input => ({
+            text: input.innerText, html: input.innerHTML,
+            height: input.getBoundingClientRect().height,
+        }));
+        assert.equal(cleared.text, '', JSON.stringify({ inputBefore: text, key, ...cleared }));
+        assert.equal(cleared.html, '', 'the empty input shows its placeholder instead of a line break');
+        assert.ok(Math.abs(cleared.height - emptyHeight) <= 1, 'clearing the input does not add a line');
+        await page.keyboard.type('x');
+        await page.waitForTimeout(100);
+        await expectText(page, 'x');
+    }
+});
+
+test('empty-input normalization preserves intentional blank lines', async t => {
+    const page = await openEditor(t);
+    await setCode(page, '', 0);
+    for (const text of ['\n', '\n\n']) {
+        await page.keyboard.press('Shift+Enter');
+        await page.waitForTimeout(100);
+        await expectText(page, text);
+    }
+    for (const text of ['\n', '']) {
+        await page.keyboard.press('Backspace');
+        await page.waitForTimeout(100);
+        await expectText(page, text);
+    }
+
+    for (const [text, offset, key, expected] of [
+        ['a\n', 0, 'Delete', '\n'],
+        ['\na', 2, 'Backspace', '\n'],
+        ['a\n\n', 0, 'Delete', '\n\n'],
+    ]) {
+        await setCode(page, text, offset);
+        // Let the real renderer install the trailing-line caret marker.
+        await page.locator('#codeInput').dispatchEvent('input');
+        await page.waitForTimeout(100);
+        await page.keyboard.press(key);
+        await page.waitForTimeout(100);
+        const actual = await page.locator('#codeInput').evaluate(input => ({ text: input.textContent, html: input.innerHTML }));
+        assert.equal(actual.text, expected, JSON.stringify({ inputBefore: text, key, ...actual }));
+    }
+
+    await setCode(page, 'delete all\nlines', 0, 16);
+    await page.keyboard.press('Backspace');
+    await page.waitForTimeout(100);
+    assert.equal(await page.locator('#codeInput').innerText(), '');
+});
+
 test('typing and word selection edit every cursor and survive highlighting', async t => {
     const page = await openEditor(t);
     await setCode(page, 'one plus\ntwo plus\nsix plus', 4);

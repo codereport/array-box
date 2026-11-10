@@ -4292,6 +4292,10 @@
 
         // Get plain text from contenteditable div (supports multiline)
         function getInputText() {
+            // Empty editors can contain browser caret-placeholder <br> elements.
+            // Preserve real newline text nodes without counting those placeholders.
+            const content = codeInput.textContent || '';
+            if (/^\n*$/.test(content)) return content;
             // Use innerText to properly handle line breaks from <br> elements
             // Normalize non-breaking spaces (U+00A0) to regular spaces
             const text = (codeInput.innerText || '').replace(/\u00A0/g, ' ');
