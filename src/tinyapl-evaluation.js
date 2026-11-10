@@ -263,7 +263,7 @@ export function mountTinyaplEvaluation(host, tree, { onResize = () => {} } = {})
             <div class="eval-canvas">${renderDiagram(model, tree)}</div>
             <div class="eval-scopes" aria-label="Expanded groups">${[...model.scopes].reverse().map(({ fn, key, result }) =>
                 `<button type="button" data-collapse="${key}" data-scope-result="${result}" aria-label="Collapse ${escape(fn.label)}"><span aria-hidden="true">−</span> ${highlightCode(fn.label, 'tinyapl')}</button>`).join('')}</div>
-            <div class="eval-inspector" aria-live="polite"><div class="eval-inspector-label">RESULT</div><div class="eval-expression">${highlightCode(`r ← ${tinyaplEvaluationExpression(model)}`, 'tinyapl')}</div></div>`}
+            <div class="eval-inspector" aria-live="polite"><div class="eval-inspector-label" title="RESULT">RESULT</div><div class="eval-expression-row"><div class="eval-expression">${highlightCode(`r ← ${tinyaplEvaluationExpression(model)}`, 'tinyapl')}</div></div></div>`}
             <div class="eval-help">${model.error ? 'Switch arguments to explore another valence.' : 'Read upwards · Hover to trace arguments · Click + to expand'}</div></div>`;
         host._evaluationModel = model;
         onResize();
@@ -291,7 +291,8 @@ export function mountTinyaplEvaluation(host, tree, { onResize = () => {} } = {})
         if (!expression) return;
         expression.innerHTML = highlightCode(text, 'tinyapl');
         fitText(expression, 19, 10);
-        onResize();
+        const label = host.querySelector('.eval-inspector-label');
+        label.title = label.textContent;
     }
 
     function activate(target) {
