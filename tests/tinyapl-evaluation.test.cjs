@@ -84,3 +84,18 @@ test('TinyAPL evaluation leaves traversal modifiers opaque and survives serializ
     assert.equal(tinyaplEvaluationExpression(buildTinyaplEvaluation(JSON.parse(JSON.stringify(tree)), { valence: 2 })), expression);
     assert.ok(!JSON.stringify(tree.root).includes('trainTines'));
 });
+
+test('TinyAPL partial application binds the initial value to the complete derived function', async () => {
+    const { model, expression } = await diagram('(0)(+)/');
+    assert.equal(expression, '0 (+/) y');
+    const fold = model.nodes.find(node => node.kind === 'call');
+    assert.equal(fold.label, '+/');
+    assert.deepEqual(fold.args.map(id => model.nodes.find(node => node.id === id).label), ['0', 'y']);
+    assert.equal((await diagram('(2)+')).expression, '2 + y');
+    assert.match((await diagram('(0)(+)/', 2)).model.error, /binding is monadic/);
+
+    const repr = '⦅⌊ ⋄ 0.5 ⋄ + ⋄ ⦅⦅(×)∘(≢) ⋄ × ⋄ (0)(+)/ ⋄ ÷ ⋄ ≢⦆ ⋄ (⦅0 ⋄ = ⋄ 6 ⋄ | ⋄ ⊢⦆)⊸(⌿)⦆⦆';
+    const full = await diagram(repr);
+    assert.equal(full.model.error, undefined);
+    assert.ok(full.expression.includes('0 (+/)'));
+});

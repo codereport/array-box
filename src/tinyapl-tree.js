@@ -27,6 +27,11 @@ export const TINYAPL_COMBINATOR_INFO = {
         monad: '⦅a⋄b⦆ y ≡ a',
         dyad: 'x ⦅a⋄b⦆ y ≡ a',
     },
+    partial: {
+        name: 'Left argument binding',
+        monad: '(a F) y ≡ a F y',
+        dyad: null,
+    },
     'fork-left-array': {
         name: '3-train (left array)',
         monad: '⦅a⋄G⋄H⦆ y ≡ a G (H y)',
@@ -187,6 +192,14 @@ function parseRepresentation(representation) {
                 node = { type: '1-mod', operand: node, modifier, kind: 'function' };
             }
         }
+        // PartialFunction is shown as (array)function, e.g. (0)(+)/.
+        // The argument binds to the complete function on the right, including
+        // its modifiers: this is 0 (+/) y, rather than a reduction of (0+).
+        if (node.kind === 'array' && pos < chars.length && ![')', '⋄', '⦆'].includes(chars[pos])) {
+            const fn = expression(depth + 1);
+            if (fn.kind !== 'function') throw new Error('Invalid partial application');
+            return { type: 'atop', f: node, g: fn, kind: 'function', partial: true };
+        }
         return node;
     }
 
@@ -207,6 +220,7 @@ export function formatTinyaplFunctionTree(value) {
         const append = text => chars.push(...text);
         const edgeCharacter = (node, last = false) => {
             if (!node) return '·';
+            if (node.partial) return last ? ')' : '(';
             if (node.trainTines) return last ? '⦆' : '⦅';
             if (node.type === 'func') return [...node.text].at(last ? -1 : 0);
             if (!last) return edgeCharacter(node.operand ?? node.left);
@@ -215,6 +229,11 @@ export function formatTinyaplFunctionTree(value) {
                 : edgeCharacter(node.right, true);
         };
         const identifierChar = ch => /[\p{L}\p{N}_∆⍙]/u.test(ch);
+        function emitOperand(node) {
+            if (node.partial) append('(');
+            emit(node);
+            if (node.partial) append(')');
+        }
         function emit(node) {
             const start = chars.length;
             if (node.trainTines) {
@@ -223,7 +242,7 @@ export function formatTinyaplFunctionTree(value) {
                 node.trainTines.forEach((tine, i) => {
                     if (i && identifierChar(edgeCharacter(node.trainTines[i - 1], true)) &&
                         identifierChar(edgeCharacter(tine))) append('⋄');
-                    if (tine) emit(tine);
+                    if (tine) emitOperand(tine);
                     else append('·');
                 });
                 append('⦆');
@@ -235,15 +254,18 @@ export function formatTinyaplFunctionTree(value) {
                 });
                 append(node.text);
             } else if (node.type === '1-mod') {
-                emit(node.operand);
+                emitOperand(node.operand);
                 emit(node.modifier);
             } else if (node.type === '2-mod') {
-                emit(node.left);
+                emitOperand(node.left);
                 emit(node.modifier);
                 const wrap = !node.right.trainTines && node.right.type !== 'func';
                 if (wrap) append('(');
                 emit(node.right);
                 if (wrap) append(')');
+            } else if (node.partial) {
+                emit(node.f);
+                emitOperand(node.g);
             }
             node.label = chars.slice(start).join('');
         }
@@ -271,6 +293,7 @@ export function formatTinyaplFunctionTree(value) {
                     combinator = node.h.kind === 'array' ? 'fork-arrays' : 'fork-left-array';
                 } else if (node.h.kind === 'array') combinator = 'fork-right-array';
             }
+            if (node.partial) combinator = 'partial';
             node.id = groups.length;
             node.cols = cols;
             node.label ??= `⦅${children.map(([, child]) => child.label).join('⋄')}⦆`;

@@ -47,6 +47,44 @@ test('TinyAPL modifier operands retain their parentheses, arity, and complete la
     assert.deepEqual(tree.groups[0].parts[0].cols, [0, 1, 2, 3, 4, 5, 6, 7]);
 });
 
+test('TinyAPL partial applications preserve the bound argument and operand grouping', async () => {
+    const { formatTinyaplFunctionTree, renderTinyaplExplainTree, TINYAPL_COMBINATOR_INFO } = await load();
+    for (const [repr, source] of [
+        ['(0)+', '0+'],
+        ['(0)(+)/', '0+/'],
+        ['((0)+)¨', '(0+)¨'],
+        ['((0)(+)/)∘(≢)', '(0+/)∘≢'],
+        ['⦅(0)(+)/ ⋄ ÷ ⋄ ≢⦆', '⦅(0+/)÷≢⦆'],
+        ['(⟨1 ⋄ 2⟩)+', '⟨1 ⋄ 2⟩+'],
+        ['("<script>")+', '"<script>"+'],
+    ]) {
+        const tree = formatTinyaplFunctionTree(fn(repr));
+        assert.ok(tree, repr);
+        assert.equal(tree.source, source, repr);
+        const binding = tree.groups.find(group => group.combinator === 'partial');
+        assert.ok(binding, repr);
+        assert.ok(TINYAPL_COMBINATOR_INFO[binding.combinator], repr);
+        assert.ok(tree.groups.every(group => group.cols.every(col => Number.isInteger(col) && col < [...tree.source].length)));
+        assert.ok(!renderTinyaplExplainTree(tree).html.includes('<script>'));
+    }
+    for (const repr of ['(0)(2)', '(0)(+', '(+)(-)']) {
+        assert.equal(formatTinyaplFunctionTree(fn(repr)), null, repr);
+    }
+});
+
+test('TinyAPL renders the complete partial-application train from issue #246', async () => {
+    const { formatTinyaplFunctionTree, renderTinyaplExplainTree } = await load();
+    // Captured from the bundled interpreter for the issue's Da function.
+    const repr = '⦅⌊ ⋄ 0.5 ⋄ + ⋄ ⦅⦅(×)∘(≢) ⋄ × ⋄ (0)(+)/ ⋄ ÷ ⋄ ≢⦆ ⋄ (⦅0 ⋄ = ⋄ 6 ⋄ | ⋄ ⊢⦆)⊸(⌿)⦆⦆';
+    const tree = formatTinyaplFunctionTree(fn(repr));
+    assert.ok(tree);
+    assert.equal(tree.source, '⦅⌊0.5+⦅⦅×∘≢×(0+/)÷≢⦆⦅0=6|⊢⦆⊸⌿⦆⦆');
+    assert.ok(tree.groups.some(group => group.combinator === 'partial'));
+    assert.ok(tree.text.includes('0'));
+    assert.ok(tree.text.includes('/'));
+    assert.match(renderTinyaplExplainTree(tree).html, /explain-source-char/);
+});
+
 test('TinyAPL nested and longer trains follow fork/atop rules and empty tines', async () => {
     const { formatTinyaplFunctionTree } = await load();
     const examples = [

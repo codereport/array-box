@@ -19,6 +19,7 @@ export async function runCode(ctx, code) {
     if (code === '"earth" Ms "empty"') return { type: 'array', shown: '┌──┬──┐\\n│ar│mp│\\n└──┴──┘' };
     if (code === 'Unsupported') return { type: 'function', repr: '⦅2 ⋄ _A ⋄ ⊢⦆' };
     if (code === 'StringBind') return { type: 'function', repr: '("<script>")∘(,)' };
+    if (code === 'Da' || code === '⦅⌊0.5+⦅⦅×∘≢×(0+/)÷≢⦆⦅0=6|⊢⦆⊸⌿⦆⦆') return { type: 'function', repr: '⦅⌊ ⋄ 0.5 ⋄ + ⋄ ⦅⦅(×)∘(≢) ⋄ × ⋄ (0)(+)/ ⋄ ÷ ⋄ ≢⦆ ⋄ (⦅0 ⋄ = ⋄ 6 ⋄ | ⋄ ⊢⦆)⊸(⌿)⦆⦆' };
     if (code === '⦅⦅+/÷≠⦆⍪∘⦅×⊞⍨⍳⦆⦆') return { type: 'function', repr: '⦅⦅(+)/ ⋄ ÷ ⋄ ≠⦆ ⋄ (⍪)∘(⦅((×)⊞)⍨ ⋄ ⍳⦆)⦆' };
     if (code === 'EmptyTines') return { type: 'function', repr: '⦅(+)/ ⋄  ⋄ | ⋄  ⋄ (-)⌺ ⋄ (-)∘(a)⦆' };
     if (code === '⦅⌊/¯2⍕¨⍛⍪⍛⍎⌺⊢⦆') return { type: 'function', repr: '⦅(⌊)/ ⋄ ¯2 ⋄ ((((⍕)¨)⍛(⍪))⍛(⍎))⌺ ⋄ ⊢⦆' };
@@ -134,6 +135,27 @@ test('TinyAPL numeric tines render complete interactive trees with array-aware e
         assert.equal(await page.locator('#explainTooltipName').textContent(), name);
         assert.ok((await page.locator('#explainTooltipPattern').textContent()).includes(pattern));
     }
+});
+
+test('issue #246 renders partial application in both TinyAPL tree views', async t => {
+    const page = await openEditor(t);
+    const code = '⦅⌊0.5+⦅⦅×∘≢×(0+/)÷≢⦆⦅0=6|⊢⦆⊸⌿⦆⦆';
+    await evaluate(page, code);
+    assert.equal(await page.locator('#explainTreeRoot .explain-source-char').allTextContents()
+        .then(chars => chars.join('')), code);
+    await page.locator(`#explainTreeRoot [data-col="${code.indexOf('0+/')}"]`).hover();
+    await page.locator('#explainTooltip.show').waitFor();
+    assert.equal(await page.locator('#explainTooltipName').textContent(), 'Left argument binding');
+    assert.match(await page.locator('#explainTooltipPattern').textContent(), /a F y/);
+
+    await evaluate(page, 'Da');
+    assert.equal(await page.locator('#explainTreeRoot').count(), 1, 'named function results keep the evaluated structure');
+    await evaluate(page, code, { structure: false });
+    await page.locator('[data-action="expand-all"]').click();
+    assert.equal(await page.locator('.eval-unavailable').count(), 0);
+    assert.ok((await page.locator('.eval-expression').textContent()).includes('0 (+/)'));
+    assert.ok((await page.locator('.eval-call text').allTextContents()).includes('+/'));
+    assert.equal(await page.locator('#codeInput').textContent(), code);
 });
 
 test('TinyAPL trains display empty tines as middle dots without extra diamonds', async t => {
