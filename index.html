@@ -29,6 +29,7 @@
 
     <!-- Theme CSS with variables and syntax highlighting classes -->
     <link rel="stylesheet" href="src/theme.css">
+    <link rel="stylesheet" href="src/tinyapl-evaluation.css">
 
     <style>
         /* App-specific styles (layout, components) */
@@ -1431,6 +1432,18 @@
                     <span class="help-desc">insert newline</span>
                 </div>
                 <div class="help-row">
+                    <span class="help-key">ctrl + shift + enter</span>
+                    <span class="help-desc">evaluation tree (TinyAPL; selection or all)</span>
+                </div>
+                <div class="help-row">
+                    <span class="help-key">ctrl + shift + e</span>
+                    <span class="help-desc">expand all (evaluation tree)</span>
+                </div>
+                <div class="help-row">
+                    <span class="help-key">ctrl + shift + r</span>
+                    <span class="help-desc">reset (evaluation tree)</span>
+                </div>
+                <div class="help-row">
                     <span class="help-key">ctrl + p</span>
                     <span class="help-desc">show language picker</span>
                 </div>
@@ -2402,9 +2415,10 @@
         import { renderBqnExplainTree, BQN_COMBINATOR_INFO,
                   renderAplExplainTree, APL_COMBINATOR_INFO,
                   renderJExplainTree, J_COMBINATOR_INFO } from './src/explain-tree.js';
+        import { mountTinyaplEvaluation } from './src/tinyapl-evaluation.js';
         import { renderTinyaplExplainTree, TINYAPL_COMBINATOR_INFO } from './src/tinyapl-tree.js';
         import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames, jGlyphNames, tinyaplGlyphNames, bqnGlyphDocs, uiuaGlyphDocs, jGlyphDocs, kapGlyphDocs, aplGlyphDocs, tinyaplGlyphDocs } from './src/keyboard.js';
-        import { createEditorFeaturesManager, toggleComment, commentTokens, autoExpandWidthForCodeAndResult } from './src/editor-features.js';
+        import { createEditorFeaturesManager, toggleComment, commentTokens, autoExpandWidthForCodeAndResult, calculateContentWidth } from './src/editor-features.js';
         import { createMultiCursorEditor } from './src/multi-cursor.js';
         import { translatePrimitives, translateArrayLiterals, clearTranslationCache } from './src/primitive-translate.js';
         import { primitiveMap, compareLanguages, lookupPrimitive, parsePrimitives, getPrimitiveName, getEquivalent, hasValence, isScalar, getAvailableRanks, getDefaultRank } from './src/primitive-compare.js';
@@ -3751,6 +3765,18 @@
             // Don't interfere with IME/Compose key input
             if (e.isComposing || e.keyCode === 229) return;
 
+            // Evaluation actions work from either the editor or the diagram.
+            if (e.ctrlKey && e.shiftKey && !e.altKey && !e.metaKey && output.classList.contains('show')) {
+                const key = e.key.toLowerCase();
+                const action = key === 'e' ? 'expand-all' : key === 'r' ? 'reset' : null;
+                const button = action && output.querySelector(`.tinyapl-evaluation [data-action="${action}"]`);
+                if (button) {
+                    e.preventDefault();
+                    if (!e.repeat) button.click();
+                    return;
+                }
+            }
+
             // Auto-focus code input when typing printable characters
             // (when not already focused and keyboard overlay is not visible)
             const keyboardWrapper = document.querySelector('.array-keyboard-wrapper.show');
@@ -3758,6 +3784,7 @@
             const comboboxInputEl = document.getElementById('comboboxInput');
 
             if (document.activeElement !== codeInput &&
+                !e.target.closest('.tinyapl-evaluation') &&
                 document.activeElement !== comboboxInputEl &&
                 !keyboardWrapper &&
                 !isHelpScreenVisible() &&
@@ -4355,7 +4382,7 @@
         }
 
         // Evaluation function (optional code = evaluate that string, e.g. selected text; else full input)
-        async function evaluateCode(optionalCode) {
+        async function evaluateCode(optionalCode, { evaluationTree = false } = {}) {
             const code = (optionalCode != null ? optionalCode : getInputText()).trim();
             if (!code) {
                 hideOutput();
@@ -4397,13 +4424,19 @@
             // Function metadata distinguishes TinyAPL trees from strings and boxed arrays.
             if (result.tinyaplFunctionTree) {
                 const tree = result.tinyaplFunctionTree;
-                const { html: explainHtml, groups: explainGroups } = renderTinyaplExplainTree(tree);
                 const stdoutHtml = tree.stdout ? escapeHtml(tree.stdout.replace(/\n$/, '')) + '\n' : '';
-                output.innerHTML = stdoutHtml + `<span style="display:inline-block;text-align:left" id="explainTreeRoot">${explainHtml}</span>`;
-                output.style.textAlign = 'center';
-                const explainRoot = document.getElementById('explainTreeRoot');
-                if (explainRoot) {
-                    explainRoot._explainGroups = explainGroups;
+                if (evaluationTree) {
+                    output.innerHTML = stdoutHtml + '<div id="tinyaplEvaluationRoot"></div>';
+                    output.style.textAlign = '';
+                    mountTinyaplEvaluation(document.getElementById('tinyaplEvaluationRoot'), tree, {
+                        onResize: () => requestAnimationFrame(constrainHeights),
+                    });
+                } else {
+                    const { html, groups } = renderTinyaplExplainTree(tree);
+                    output.innerHTML = stdoutHtml + `<span style="display:inline-block;text-align:left" id="explainTreeRoot">${html}</span>`;
+                    output.style.textAlign = 'center';
+                    const explainRoot = document.getElementById('explainTreeRoot');
+                    explainRoot._explainGroups = groups;
                     explainRoot._combinatorInfo = TINYAPL_COMBINATOR_INFO;
                     explainRoot._tooltipLabels = { monad: 'y', dyad: 'x y' };
                 }
@@ -4451,6 +4484,15 @@
 
             // Dynamically adjust font size first, then calculate width once at final size
             requestAnimationFrame(() => {
+                if (result.tinyaplFunctionTree && evaluationTree) {
+                    // Diagram controls and SVG geometry have their own sizes.
+                    // Size both boxes together from the code and diagram,
+                    // without measuring toolbar text as a line of APL output.
+                    output.style.fontSize = '42px';
+                    output.style.overflowX = 'auto';
+                    constrainHeights();
+                    return;
+                }
                 // Reset to default font size (scaled 1.75x)
                 let fontSize = 42;
                 const minFontSize = 10;
@@ -4559,7 +4601,8 @@
         // Priority: code editor keeps its natural size; output shrinks first.
         // Output won't shrink below ~5 lines. Only then does the input shrink.
         function constrainHeights() {
-            const containerMaxH = window.innerHeight - 70; // matches calc(100vh - 70px)
+            const evaluationRoot = output.classList.contains('show') ? output.querySelector('.tinyapl-evaluation') : null;
+            const containerMaxH = window.innerHeight - (evaluationRoot ? 140 : 70);
             const gap = 24; // margin-top on output
             const minOutputH = 375; // ~5 lines at 42px
 
@@ -4574,6 +4617,28 @@
             }
 
             const inputH = codeInput.scrollHeight;
+            if (evaluationRoot) {
+                const style = getComputedStyle(output);
+                const frameWidth = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) +
+                    parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth);
+                const selectorWidth = container.offsetWidth - output.offsetWidth;
+                const diagramWidth = evaluationRoot.querySelector('.eval-svg')?.viewBox.baseVal.width ?? 420;
+                const sharedWidth = Math.max(
+                    1040, // Preserve the default evaluation layout width.
+                    calculateContentWidth(codeInput, getInputText()),
+                    diagramWidth + frameWidth + selectorWidth,
+                );
+                container.style.maxWidth = `${Math.min(window.innerWidth - 70, sharedWidth)}px`;
+
+                // Fit the whole diagram before falling back to output scrolling.
+                // Leave space below the panel for the fixed keyboard hint.
+                const available = Math.max(240, containerMaxH - inputH - gap);
+                const otherHeight = output.scrollHeight - evaluationRoot.offsetHeight +
+                    parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
+                evaluationRoot._fitToHeight(available - otherHeight);
+                output.style.maxHeight = `${available}px`;
+                return;
+            }
             const outputH = output.scrollHeight;
             const availableForOutput = containerMaxH - inputH - gap;
 
@@ -4619,6 +4684,19 @@
             applySyntaxHighlighting
         );
         editorFeatures.init();
+
+        // Reserve this chord before multi-cursor editing handles Shift+Enter.
+        codeInput.addEventListener('keydown', (e) => {
+            if (e.isComposing || e.keyCode === 229 || currentLanguage !== 'tinyapl' ||
+                e.key !== 'Enter' || !e.ctrlKey || !e.shiftKey) return;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            const sel = window.getSelection();
+            const selectedText = sel.toString().trim();
+            const selectionInInput = sel.rangeCount > 0 && codeInput.contains(sel.anchorNode) && codeInput.contains(sel.focusNode);
+            editorFeatures.alignAll();
+            evaluateCode(selectedText && selectionInInput ? selectedText : undefined, { evaluationTree: true });
+        }, true);
 
         const multiCursor = createMultiCursorEditor(codeInput, {
             getText: getInputText,

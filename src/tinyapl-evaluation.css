@@ -1,0 +1,77 @@
+.tinyapl-evaluation {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+    text-align: left;
+    line-height: 1.4;
+    --eval-muted: #9aa8bc;
+    --eval-line: #708097;
+}
+.eval-actions, .eval-switch, .eval-scopes {
+    display: flex;
+    align-items: center;
+}
+.eval-toolbar {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #ffffff12;
+    font: 13px/1.4 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+.tinyapl-evaluation button {
+    font: inherit;
+    color: var(--eval-muted);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    padding: 6px 10px;
+}
+.tinyapl-evaluation button:hover { color: var(--text-color); background: #ffffff09; }
+.tinyapl-evaluation button:focus-visible, .eval-node:focus-visible { outline: 2px solid var(--dracula-cyan); outline-offset: 3px; }
+.tinyapl-evaluation button:disabled { opacity: .4; cursor: default; }
+.eval-switch { padding: 3px; border: 1px solid #ffffff16; border-radius: 9px; background: #11182755; }
+.eval-switch button[aria-pressed="true"] { background: #374151; color: #f8fafc; box-shadow: 0 1px 3px #0003; }
+.eval-valence button { min-width: 40px; font-family: 'JetBrains Mono', monospace; }
+.eval-actions { gap: 3px; white-space: nowrap; }
+.eval-actions button { display: inline-flex; align-items: center; justify-content: center; padding: 6px; }
+.eval-actions svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.eval-source { min-width: 0; font: 26px/1.5 'TinyAPL', monospace; text-align: center; white-space: pre; overflow-x: hidden; overflow-y: hidden; }
+.eval-source-wrap { white-space: pre-wrap; overflow-wrap: anywhere; }
+.eval-source > span { border-radius: 3px; transition: background .15s; }
+.eval-source-active { background: #8be9fd22; }
+.eval-canvas { display: flex; justify-content: center; padding-top: 12px; }
+.eval-svg { display: block; max-width: 100%; height: auto; min-width: 0; flex-shrink: 0; }
+.eval-edge { fill: none; stroke: var(--eval-line); stroke-width: 2.8; stroke-linecap: round; transition: opacity .12s, stroke .12s; }
+.eval-node { color: var(--dracula-cyan); }
+.eval-node text { font: 32px 'TinyAPL', monospace; fill: currentColor; }
+.eval-node tspan { fill: currentColor; }
+.eval-node-bg { fill: var(--output-bg); stroke: transparent; stroke-width: 1; }
+.eval-expandable { cursor: pointer; }
+.eval-expandable .eval-node-bg { stroke: #8be9fd38; fill: #172230; stroke-dasharray: 3 4; }
+.eval-expandable:hover .eval-node-bg, .eval-expandable:focus .eval-node-bg { stroke: var(--dracula-cyan); fill: #203442; stroke-dasharray: none; }
+.eval-node .eval-plus { font: 17px 'JetBrains Mono', monospace; fill: var(--eval-muted); }
+.eval-input { color: var(--text-color); }
+.eval-constant { color: var(--dracula-purple); }
+.eval-node .eval-input-caption { font: 10px 'JetBrains Mono', monospace; fill: var(--eval-muted); }
+.eval-dim { opacity: .17; }
+.eval-edge.eval-trace { stroke: var(--dracula-cyan); }
+.eval-node.eval-trace .eval-node-bg { fill: #233545; }
+.eval-scopes { flex-wrap: wrap; justify-content: center; gap: 6px; margin: 4px 0 12px; }
+.eval-scopes button { font: 15px/1.2 'TinyAPL', monospace; border: 1px solid #ffffff16; background: #11182755; padding: 5px 8px; max-width: 100%; white-space: pre; }
+.eval-scopes button > span:first-child { color: var(--eval-muted); }
+.eval-inspector { padding: 10px 12px; background: #11182766; border: 1px solid #ffffff0b; border-radius: 8px; text-align: center; }
+.eval-inspector-label { font: 9px/1.5 'JetBrains Mono', monospace; letter-spacing: 1.4px; color: var(--eval-muted); margin-bottom: 5px; }
+.eval-expression { width: fit-content; max-width: 100%; margin-inline: auto; font: 19px/1.4 'TinyAPL', monospace; color: var(--text-color); text-align: left; white-space: pre; overflow-x: auto; overflow-y: hidden; }
+.eval-help { margin-top: 9px; font: 11px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; text-align: center; color: var(--eval-muted); }
+.eval-unavailable { padding: 60px 20px; font: 15px/1.7 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: var(--eval-muted); text-align: center; }
+@media (max-width: 600px) {
+    .eval-toolbar { gap: 6px; font-size: 11px; }
+    .eval-toolbar button { padding: 5px 6px; }
+    .eval-valence button { min-width: 28px; }
+    .eval-help { font-size: 10px; }
+}

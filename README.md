@@ -41,6 +41,9 @@ A code editor and runner for array programming languages: **BQN**, **APL**, **J*
 | -------------------- | -------------------------------- |
 | `Enter`              | Evaluate code                    |
 | `Shift+Enter`        | Insert newline                   |
+| `Ctrl+Shift+Enter`   | TinyAPL evaluation tree (selection or all code) |
+| `Ctrl+Shift+E`       | Expand all in the visible evaluation tree |
+| `Ctrl+Shift+R`       | Reset the visible evaluation tree |
 | `Ctrl+Up/Down`       | Switch language                  |
 | `Ctrl+K`             | Toggle keyboard overlay          |
 | `Ctrl+H`             | Toggle help screen               |

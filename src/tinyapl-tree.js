@@ -216,6 +216,7 @@ export function formatTinyaplFunctionTree(value) {
         };
         const identifierChar = ch => /[\p{L}\p{N}_∆⍙]/u.test(ch);
         function emit(node) {
+            const start = chars.length;
             if (node.trainTines) {
                 append('⦅');
                 // Adjacent names would merge into one identifier in a compact train.
@@ -244,6 +245,7 @@ export function formatTinyaplFunctionTree(value) {
                 emit(node.right);
                 if (wrap) append(')');
             }
+            node.label = chars.slice(start).join('');
         }
         emit(root);
 
@@ -269,6 +271,9 @@ export function formatTinyaplFunctionTree(value) {
                     combinator = node.h.kind === 'array' ? 'fork-arrays' : 'fork-left-array';
                 } else if (node.h.kind === 'array') combinator = 'fork-right-array';
             }
+            node.id = groups.length;
+            node.cols = cols;
+            node.label ??= `⦅${children.map(([, child]) => child.label).join('⋄')}⦆`;
             groups.push({ id: groups.length, type: node.type, cols, junctionRow: -depth, parts,
                 ...(combinator !== node.type ? { combinator } : {}) });
             return cols;
@@ -279,6 +284,10 @@ export function formatTinyaplFunctionTree(value) {
             text: layoutFunctionTree(root, [], 0, null).lines.join('\n'),
             groups,
             classes,
+            // Keep the evaluated structure for the argument-flow prototype.
+            // trainTines are presentation aliases of children; omit them so the
+            // result stays small and serializable across the WASM/UI boundary.
+            root: JSON.parse(JSON.stringify(root, (key, value) => key === 'trainTines' ? undefined : value)),
         };
     } catch {
         return null;
