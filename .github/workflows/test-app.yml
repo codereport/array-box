@@ -10,8 +10,11 @@ on:
 jobs:
   application-tests:
     name: Application tests
-    # Playwright 1.58.2 supports Ubuntu 24.04; ubuntu-latest can select 26.04.
     runs-on: ubuntu-24.04
+    container:
+      # Match package-lock.json; browsers and system libraries are preinstalled.
+      image: mcr.microsoft.com/playwright:v1.58.2-noble
+      options: --ipc=host
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -23,13 +26,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Install Playwright browsers
-        timeout-minutes: 5
-        run: |
-          # Avoid APT hangs when falling back from the Azure Ubuntu mirror.
-          echo 'https://archive.ubuntu.com/ubuntu/' | sudo tee /etc/apt/apt-mirrors.txt
-          npx playwright install --with-deps chromium
 
       - name: Run application tests
         run: npm run test:app
