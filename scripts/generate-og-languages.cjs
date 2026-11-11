@@ -27,7 +27,7 @@ const COLORS = {
 // Language definitions: 2 rows x 3 cols
 const LANGS = [
     // Row 1
-    { name: 'APL',     version: 'Dyalog v20.0',     file: 'apl.png' },
+    { name: 'APL',     version: 'Dyalog v21.0',     file: 'apl.png' },
     { name: 'BQN',     version: 'CBQN 0.12',        file: 'bqn.svg' },
     { name: 'Uiua',    version: '0.20.0-dev.1',      file: 'uiua.png' },
     // Row 2

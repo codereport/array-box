@@ -14,12 +14,12 @@ for (const file of [
 }
 
 // Use the same candidates and startup probe as apl-server.cjs.
-const candidates = ['dyalog', '/opt/mdyalog/20.0/64/unicode/mapl', path.join(homedir(), 'dyalog/mapl')];
+const candidates = ['dyalog', '/opt/mdyalog/21.0/64/unicode/mapl', '/opt/mdyalog/20.0/64/unicode/mapl', path.join(homedir(), 'dyalog/mapl')];
 let apl = null;
 for (const candidate of candidates) {
     const result = spawnSync(candidate, [], {
         input: 'exit 0\n', encoding: 'utf8', timeout: 3000,
-        env: { ...process.env, DYALOG_NETCORE: '0', ENABLE_CEF: '0', DYALOG_NOPOPUPS: '1' }
+        env: { ...process.env, ENABLE_CEF: '0', DYALOG_NOPOPUPS: '1' }
     });
     if (result.status === 0) {
         apl = candidate;
@@ -27,7 +27,7 @@ for (const candidate of candidates) {
     }
 }
 if (!apl) {
-    failures.push('Dyalog APL is missing or cannot start. Rerun setup.py --media-server-macbook online to download and install it from dyalog.com. For an offline install, put the official Linux x86_64 Unicode v20 installer from https://www.dyalog.com/download-zone.htm in ~/Downloads first.');
+    failures.push('Dyalog APL is missing or cannot start. Rerun setup.py --media-server-macbook online to download and install it from dyalog.com. For an offline install, put the official Linux x86_64 Unicode v21.0 installer from https://www.dyalog.com/download-zone.htm in ~/Downloads first.');
 }
 
 const docker = spawnSync('docker', ['info', '--format', '{{.ServerVersion}}'], { encoding: 'utf8', timeout: 6000 });

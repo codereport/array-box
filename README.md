@@ -112,11 +112,19 @@ server manager.
   - J uses WASM for client-side execution
   - Kap uses Kotlin/JS for client-side execution
   - TinyAPL and Uiua use WASM for client-side execution
-- **APL** requires a local Dyalog installation and is managed by the server manager
+- **APL** uses a local [Dyalog 21.0 Unicode installation](https://www.dyalog.com/download-zone.htm?p=download)
+  and is managed by the server manager. Install it on the backend host before
+  starting the server. On Linux, Array Box checks `dyalog` on `PATH`, then
+  `/opt/mdyalog/21.0/64/unicode/mapl`, with older and `~/dyalog/mapl` installations
+  as fallbacks. Ensure `dyalog` on `PATH` points to 21.0 when upgrading an existing
+  installation.
 
 ## Docker Sandbox Mode (Recommended for Shared Use)
 
-For secure APL code execution, you can run the APL server in a Docker container with strict isolation:
+For secure APL code execution, you can run the APL server in a Docker container
+with strict isolation. The container mounts the host's Dyalog installation;
+it does not download an interpreter. Restart the backend after upgrading
+Dyalog so its warm containers use the new installation.
 
 ```bash
 # Build the APL sandbox image (one-time setup)

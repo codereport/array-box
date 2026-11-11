@@ -48,34 +48,34 @@ Search labels below differ from the bundled hover documentation. Some are useful
 | j | [T.](https://code.jsoftware.com/wiki/Vocabulary/tcapdot) | weighted taylor / taylor | set debug thread / threads/tasks |
 | j | [Z:](https://code.jsoftware.com/wiki/Vocabulary/zcapco) | fold status / terminate fold | get fold status / terminate fold |
 | j | [_](https://code.jsoftware.com/wiki/Vocabulary/under) | negative / infinity | negative sign/infinity |
-| apl | [×](https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/direction/) | direction / times | direction (signum) / times |
-| apl | [⍟](https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/natural-logarithm/) | natural log / logarithm | natural logarithm / logarithm |
-| apl | [○](https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/pi-times/) | pi times / circular | pi times / circular functions |
-| apl | [∧](https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/lowest-common-multiple-and/) | lcm / and | lowest common multiple / and |
-| apl | [∨](https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/greatest-common-divisor-or/) | gcd / or | greatest common divisor / or |
-| apl | [<](https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/less-than/) | less | less than |
-| apl | [>](https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/greater-than/) | greater | greater than |
-| apl | [=](https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/equal-to/) | equal | equal to |
-| apl | [≠](https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/unique-mask/) | unique mask / not equal | unique mask / not equal to |
-| apl | [≤](https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/less-than-or-equal-to/) | less or equal | less than or equal to |
-| apl | [≥](https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/greater-than-or-equal-to/) | greater or equal | greater than or equal to |
-| apl | [,](https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/ravel/) | ravel / catenate | ravel / catenate / laminate |
-| apl | [⍉](https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/transpose/) | transpose | transpose / dyadic transpose |
-| apl | [↑](https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/mix/) | mix (first) / take | mix / take |
-| apl | [⊃](https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/first/) | first (mix) / pick | first / disclose / pick |
-| apl | [⍋](https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/grade-up/) | grade up | grade up / dyadic grade up |
-| apl | [⍒](https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/grade-down/) | grade down | grade down / dyadic grade down |
-| apl | [/](https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/replicate/) | replicate / reduce | reduce / replicate |
-| apl | [\\](https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/expand/) | expand / scan | scan / expand |
-| apl | [⌿](https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/replicate-first/) | replicate first / reduce first | reduce first / replicate first |
-| apl | [⍀](https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/expand-first/) | expand first / scan first | scan first / expand first |
-| apl | [⍨](https://docs.dyalog.com/20.0/language-reference-guide/primitive-operators/commute/) | commute / constant | commute / self |
-| apl | [⍕](https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/format/) | format | format / format by specification |
-| apl | [⎕](https://docs.dyalog.com/20.0/language-reference-guide/system-functions/evaluated-input-output/) | quad | quad (i/o) |
-| apl | [⍬](https://docs.dyalog.com/20.0/language-reference-guide/other-syntax/zilde/) | zilde (empty) | zilde |
-| apl | [∇](https://docs.dyalog.com/20.0/language-reference-guide/glyphs/#triangles) | del (function) | del |
-| apl | [←](https://docs.dyalog.com/20.0/language-reference-guide/other-syntax/assignment/) | assign | assignment |
-| apl | [→](https://docs.dyalog.com/20.0/language-reference-guide/other-syntax/branch/) | branch | branch / abort |
-| apl | [¯](https://docs.dyalog.com/20.0/language-reference-guide/glyphs/#lines-horizontal-%5F) | negative / high minus | high minus |
-| apl | [⍺](https://docs.dyalog.com/20.0/language-reference-guide/glyphs/#letterforms) | left argument | alpha (left argument) |
-| apl | [⍵](https://docs.dyalog.com/20.0/language-reference-guide/glyphs/#letterforms) | right argument | omega (right argument) |
+| apl | [×](https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/direction/) | direction / times | direction (signum) / times |
+| apl | [⍟](https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/natural-logarithm/) | natural log / logarithm | natural logarithm / logarithm |
+| apl | [○](https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/pi-times/) | pi times / circular | pi times / circular functions |
+| apl | [∧](https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/lowest-common-multiple-and/) | lcm / and | lowest common multiple / and |
+| apl | [∨](https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/greatest-common-divisor-or/) | gcd / or | greatest common divisor / or |
+| apl | [<](https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/less-than/) | less | less than |
+| apl | [>](https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/greater-than/) | greater | greater than |
+| apl | [=](https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/equal-to/) | equal | equal to |
+| apl | [≠](https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/unique-mask/) | unique mask / not equal | unique mask / not equal to |
+| apl | [≤](https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/less-than-or-equal-to/) | less or equal | less than or equal to |
+| apl | [≥](https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/greater-than-or-equal-to/) | greater or equal | greater than or equal to |
+| apl | [,](https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/ravel/) | ravel / catenate | ravel / catenate / laminate |
+| apl | [⍉](https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/transpose/) | transpose | transpose / dyadic transpose |
+| apl | [↑](https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/mix/) | mix (first) / take | mix / take |
+| apl | [⊃](https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/first/) | first (mix) / pick | first / disclose / pick |
+| apl | [⍋](https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/grade-up/) | grade up | grade up / dyadic grade up |
+| apl | [⍒](https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/grade-down/) | grade down | grade down / dyadic grade down |
+| apl | [/](https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/replicate/) | replicate / reduce | reduce / replicate |
+| apl | [\\](https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/expand/) | expand / scan | scan / expand |
+| apl | [⌿](https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/replicate-first/) | replicate first / reduce first | reduce first / replicate first |
+| apl | [⍀](https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/expand-first/) | expand first / scan first | scan first / expand first |
+| apl | [⍨](https://docs.dyalog.com/21.0/language-reference-guide/primitive-operators/commute/) | commute / constant | commute / self |
+| apl | [⍕](https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/format/) | format | format / format by specification |
+| apl | [⎕](https://docs.dyalog.com/21.0/language-reference-guide/system-functions/evaluated-input-output/) | quad | quad (i/o) |
+| apl | [⍬](https://docs.dyalog.com/21.0/language-reference-guide/other-syntax/zilde/) | zilde (empty) | zilde |
+| apl | [∇](https://docs.dyalog.com/21.0/language-reference-guide/glyphs/#triangles) | del (function) | del |
+| apl | [←](https://docs.dyalog.com/21.0/language-reference-guide/other-syntax/assignment/) | assign | assignment |
+| apl | [→](https://docs.dyalog.com/21.0/language-reference-guide/other-syntax/branch/) | branch | branch / abort |
+| apl | [¯](https://docs.dyalog.com/21.0/language-reference-guide/glyphs/#lines-horizontal-%5F) | negative / high minus | high minus |
+| apl | [⍺](https://docs.dyalog.com/21.0/language-reference-guide/glyphs/#letterforms) | left argument | alpha (left argument) |
+| apl | [⍵](https://docs.dyalog.com/21.0/language-reference-guide/glyphs/#letterforms) | right argument | omega (right argument) |

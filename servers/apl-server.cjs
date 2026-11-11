@@ -33,6 +33,7 @@ function findAPLExecutable() {
     
     const candidates = [
         'dyalog',
+        '/opt/mdyalog/21.0/64/unicode/mapl',
         '/opt/mdyalog/20.0/64/unicode/mapl',
         path.join(homedir(), 'dyalog/mapl')
     ];

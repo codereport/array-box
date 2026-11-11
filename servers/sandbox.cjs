@@ -77,6 +77,7 @@ function findDyalogPath() {
     
     // Try common installation directories
     const candidates = [
+        '/opt/mdyalog/21.0/64/unicode',
         '/opt/mdyalog/20.0/64/unicode',
         '/opt/mdyalog/19.0/64/unicode', 
         '/opt/mdyalog/18.2/64/unicode',

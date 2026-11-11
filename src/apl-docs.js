@@ -2,7 +2,7 @@
  * Dyalog APL Primitive Documentation
  * 
  * Hand-crafted from official Dyalog APL documentation
- * Source: https://docs.dyalog.com/20.0/language-reference-guide/
+ * Source: https://docs.dyalog.com/21.0/language-reference-guide/
  * Created: 2026-01-28
  * 
  * LICENSE ATTRIBUTION:
@@ -14,7 +14,7 @@
 
 export const aplDocsMeta = {
     "language": "Dyalog APL",
-    "source": "https://docs.dyalog.com/20.0/language-reference-guide/",
+    "source": "https://docs.dyalog.com/21.0/language-reference-guide/",
     "createdAt": "2026-01-28",
     "version": "1.0.0"
 };
@@ -33,7 +33,7 @@ export const aplGlyphDocs = {
     "+": {
         "glyph": "+",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/conjugate/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/conjugate/",
         "monad": {
             "name": "Conjugate",
             "description": "Complex conjugate of the argument. For real numbers, returns the argument unchanged.",
@@ -48,7 +48,7 @@ export const aplGlyphDocs = {
     "-": {
         "glyph": "-",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/negate/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/negate/",
         "monad": {
             "name": "Negate",
             "description": "Arithmetic negation. Changes the sign of the argument.",
@@ -63,7 +63,7 @@ export const aplGlyphDocs = {
     "×": {
         "glyph": "×",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/direction/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/direction/",
         "monad": {
             "name": "Direction (Signum)",
             "description": "Returns ¯1, 0, or 1 depending on whether the argument is negative, zero, or positive. For complex numbers, returns unit vector.",
@@ -78,7 +78,7 @@ export const aplGlyphDocs = {
     "÷": {
         "glyph": "÷",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/reciprocal/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/reciprocal/",
         "monad": {
             "name": "Reciprocal",
             "description": "Returns 1 divided by the argument.",
@@ -93,7 +93,7 @@ export const aplGlyphDocs = {
     "|": {
         "glyph": "|",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/magnitude/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/magnitude/",
         "monad": {
             "name": "Magnitude",
             "description": "Absolute value. For complex numbers, returns the distance from origin.",
@@ -108,7 +108,7 @@ export const aplGlyphDocs = {
     "⌈": {
         "glyph": "⌈",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/ceiling/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/ceiling/",
         "monad": {
             "name": "Ceiling",
             "description": "Smallest integer greater than or equal to the argument.",
@@ -123,7 +123,7 @@ export const aplGlyphDocs = {
     "⌊": {
         "glyph": "⌊",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/floor/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/floor/",
         "monad": {
             "name": "Floor",
             "description": "Largest integer less than or equal to the argument.",
@@ -138,7 +138,7 @@ export const aplGlyphDocs = {
     "*": {
         "glyph": "*",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/exponential/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/exponential/",
         "monad": {
             "name": "Exponential",
             "description": "e raised to the power of the argument.",
@@ -153,7 +153,7 @@ export const aplGlyphDocs = {
     "⍟": {
         "glyph": "⍟",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/natural-logarithm/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/natural-logarithm/",
         "monad": {
             "name": "Natural Logarithm",
             "description": "Logarithm base e of the argument.",
@@ -168,7 +168,7 @@ export const aplGlyphDocs = {
     "!": {
         "glyph": "!",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/factorial/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/factorial/",
         "monad": {
             "name": "Factorial",
             "description": "Product of integers from 1 to the argument. For non-integers, uses gamma function.",
@@ -183,7 +183,7 @@ export const aplGlyphDocs = {
     "○": {
         "glyph": "○",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/pi-times/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/pi-times/",
         "monad": {
             "name": "Pi Times",
             "description": "Argument multiplied by π.",
@@ -198,7 +198,7 @@ export const aplGlyphDocs = {
     "?": {
         "glyph": "?",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/roll/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/roll/",
         "monad": {
             "name": "Roll",
             "description": "Random integer from 1 to argument (with ⎕IO=1) or 0 to argument-1 (with ⎕IO=0).",
@@ -213,7 +213,7 @@ export const aplGlyphDocs = {
     "~": {
         "glyph": "~",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/not/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/not/",
         "monad": {
             "name": "NOT",
             "description": "Logical negation. Returns 1 for 0 and 0 for 1.",
@@ -228,7 +228,7 @@ export const aplGlyphDocs = {
     "∧": {
         "glyph": "∧",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/lowest-common-multiple-and/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/lowest-common-multiple-and/",
         "dyad": {
             "name": "Lowest Common Multiple / AND",
             "description": "For booleans, logical AND. For integers, lowest common multiple.",
@@ -238,7 +238,7 @@ export const aplGlyphDocs = {
     "∨": {
         "glyph": "∨",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/greatest-common-divisor-or/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/greatest-common-divisor-or/",
         "dyad": {
             "name": "Greatest Common Divisor / OR",
             "description": "For booleans, logical OR. For integers, greatest common divisor.",
@@ -248,7 +248,7 @@ export const aplGlyphDocs = {
     "⍲": {
         "glyph": "⍲",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/nand/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/nand/",
         "dyad": {
             "name": "NAND",
             "description": "Logical NAND. Returns 0 only when both arguments are 1.",
@@ -258,7 +258,7 @@ export const aplGlyphDocs = {
     "⍱": {
         "glyph": "⍱",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/nor/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/nor/",
         "dyad": {
             "name": "NOR",
             "description": "Logical NOR. Returns 1 only when both arguments are 0.",
@@ -268,7 +268,7 @@ export const aplGlyphDocs = {
     "<": {
         "glyph": "<",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/less-than/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/less-than/",
         "dyad": {
             "name": "Less Than",
             "description": "Returns 1 if left is less than right, 0 otherwise.",
@@ -278,7 +278,7 @@ export const aplGlyphDocs = {
     ">": {
         "glyph": ">",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/greater-than/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/greater-than/",
         "dyad": {
             "name": "Greater Than",
             "description": "Returns 1 if left is greater than right, 0 otherwise.",
@@ -288,7 +288,7 @@ export const aplGlyphDocs = {
     "=": {
         "glyph": "=",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/equal-to/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/equal-to/",
         "dyad": {
             "name": "Equal To",
             "description": "Returns 1 if arguments are equal, 0 otherwise. Scalar comparison.",
@@ -298,7 +298,7 @@ export const aplGlyphDocs = {
     "≠": {
         "glyph": "≠",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/unique-mask/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/unique-mask/",
         "monad": {
             "name": "Unique Mask",
             "description": "Boolean mask where 1 marks first occurrence of each unique element.",
@@ -313,7 +313,7 @@ export const aplGlyphDocs = {
     "≤": {
         "glyph": "≤",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/less-than-or-equal-to/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/less-than-or-equal-to/",
         "dyad": {
             "name": "Less Than or Equal To",
             "description": "Returns 1 if left is less than or equal to right.",
@@ -323,7 +323,7 @@ export const aplGlyphDocs = {
     "≥": {
         "glyph": "≥",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/greater-than-or-equal-to/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/greater-than-or-equal-to/",
         "dyad": {
             "name": "Greater Than or Equal To",
             "description": "Returns 1 if left is greater than or equal to right.",
@@ -333,7 +333,7 @@ export const aplGlyphDocs = {
     "≡": {
         "glyph": "≡",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/depth/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/depth/",
         "monad": {
             "name": "Depth",
             "description": "Nesting depth of the array. Simple scalars have depth 0.",
@@ -348,7 +348,7 @@ export const aplGlyphDocs = {
     "≢": {
         "glyph": "≢",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/tally/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/tally/",
         "monad": {
             "name": "Tally",
             "description": "Number of major cells (first dimension). Scalars have tally 1.",
@@ -363,7 +363,7 @@ export const aplGlyphDocs = {
     "⍴": {
         "glyph": "⍴",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/shape/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/shape/",
         "monad": {
             "name": "Shape",
             "description": "Returns the dimensions of the array.",
@@ -378,7 +378,7 @@ export const aplGlyphDocs = {
     ",": {
         "glyph": ",",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/ravel/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/ravel/",
         "monad": {
             "name": "Ravel",
             "description": "Flattens array to a vector.",
@@ -393,7 +393,7 @@ export const aplGlyphDocs = {
     "⍪": {
         "glyph": "⍪",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/table/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/table/",
         "monad": {
             "name": "Table",
             "description": "Converts to 2D matrix. Vectors become single-column matrices.",
@@ -408,7 +408,7 @@ export const aplGlyphDocs = {
     "⌽": {
         "glyph": "⌽",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/reverse/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/reverse/",
         "monad": {
             "name": "Reverse",
             "description": "Reverses elements along last axis.",
@@ -423,7 +423,7 @@ export const aplGlyphDocs = {
     "⊖": {
         "glyph": "⊖",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/reverse-first/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/reverse-first/",
         "monad": {
             "name": "Reverse First",
             "description": "Reverses elements along first axis.",
@@ -438,7 +438,7 @@ export const aplGlyphDocs = {
     "⍉": {
         "glyph": "⍉",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/transpose/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/transpose/",
         "monad": {
             "name": "Transpose",
             "description": "Reverses the order of axes. For matrices, swaps rows and columns.",
@@ -453,7 +453,7 @@ export const aplGlyphDocs = {
     "↑": {
         "glyph": "↑",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/mix/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/mix/",
         "monad": {
             "name": "Mix",
             "description": "Combines nested array elements into higher-rank array.",
@@ -468,7 +468,7 @@ export const aplGlyphDocs = {
     "↓": {
         "glyph": "↓",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/split/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/split/",
         "monad": {
             "name": "Split",
             "description": "Splits array along last axis into nested vector.",
@@ -483,7 +483,7 @@ export const aplGlyphDocs = {
     "⊂": {
         "glyph": "⊂",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/enclose/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/enclose/",
         "monad": {
             "name": "Enclose",
             "description": "Creates a scalar containing the argument. Simple scalars are unchanged.",
@@ -498,7 +498,7 @@ export const aplGlyphDocs = {
     "⊃": {
         "glyph": "⊃",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/first/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/first/",
         "monad": {
             "name": "First / Disclose",
             "description": "Returns first element. For nested scalars, returns contents.",
@@ -513,7 +513,7 @@ export const aplGlyphDocs = {
     "⊆": {
         "glyph": "⊆",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/nest/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/nest/",
         "monad": {
             "name": "Nest",
             "description": "Encloses simple arrays, leaves nested arrays unchanged.",
@@ -528,7 +528,7 @@ export const aplGlyphDocs = {
     "∊": {
         "glyph": "∊",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/enlist/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/enlist/",
         "monad": {
             "name": "Enlist",
             "description": "Flattens nested array to simple vector of atoms.",
@@ -543,7 +543,7 @@ export const aplGlyphDocs = {
     "∩": {
         "glyph": "∩",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/intersection/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/intersection/",
         "dyad": {
             "name": "Intersection",
             "description": "Elements that appear in both arguments.",
@@ -553,7 +553,7 @@ export const aplGlyphDocs = {
     "∪": {
         "glyph": "∪",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/unique/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/unique/",
         "monad": {
             "name": "Unique",
             "description": "Removes duplicate major cells.",
@@ -568,7 +568,7 @@ export const aplGlyphDocs = {
     "⊣": {
         "glyph": "⊣",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/same/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/same/",
         "monad": {
             "name": "Same",
             "description": "Returns the argument unchanged.",
@@ -583,7 +583,7 @@ export const aplGlyphDocs = {
     "⊢": {
         "glyph": "⊢",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/same/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/same/",
         "monad": {
             "name": "Same",
             "description": "Returns the argument unchanged.",
@@ -598,7 +598,7 @@ export const aplGlyphDocs = {
     "⍳": {
         "glyph": "⍳",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/index-generator/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/index-generator/",
         "monad": {
             "name": "Index Generator",
             "description": "Generates indices. For scalar n, produces 1 to n (or 0 to n-1 with ⎕IO=0).",
@@ -613,7 +613,7 @@ export const aplGlyphDocs = {
     "⍸": {
         "glyph": "⍸",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/where/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/where/",
         "monad": {
             "name": "Where",
             "description": "Indices where argument is 1. For higher-rank, returns coordinate vectors.",
@@ -628,7 +628,7 @@ export const aplGlyphDocs = {
     "⍋": {
         "glyph": "⍋",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/grade-up/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/grade-up/",
         "monad": {
             "name": "Grade Up",
             "description": "Indices that would sort argument in ascending order.",
@@ -643,7 +643,7 @@ export const aplGlyphDocs = {
     "⍒": {
         "glyph": "⍒",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/grade-down/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/grade-down/",
         "monad": {
             "name": "Grade Down",
             "description": "Indices that would sort argument in descending order.",
@@ -658,7 +658,7 @@ export const aplGlyphDocs = {
     "⍷": {
         "glyph": "⍷",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/find/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/find/",
         "dyad": {
             "name": "Find",
             "description": "Boolean array marking start positions of left in right.",
@@ -668,7 +668,7 @@ export const aplGlyphDocs = {
     "⌷": {
         "glyph": "⌷",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/materialise/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/materialise/",
         "monad": {
             "name": "Materialise",
             "description": "Forces evaluation of a lazy/virtual array.",
@@ -683,7 +683,7 @@ export const aplGlyphDocs = {
     "⊥": {
         "glyph": "⊥",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/decode/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/decode/",
         "dyad": {
             "name": "Decode (Base)",
             "description": "Evaluates right argument in number system with radices from left.",
@@ -693,7 +693,7 @@ export const aplGlyphDocs = {
     "⊤": {
         "glyph": "⊤",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/encode/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/encode/",
         "dyad": {
             "name": "Encode (Represent)",
             "description": "Represents right argument in number system with radices from left.",
@@ -703,7 +703,7 @@ export const aplGlyphDocs = {
     "⌹": {
         "glyph": "⌹",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/matrix-inverse/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/matrix-inverse/",
         "monad": {
             "name": "Matrix Inverse",
             "description": "Inverse of a square matrix.",
@@ -718,7 +718,7 @@ export const aplGlyphDocs = {
     "/": {
         "glyph": "/",
         "type": "operator",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/replicate/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/replicate/",
         "monad": {
             "name": "Reduce",
             "description": "Inserts function between elements along last axis.",
@@ -733,7 +733,7 @@ export const aplGlyphDocs = {
     "\\": {
         "glyph": "\\",
         "type": "operator",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/expand/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/expand/",
         "monad": {
             "name": "Scan",
             "description": "Running reduction along last axis.",
@@ -748,7 +748,7 @@ export const aplGlyphDocs = {
     "⌿": {
         "glyph": "⌿",
         "type": "operator",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/replicate-first/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/replicate-first/",
         "monad": {
             "name": "Reduce First",
             "description": "Inserts function between elements along first axis.",
@@ -763,7 +763,7 @@ export const aplGlyphDocs = {
     "⍀": {
         "glyph": "⍀",
         "type": "operator",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/expand-first/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/expand-first/",
         "monad": {
             "name": "Scan First",
             "description": "Running reduction along first axis.",
@@ -778,7 +778,7 @@ export const aplGlyphDocs = {
     "¨": {
         "glyph": "¨",
         "type": "operator",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-operators/each/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-operators/each/each-with-monadic-operand/",
         "monad": {
             "name": "Each",
             "description": "Applies function to each element of array(s).",
@@ -788,7 +788,7 @@ export const aplGlyphDocs = {
     "⍨": {
         "glyph": "⍨",
         "type": "operator",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-operators/commute/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-operators/commute/",
         "monad": {
             "name": "Commute / Self",
             "description": "Monadic: applies function with same argument on both sides. Dyadic: swaps arguments.",
@@ -798,7 +798,7 @@ export const aplGlyphDocs = {
     "∘": {
         "glyph": "∘",
         "type": "operator",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-operators/beside/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-operators/beside/",
         "monad": {
             "name": "Beside / Bind",
             "description": "Composes functions (f∘g: apply g then f) or binds argument to function.",
@@ -808,7 +808,7 @@ export const aplGlyphDocs = {
     "⍤": {
         "glyph": "⍤",
         "type": "operator",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-operators/atop/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-operators/atop/",
         "monad": {
             "name": "Atop / Rank",
             "description": "Atop: f⍤g applies f to result of g. Rank: applies function to cells of specified rank.",
@@ -818,7 +818,7 @@ export const aplGlyphDocs = {
     "⍥": {
         "glyph": "⍥",
         "type": "operator",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-operators/over/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-operators/over/",
         "monad": {
             "name": "Over",
             "description": "Applies right operand to arguments, then left operand to results.",
@@ -828,7 +828,7 @@ export const aplGlyphDocs = {
     "⍣": {
         "glyph": "⍣",
         "type": "operator",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-operators/power/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-operators/power/",
         "monad": {
             "name": "Power Operator",
             "description": "Repeats function application. Right operand is count or convergence function.",
@@ -838,7 +838,7 @@ export const aplGlyphDocs = {
     "@": {
         "glyph": "@",
         "type": "operator",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-operators/at/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-operators/at/",
         "monad": {
             "name": "At",
             "description": "Applies function or assigns values at specified positions.",
@@ -848,7 +848,7 @@ export const aplGlyphDocs = {
     "⌸": {
         "glyph": "⌸",
         "type": "operator",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-operators/key/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-operators/key/",
         "monad": {
             "name": "Key",
             "description": "Groups by unique keys and applies function to each group.",
@@ -858,7 +858,7 @@ export const aplGlyphDocs = {
     "⌺": {
         "glyph": "⌺",
         "type": "operator",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-operators/stencil/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-operators/stencil/",
         "monad": {
             "name": "Stencil",
             "description": "Applies function to overlapping neighborhoods (sliding windows).",
@@ -868,7 +868,7 @@ export const aplGlyphDocs = {
     "⍠": {
         "glyph": "⍠",
         "type": "operator",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-operators/variant/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-operators/variant/",
         "monad": {
             "name": "Variant",
             "description": "Specifies options for function execution.",
@@ -878,7 +878,7 @@ export const aplGlyphDocs = {
     "⌶": {
         "glyph": "⌶",
         "type": "operator",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-operators/i-beam/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-operators/i-beam/",
         "monad": {
             "name": "I-Beam",
             "description": "Access to system functions. Left argument selects function.",
@@ -888,7 +888,7 @@ export const aplGlyphDocs = {
     "⍛": {
         "glyph": "⍛",
         "type": "operator",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-operators/behind/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-operators/behind/",
         "monad": {
             "name": "Behind",
             "description": "Reverse composition: applies left operand to left argument only.",
@@ -898,7 +898,7 @@ export const aplGlyphDocs = {
     "⍎": {
         "glyph": "⍎",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/execute/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/execute/",
         "monad": {
             "name": "Execute",
             "description": "Evaluates character vector as APL expression.",
@@ -913,7 +913,7 @@ export const aplGlyphDocs = {
     "⍕": {
         "glyph": "⍕",
         "type": "function",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/primitive-functions/format/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/primitive-functions/format/",
         "monad": {
             "name": "Format",
             "description": "Converts array to character representation.",
@@ -928,7 +928,7 @@ export const aplGlyphDocs = {
     "⎕": {
         "glyph": "⎕",
         "type": "syntax",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/system-functions/evaluated-input-output/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/system-functions/evaluated-input-output/",
         "monad": {
             "name": "Quad (I/O)",
             "description": "Evaluated input/output. Also prefix for system functions and variables.",
@@ -938,7 +938,7 @@ export const aplGlyphDocs = {
     "⍞": {
         "glyph": "⍞",
         "type": "syntax",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/system-functions/character-input-output/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/system-functions/character-input-output/",
         "monad": {
             "name": "Quote-Quad",
             "description": "Character input/output without formatting.",
@@ -948,7 +948,7 @@ export const aplGlyphDocs = {
     "⍬": {
         "glyph": "⍬",
         "type": "syntax",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/other-syntax/zilde/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/other-syntax/zilde/",
         "monad": {
             "name": "Zilde",
             "description": "Empty numeric vector. Equivalent to ⍳0 or 0⍴0.",
@@ -958,7 +958,7 @@ export const aplGlyphDocs = {
     "∇": {
         "glyph": "∇",
         "type": "syntax",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/glyphs/#triangles",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/glyphs/#triangles",
         "monad": {
             "name": "Del",
             "description": "Function definition delimiter or self-reference in dfns.",
@@ -968,7 +968,7 @@ export const aplGlyphDocs = {
     "←": {
         "glyph": "←",
         "type": "syntax",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/other-syntax/assignment/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/other-syntax/assignment/",
         "monad": {
             "name": "Assignment",
             "description": "Assigns value to name. Also used in modified and indexed assignment.",
@@ -978,7 +978,7 @@ export const aplGlyphDocs = {
     "→": {
         "glyph": "→",
         "type": "syntax",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/other-syntax/branch/",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/other-syntax/branch/",
         "monad": {
             "name": "Branch / Abort",
             "description": "Branch to line number or label. Empty argument (→) aborts execution.",
@@ -988,7 +988,7 @@ export const aplGlyphDocs = {
     "⋄": {
         "glyph": "⋄",
         "type": "syntax",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/glyphs/#wedges",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/glyphs/#wedges",
         "monad": {
             "name": "Statement Separator",
             "description": "Separates multiple statements on one line.",
@@ -998,7 +998,7 @@ export const aplGlyphDocs = {
     "⍝": {
         "glyph": "⍝",
         "type": "syntax",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/glyphs/#circles",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/glyphs/#circles",
         "monad": {
             "name": "Comment",
             "description": "Everything after ⍝ to end of line is a comment.",
@@ -1008,7 +1008,7 @@ export const aplGlyphDocs = {
     "⍺": {
         "glyph": "⍺",
         "type": "syntax",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/glyphs/#letterforms",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/glyphs/#letterforms",
         "monad": {
             "name": "Alpha (Left Argument)",
             "description": "Represents left argument in dfns and dops.",
@@ -1018,7 +1018,7 @@ export const aplGlyphDocs = {
     "⍵": {
         "glyph": "⍵",
         "type": "syntax",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/glyphs/#letterforms",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/glyphs/#letterforms",
         "monad": {
             "name": "Omega (Right Argument)",
             "description": "Represents right argument in dfns and dops.",
@@ -1028,7 +1028,7 @@ export const aplGlyphDocs = {
     "¯": {
         "glyph": "¯",
         "type": "syntax",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/glyphs/#lines-horizontal-%5F",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/glyphs/#lines-horizontal-%5F",
         "monad": {
             "name": "High Minus",
             "description": "Prefix for negative number literals. Not the same as - (negate).",
@@ -1038,7 +1038,7 @@ export const aplGlyphDocs = {
     "∆": {
         "glyph": "∆",
         "type": "syntax",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/glyphs/#triangles",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/glyphs/#triangles",
         "monad": {
             "name": "Delta",
             "description": "Valid character in names. Often used for variant or derivative functions.",
@@ -1048,7 +1048,7 @@ export const aplGlyphDocs = {
     "⍙": {
         "glyph": "⍙",
         "type": "syntax",
-        "docUrl": "https://docs.dyalog.com/20.0/language-reference-guide/glyphs/#triangles",
+        "docUrl": "https://docs.dyalog.com/21.0/language-reference-guide/glyphs/#triangles",
         "monad": {
             "name": "Delta Underbar",
             "description": "Valid character in names.",

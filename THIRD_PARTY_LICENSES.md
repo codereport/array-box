@@ -172,7 +172,7 @@ SOFTWARE.
 
 The Dyalog APL primitive documentation in `src/apl-docs.js` is derived from the official Dyalog documentation.
 
-**Source:** https://docs.dyalog.com/20.0/language-reference-guide/  
+**Source:** https://docs.dyalog.com/21.0/language-reference-guide/\
 **License:** Creative Commons Attribution 4.0 International (CC BY 4.0)
 
 Copyright © 1982-2026 Dyalog Limited

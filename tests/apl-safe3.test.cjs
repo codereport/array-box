@@ -8,6 +8,7 @@ const { test } = require('node:test');
 const executable = [
     process.env.ARRAYBOX_DYALOG,
     ...(process.env.PATH || '').split(path.delimiter).map(dir => path.join(dir, 'dyalog')),
+    '/opt/mdyalog/21.0/64/unicode/mapl',
     '/opt/mdyalog/20.0/64/unicode/mapl', path.join(homedir(), 'dyalog/mapl')
 ].find(candidate => candidate && existsSync(candidate));
 
