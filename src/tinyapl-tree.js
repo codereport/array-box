@@ -296,7 +296,16 @@ export function formatTinyaplFunctionTree(value) {
             if (node.partial) combinator = 'partial';
             node.id = groups.length;
             node.cols = cols;
-            node.label ??= `⦅${children.map(([, child]) => child.label).join('⋄')}⦆`;
+            if (node.label === undefined) {
+                const tines = children.map(([, child]) => child);
+                // Generated subtrains can use compact syntax when it preserves
+                // token boundaries, modifier binding, and partial applications.
+                const compact = tines.every((tine, i) => !tine.partial && (!i || (
+                    !MODIFIERS.has([...tines[i - 1].label].at(-1)) &&
+                    !(identifierChar([...tines[i - 1].label].at(-1)) && identifierChar([...tine.label][0]))
+                )));
+                node.label = `⦅${tines.map(tine => tine.label).join(compact ? '' : '⋄')}⦆`;
+            }
             groups.push({ id: groups.length, type: node.type, cols, junctionRow: -depth, parts,
                 ...(combinator !== node.type ? { combinator } : {}) });
             return cols;

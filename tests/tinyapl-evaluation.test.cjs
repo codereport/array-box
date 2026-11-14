@@ -85,6 +85,23 @@ test('TinyAPL evaluation leaves traversal modifiers opaque and survives serializ
     assert.ok(!JSON.stringify(tree.root).includes('trainTines'));
 });
 
+test('TinyAPL collapsed subtrains omit diamonds when compact syntax preserves their tines', async () => {
+    const { model, expression } = await diagram('⦅(+)/ ⋄ ↗ ⋄ × ⋄ 0 ⋄ = ⋄ … ⋄ | ⋄ ≢⦆', 1, false);
+    assert.equal(expression, '(+/) ((⦅↗×⦅0=⦅…|≢⦆⦆⦆) y)');
+    assert.ok(model.nodes.every(node => !node.label.includes('⋄')));
+
+    // Names must stay separate, and modifiers and partial applications must
+    // retain their operands when a generated subtrain is copied back to code.
+    for (const [repr, label] of [
+        ['⦅+ ⋄ F ⋄ G ⋄ H⦆', '⦅F⋄G⋄H⦆'],
+        ['⦅+ ⋄ (+)⍨ ⋄ - ⋄ ×⦆', '⦅+⍨⋄-⋄×⦆'],
+        ['⦅+ ⋄ × ⋄ (0)(+)/ ⋄ ÷⦆', '⦅×⋄0+/⋄÷⦆'],
+    ]) {
+        const { model } = await diagram(repr, 1, false);
+        assert.ok(model.nodes.some(node => node.label === label), repr);
+    }
+});
+
 test('TinyAPL partial application binds the initial value to the complete derived function', async () => {
     const { model, expression } = await diagram('(0)(+)/');
     assert.equal(expression, '0 (+/) y');

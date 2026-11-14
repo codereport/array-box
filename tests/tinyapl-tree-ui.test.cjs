@@ -273,8 +273,8 @@ test('TinyAPL evaluation supports keyboard expansion and constant results', asyn
     await page.locator('.eval-expandable').first().focus();
     await page.keyboard.press('Space');
     assert.equal(await page.locator('.eval-call').count(), 5);
-    assert.equal(await page.locator('[data-collapse]:focus').count(), 1);
-    await page.keyboard.press('Enter');
+    assert.equal(await page.locator('.eval-node:focus').count(), 1);
+    await page.keyboard.press('Control+Shift+R');
     assert.equal(await page.locator('.eval-expandable').count(), 2);
     assert.equal(await page.locator('#codeInput').textContent(), 'Ms');
     await page.locator('[data-action="expand-all"]').click();
@@ -290,6 +290,33 @@ test('TinyAPL evaluation supports keyboard expansion and constant results', asyn
     assert.equal(await page.locator('#output script').count(), 0);
     assert.equal(await page.locator('.eval-constant text').textContent(), '"<script>"');
     assert.ok((await page.locator('.eval-expression').textContent()).includes('"<script>"'));
+});
+
+test('TinyAPL collapsed labels use the same syntax colors as the result expression', async t => {
+    const page = await openEditor(t);
+    await evaluate(page, 'Da', { structure: false });
+    const colors = await page.locator('.eval-expandable').first().evaluate(node => {
+        const expression = document.querySelector('.eval-expression');
+        return {
+            plain: getComputedStyle(node.querySelector('text')).fill,
+            expectedPlain: getComputedStyle(expression).color,
+            tokens: ['syntax-number', 'syntax-function', 'syntax-modifier-monadic', 'syntax-modifier-dyadic'].map(cls => {
+                const token = node.querySelector(`tspan.${cls}`);
+                return {
+                    cls,
+                    text: token?.textContent,
+                    fill: token && getComputedStyle(token).fill,
+                    expected: getComputedStyle(expression.querySelector(`.${cls}`)).color,
+                };
+            }),
+        };
+    });
+    assert.equal(colors.plain, colors.expectedPlain, 'brackets keep the normal text color');
+    for (const { cls, text, fill, expected } of colors.tokens) {
+        assert.ok(text, cls);
+        assert.equal(fill, expected, cls);
+    }
+    assert.equal(colors.tokens[0].text, '0.5', 'numbers are highlighted as complete tokens');
 });
 
 test('TinyAPL evaluation expand/reset shortcuts work from the editor and diagram', async t => {
@@ -347,7 +374,7 @@ test('expanded TinyAPL diagrams fit the viewport with a highlighted, single-line
     await page.locator('[data-action="expand-all"]').click();
     await page.mouse.move(0, 0);
     await page.evaluate(() => document.fonts.ready);
-    assert.equal(await page.locator('.eval-heading, .eval-experiment, .eval-result-label, .eval-result-edge').count(), 0);
+    assert.equal(await page.locator('.eval-heading, .eval-experiment, .eval-result-label, .eval-result-edge, .eval-input-caption, .eval-scopes, [data-collapse], .eval-inspector, .eval-inspector-label, .eval-help').count(), 0);
     assert.equal(await page.locator('.eval-toolbar .eval-source').textContent(), code);
     assert.ok(await page.locator('.eval-expression .syntax-function').count() > 0);
     assert.ok(await page.locator('.eval-expression .syntax-modifier-monadic').count() > 0);

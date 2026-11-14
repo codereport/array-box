@@ -1,4 +1,4 @@
-import { getSyntaxClass, highlightCode } from './syntax.js';
+import { highlightCode } from './syntax.js';
 
 const escape = value => String(value).replace(/[&<>"']/g, ch => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -181,16 +181,12 @@ function layout(model) {
     return { nodes: [...nodes.values()], width, height: 34 + (maxRank + 1) * 88 + 48 };
 }
 
-function svgLabel(node, tree) {
+function svgLabel(node) {
     if (!node.fn) return escape(node.label);
-    return [...node.label].map((ch, i) => {
-        const col = node.fn.cols?.[i];
-        const cls = node.fn.type === 'func' ? tree.classes[col] : getSyntaxClass(ch, 'tinyapl');
-        return `<tspan${cls ? ` class="${escape(cls)}"` : ''}>${escape(ch)}</tspan>`;
-    }).join('');
+    return highlightCode(node.label, 'tinyapl').replace(/<(\/?)span\b/g, '<$1tspan');
 }
 
-function renderDiagram(model, tree) {
+function renderDiagram(model) {
     const { nodes, width, height } = layout(model);
     const byId = new Map(nodes.map(node => [node.id, node]));
     const paths = nodes.flatMap(node => node.args.map((arg, port) => {
@@ -209,9 +205,8 @@ function renderDiagram(model, tree) {
             ${expandable ? `data-expand="${node.key}" role="button" tabindex="0" aria-label="${escape(title)}" aria-expanded="false"` : 'tabindex="0" role="group"'}>
             <title>${escape(title)}</title>
             <rect class="eval-node-bg" x="${node.x - node.boxWidth / 2}" y="${node.y - 26}" width="${node.boxWidth}" height="52" rx="12"/>
-            <text x="${node.x - (expandable ? 12 : 0)}" y="${node.y}" text-anchor="middle" dominant-baseline="central">${svgLabel(node, tree)}</text>
+            <text x="${node.x - (expandable ? 12 : 0)}" y="${node.y}" text-anchor="middle" dominant-baseline="central">${svgLabel(node)}</text>
             ${expandable ? `<text class="eval-plus" x="${node.x + node.boxWidth / 2 - 17}" y="${node.y}" text-anchor="middle" dominant-baseline="central">+</text>` : ''}
-            ${node.kind === 'input' ? `<text class="eval-input-caption" x="${node.x}" y="${node.y + 37}" text-anchor="middle">${node.label === 'x' ? 'left' : 'right'} argument</text>` : ''}
         </g>`;
     }).join('');
     return `<svg class="eval-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" style="width:${width}px" role="group" aria-label="Evaluation diagram. Arguments flow from bottom to top.">
@@ -236,7 +231,7 @@ function fitText(element, maximum, minimum) {
 /** Mount a disposable view. All handlers belong to this output, not document. */
 export function mountTinyaplEvaluation(host, tree, { onResize = () => {} } = {}) {
     const expandable = tinyaplExpandableGroups(tree.root);
-    const state = { valence: 1, expanded: new Set(['root']), collapsed: new Set() };
+    const state = { valence: 1, expanded: new Set(['root']) };
     // Pick the usable valence for the initial view (notably Mirror).
     if (buildTinyaplEvaluation(tree, state).error && !buildTinyaplEvaluation(tree, { ...state, valence: 2 }).error) state.valence = 2;
     host.classList.add('tinyapl-evaluation');
@@ -260,11 +255,9 @@ export function mountTinyaplEvaluation(host, tree, { onResize = () => {} } = {})
         </div>
         <div class="eval-body">
             ${model.error ? `<div class="eval-unavailable" role="status">${escape(model.error)}</div>` : `
-            <div class="eval-canvas">${renderDiagram(model, tree)}</div>
-            <div class="eval-scopes" aria-label="Expanded groups">${[...model.scopes].reverse().map(({ fn, key, result }) =>
-                `<button type="button" data-collapse="${key}" data-scope-result="${result}" aria-label="Collapse ${escape(fn.label)}"><span aria-hidden="true">−</span> ${highlightCode(fn.label, 'tinyapl')}</button>`).join('')}</div>
-            <div class="eval-inspector" aria-live="polite"><div class="eval-inspector-label" title="RESULT">RESULT</div><div class="eval-expression-row"><div class="eval-expression">${highlightCode(`r ← ${tinyaplEvaluationExpression(model)}`, 'tinyapl')}</div></div></div>`}
-            <div class="eval-help">${model.error ? 'Switch arguments to explore another valence.' : 'Read upwards · Hover to trace arguments · Click + to expand'}</div></div>`;
+            <div class="eval-canvas">${renderDiagram(model)}</div>
+            <div class="eval-expression-row" aria-live="polite"><div class="eval-expression">${highlightCode(`r ← ${tinyaplEvaluationExpression(model)}`, 'tinyapl')}</div></div>`}
+        </div>`;
         host._evaluationModel = model;
         onResize();
     }
@@ -275,7 +268,6 @@ export function mountTinyaplEvaluation(host, tree, { onResize = () => {} } = {})
     host._fitToHeight = height => {
         fitText(host.querySelector('.eval-source'), 26, 11);
         fitText(host.querySelector('.eval-expression'), 19, 10);
-        host.querySelectorAll('.eval-scopes button').forEach(el => fitText(el, 15, 10));
         const canvas = host.querySelector('.eval-canvas');
         const svg = host.querySelector('.eval-svg');
         if (!canvas || !svg) return;
@@ -291,35 +283,30 @@ export function mountTinyaplEvaluation(host, tree, { onResize = () => {} } = {})
         if (!expression) return;
         expression.innerHTML = highlightCode(text, 'tinyapl');
         fitText(expression, 19, 10);
-        const label = host.querySelector('.eval-inspector-label');
-        label.title = label.textContent;
     }
 
     function activate(target) {
         if (target.dataset.expand !== undefined) {
             state.expanded.add(target.dataset.expand);
-            state.collapsed.delete(target.dataset.expand);
-        } else if (target.dataset.collapse !== undefined) {
-            state.expanded.delete(target.dataset.collapse);
-            state.collapsed.add(target.dataset.collapse);
         }
         else switch (target.dataset.action) {
             case 'monad': state.valence = 1; break;
             case 'dyad': state.valence = 2; break;
-            case 'expand-all': state.expanded = new Set(expandable); state.collapsed.clear(); break;
-            case 'reset': state.expanded = new Set(['root']); state.collapsed.clear(); break;
+            case 'expand-all': state.expanded = new Set(expandable); break;
+            case 'reset': state.expanded = new Set(['root']); break;
             default: return;
         }
         const expandId = target.dataset.expand;
-        const collapseId = target.dataset.collapse;
         const action = target.dataset.action;
         const wasKeyboard = target === document.activeElement;
         render();
-        if (wasKeyboard) host.querySelector(expandId !== undefined ? `[data-collapse="${expandId}"]`
-            : collapseId !== undefined ? `[data-expand="${collapseId}"]` : `[data-action="${action}"]`)?.focus();
+        if (wasKeyboard) {
+            const result = host._evaluationModel.scopes.find(scope => scope.key === expandId)?.result;
+            host.querySelector(expandId !== undefined ? `[data-node="${result}"]` : `[data-action="${action}"]`)?.focus();
+        }
     }
     host.addEventListener('click', event => {
-        const target = event.target.closest('[data-action], [data-expand], [data-collapse]');
+        const target = event.target.closest('[data-action], [data-expand]');
         if (target) activate(target);
     });
     host.addEventListener('keydown', event => {
@@ -335,15 +322,13 @@ export function mountTinyaplEvaluation(host, tree, { onResize = () => {} } = {})
         host.querySelectorAll('.eval-trace, .eval-dim, .eval-source-active').forEach(el => el.classList.remove('eval-trace', 'eval-dim', 'eval-source-active'));
         const model = host._evaluationModel;
         if (model?.error) return;
-        const label = host.querySelector('.eval-inspector-label');
         const expression = host.querySelector('.eval-expression');
         // Replacing the view can fire focusout while its new DOM is mounting.
-        if (!label || !expression) return;
-        label.textContent = 'RESULT';
+        if (!expression) return;
         setExpression(`r ← ${tinyaplEvaluationExpression(model)}`);
     }
     function trace(event) {
-        const target = event.target.closest('[data-node], [data-source-col], [data-scope-result]');
+        const target = event.target.closest('[data-node], [data-source-col]');
         if (!target) return;
         clearTrace();
         const model = host._evaluationModel;
@@ -355,8 +340,8 @@ export function mountTinyaplEvaluation(host, tree, { onResize = () => {} } = {})
             active.add(id);
             nodeMap.get(id).args.forEach(visit);
         }
-        const selected = model.nodes.filter(node => target.dataset.node !== undefined || target.dataset.scopeResult !== undefined
-            ? node.id === Number(target.dataset.node ?? target.dataset.scopeResult)
+        const selected = model.nodes.filter(node => target.dataset.node !== undefined
+            ? node.id === Number(target.dataset.node)
             : node.fn?.cols?.includes(Number(target.dataset.sourceCol)));
         if (selected.length === 1 && selected[0].kind === 'input') {
             active.add(selected[0].id);
@@ -371,14 +356,12 @@ export function mountTinyaplEvaluation(host, tree, { onResize = () => {} } = {})
         const cols = new Set(selected.flatMap(node => node.fn?.cols ?? []));
         host.querySelectorAll('[data-source-col]').forEach(el => { if (cols.has(Number(el.dataset.sourceCol))) el.classList.add('eval-source-active'); });
         const node = selected[0];
-        host.querySelector('.eval-inspector-label').textContent = node.kind === 'input' ? 'ARGUMENT'
-            : node.kind === 'constant' ? 'CONSTANT' : `${node.args.length === 2 ? 'DYADIC' : 'MONADIC'} CALL${node.expandable ? ' · CLICK TO EXPAND' : ''}`;
         setExpression(tinyaplEvaluationExpression(model, node.id));
     }
     host.addEventListener('mouseover', trace);
     host.addEventListener('focusin', trace);
     host.addEventListener('mouseout', event => {
-        const previous = event.target.closest('[data-node], [data-source-col], [data-scope-result]');
+        const previous = event.target.closest('[data-node], [data-source-col]');
         if (previous && !previous.contains(event.relatedTarget)) clearTrace();
     });
     host.addEventListener('focusout', clearTrace);
