@@ -192,6 +192,10 @@ async function launcherFixture(t) {
         const { spawn } = require('node:child_process');
         const child = spawn(process.execPath, ['worker.cjs'], { stdio: ['ignore', 'pipe', 'inherit'] });
         child.stdout.once('data', () => { ${recordPid('manager')} console.log('ready'); });
+        process.on('SIGTERM', () => {
+            child.once('exit', () => process.exit(0));
+            child.kill('SIGTERM');
+        });
         setInterval(() => {}, 1000);
     `);
     write('servers/api-gateway.cjs', `
@@ -215,55 +219,26 @@ kill -0 "$pid" 2>/dev/null
 `, 0o755);
     write('bin/ss', '#!/bin/sh\nif [ -n "$ARRAYBOX_TEST_OCCUPIED_PORT" ] && [ "$*" = "-H -ltn sport = :$ARRAYBOX_TEST_OCCUPIED_PORT" ]; then echo LISTEN; fi\n', 0o755);
     write('bin/sleep', '#!/bin/sh\nexec /usr/bin/sleep 0.05\n', 0o755);
-    // Unrelated tunnels must not prevent startup; any deployment attempt must fail.
-    write('bin/pgrep', '#!/bin/sh\nexit 0\n', 0o755);
-    write('bin/systemctl', `#!/usr/bin/env node
-        const fs = require('node:fs');
-        const path = require('node:path');
-        const stateFile = path.join(process.env.ARRAYBOX_TEST_DIR, 'service.json');
-        const [scope, command, unit] = process.argv.slice(2);
-        if (scope !== '--user' || unit !== 'arraybox.service') process.exit(1);
-        if (!fs.existsSync(stateFile)) process.exit(1);
-        const service = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
-        if (command === 'show') {
-            console.log(Object.entries(service).map(([key, value]) => key + '=' + value).join('\\n'));
-        } else if (command === 'stop') {
-            if (process.env.ARRAYBOX_TEST_FAIL_STOP) {
-                console.error('Service stop failed');
-                process.exit(1);
-            }
-            fs.writeFileSync(stateFile, JSON.stringify({ ...service, ActiveState: 'inactive', MainPID: 0 }));
-            fs.writeFileSync(path.join(process.env.ARRAYBOX_TEST_DIR, 'service-stopped'), 'stopped');
-            if (Number(service.MainPID)) process.kill(Number(service.MainPID), 'SIGTERM');
-            (async () => {
-                const deadline = Date.now() + 5000;
-                while (Number(service.MainPID) && Date.now() < deadline) {
-                    try {
-                        const stat = fs.readFileSync('/proc/' + service.MainPID + '/stat', 'utf8');
-                        if (['Z', 'X'].includes(stat.slice(stat.lastIndexOf(')') + 2).split(' ')[0])) break;
-                    } catch { break; }
-                    await new Promise(resolve => setTimeout(resolve, 20));
-                }
-            })();
-        } else process.exit(1);
-    `, 0o755);
-    for (const command of ['docker', 'git']) write(`bin/${command}`, '#!/bin/sh\nexit 1\n', 0o755);
+    write('bin/pgrep', `#!/bin/sh
+[ -n "$ARRAYBOX_TEST_EXISTING_TUNNEL" ] && exit 0
+pid=$(cat "$XDG_STATE_HOME/array-box/tunnel.pid" 2>/dev/null) || exit 1
+kill -0 "$pid" 2>/dev/null
+`, 0o755);
+    for (const command of ['docker', 'git', 'systemctl']) write(`bin/${command}`, '#!/bin/sh\nexit 1\n', 0o755);
+    const env = {
+        ...process.env,
+        PATH: `${path.join(dir, 'bin')}:${process.env.PATH}`,
+        XDG_STATE_HOME: path.join(dir, 'state'),
+        ARRAYBOX_TEST_DIR: dir
+    };
+    fs.mkdirSync(stateDir, { recursive: true });
     return {
         start,
-        configureService: (properties = {}) => write('service.json', JSON.stringify({
-            LoadState: 'loaded', ActiveState: 'active', WorkingDirectory: dir,
-            MainPID: 0, ControlGroup: '/app.slice/arraybox.service', ...properties
-        })),
-        serviceStopped: () => fs.existsSync(path.join(dir, 'service-stopped')),
+        startBackend: () => start('servers/server-manager.cjs', null, { env }),
+        startGateway: () => start('servers/api-gateway.cjs', null, { env }),
         launch: (args = [], overrides = {}) => start('scripts/serve-public.sh', null, {
             executable: 'bash', args: ['--no-deploy', ...args],
-            env: {
-                ...process.env,
-                PATH: `${path.join(dir, 'bin')}:${process.env.PATH}`,
-                XDG_STATE_HOME: path.join(dir, 'state'),
-                ARRAYBOX_TEST_DIR: dir,
-                ...overrides
-            }
+            env: { ...env, ...overrides }
         }),
         pids: () => ['manager', 'gateway', 'tunnel', 'worker']
             .map(name => Number(fs.readFileSync(path.join(stateDir, `${name}.pid`), 'utf8'))),
@@ -289,7 +264,7 @@ function isAlive(pid) {
     }
 }
 
-test('launcher replaces a running stack, leaves it alone during checks, and cleans up on shutdown', { timeout: 20000 }, async t => {
+test('launcher starts a stack, leaves it alone during checks, and cleans up on shutdown', { timeout: 10000 }, async t => {
     const { launch, pids } = await launcherFixture(t);
     const original = await launch();
     await waitForPublicStack(original);
@@ -300,85 +275,84 @@ test('launcher replaces a running stack, leaves it alone during checks, and clea
     assert.ok(originalPids.every(isAlive));
     assert.equal(original.exitCode, null);
 
-    const failedPreflight = await launch([], { ARRAYBOX_TEST_FAIL_PREPARE: '1' });
-    assert.deepEqual(await failedPreflight.completion, [1, null], failedPreflight.output);
+    const duplicate = await launch();
+    assert.deepEqual(await duplicate.completion, [1, null], duplicate.output);
+    assert.match(duplicate.output, /A cloudflared process is already running/);
     assert.ok(originalPids.every(isAlive));
     assert.equal(original.exitCode, null);
 
-    const replacement = await launch();
-    await waitForPublicStack(replacement);
-    await original.completion;
-    assert.ok(originalPids.every(pid => !isAlive(pid)), replacement.output);
-    const replacementPids = pids();
-    assert.ok(replacementPids.every(isAlive));
-
-    replacement.kill('SIGTERM');
-    assert.deepEqual(await replacement.completion, [143, null], replacement.output);
-    assert.ok(replacementPids.every(pid => !isAlive(pid)), replacement.output);
+    original.kill('SIGTERM');
+    assert.deepEqual(await original.completion, [143, null], original.output);
+    assert.ok(originalPids.every(pid => !isAlive(pid)), original.output);
 });
 
-test('launcher refuses ports occupied by unrelated processes', { timeout: 10000 }, async t => {
+test('launcher refuses an occupied gateway port and cleans up its new backend', { timeout: 10000 }, async t => {
     const { launch, start, stateDir } = await launcherFixture(t);
     const unrelated = await start('unrelated.cjs', idle);
     const launcher = await launch([], { ARRAYBOX_TEST_OCCUPIED_PORT: '3000' });
     assert.deepEqual(await launcher.completion, [1, null], launcher.output);
-    assert.match(launcher.output, /Required ports are occupied by other processes: 3000/);
+    assert.match(launcher.output, /Port 3000 is occupied by something other than a healthy Array Box gateway/);
     assert.ok(isAlive(unrelated.pid));
+    for (const name of ['manager', 'worker']) {
+        assert.ok(!isAlive(Number(fs.readFileSync(path.join(stateDir, `${name}.pid`), 'utf8'))), launcher.output);
+    }
+});
+
+test('launcher reuses healthy services, skips preparation, and preserves them on shutdown', { timeout: 10000 }, async t => {
+    const { launch, pids, startBackend, startGateway } = await launcherFixture(t);
+    const backend = await startBackend();
+    const gateway = await startGateway();
+    const launcher = await launch([], { ARRAYBOX_TEST_FAIL_PREPARE: '1' });
+    await waitForPublicStack(launcher);
+    const [managerPid, gatewayPid, tunnelPid, workerPid] = pids();
+    assert.equal(managerPid, backend.pid);
+    assert.equal(gatewayPid, gateway.pid);
+    assert.match(launcher.output, /Backend servers are already healthy; reusing them/);
+    assert.match(launcher.output, /API gateway is already healthy; reusing it/);
+
+    launcher.kill('SIGTERM');
+    assert.deepEqual(await launcher.completion, [143, null], launcher.output);
+    assert.ok(!isAlive(tunnelPid));
+    assert.ok([managerPid, gatewayPid, workerPid].every(isAlive));
+});
+
+test('launcher preserves a reused gateway while shutting down its new backend and tunnel', { timeout: 10000 }, async t => {
+    const { launch, pids, startGateway } = await launcherFixture(t);
+    const gateway = await startGateway();
+    const launcher = await launch();
+    await waitForPublicStack(launcher);
+    const [managerPid, gatewayPid, tunnelPid, workerPid] = pids();
+    assert.equal(gatewayPid, gateway.pid);
+    launcher.kill('SIGTERM');
+    assert.deepEqual(await launcher.completion, [143, null], launcher.output);
+    assert.ok(isAlive(gatewayPid));
+    assert.ok([managerPid, tunnelPid, workerPid].every(pid => !isAlive(pid)), launcher.output);
+});
+
+test('launcher preserves a reused backend when gateway startup fails', { timeout: 10000 }, async t => {
+    const { launch, startBackend, stateDir } = await launcherFixture(t);
+    const backend = await startBackend();
+    const launcher = await launch([], { ARRAYBOX_TEST_FAIL_GATEWAY: '1' });
+    assert.deepEqual(await launcher.completion, [1, null], launcher.output);
+    assert.match(launcher.output, /API gateway exited during startup/);
+    assert.ok(isAlive(backend.pid));
+    assert.ok(isAlive(Number(fs.readFileSync(path.join(stateDir, 'worker.pid'), 'utf8'))));
+});
+
+test('launcher refuses an existing tunnel before starting services', async t => {
+    const { launch, stateDir } = await launcherFixture(t);
+    const launcher = await launch([], { ARRAYBOX_TEST_EXISTING_TUNNEL: '1' });
+    assert.deepEqual(await launcher.completion, [1, null], launcher.output);
+    assert.match(launcher.output, /A cloudflared process is already running/);
     assert.ok(!fs.existsSync(path.join(stateDir, 'manager.pid')));
 });
 
-test('launcher stops the background service before replacing it and cancels its automatic restart', { timeout: 15000 }, async t => {
-    const { launch, pids, configureService, serviceStopped } = await launcherFixture(t);
-    const original = await launch();
-    await waitForPublicStack(original);
-    const originalPids = pids();
-    configureService({ MainPID: original.pid });
-    let restart;
-    original.once('exit', () => {
-        restart = setTimeout(() => {
-            if (!serviceStopped()) void launch();
-        }, 100);
-    });
-    t.after(() => clearTimeout(restart));
-
-    const check = await launch(['--check']);
-    assert.deepEqual(await check.completion, [0, null], check.output);
-    assert.equal(serviceStopped(), false);
-    const failedPreflight = await launch([], { ARRAYBOX_TEST_FAIL_PREPARE: '1' });
-    assert.deepEqual(await failedPreflight.completion, [1, null], failedPreflight.output);
-    assert.equal(serviceStopped(), false);
-    assert.ok(originalPids.every(isAlive));
-
-    const replacement = await launch();
-    await waitForPublicStack(replacement);
-    await delay(300);
-    assert.equal(serviceStopped(), true, replacement.output);
-    assert.ok(originalPids.every(pid => !isAlive(pid)), replacement.output);
-    assert.ok(pids().every(isAlive));
-    assert.equal(replacement.exitCode, null);
-    assert.equal(replacement.signalCode, null);
-});
-
-test('launcher cancels a pending service restart even when the old launcher has already exited', { timeout: 10000 }, async t => {
-    const { launch, configureService, serviceStopped } = await launcherFixture(t);
-    configureService({ ActiveState: 'activating', MainPID: 0 });
-    const launcher = await launch();
-    await waitForPublicStack(launcher);
-    assert.equal(serviceStopped(), true, launcher.output);
-});
-
-test('launcher preserves the existing stack if stopping its service fails', { timeout: 10000 }, async t => {
-    const { launch, pids, configureService, serviceStopped } = await launcherFixture(t);
-    const original = await launch();
-    await waitForPublicStack(original);
-    const originalPids = pids();
-    configureService({ MainPID: original.pid });
-    const replacement = await launch([], { ARRAYBOX_TEST_FAIL_STOP: '1' });
-    assert.deepEqual(await replacement.completion, [1, null], replacement.output);
-    assert.match(replacement.output, /Could not stop arraybox.service: Service stop failed/);
-    assert.equal(serviceStopped(), false);
-    assert.ok(originalPids.every(isAlive));
-    assert.equal(original.exitCode, null);
+test('launcher refuses occupied backend ports before starting services', async t => {
+    const { launch, stateDir } = await launcherFixture(t);
+    const launcher = await launch([], { ARRAYBOX_TEST_OCCUPIED_PORT: '8081' });
+    assert.deepEqual(await launcher.completion, [1, null], launcher.output);
+    assert.match(launcher.output, /The backend is unhealthy but these required ports are occupied: 8081/);
+    assert.ok(!fs.existsSync(path.join(stateDir, 'manager.pid')));
 });
 
 test('launcher cleans up the backend and its children when gateway startup fails', { timeout: 10000 }, async t => {

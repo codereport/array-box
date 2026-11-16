@@ -28,4 +28,4 @@ jobs:
         run: npm ci
 
       - name: Run application tests
-        run: npm run test:app
+        run: node --test tests/*.test.cjs
