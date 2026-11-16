@@ -492,6 +492,8 @@ const APL_FUNC_GLYPHS = new Set([
 ]);
 // 1-operators (monadic operators / adverbs)
 const APL_MOD1_GLYPHS = new Set([...`/\\⌿⍀¨⍨`]);
+// Hybrid reduce/scan glyphs can also denote replicate/expand functions.
+const APL_HYBRID_GLYPHS = new Set([...`/\\⌿⍀`]);
 // 2-operators (dyadic operators / conjunctions)
 const APL_MOD2_GLYPHS = new Set([...`∘.⍤⍥⍣@⍠⌸⌺⌶⍛`]);
 
@@ -514,9 +516,8 @@ function aplSystemFunctionLength(chars, start) {
 /**
  * Parse an APL source expression and return hover groups.
  *
- * Identical algorithm to parseBqnExprGroups — APL trains share the same
- * right-recursive fork/atop structure and left-to-right operator binding.
- * Only the glyph sets differ.
+ * APL trains share BQN's right-recursive fork/atop structure and left-to-right
+ * operator binding. Hybrid slash glyphs also act as functions in operand positions.
  *
  * @param {string} src
  * @param {boolean} returnTree - Return the parsed tree instead of hover groups
@@ -578,6 +579,7 @@ function parseAplExprGroups(src, returnTree = false) {
         }
 
         if (APL_FUNC_GLYPHS.has(ch)) { tokens.push({ type: 'func', cols: [i + colOffset] }); i++; continue; }
+        if (APL_HYBRID_GLYPHS.has(ch)) { tokens.push({ type: 'hybrid', cols: [i + colOffset] }); i++; continue; }
         if (APL_MOD1_GLYPHS.has(ch)) { tokens.push({ type: 'mod1', cols: [i + colOffset] }); i++; continue; }
         if (APL_MOD2_GLYPHS.has(ch)) { tokens.push({ type: 'mod2', cols: [i + colOffset] }); i++; continue; }
 
@@ -596,18 +598,21 @@ function parseAplExprGroups(src, returnTree = false) {
         i++;
     }
 
-    // Step 2: Parse modifier applications left-to-right into derived-function nodes
+    // Step 2: Parse modifier applications left-to-right into derived-function nodes.
+    // A hybrid in an operand position is a function, including the short right
+    // operand of a dyadic operator (e.g. +⍛/).
+    const asOperand = token => token.type === 'hybrid' ? { ...token, type: 'func' } : token;
     const dervs = [];
     let ti = 0;
 
     while (ti < tokens.length) {
-        if (tokens[ti].type !== 'func') { ti++; continue; }
+        if (!['func', 'hybrid'].includes(tokens[ti].type)) { ti++; continue; }
 
-        let cur = tokens[ti];
+        let cur = asOperand(tokens[ti]);
         ti++;
 
         for (;;) {
-            if (ti < tokens.length && tokens[ti].type === 'mod1') {
+            if (ti < tokens.length && ['mod1', 'hybrid'].includes(tokens[ti].type)) {
                 const modTok = tokens[ti];
                 cur = {
                     type: '1-mod',
@@ -620,10 +625,10 @@ function parseAplExprGroups(src, returnTree = false) {
                 ti < tokens.length &&
                 tokens[ti].type === 'mod2' &&
                 ti + 1 < tokens.length &&
-                tokens[ti + 1].type === 'func'
+                ['func', 'hybrid'].includes(tokens[ti + 1].type)
             ) {
                 const modTok   = tokens[ti];
-                const rightTok = tokens[ti + 1];
+                const rightTok = asOperand(tokens[ti + 1]);
                 cur = {
                     type: '2-mod',
                     cols: [...cur.cols, ...modTok.cols, ...rightTok.cols],

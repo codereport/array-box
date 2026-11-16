@@ -102,6 +102,55 @@ test('opaque function representations can use a complete original primitive expr
     assert.equal(formatAplFunctionOutput(OUTPUT, undefined, 'F←(⊃∘⌽+⍥⍎⊃) ⋄ F'), OUTPUT);
 });
 
+test('issue #252 rebuilds the complete train when a hybrid glyph is a function operand', async () => {
+    const { formatAplFunctionOutput, renderAplExplainTree } = await import('../src/explain-tree.js');
+    const source = '⌈/2-⍨/(∪⍛≡∘⍕¨)⍛/∘⍳';
+    const output = ' ⌈/  2   -⍨ /      ∪⍛≡ ∘ ∇sûre_format  ¨ ⍛/ ∘⍳  ';
+    const expected = [
+        '  ┌───┴───┐',
+        '  / ┌─────┼───────┐',
+        '┌─┘ 2     /       ∘',
+        '⌈       ┌─┘      ┌┴─┐',
+        '        ⍨        ⍛  ⍳',
+        '      ┌─┘       ┌┴┐',
+        '      -         ¨ /',
+        '              ┌─┘',
+        '              ∘',
+        '             ┌┴─┐',
+        '             ⍛  ⍕',
+        '            ┌┴┐',
+        '            ∪ ≡'
+    ].join('\n');
+    for (const representation of [undefined, leaf(output)]) {
+        const formatted = formatAplFunctionOutput(output, representation, source);
+        assert.equal(formatted, expected);
+        assert.ok(!formatted.includes('sûre_'));
+        const { groups } = renderAplExplainTree(source, formatted);
+        const behind = groups.find(group => group.type === '2-mod' &&
+            group.parts.some(part => part.role === 'modifier' && part.cols.includes(14)));
+        assert.deepEqual(behind.parts.find(part => part.role === 'right').cols, [15]);
+    }
+});
+
+test('hybrid glyphs retain their function and operator roles in covered-function trees', async () => {
+    const { formatAplFunctionOutput, renderAplExplainTree } = await import('../src/explain-tree.js');
+    for (const hybrid of ['/', '⌿', '\\', '⍀']) {
+        const source = `(⍕⍛${hybrid})`;
+        assert.equal(formatAplFunctionOutput('∇sûre_format', undefined, source), ` ⍛\n┌┴┐\n⍕ ${hybrid}`);
+        const { groups } = renderAplExplainTree(source, '');
+        assert.equal(groups.length, 1);
+        assert.equal(groups[0].type, '2-mod');
+        assert.deepEqual(groups[0].parts.find(part => part.role === 'right').cols, [3]);
+
+        assert.equal(formatAplFunctionOutput('∇sûre_format', undefined, `(${hybrid}∘⍕)`),
+            ` ∘\n┌┴┐\n${hybrid} ⍕`);
+        const reduced = renderAplExplainTree(`(+${hybrid}÷≢)`, '').groups;
+        assert.equal(reduced[0].type, '1-mod');
+        assert.deepEqual(reduced[0].parts.find(part => part.role === 'modifier').cols, [2]);
+        assert.equal(reduced[1].type, 'fork');
+    }
+});
+
 test('other covers retain operator structure and system-function labels', async () => {
     const { formatAplFunctionOutput } = await import('../src/explain-tree.js');
     assert.equal(formatAplFunctionOutput(' ∇sûre_format ¨', tree(leaf('∇sûre_format'), leaf('¨'))), '  ¨\n┌─┘\n⍕');
