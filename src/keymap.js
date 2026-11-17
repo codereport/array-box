@@ -340,7 +340,7 @@ export const uiuaGlyphs = {
     ],
     // Monadic Array - Operate on a single array
     monadicArray: [
-        '⧻', '△', '⇡', '⊢', '⊣', '⇌', '♭', '¤', '⋯', '⍉', '⍆', '⍏', '⍖', '⊚', '◴', '⊛', '⧆', '◰', '□', '⋕',
+        '⧻', '△', '⇡', '⊢', '⊣', '⇌', '♭', '¤', '⋯', '⍉', '⍆', '⍏', '⍖', '⊚', '◴', '⊛', '⧆', '□', '⋕',
         '𝕍'
     ],
     // Dyadic Pervasive - Operate on every pair of elements in two arrays
@@ -349,13 +349,13 @@ export const uiuaGlyphs = {
     ],
     // Dyadic Array - Operate on two arrays
     dyadicArray: [
-        '≍', '⊟', '⊂', '⊏', '⊡', '↯', '☇', '↙', '↘', '↻', '⤸', '▽', '⌕', '⦷', '∊',  '⊗', '◫', '⊥',
+        '≍', '⊟', '⊂', '⊏', '⊡', '↯', '↙', '↘', '↻', '⤸', '▽', '⌕', '⦷', '∊',  '⊗', '⊥',
         '⨰', '⨱', '⊨'
     ],
     // 1-Modifiers (monadic modifiers) - Take 1 function argument
     monadicModifiers: [
         '˙', '˜', '⊙', '⋅', '⟜', '⊸', '⤙', '⤚', '◠', '◡', '∩',
-        '≡', '∵', '⍚', '⊞', '⧅', '⧈', '⊕', '⊜',
+        '≡', '⍚', '⊞', '⧅', '⧈', '⊕', '⊜',
         '/', '∧', '\\', '⍥',
         '⌅', '°', '⌝',
         '⧋', '◇', '∪', '⍩'

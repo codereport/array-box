@@ -839,7 +839,6 @@ export const uiuaGlyphNames = {
     '◴': 'deduplicate',
     '⊛': 'classify',
     '⧆': 'occurrences',
-    '◰': 'unique',
     '□': 'box',
     '⋕': 'parse',
     
@@ -859,8 +858,6 @@ export const uiuaGlyphNames = {
     '⦷': 'mask',
     '∊': 'memberof',
     '⊗': 'indexin',
-    '◫': 'windows',
-    '☇': 'rerank',
     '⊥': 'base',
     
     // Mapping Modifiers
@@ -871,7 +868,6 @@ export const uiuaGlyphNames = {
     '⧈': 'stencil',
     '⊕': 'group',
     '⊜': 'partition',
-    '∵': 'each',
     '⍩': 'case',
     
     // Iterating Modifiers

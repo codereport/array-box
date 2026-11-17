@@ -296,7 +296,7 @@ export const primitiveMap = {
         dyad:  null
     },
     '¨': {
-        monad: { name: 'Each', apl: '¨', bqn: '¨', j: '"0', kap: '¨', uiua: '∵' },
+        monad: { name: 'Each', apl: '¨', bqn: '¨', j: '"0', kap: '¨', uiua: '≡₀' },
         dyad:  null
     },
     '⍨': {

@@ -518,6 +518,19 @@
             font-family: 'Uiua', 'Courier New', monospace;
         }
 
+        .uiua-diagnostics {
+            margin-top: 18px;
+            padding: 14px 20px;
+            border-left: 3px solid var(--syntax-uiua-function-monadic);
+            color: var(--text-color);
+            font: 18px/1.5 'Uiua', 'Courier New', monospace;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .uiua-diagnostic + .uiua-diagnostic { margin-top: 10px; }
+        .uiua-diagnostic-label { font: 600 13px/1.5 system-ui, sans-serif; opacity: 0.7; }
+
         .output.j {
             font-family: 'JetBrains Mono', monospace;
             font-variant-ligatures: none;
@@ -1406,6 +1419,7 @@
                 tabindex="1"
             ></div>
             <div class="output" id="output"></div>
+            <div class="uiua-diagnostics" id="uiuaDiagnostics" role="status" aria-label="Uiua recommendations" hidden></div>
             <div class="loading-indicator" id="loadingIndicator">
                 <div class="loading-dot"></div>
                 <div class="loading-dot"></div>
@@ -1811,7 +1825,8 @@
     <!-- Uiua WASM Loader -->
     <script type="module">
         // Load Uiua WASM module
-        import initUiua, { eval_uiua, format_uiua, uiua_version } from './wasm/uiua_wasm.js';
+        import initUiua, { eval_uiua, format_uiua, uiua_version, uiua_name_tokens } from './wasm/uiua_wasm.js';
+        import { setUiuaNameResolver } from './src/syntax.js';
 
         let uiuaReady = false;
         let uiuaLoadError = null;
@@ -1823,6 +1838,8 @@
             try {
                 await initUiua();
                 uiuaReady = true;
+                setUiuaNameResolver(name => JSON.parse(uiua_name_tokens(name)));
+                window.dispatchEvent(new Event('uiua-ready'));
                 const version = uiua_version();
                 console.log('Uiua WASM loaded, version:', version);
                 // Update version display in dropdown
@@ -2451,6 +2468,7 @@
         import { ArrayKeyboard, uiuaGlyphNames, bqnGlyphNames, aplGlyphNames, kapGlyphNames, jGlyphNames, tinyaplGlyphNames, bqnGlyphDocs, uiuaGlyphDocs, jGlyphDocs, kapGlyphDocs, aplGlyphDocs, tinyaplGlyphDocs } from './src/keyboard.js';
         import { createEditorFeaturesManager, toggleComment, commentTokens, autoExpandWidthForCodeAndResult, calculateContentWidth } from './src/editor-features.js';
         import { createMultiCursorEditor } from './src/multi-cursor.js';
+        import { mapUiuaSelections } from './src/uiua-editor.js';
         import { translatePrimitives, translateArrayLiterals, clearTranslationCache } from './src/primitive-translate.js';
         import { primitiveMap, compareLanguages, lookupPrimitive, parsePrimitives, getPrimitiveName, getEquivalent, hasValence, isScalar, getAvailableRanks, getDefaultRank } from './src/primitive-compare.js';
 
@@ -2837,7 +2855,9 @@
                         return {
                             success: result.success,
                             output: result.output || '',
-                            formatted: result.formatted || null
+                            formatted: result.formatted ?? null,
+                            glyphMap: result.glyph_map || [],
+                            diagnostics: result.diagnostics || []
                         };
                     } catch (error) {
                         return {
@@ -4418,14 +4438,18 @@
 
         // Evaluation function (optional code = evaluate that string, e.g. selected text; else full input)
         async function evaluateCode(optionalCode, { evaluationTree = false } = {}) {
-            const code = (optionalCode != null ? optionalCode : getInputText()).trim();
-            if (!code) {
+            const inputBeforeEvaluation = getInputText();
+            const rawCode = optionalCode != null ? optionalCode : inputBeforeEvaluation;
+            const code = currentLanguage === 'uiua' ? rawCode : rawCode.trim();
+            const evaluationLanguage = currentLanguage;
+            if (!code.trim()) {
                 hideOutput();
                 lastResult = null;
                 return;
             }
 
             const langConfig = languages[currentLanguage];
+            showUiuaDiagnostics([]);
 
             // Show loading indicator and hide previous output
             output.classList.remove('show');
@@ -4451,10 +4475,13 @@
             historyIndex = -1;
             currentUnsavedCode = '';
 
-            // If formatted code is returned (Uiua), replace input with it
-            if (result.formatted && result.formatted.trim() !== code) {
-                setInputText(result.formatted.trim());
+            // Formatting selected code must not replace the rest of the input.
+            // Ignore a stale result if the user edited or switched languages.
+            if (currentLanguage !== evaluationLanguage || getInputText() !== inputBeforeEvaluation) return;
+            if (optionalCode == null && result.formatted != null) {
+                applyUiuaFormat({ formatted: result.formatted, glyph_map: result.glyphMap });
             }
+            if (evaluationLanguage === 'uiua') showUiuaDiagnostics(result.diagnostics || []);
 
             // Function metadata distinguishes TinyAPL trees from strings and boxed arrays.
             if (result.tinyaplFunctionTree) {
@@ -4696,6 +4723,7 @@
         window.addEventListener('resize', constrainHeights);
 
         function hideOutput() {
+            showUiuaDiagnostics([]);
             output.classList.remove('show');
             loadingIndicator.classList.remove('show');
             output.style.overflowX = 'hidden'; // Reset overflow when hiding
@@ -4738,6 +4766,49 @@
             renderText: text => { codeInput.innerHTML = highlightInputText(text); }
         });
 
+        window.addEventListener('uiua-ready', () => {
+            if (currentLanguage === 'uiua') applySyntaxHighlightingImmediate();
+        });
+
+        function showUiuaDiagnostics(diagnostics) {
+            const panel = document.getElementById('uiuaDiagnostics');
+            panel.replaceChildren();
+            panel.hidden = diagnostics.length === 0;
+            for (const diagnostic of diagnostics) {
+                const item = document.createElement('div');
+                item.className = 'uiua-diagnostic';
+                const label = document.createElement('div');
+                label.className = 'uiua-diagnostic-label';
+                label.textContent = diagnostic.kind === 'warning' ? 'Warning' : 'Recommendation';
+                if (diagnostic.line) label.textContent += ` · Line ${diagnostic.line}`;
+                const message = document.createElement('div');
+                message.textContent = diagnostic.message;
+                item.append(label, message);
+                panel.append(item);
+            }
+        }
+
+        function applyUiuaFormat(result) {
+            if (result.formatted == null || result.formatted === getInputText()) return;
+            const selections = mapUiuaSelections(multiCursor.captureSelection(),
+                result.glyph_map || [], result.formatted.length);
+            codeInput.textContent = result.formatted;
+            applySyntaxHighlightingImmediate();
+            multiCursor.restoreSelection(selections);
+            editorFeatures.handleAutoExpand();
+        }
+
+        async function formatUiuaInput() {
+            const text = getInputText();
+            if (!await window.uiuaWasm?.load()) return;
+            if (currentLanguage !== 'uiua' || getInputText() !== text) return;
+            const result = window.uiuaWasm.format(text);
+            if (result?.success) {
+                applyUiuaFormat(result);
+                showUiuaDiagnostics(result.diagnostics || []);
+            }
+        }
+
         // Keyboard shortcuts for code input
         codeInput.addEventListener('keydown', (e) => {
             // Don't interfere with IME/Compose key input
@@ -4750,7 +4821,7 @@
                 const selectionInInput = sel.rangeCount > 0 && codeInput.contains(sel.anchorNode);
                 if (selectedText && selectionInInput) {
                     e.preventDefault();
-                    editorFeatures.alignAll();
+                    if (currentLanguage !== 'uiua') editorFeatures.alignAll();
                     evaluateCode(selectedText);
                     return;
                 }
@@ -4760,15 +4831,19 @@
             // Enter to evaluate (auto-align first)
             if (e.key === 'Enter') {
                 e.preventDefault();
-                editorFeatures.alignAll();
+                if (currentLanguage !== 'uiua') editorFeatures.alignAll();
                 evaluateCode();
             }
 
             // Ctrl+F to format only (no evaluation)
             if (e.ctrlKey && e.key === 'f') {
                 e.preventDefault();
-                editorFeatures.alignAll();
                 hideOutput();
+                if (currentLanguage === 'uiua') {
+                    formatUiuaInput();
+                } else {
+                    editorFeatures.alignAll();
+                }
                 return;
             }
 
@@ -4901,6 +4976,7 @@
 
         // Handle input changes - apply syntax highlighting (output persists until next eval)
         codeInput.addEventListener('input', () => {
+            showUiuaDiagnostics([]);
             // Skip highlighting during IME/Compose input to avoid disrupting composition
             if (isComposing) return;
             // Debounced highlighting will be applied automatically

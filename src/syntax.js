@@ -1,3 +1,22 @@
+// Installed by the Uiua WASM loader so highlighting uses the interpreter's
+// prefix and alias rules, including concatenated names such as `revran`.
+let uiuaNameResolver = null;
+const uiuaNameCache = new Map();
+
+export function setUiuaNameResolver(resolver) {
+    uiuaNameResolver = resolver;
+    uiuaNameCache.clear();
+}
+
+function resolveUiuaName(name) {
+    if (!uiuaNameResolver) return null;
+    if (!uiuaNameCache.has(name)) {
+        if (uiuaNameCache.size >= 512) uiuaNameCache.clear();
+        uiuaNameCache.set(name, uiuaNameResolver(name));
+    }
+    return uiuaNameCache.get(name);
+}
+
 /**
  * Syntax highlighting for array languages
  * Provides syntax rules and highlighting functions for BQN, APL, J, and Uiua
@@ -152,14 +171,14 @@ export const syntaxRules = {
         monadic: [
             '¬', '±', '√', '⌵', '⌈', '⌊', '⧻', '△', '⇡', '⊢', '⊣', '⇌',
             '♭', '¤', '⊚', '⊛', '◴', '⍏', '⍖', '⁅',
-            '⍉', '⋯', '⨪', 'ₑ', '∿', '⍆', '⧆', '◰', '□', '⋕',
+            '⍉', '⋯', '⨪', 'ₑ', '∿', '⍆', '⧆', '□', '⋕',
             '𝕍'
         ],
         // Dyadic functions (green) - take 2 array arguments
         functions: [
             '+', '-', '×', '÷', '◿', 'ⁿ', '=', '≠', '<', '>', '≤', '≥',
-            '↧', '↥', '∠', '∨', 'ℂ', '⊂', '⊏', '⊡', '↯', '☇',
-            '↙', '↘', '↻', '⊗', '∊', '⊟', '▽', '◫', '⤸',
+            '↧', '↥', '∠', '∨', 'ℂ', '⊂', '⊏', '⊡', '↯',
+            '↙', '↘', '↻', '⊗', '∊', '⊟', '▽', '⤸',
             '≍', '⌕', '⦷',  '⊥',
             '⨰', '⨱', '⊨'
         ],
@@ -167,7 +186,7 @@ export const syntaxRules = {
         // Matches uiuaGlyphs.monadicModifiers from keymap.js (popup source of truth)
         dyadic: [
             '∘', '◌', '˙', '˜', '⊙', '⋅', '⟜', '⊸', '⤙', '⤚', '◠', '◡', '∩',
-            '≡', '∵', '⍚', '⊞', '⧅', '⧈', '⊕', '⊜',
+            '≡', '⍚', '⊞', '⧅', '⧈', '⊕', '⊜',
             '/', '∧', '\\', '⍥',
             '⌅', '°', '⌝',
             '⧋', '◇', '∪', '⍩'
@@ -352,6 +371,17 @@ export function highlightCode(text, language) {
         }
         
         // Check for strings
+        // Uiua raw and multiline format strings extend from `$ ` / `$$ `
+        // to the end of the line, including words that look like prefixes.
+        if (language === 'uiua' && /^\$\$?(?: |\r?\n|$)/.test(remainingText)) {
+            const lineEnd = text.indexOf('\n', i);
+            const end = lineEnd === -1 ? text.length : lineEnd;
+            tokens.push({ type: 'string', value: text.slice(i, end) });
+            lastGlyphType = 'string';
+            i = end;
+            continue;
+        }
+
         // Support both single stringDelimiter and array of stringDelimiters
         const stringDelimiters = rules.stringDelimiters || (rules.stringDelimiter ? [rules.stringDelimiter] : []);
         if (stringDelimiters.includes(char)) {
@@ -479,6 +509,28 @@ export function highlightCode(text, language) {
             continue;
         }
         
+        // Consume the entire Uiua name even when it is not a primitive, so a
+        // valid prefix inside a binding or an unknown identifier stays plain.
+        if (language === 'uiua' && /[A-Za-z&]/.test(char)) {
+            const name = remainingText.match(/^[A-Za-z&][A-Za-z0-9!]*/)[0];
+            const parts = resolveUiuaName(name);
+            if (parts) {
+                for (const [value, glyph] of parts) {
+                    const type = rules.constants.includes(glyph) ? 'number' :
+                        ['monadic', 'functions', 'dyadic', 'modifier'].find(key => rules[key].includes(glyph));
+                    const tokenType = type === 'functions' ? 'function' : type ||
+                        (rules.subscripts.includes(glyph) ? lastGlyphType : 'default');
+                    tokens.push({ type: tokenType, value });
+                    lastGlyphType = tokenType;
+                }
+            } else {
+                tokens.push({ type: 'default', value: name });
+                lastGlyphType = 'default';
+            }
+            i += name.length;
+            continue;
+        }
+
         // Check for user-defined identifier patterns (BQN, TinyAPL)
         // Capitalized = function, _prefix = 1-modifier, _prefix_suffix_ = 2-modifier
         if (rules.identifierPatterns) {

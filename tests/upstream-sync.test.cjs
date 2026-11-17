@@ -56,6 +56,15 @@ test('retired Uiua glyphs can be removed from any array position', async () => {
     assert.equal(compact(removeGlyphLiteral("['a', 'b', 'c']", "'c'")), "['a','b']");
 });
 
+test('Uiua sync retires keyboard glyphs even when their docs were already absent', async () => {
+    const { findRetiredUiuaGlyphs } = await load();
+    const previousDocs = { '⇡': { name: 'range' }, '∵': { name: 'each' } };
+    const currentDocs = { '⇡': { name: 'range' } };
+    assert.deepEqual(findRetiredUiuaGlyphs(previousDocs, currentDocs,
+        ['∵', '☇', '◰', '◫', '⇡']), ['∵', '☇', '◰', '◫']);
+    assert.deepEqual(findRetiredUiuaGlyphs(previousDocs, currentDocs, ['⇡']), ['∵']);
+});
+
 test('Kap source headings produce live source-line hover links', async () => {
     const { kapHeadings, fixKapLinks } = await load();
     const headings = Array.from({ length: 75 }, (_, i) => `=== \`${String.fromCodePoint(0x2200 + i)}\`: Name ${i}`);

@@ -89,6 +89,13 @@ function removeGlyphLiteral(block, literal) {
     return block;
 }
 
+function findRetiredUiuaGlyphs(previousDocs, currentDocs, keyboardGlyphs) {
+    // A deprecated glyph may have lost its docs in an earlier sync while
+    // remaining in the keyboard. Check the keyboard as well as removed docs.
+    return [...new Set([...Object.keys(previousDocs), ...keyboardGlyphs])]
+        .filter(glyph => !currentDocs[glyph]);
+}
+
 function removeUiuaGlyph(glyph) {
     const literal = jsString(glyph);
     let keyboard = readFileSync(src('keyboard.js'), 'utf8');
@@ -286,7 +293,8 @@ async function main() {
         appendToArray(src('keymap.js'), 'uiuaGlyphs', keymapCategory, unseenKeymap);
         appendToSyntax(syntaxCategory, glyphs.filter(g => !syntaxRules.uiua[syntaxCategory].includes(g)), 'uiua');
     }
-    const retiredUiua = Object.keys(previousUiuaDocs).filter(glyph => !uiuaGlyphDocs[glyph]);
+    const retiredUiua = findRetiredUiuaGlyphs(previousUiuaDocs, uiuaGlyphDocs,
+        Object.values(keymap.uiuaGlyphs).flat());
     for (const glyph of retiredUiua) removeUiuaGlyph(glyph);
     const renamedUiua = Object.entries(uiuaGlyphDocs).filter(([glyph, doc]) =>
         previousUiuaDocs[glyph]?.name && previousUiuaDocs[glyph].name !== doc.name);
@@ -376,4 +384,4 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     main().catch(error => { console.error(error); process.exitCode = 1; });
 }
 
-export { classifyUiua, fixKapLinks, kapHeadings, parseTinyKeyboard, removeGlyphLiteral };
+export { classifyUiua, findRetiredUiuaGlyphs, fixKapLinks, kapHeadings, parseTinyKeyboard, removeGlyphLiteral };
