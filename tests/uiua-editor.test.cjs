@@ -144,6 +144,29 @@ test('Uiua prefix coloring respects strings, raw strings, characters, and commen
     assert.equal(await page.locator('#codeInput .syntax-comment').count(), 1);
 });
 
+test('Uiua prefixes and adjacent numbers have the same colors with or without spaces', async t => {
+    const page = await openEditor(t);
+    await setCode(page, '');
+    await page.keyboard.type('revrange5');
+    await page.locator('#codeInput .syntax-number').waitFor();
+    assert.deepEqual(await selection(page), { anchor: 9, head: 9, text: '' });
+
+    for (const number of ['5', '5_10', '5.5', '.5', '1e3', '¯5', '¯1.5_2e3']) {
+        for (const space of ['', ' ']) {
+            const text = `revrange${space}${number}`;
+            await setCode(page, text);
+            const spans = await page.locator('#codeInput span').evaluateAll(elements =>
+                elements.map(element => [element.textContent, element.className]));
+            assert.deepEqual(spans, [
+                ['rev', 'syntax-uiua-function-monadic'],
+                ['range', 'syntax-uiua-function-monadic'],
+                [number, 'syntax-number'],
+            ], text);
+            assert.equal(await page.locator('#codeInput').textContent(), text);
+        }
+    }
+});
+
 test('Uiua formatting preserves carets across prefix conversion and Unicode', async t => {
     const page = await openEditor(t);
     for (const prefix of ['', '"🦊" ', '"e\u0301" ', '# heading\n']) {

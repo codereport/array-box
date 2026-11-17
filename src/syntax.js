@@ -356,9 +356,10 @@ export function highlightCode(text, language) {
         const char = text[i];
         
         // Check for numbers first (including negative numbers with ¯ or _)
-        // Only match if the digit is NOT continuing an identifier (e.g. IO, var2)
+        // Uiua numbers can directly follow names; digits are separate tokens.
+        // Other languages can include digits in identifiers (e.g. var2).
         const prevChar = i > 0 ? text[i - 1] : '';
-        const isPartOfIdentifier = /[A-Za-z0-9_]/.test(prevChar);
+        const isPartOfIdentifier = language !== 'uiua' && /[A-Za-z0-9_]/.test(prevChar);
         const numberMatch = !isPartOfIdentifier && remainingText.match(rules.numberPattern);
         if (numberMatch) {
             tokens.push({
@@ -512,7 +513,7 @@ export function highlightCode(text, language) {
         // Consume the entire Uiua name even when it is not a primitive, so a
         // valid prefix inside a binding or an unknown identifier stays plain.
         if (language === 'uiua' && /[A-Za-z&]/.test(char)) {
-            const name = remainingText.match(/^[A-Za-z&][A-Za-z0-9!]*/)[0];
+            const name = remainingText.match(/^[A-Za-z&][A-Za-z!]*/)[0];
             const parts = resolveUiuaName(name);
             if (parts) {
                 for (const [value, glyph] of parts) {
