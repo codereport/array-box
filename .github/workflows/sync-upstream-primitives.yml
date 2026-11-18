@@ -27,6 +27,9 @@ jobs:
       - name: Refresh upstream docs and glyphs
         run: npm run sync:primitives
 
+      - name: Test upstream sync
+        run: node --test tests/upstream-sync.test.cjs
+
       - name: Check primitive names
         run: node scripts/check-primitive-names.mjs
 
@@ -49,7 +52,7 @@ jobs:
           token: ${{ secrets.PAT_REPO }}
           branch: auto/update-primitives
           delete-branch: true
-          commit-message: 'Sync upstream primitives and docs'
+          commit-message: '⬆️ Sync upstream primitives and docs'
           title: 'Sync upstream primitives and docs'
           body: ${{ steps.body.outputs.body }}
           add-paths: |

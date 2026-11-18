@@ -100,6 +100,35 @@ pub fn uiua_name_tokens(name: &str) -> String {
     serde_json::to_string(&tokens).unwrap()
 }
 
+/// Describe the active primitives in this runtime for documentation sync.
+#[wasm_bindgen]
+pub fn uiua_primitives() -> String {
+    let primitives = uiua::Primitive::non_deprecated()
+        .filter_map(|primitive| {
+            let glyph = primitive
+                .glyph()
+                .map(|glyph| glyph.to_string())
+                .or_else(|| primitive.ascii().map(|ascii| ascii.to_string()))?;
+            let mut info = serde_json::json!({
+                "glyph": glyph,
+                "class": format!("{:?}", primitive.class()),
+                "description": primitive.doc().lines().next().unwrap_or_default().trim(),
+            });
+            if let Some(args) = primitive.args() {
+                info["args"] = args.into();
+            }
+            if let Some(outputs) = primitive.outputs() {
+                info["outputs"] = outputs.into();
+            }
+            if let Some(modifier_args) = primitive.modifier_args() {
+                info["modifier_args"] = modifier_args.into();
+            }
+            Some((primitive.name(), info))
+        })
+        .collect::<std::collections::BTreeMap<_, _>>();
+    serde_json::to_string(&primitives).unwrap()
+}
+
 fn value_to_string(value: &Value) -> String {
     value.show()
 }

@@ -5,6 +5,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { loadUiuaPrimitives, scrapeUiuaDocs } from './scrape-uiua-docs.cjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const src = name => path.join(root, 'src', name);
@@ -244,15 +245,17 @@ async function main() {
     const [uiuaRaw, kapSource, tinyKeyboardSource, uiuaFont] = await Promise.all([
         get(uiuaUrl), get(kapRawUrl), get(tinyKeyboardUrl), getFont(uiuaFontUrl),
     ]);
-    const uiua = JSON.parse(uiuaRaw);
-    if (Object.keys(uiua).length < 100) throw new Error('Uiua primitive list looks incomplete');
+    const upstreamUiua = JSON.parse(uiuaRaw);
+    if (Object.keys(upstreamUiua).length < 100) throw new Error('Uiua primitive list looks incomplete');
+    const uiua = await loadUiuaPrimitives(upstreamUiua);
     const headings = kapHeadings(kapSource);
     const tinyKeyboardRows = parseTinyKeyboard(tinyKeyboardSource);
     const { uiuaGlyphDocs: previousUiuaDocs } = await import('../src/uiua-docs.js?before-sync');
     const previousDocsCode = new Map(['uiua', 'tinyapl', 'bqn'].map(lang =>
         [lang, readFileSync(src(`${lang}-docs.js`), 'utf8')]));
 
-    for (const lang of previousDocsCode.keys()) {
+    await scrapeUiuaDocs(uiua);
+    for (const lang of ['tinyapl', 'bqn']) {
         execFileSync(process.execPath, [path.join(root, 'scripts', `scrape-${lang}-docs.cjs`)], { stdio: 'inherit' });
     }
     const languageNames = { uiua: 'Uiua', tinyapl: 'TinyAPL', bqn: 'BQN' };

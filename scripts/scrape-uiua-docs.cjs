@@ -2,8 +2,8 @@
 /**
  * Uiua Documentation Scraper
  * 
- * Fetches primitive documentation from the Uiua GitHub repository
- * and generates a JSON file for use in hover docs.
+ * Fetches primitive descriptions from the Uiua GitHub repository and uses
+ * the bundled runtime's active primitive definitions to generate hover docs.
  * 
  * Usage: node scripts/scrape-uiua-docs.cjs
  * 
@@ -18,6 +18,18 @@ const PRIMITIVES_URL = 'https://raw.githubusercontent.com/uiua-lang/uiua/main/si
 
 // Output path
 const JS_OUTPUT_FILE = path.join(__dirname, '..', 'src', 'uiua-docs.js');
+
+/** Keep upstream prose, but take glyphs, signatures, and availability from the runtime. */
+async function loadUiuaPrimitives(upstream) {
+    const { initSync, uiua_primitives } = await import('../wasm/uiua_wasm.js');
+    initSync({ module: fs.readFileSync(path.join(__dirname, '..', 'wasm', 'uiua_wasm_bg.wasm')) });
+    const primitives = JSON.parse(uiua_primitives());
+    if (Object.keys(primitives).length < 100) throw new Error('Uiua runtime primitive list looks incomplete');
+    for (const [name, info] of Object.entries(primitives)) {
+        info.description = upstream[name]?.description ?? info.description;
+    }
+    return primitives;
+}
 
 /**
  * Fetch a URL and return the content
@@ -136,13 +148,15 @@ export function getUiuaHoverContent(glyph) {
 /**
  * Main scraping function
  */
-async function scrapeUiuaDocs() {
+async function scrapeUiuaDocs(primitives) {
     console.log('Uiua Documentation Scraper');
     console.log('==========================\n');
     
-    console.log(`Fetching ${PRIMITIVES_URL}...`);
-    const rawJson = await fetchUrl(PRIMITIVES_URL);
-    const primitives = JSON.parse(rawJson);
+    if (!primitives) {
+        console.log(`Fetching ${PRIMITIVES_URL}...`);
+        const rawJson = await fetchUrl(PRIMITIVES_URL);
+        primitives = await loadUiuaPrimitives(JSON.parse(rawJson));
+    }
     
     console.log(`Found ${Object.keys(primitives).length} primitives\n`);
     
@@ -220,8 +234,11 @@ async function scrapeUiuaDocs() {
     }
 }
 
-// Run the scraper
-scrapeUiuaDocs().catch(err => {
-    console.error('Error:', err.message);
-    process.exit(1);
-});
+if (require.main === module) {
+    scrapeUiuaDocs().catch(err => {
+        console.error('Error:', err.message);
+        process.exitCode = 1;
+    });
+}
+
+module.exports = { loadUiuaPrimitives, scrapeUiuaDocs };

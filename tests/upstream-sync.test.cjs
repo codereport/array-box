@@ -65,6 +65,48 @@ test('Uiua sync retires keyboard glyphs even when their docs were already absent
     assert.deepEqual(findRetiredUiuaGlyphs(previousDocs, currentDocs, ['⇡']), ['∵']);
 });
 
+test('Uiua sync keeps bundled glyphs when upstream assigns new glyphs to their names', async () => {
+    const { loadUiuaPrimitives } = require('../scripts/scrape-uiua-docs.cjs');
+    const { findRetiredUiuaGlyphs } = await load();
+    const { uiuaGlyphDocs } = await import('../src/uiua-docs.js');
+    const { uiuaGlyphs } = await import('../src/keymap.js');
+    const primitives = await loadUiuaPrimitives({
+        mask: { glyph: '⚇', class: 'Misc', args: 9, description: 'Updated mask description' },
+        stencil: { glyph: '◫', modifier_args: 2 },
+        future: { glyph: '🆕', class: 'MonadicArray', args: 1 },
+    });
+
+    assert.equal(primitives.mask.glyph, '⦷');
+    assert.equal(primitives.mask.class, 'DyadicArray');
+    assert.equal(primitives.mask.args, 2);
+    assert.equal(primitives.mask.description, 'Updated mask description');
+    assert.equal(primitives.stencil.glyph, '⧈');
+    assert.equal(primitives.stencil.modifier_args, 1);
+    assert.equal(primitives.future, undefined);
+    assert.ok(primitives['absolute value']);
+    assert.ok(primitives.range.description);
+
+    const currentDocs = Object.fromEntries(Object.values(primitives).map(info => [info.glyph, info]));
+    assert.deepEqual(findRetiredUiuaGlyphs(uiuaGlyphDocs, currentDocs, Object.values(uiuaGlyphs).flat()), []);
+});
+
+test('Uiua sync excludes primitives deprecated by the runtime even if upstream lists them as active', async () => {
+    const { loadUiuaPrimitives } = require('../scripts/scrape-uiua-docs.cjs');
+    const primitives = await loadUiuaPrimitives({
+        each: { glyph: '∵' },
+        windows: { glyph: '◫' },
+        unique: { glyph: '◰' },
+        rerank: { glyph: '☇' },
+        duplicate: { glyph: '.' },
+        flip: { glyph: ':' },
+    });
+    const glyphs = new Set(Object.values(primitives).map(info => info.glyph));
+    for (const glyph of ['∵', '◫', '◰', '☇', '.', ':']) assert.ok(!glyphs.has(glyph), glyph);
+    assert.equal(primitives.each, undefined);
+    assert.equal(primitives.windows, undefined);
+    assert.equal(primitives.rows.glyph, '≡');
+});
+
 test('Kap source headings produce live source-line hover links', async () => {
     const { kapHeadings, fixKapLinks } = await load();
     const headings = Array.from({ length: 75 }, (_, i) => `=== \`${String.fromCodePoint(0x2200 + i)}\`: Name ${i}`);

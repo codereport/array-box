@@ -59,6 +59,23 @@ export function uiua_name_tokens(name) {
 }
 
 /**
+ * Describe the active primitives in this runtime for documentation sync.
+ * @returns {string}
+ */
+export function uiua_primitives() {
+    let deferred1_0;
+    let deferred1_1;
+    try {
+        const ret = wasm.uiua_primitives();
+        deferred1_0 = ret[0];
+        deferred1_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
+    } finally {
+        wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+    }
+}
+
+/**
  * @returns {string}
  */
 export function uiua_version() {
