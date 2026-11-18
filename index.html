@@ -30,6 +30,7 @@
     <!-- Theme CSS with variables and syntax highlighting classes -->
     <link rel="stylesheet" href="src/theme.css">
     <link rel="stylesheet" href="src/tinyapl-evaluation.css">
+    <link rel="stylesheet" href="src/matrix-rain.css">
 
     <style>
         /* App-specific styles (layout, components) */
@@ -2471,6 +2472,7 @@
         import { mapUiuaSelections } from './src/uiua-editor.js';
         import { translatePrimitives, translateArrayLiterals, clearTranslationCache } from './src/primitive-translate.js';
         import { primitiveMap, compareLanguages, lookupPrimitive, parsePrimitives, getPrimitiveName, getEquivalent, hasValence, isScalar, getAvailableRanks, getDefaultRank } from './src/primitive-compare.js';
+        import { installMatrixRain } from './src/matrix-rain.js';
 
         // Glyph documentation by language
         const glyphDocsByLanguage = {
@@ -3071,6 +3073,7 @@
 
         const languageOrder = ['apl', 'bqn', 'uiua', 'j', 'kap', 'tinyapl'];
         let currentLanguage = 'apl';
+        const matrixRain = installMatrixRain(getMatrixRainGlyphs(currentLanguage));
         let currentKeyboardCleanup = null;
         let lastResult = null; // Store last evaluation result for permalinks
 
@@ -3938,6 +3941,7 @@
             }
 
             currentLanguage = lang;
+            matrixRain.setGlyphs(getMatrixRainGlyphs(lang));
             const langConfig = languages[lang];
 
             // Update logo
@@ -5512,6 +5516,17 @@
 
         const f1DocTooltip = document.getElementById('f1DocTooltip');
         let f1TooltipVisible = false;
+
+        function getMatrixRainGlyphs(language) {
+            const config = keyboardConfigs[language];
+            // TinyAPL's keymap stores four prefix levels per key.
+            const mappedGlyphs = Object.values(config.keymap || {}).flatMap(value =>
+                typeof value === 'string' ? [value] : Object.values(value));
+            const categoryGlyphs = Object.values(config.glyphCategories || {})
+                .flatMap(category => category.glyphs);
+            return new Set([...getAllGlyphs(language), ...mappedGlyphs, ...categoryGlyphs]
+                .filter(Boolean));
+        }
 
         /**
          * Get all known glyphs for the current language
