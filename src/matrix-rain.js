@@ -4,9 +4,13 @@ const FONT_SIZE = 32;
 const FONT_FAMILIES = ['APL', 'Uiua', 'JetBrains Mono'];
 const RAIN_FONT = `${FONT_SIZE}px ${FONT_FAMILIES.map(family => `"${family}"`).join(', ')}, monospace`;
 const FRAME_INTERVAL = 1000 / 30;
+const HIGHLIGHT_HOLD_MS = 1000;
+const HIGHLIGHT_FADE_MS = 1000;
 
-export function installMatrixRain(initialGlyphs) {
+export function installMatrixRain(initialGlyphs, inputElement, getGlyphColor = () => 'rgb(139, 233, 253)') {
     let glyphPool = [...initialGlyphs];
+    const highlights = new Map();
+    let pendingInsertion = null;
     const randomGlyph = () => glyphPool[Math.floor(Math.random() * glyphPool.length)];
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let backdrop = null;
@@ -19,8 +23,11 @@ export function installMatrixRain(initialGlyphs) {
     let previousTime = null;
     let fontPromise = null;
 
-    function paint(elapsed = 0) {
+    function paint(elapsed = 0, time = performance.now()) {
         if (!context) return;
+        for (const [glyph, { started }] of highlights) {
+            if (time - started >= HIGHLIGHT_HOLD_MS + HIGHLIGHT_FADE_MS) highlights.delete(glyph);
+        }
         context.clearRect(0, 0, width, height);
         for (const stream of streams) {
             stream.y += stream.speed * elapsed;
@@ -30,14 +37,25 @@ export function installMatrixRain(initialGlyphs) {
             // Let glyphs stay readable for a few seconds between changes.
             const changeChance = 1 - Math.exp(-elapsed * 0.3);
             for (let i = 0; i < stream.glyphs.length; i++) {
-                if (Math.random() < changeChance) stream.glyphs[i] = randomGlyph();
+                if (!highlights.has(stream.glyphs[i]) && Math.random() < changeChance) {
+                    stream.glyphs[i] = randomGlyph();
+                }
                 const y = Math.round(stream.y - i * ROW_HEIGHT);
                 if (y < -ROW_HEIGHT || y > height) continue;
-                context.globalAlpha = stream.opacity * (1 - i / stream.glyphs.length);
+                const highlight = highlights.get(stream.glyphs[i]);
+                const strength = highlight ?
+                    Math.min(1, (HIGHLIGHT_HOLD_MS + HIGHLIGHT_FADE_MS - (time - highlight.started)) / HIGHLIGHT_FADE_MS) : 0;
+                const opacity = stream.opacity * (1 - i / stream.glyphs.length);
+                context.globalAlpha = opacity + (1 - opacity) * strength;
+                context.fillStyle = strength ?
+                    `rgb(${highlight.color.map(channel => Math.round(255 + (channel - 255) * strength)).join(', ')})` : '#ffffff';
+                if (strength) context.shadowColor = `rgb(${highlight.color.join(', ')})`;
+                context.shadowBlur = 18 * strength;
                 context.fillText(stream.glyphs[i], stream.x, y);
             }
         }
         context.globalAlpha = 1;
+        context.shadowBlur = 0;
     }
 
     function resize() {
@@ -72,9 +90,9 @@ export function installMatrixRain(initialGlyphs) {
         if (previousTime === null || time - previousTime >= FRAME_INTERVAL) {
             const elapsed = previousTime === null ? 0 : Math.min((time - previousTime) / 1000, 0.1);
             previousTime = time;
-            paint(elapsed);
+            paint(reducedMotion.matches ? 0 : elapsed, time);
         }
-        frame = requestAnimationFrame(animate);
+        if (!reducedMotion.matches || highlights.size) frame = requestAnimationFrame(animate);
     }
 
     function updateAnimation() {
@@ -83,8 +101,51 @@ export function installMatrixRain(initialGlyphs) {
         previousTime = null;
         if (!context || document.hidden) return;
         // Keep the wallpaper and a still frame of rain for reduced motion.
-        if (reducedMotion.matches) paint();
+        if (reducedMotion.matches && !highlights.size) paint();
         else frame = requestAnimationFrame(animate);
+    }
+
+    function highlightInput(text) {
+        if (!context || !text) return;
+        let prefix = text;
+        const selection = window.getSelection();
+        if (selection?.rangeCount && inputElement.contains(selection.focusNode)) {
+            const range = document.createRange();
+            range.selectNodeContents(inputElement);
+            range.setEnd(selection.focusNode, selection.focusOffset);
+            prefix = range.toString();
+        }
+        const time = performance.now();
+        let matched = false;
+        for (const glyph of glyphPool) {
+            // Match inserted Unicode glyphs and newly completed tokens such as J's i.
+            if (text.includes(glyph) || prefix.endsWith(glyph)) {
+                // The resolver reads computed editor colors, returned as RGB.
+                const color = getGlyphColor(glyph).match(/[\d.]+/g).slice(0, 3).map(Number);
+                highlights.set(glyph, { started: time, color });
+                matched = true;
+            }
+        }
+        if (!matched) return;
+        paint();
+        if (frame === null) updateAnimation();
+    }
+
+    function onBeforeInput(event) {
+        // Prefix-key and multi-cursor insertion dispatch a plain input event.
+        // Capture their text before an editor handler performs the insertion.
+        pendingInsertion = !event.isComposing && event.inputType.startsWith('insert') ? event.data : null;
+    }
+
+    function onInput(event) {
+        const text = event.data ?? pendingInsertion;
+        pendingInsertion = null;
+        if (!event.isComposing) highlightInput(text);
+    }
+
+    function onCompositionEnd(event) {
+        pendingInsertion = null;
+        highlightInput(event.data);
     }
 
     function disable() {
@@ -97,6 +158,8 @@ export function installMatrixRain(initialGlyphs) {
         backdrop?.remove();
         backdrop = canvas = context = null;
         streams = [];
+        highlights.clear();
+        pendingInsertion = null;
         document.body.classList.remove('matrix-mode');
     }
 
@@ -141,13 +204,24 @@ export function installMatrixRain(initialGlyphs) {
 
     // Capture the chord before editor, multi-cursor, and keyboard-overlay handlers.
     document.addEventListener('keydown', onKeyDown, true);
+    inputElement?.addEventListener('beforeinput', onBeforeInput, true);
+    inputElement?.addEventListener('input', onInput);
+    inputElement?.addEventListener('compositionend', onCompositionEnd);
     return {
         setGlyphs(glyphs) {
             glyphPool = [...glyphs];
-            if (context) resize();
+            highlights.clear();
+            pendingInsertion = null;
+            if (context) {
+                resize();
+                updateAnimation();
+            }
         },
         destroy() {
             document.removeEventListener('keydown', onKeyDown, true);
+            inputElement?.removeEventListener('beforeinput', onBeforeInput, true);
+            inputElement?.removeEventListener('input', onInput);
+            inputElement?.removeEventListener('compositionend', onCompositionEnd);
             disable();
         }
     };

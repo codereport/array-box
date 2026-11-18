@@ -255,3 +255,131 @@ test('switching language replaces the entire rain glyph set even with reduced mo
     await assertLanguageRain(page, allowed, 'bqn');
     assert.deepEqual(errors, []);
 });
+
+async function captureRainHighlights(page) {
+    await page.evaluate(() => {
+        window.rainPaint = [];
+        const clearRect = CanvasRenderingContext2D.prototype.clearRect;
+        const fillText = CanvasRenderingContext2D.prototype.fillText;
+        CanvasRenderingContext2D.prototype.clearRect = function(...args) {
+            if (this.canvas.closest('.matrix-backdrop')) window.rainPaint = [];
+            return clearRect.apply(this, args);
+        };
+        CanvasRenderingContext2D.prototype.fillText = function(glyph, ...args) {
+            if (this.canvas.closest('.matrix-backdrop')) {
+                window.rainPaint.push({ glyph, color: this.fillStyle, shadowColor: this.shadowColor,
+                    alpha: this.globalAlpha, glow: this.shadowBlur });
+            }
+            return fillText.call(this, glyph, ...args);
+        };
+    });
+}
+
+test('prefix-key glyphs light up matching rain and fade back to the same still frame', async t => {
+    const { page, errors } = await openEditor(t, { reducedMotion: 'reduce' });
+    await captureRainHighlights(page);
+    await page.keyboard.press('Control+Shift+m');
+    const baseline = await snapshot(page);
+    const [key, glyph] = await page.evaluate(async () => {
+        const { aplKeymap } = await import('/src/keymap.js');
+        return Object.entries(aplKeymap).find(([key, glyph]) => /^[a-z]$/.test(key) &&
+            window.rainPaint.some(item => item.glyph === glyph));
+    });
+    await page.locator('#codeInput').focus();
+    await page.keyboard.press('Backquote');
+    await page.keyboard.press(key);
+    assert.equal(await page.locator('#codeInput').textContent(), glyph);
+    const painted = await page.evaluate(() => window.rainPaint);
+    assert.ok(painted.filter(item => item.glyph === glyph).every(item => item.alpha === 1 && item.glow > 0));
+    assert.ok(painted.filter(item => item.glyph !== glyph).every(item => item.glow === 0 && item.color === '#ffffff'));
+    assert.notEqual(await snapshot(page), baseline);
+
+    await page.waitForTimeout(650);
+    assert.ok(await page.evaluate(glyph => window.rainPaint.filter(item => item.glyph === glyph)
+        .every(item => item.alpha === 1), glyph), 'matching glyphs stay bright before fading');
+    await page.waitForFunction(glyph => window.rainPaint.some(item =>
+        item.glyph === glyph && item.glow > 0 && item.alpha < 1), glyph);
+    await page.waitForFunction(() => window.rainPaint.every(item => item.glow === 0));
+    assert.equal(await snapshot(page), baseline, 'fading restores the original glyph positions, colors, and opacity');
+    await page.waitForTimeout(150);
+    assert.equal(await snapshot(page), baseline, 'reduced-motion rain stays still after the highlight ends');
+    assert.deepEqual(errors, []);
+});
+
+test('completed J tokens glow, repeated typing extends the highlight, and toggling clears it', async t => {
+    const { page, errors } = await openEditor(t, { language: 'j', reducedMotion: 'reduce' });
+    await captureRainHighlights(page);
+    await page.keyboard.press('Control+Shift+m');
+    await snapshot(page);
+    const token = await page.evaluate(() => window.rainPaint.find(item =>
+        item.glyph.length > 1 && /^[a-z][.:]$/i.test(item.glyph))?.glyph);
+    assert.ok(token, 'the rain contains a J digraph to type');
+    await page.locator('#codeInput').focus();
+    await page.keyboard.type(token);
+    assert.ok(await page.evaluate(token => window.rainPaint.some(item =>
+        item.glyph === token && item.alpha === 1 && item.glow > 0), token));
+    await page.waitForTimeout(800);
+    await page.keyboard.type(token);
+    await page.waitForTimeout(500);
+    assert.ok(await page.evaluate(token => window.rainPaint.filter(item => item.glyph === token)
+        .every(item => item.alpha === 1 && item.glow > 0), token), 'typing again restarts the hold time');
+    assert.equal(await page.locator('#codeInput').textContent(), token.repeat(2));
+
+    await page.keyboard.press('Control+Shift+m');
+    await page.keyboard.press('Control+Shift+m');
+    await snapshot(page);
+    assert.ok(await page.evaluate(() => window.rainPaint.every(item => item.glow === 0)));
+    assert.deepEqual(errors, []);
+});
+
+test('rain glyphs and their glow match editor syntax colors in every language', async t => {
+    const { page, errors } = await openEditor(t, { reducedMotion: 'reduce' });
+    await captureRainHighlights(page);
+    await page.keyboard.press('Control+Shift+m');
+    await snapshot(page);
+    const cases = {
+        apl: ['+', '¨', '∘', '¯'],
+        bqn: ['+', '¨', '∘', 'π'],
+        uiua: ['√', '+', '/', '⊃', 'π'],
+        j: ['+', '/.', '@.', 'a.'],
+        kap: ['+', '¨', '∘', '¯'],
+        tinyapl: ['+', '¨', '∘', '∞'],
+    };
+    for (const [language, glyphs] of Object.entries(cases)) {
+        if (language !== 'apl') await page.keyboard.press('Control+ArrowDown');
+        assert.equal(await page.locator(`#codeInput.${language}`).count(), 1);
+        // Resample the random rain until each representative color has a visible glyph.
+        await page.evaluate(glyphs => {
+            for (let i = 0; i < 20 && !glyphs.every(glyph =>
+                window.rainPaint.some(item => item.glyph === glyph)); i++) {
+                window.dispatchEvent(new Event('resize'));
+            }
+        }, glyphs);
+        await page.locator('#codeInput').focus();
+        await page.keyboard.insertText(glyphs.join(' '));
+        await page.waitForFunction(glyphs => glyphs.every(glyph =>
+            [...document.querySelectorAll('#codeInput span')].some(span => span.textContent === glyph)), glyphs);
+        const { expected, drawn } = await page.evaluate(glyphs => {
+            const context = document.createElement('canvas').getContext('2d');
+            const expected = Object.fromEntries([...document.querySelectorAll('#codeInput span')]
+                .filter(span => glyphs.includes(span.textContent)).map(span => {
+                    context.fillStyle = getComputedStyle(span).color;
+                    return [span.textContent, context.fillStyle];
+                }));
+            return { expected, drawn: window.rainPaint.filter(item => glyphs.includes(item.glyph)) };
+        }, glyphs);
+        assert.ok(new Set(Object.values(expected)).size >= 4, `${language} covers four different editor colors`);
+        for (const glyph of glyphs) {
+            const matches = drawn.filter(item => item.glyph === glyph);
+            assert.ok(matches.length, `${language} ${glyph} appears in the rain`);
+            for (const item of matches) {
+                assert.equal(item.color, expected[glyph], `${language} ${glyph} matches the editor`);
+                assert.equal(item.shadowColor, expected[glyph], `${language} ${glyph} has the same glow color`);
+                assert.equal(item.alpha, 1);
+                assert.ok(item.glow > 0);
+            }
+        }
+        await page.locator('#codeInput').fill('');
+    }
+    assert.deepEqual(errors, []);
+});

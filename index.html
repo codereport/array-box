@@ -3073,7 +3073,6 @@
 
         const languageOrder = ['apl', 'bqn', 'uiua', 'j', 'kap', 'tinyapl'];
         let currentLanguage = 'apl';
-        const matrixRain = installMatrixRain(getMatrixRainGlyphs(currentLanguage));
         let currentKeyboardCleanup = null;
         let lastResult = null; // Store last evaluation result for permalinks
 
@@ -3090,6 +3089,7 @@
         const currentLogo = document.getElementById('currentLogo');
         const dropdown = document.getElementById('dropdown');
         const codeInput = document.getElementById('codeInput');
+        const matrixRain = installMatrixRain(getMatrixRainGlyphs(currentLanguage), codeInput, getMatrixRainGlyphColor);
         const output = document.getElementById('output');
         const loadingIndicator = document.getElementById('loadingIndicator');
         const container = document.querySelector('.container');
@@ -5516,6 +5516,18 @@
 
         const f1DocTooltip = document.getElementById('f1DocTooltip');
         let f1TooltipVisible = false;
+
+        function getMatrixRainGlyphColor(glyph) {
+            // Resolve the same highlighting classes and theme colors as the editor,
+            // including J digraphs and Uiua's distinct function/modifier colors.
+            const probe = document.createElement('span');
+            probe.hidden = true;
+            probe.innerHTML = highlightCode(glyph, currentLanguage);
+            document.body.append(probe);
+            const color = getComputedStyle(probe.firstElementChild || probe).color;
+            probe.remove();
+            return color;
+        }
 
         function getMatrixRainGlyphs(language) {
             const config = keyboardConfigs[language];
