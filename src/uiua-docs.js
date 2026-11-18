@@ -469,8 +469,8 @@ export const uiuaGlyphDocs = {
         "signature": "2 → 1",
         "docUrl": "https://www.uiua.org/docs/less%20than"
     },
-    "⦷": {
-        "glyph": "⦷",
+    "⚇": {
+        "glyph": "⚇",
         "type": "dyadic function",
         "name": "mask",
         "description": "Mask the occurrences of one array in another",
@@ -829,8 +829,8 @@ export const uiuaGlyphDocs = {
         "signature": "1 → 1",
         "docUrl": "https://www.uiua.org/docs/sqrt"
     },
-    "⧈": {
-        "glyph": "⧈",
+    "◫": {
+        "glyph": "◫",
         "type": "modifier",
         "name": "stencil",
         "description": "Call a function on windows of an array",

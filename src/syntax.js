@@ -179,17 +179,19 @@ export const syntaxRules = {
             '+', '-', '×', '÷', '◿', 'ⁿ', '=', '≠', '<', '>', '≤', '≥',
             '↧', '↥', '∠', '∨', 'ℂ', '⊂', '⊏', '⊡', '↯',
             '↙', '↘', '↻', '⊗', '∊', '⊟', '▽', '⤸',
-            '≍', '⌕', '⦷',  '⊥',
-            '⨰', '⨱', '⊨'
+            '≍', '⌕',   '⊥',
+            '⨰', '⨱', '⊨',
+            '⚇'
         ],
         // 1-modifiers (pink) - take 1 function argument
         // Matches uiuaGlyphs.monadicModifiers from keymap.js (popup source of truth)
         dyadic: [
             '∘', '◌', '˙', '˜', '⊙', '⋅', '⟜', '⊸', '⤙', '⤚', '◠', '◡', '∩',
-            '≡', '⍚', '⊞', '⧅', '⧈', '⊕', '⊜',
+            '≡', '⍚', '⊞', '⧅',  '⊕', '⊜',
             '/', '∧', '\\', '⍥',
             '⌅', '°', '⌝',
-            '⧋', '◇', '∪', '⍩'
+            '⧋', '◇', '∪', '⍩',
+            '◫'
         ],
         // 2-modifiers (yellow) - take 2+ function arguments
         // Matches uiuaGlyphs.dyadicModifiers from keymap.js (popup source of truth)

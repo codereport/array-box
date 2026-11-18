@@ -349,16 +349,18 @@ export const uiuaGlyphs = {
     ],
     // Dyadic Array - Operate on two arrays
     dyadicArray: [
-        '≍', '⊟', '⊂', '⊏', '⊡', '↯', '↙', '↘', '↻', '⤸', '▽', '⌕', '⦷', '∊',  '⊗', '⊥',
-        '⨰', '⨱', '⊨'
+        '≍', '⊟', '⊂', '⊏', '⊡', '↯', '↙', '↘', '↻', '⤸', '▽', '⌕',  '∊',  '⊗', '⊥',
+        '⨰', '⨱', '⊨',
+        '⚇'
     ],
     // 1-Modifiers (monadic modifiers) - Take 1 function argument
     monadicModifiers: [
         '˙', '˜', '⊙', '⋅', '⟜', '⊸', '⤙', '⤚', '◠', '◡', '∩',
-        '≡', '⍚', '⊞', '⧅', '⧈', '⊕', '⊜',
+        '≡', '⍚', '⊞', '⧅',  '⊕', '⊜',
         '/', '∧', '\\', '⍥',
         '⌅', '°', '⌝',
-        '⧋', '◇', '∪', '⍩'
+        '⧋', '◇', '∪', '⍩',
+        '◫'
     ],
     // 2-Modifiers (dyadic modifiers) - Take 2+ function arguments
     dyadicModifiers: [

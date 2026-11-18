@@ -855,7 +855,6 @@ export const uiuaGlyphNames = {
     '⤸': 'orient',
     '▽': 'keep',
     '⌕': 'find',
-    '⦷': 'mask',
     '∊': 'memberof',
     '⊗': 'indexin',
     '⊥': 'base',
@@ -865,7 +864,6 @@ export const uiuaGlyphNames = {
     '⍚': 'inventory',
     '⊞': 'table',
     '⧅': 'tuples',
-    '⧈': 'stencil',
     '⊕': 'group',
     '⊜': 'partition',
     '⍩': 'case',
@@ -957,6 +955,9 @@ export const uiuaGlyphNames = {
     '⨱': 'outer product',
     '⍡': 'pattern',
     '⊨': 'validate',
+    // Added from upstream documentation; review placement and labels.
+    '⚇': 'mask',
+    '◫': 'stencil',
 };
 
 // Default keyboard layout (US QWERTY)
