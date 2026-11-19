@@ -52,7 +52,8 @@ cd "$BUILD_DIR"
 NPROC=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
 echo "Using $NPROC parallel workers"
 
-./gradlew standalonejs:jsBrowserDistribution --parallel --max-workers="$NPROC" 2>&1
+./gradlew --init-script "$SCRIPT_DIR/kap-build.init.gradle" \
+    standalonejs:jsBrowserDistribution --parallel --max-workers="$NPROC" 2>&1
 echo ""
 
 # Copy output files

@@ -1,0 +1,13 @@
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+
+// Kotlin/JS supplies Ivy repositories for the Node.js and Yarn distributions.
+// Do not probe Maven repositories for these tools: Kap's legacy JetBrains
+// Space repository cannot resolve, which prevents Gradle reaching their hosts.
+allprojects { project ->
+    project.repositories.withType(MavenArtifactRepository).configureEach { repository ->
+        repository.content { filter ->
+            filter.excludeModule('org.nodejs', 'node')
+            filter.excludeModule('com.yarnpkg', 'yarn')
+        }
+    }
+}
