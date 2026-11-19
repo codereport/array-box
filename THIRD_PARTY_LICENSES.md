@@ -2,6 +2,44 @@
 
 This project includes interpreters, WASM runtimes, and documentation from the following open-source projects.
 
+## Background photographs
+
+The Unsplash photographs listed below in `assets/backgrounds/` are used under the [Unsplash License](https://unsplash.com/license), separately from the code license. They have been resized and compressed for local use.
+
+| File | Photographer | Original photograph |
+| --- | --- | --- |
+| `aurora.jpg` | Stefan Szankowski | [Northern lights over a Norwegian fjord](https://unsplash.com/photos/green-aurora-borealis-over-a-calm-lake-and-mountains-Pws2-4rSBQ0) |
+| `snow.jpg` | Dmitrii Shirnin | [Snow-covered pine forest](https://unsplash.com/photos/snow-covered-pine-trees-in-a-serene-winter-forest-mqEKg5D6lnE) |
+| `bamboo.jpg` | Kate Kasiutich | [Sunlight through bamboo](https://unsplash.com/photos/sunlight-streams-through-a-dense-bamboo-forest-path-xnWP566J7gI) |
+| `piran.jpg` | Josef Kali | [Piran above the Adriatic](https://unsplash.com/photos/coastal-town-with-red-roofs-and-church-by-the-sea-sXj6108497E) |
+
+The editor applies subdued color grading to these photographs. Location captions use the photographers’ location metadata.
+
+## Personal photographs
+
+The four `personal-*.webp` backgrounds are photographs by **Conor Shakory**, supplied by the photographer for this project. They retain their own copyright, separate from the code and stock-photo licenses. The original JPEGs are kept locally; this repository includes resized WebP copies. Caption dates come from EXIF `DateTimeOriginal`, using the camera's local calendar date. Locations come from GPS metadata or confirmation by the photographer. Exact GPS coordinates are not included in the WebP copies.
+
+| Background | Original file | Capture date |
+| --- | --- | --- |
+| `personal-wengen.webp` | `IMG_20230615_143324.jpg` | 2023-06-15 |
+| `personal-trondheim.webp` | `PXL_20240614_205256891.jpg` | 2024-06-14 |
+| `personal-lofoten.webp` | `PXL_20240618_112828255.jpg` | 2024-06-18 |
+| `personal-lakeside.webp` | `PXL_20251001_210951970.jpg` | 2025-10-01 |
+
+## Background illustrations
+
+The landscape artwork for the animated nature scenes (`creek.webp`, `creek-willow.webp`, `shore.webp`, `shore-dusk.webp`, and `clouds.webp`) was generated for this project with OpenAI's image-generation tool. The scenes combine this artwork with original 3D foreground vegetation, fitted moving water, and cloud shaders. The same images serve as still fallbacks without WebGL. These are original fictional landscapes with no third-party game assets or footage.
+
+The WebP thumbnails in `assets/backgrounds/previews/` are resized copies of the corresponding backgrounds, including the existing Yosemite wallpaper. They retain the same attribution as their source images.
+
+## Three.js
+
+The 3D backgrounds use Three.js 0.182.0, bundled locally in `src/vendor/three/` so the scenes work without a CDN or build step.
+
+**Repository:** https://github.com/mrdoob/three.js
+
+**License:** MIT, copyright 2010–2025 Three.js Authors. The complete license is included in [`src/vendor/three/LICENSE`](src/vendor/three/LICENSE).
+
 ---
 
 ## BQN (CBQN)

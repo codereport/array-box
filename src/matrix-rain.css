@@ -1,30 +1,186 @@
-/* Hidden backdrop, toggled with Ctrl+Shift+M. */
+/* Ctrl+Shift+M cycles through the scenes, then returns to the normal editor. */
 body.matrix-mode {
     isolation: isolate;
     background: #171329;
+    --matrix-edge: rgba(217, 204, 247, 0.45);
 }
 
-.matrix-backdrop {
+body.matrix-retiring {
+    isolation: isolate;
+}
+
+.matrix-backdrop,
+.matrix-retiring-backdrop {
     position: fixed;
     inset: 0;
     z-index: -1;
     overflow: hidden;
     pointer-events: none;
-    background: #171329 url('../assets/yosemite-violet.jpg') center / cover no-repeat;
+    background: #101722;
 }
 
-.matrix-backdrop::before {
-    content: '';
+.matrix-wallpaper {
+    --scene-wash: linear-gradient(rgba(14, 10, 30, 0.12), rgba(14, 10, 30, 0.28));
     position: absolute;
     inset: 0;
-    background: linear-gradient(rgba(14, 10, 30, 0.12), rgba(14, 10, 30, 0.28));
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
 }
 
-.matrix-backdrop canvas {
+.matrix-wallpaper.is-visible {
+    opacity: 1;
+}
+
+.matrix-wallpaper img {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
+    object-fit: cover;
+    filter: var(--scene-grade, saturate(0.68) contrast(0.94) brightness(0.91));
+}
+
+.matrix-wallpaper[data-scene="yosemite"],
+.matrix-wallpaper[data-tone="art"] {
+    --scene-grade: none;
+}
+
+.matrix-wallpaper[data-tone="painted"] {
+    --scene-grade: saturate(0.85) brightness(0.95);
+    --scene-wash: linear-gradient(rgba(28, 43, 47, 0.05), rgba(20, 36, 42, 0.17));
+}
+
+.matrix-wallpaper[data-tone="personal"] {
+    --scene-grade: saturate(0.88) contrast(0.97) brightness(0.98);
+    --scene-wash: linear-gradient(rgba(14, 23, 31, 0.04), rgba(14, 23, 31, 0.12));
+}
+
+.matrix-wallpaper[data-renderer="3d"] {
+    --scene-wash: linear-gradient(transparent, rgba(17, 30, 26, 0.035));
+}
+
+.matrix-wallpaper[data-renderer="3d"]::after {
+    opacity: 0.35;
+}
+
+.matrix-wallpaper[data-scene="snow"][data-tone] {
+    --scene-grade: saturate(0.45) brightness(0.49) contrast(0.88);
+    --scene-wash: linear-gradient(rgba(19, 35, 55, 0.20), rgba(17, 34, 52, 0.30));
+}
+
+.matrix-wallpaper[data-scene="window"] {
+    --scene-grade: saturate(0.14) contrast(0.70) brightness(0.66) blur(1px);
+}
+
+.matrix-wallpaper[data-tone="green"] {
+    --scene-wash: linear-gradient(rgba(7, 29, 25, 0.12), rgba(6, 25, 24, 0.27));
+}
+
+.matrix-wallpaper[data-tone="warm"] {
+    --scene-wash: linear-gradient(rgba(32, 22, 25, 0.10), rgba(30, 20, 29, 0.25));
+}
+
+.matrix-wallpaper[data-tone="cool"] {
+    --scene-wash: linear-gradient(rgba(19, 33, 49, 0.10), rgba(13, 29, 48, 0.25));
+}
+
+.matrix-wallpaper[data-tone="rose"] {
+    --scene-wash: linear-gradient(rgba(40, 25, 43, 0.09), rgba(35, 23, 45, 0.23));
+}
+
+.matrix-wallpaper[data-tone="night"] {
+    --scene-wash: linear-gradient(rgba(12, 22, 40, 0.06), rgba(12, 22, 40, 0.20));
+}
+
+.matrix-wallpaper[data-tone="art"] {
+    --scene-wash: linear-gradient(transparent, rgba(12, 18, 28, 0.06));
+}
+
+.matrix-wallpaper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: var(--scene-wash);
+}
+
+.matrix-wallpaper::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: radial-gradient(ellipse at center, transparent 30%, rgba(6, 10, 20, 0.22) 100%);
+}
+
+.matrix-wallpaper[data-scene="aurora"] {
+    --scene-wash: linear-gradient(rgba(5, 20, 30, 0.03), rgba(5, 15, 29, 0.26));
+}
+
+.matrix-wallpaper[data-scene="alpine"] {
+    --scene-wash: linear-gradient(rgba(18, 31, 49, 0.22), rgba(10, 25, 40, 0.36));
+}
+
+.matrix-wallpaper[data-scene="dunes"] {
+    --scene-wash: linear-gradient(rgba(38, 19, 20, 0.13), rgba(32, 17, 23, 0.35));
+}
+
+.matrix-wallpaper[data-scene="forest"] {
+    --scene-wash: linear-gradient(rgba(7, 34, 32, 0.30), rgba(5, 25, 23, 0.34));
+}
+
+.matrix-wallpaper[data-scene="ocean"] {
+    --scene-grade: saturate(0.82) contrast(0.97) brightness(0.93);
+    --scene-wash: linear-gradient(rgba(16, 28, 47, 0.04), rgba(10, 20, 34, 0.12));
+}
+
+.matrix-wallpaper[data-scene="dunes"] img {
+    object-position: center 48%;
+}
+
+.matrix-wallpaper[data-scene="swiss-trail"] img {
+    object-position: center 69%;
+}
+
+.matrix-wallpaper[data-scene="personal-lofoten"] img {
+    object-position: center top;
+}
+
+.backdrop-card[data-scene="personal-lofoten"] img {
+    object-position: center top;
+}
+
+body.matrix-mode[data-matrix-scene="dunes"] {
+    --matrix-edge: rgba(240, 212, 176, 0.40);
+}
+
+body.matrix-mode[data-matrix-scene="forest"] {
+    --matrix-edge: rgba(185, 216, 196, 0.40);
+}
+
+canvas.matrix-glyphs,
+.matrix-frozen-glyphs {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    width: 100%;
+    height: 100%;
+}
+
+canvas.matrix-nature,
+.matrix-frozen-nature {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    opacity: 0;
+}
+
+canvas.matrix-nature.is-visible,
+.matrix-frozen-nature {
+    opacity: 1;
 }
 
 body.matrix-mode .code-input:not(.multi-cursor-active),
@@ -35,10 +191,304 @@ body.matrix-mode .output {
 
 body.matrix-mode .code-input,
 body.matrix-mode .output {
-    border-color: rgba(217, 204, 247, 0.45);
+    border-color: var(--matrix-edge);
     box-shadow: 0 12px 42px rgba(7, 5, 17, 0.25);
 }
 
 body.matrix-mode .code-input:empty::before {
     color: #b8b1c8;
+}
+
+.matrix-scene-status {
+    position: fixed;
+    top: 26px;
+    right: 28px;
+    z-index: 5;
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: center;
+    column-gap: 16px;
+    row-gap: 3px;
+    padding: 13px 17px;
+    border: 1px solid rgba(236, 238, 245, 0.12);
+    border-radius: 11px;
+    background: rgba(12, 19, 30, 0.40);
+    backdrop-filter: blur(16px);
+    color: rgba(245, 246, 250, 0.88);
+    font-family: 'JetBrains Mono', monospace;
+    pointer-events: none;
+    user-select: none;
+    opacity: 0;
+    transform: translateY(-5px);
+    transition: opacity 450ms ease, transform 450ms ease;
+}
+
+.matrix-scene-status.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.matrix-scene-count {
+    grid-row: 1 / 3;
+    color: rgba(228, 232, 242, 0.48);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+}
+
+.matrix-scene-status.has-credit .matrix-scene-count {
+    grid-row: 1 / 4;
+}
+
+.matrix-scene-status strong {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+.matrix-scene-status small {
+    color: rgba(228, 232, 242, 0.52);
+    font-size: 10px;
+}
+
+.matrix-scene-status strong,
+.matrix-scene-status small {
+    grid-column: 2;
+}
+
+.matrix-scene-status .matrix-scene-credit {
+    color: rgba(228, 232, 242, 0.65);
+    font-size: 9px;
+    line-height: 1.5;
+    margin-top: 1px;
+}
+
+@media (max-width: 600px) {
+    .matrix-scene-status {
+        top: 16px;
+        right: 16px;
+        max-width: calc(100vw - 32px);
+        box-sizing: border-box;
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+}
+
+.backdrop-picker {
+    width: min(1180px, calc(100vw - 48px));
+    max-width: none;
+    max-height: calc(100dvh - 48px);
+    margin: auto;
+    padding: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+    border: 1px solid rgba(207, 221, 219, 0.19);
+    border-radius: 20px;
+    background: #18232b;
+    color: #e6edea;
+    font-family: 'JetBrains Mono', monospace;
+    box-shadow: 0 30px 100px #0008;
+    color-scheme: dark;
+}
+
+.backdrop-picker[open] {
+    display: flex;
+    flex-direction: column;
+}
+
+.backdrop-picker::backdrop {
+    background: rgba(8, 15, 21, 0.72);
+    backdrop-filter: blur(12px);
+}
+
+.backdrop-picker-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-shrink: 0;
+    padding: 24px 26px 20px;
+}
+
+.backdrop-picker-header h2 {
+    margin: 0 0 5px;
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: -0.04em;
+}
+
+.backdrop-picker-header p {
+    margin: 0;
+    font-size: 11px;
+    color: #a5b7b7;
+}
+
+.backdrop-picker-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+:where(.backdrop-picker) button {
+    font: inherit;
+    cursor: pointer;
+    color: inherit;
+}
+
+.backdrop-picker-off,
+.backdrop-picker-close {
+    padding: 7px 12px;
+    border: 1px solid #b8ceca33;
+    border-radius: 8px;
+    background: #ffffff06;
+    font-size: 11px;
+}
+
+.backdrop-picker-off[aria-pressed="true"] {
+    border-color: #b1d5c6;
+    background: #b1d5c60d;
+    color: #d5e8df;
+}
+
+.backdrop-picker-close {
+    width: 32px;
+    padding: 2px 0;
+    border-color: transparent;
+    font-size: 24px;
+    color: #a5b7b7;
+}
+
+.backdrop-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-auto-rows: min-content;
+    align-content: start;
+    gap: 14px;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 2px 26px 24px;
+    scrollbar-width: thin;
+    scrollbar-color: #526963 transparent;
+}
+
+.backdrop-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 0;
+    overflow: hidden;
+    text-align: left;
+    background: #ffffff03;
+    border: 1px solid #bfd2cd1f;
+    border-radius: 10px;
+    transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.backdrop-card:hover {
+    border-color: #c4e3d97f;
+    background: #ffffff09;
+}
+
+.backdrop-card[aria-pressed="true"] {
+    border-color: #b1d5c6;
+    box-shadow: 0 0 0 1px #b1d5c6;
+}
+
+.backdrop-card-preview {
+    position: relative;
+    flex-shrink: 0;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: #26383c;
+}
+
+.backdrop-card-preview img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.backdrop-card[aria-pressed="true"] .backdrop-card-preview::after {
+    content: '✓';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border: 1px solid #d6e9db66;
+    border-radius: 50%;
+    background: #172c26c9;
+    color: #e4f6eb;
+    font-size: 13px;
+}
+
+.backdrop-card-caption {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+    padding: 12px;
+}
+
+.backdrop-card-caption strong {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.backdrop-card-location,
+.backdrop-card-caption small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 9px;
+    color: #a6b9b6;
+}
+
+.backdrop-card-caption small {
+    font-size: 8px;
+    color: #8b9e9e;
+}
+
+.backdrop-picker button:focus-visible {
+    outline: 2px solid #d2eee2;
+    outline-offset: -4px;
+}
+
+.backdrop-picker-footer {
+    display: flex;
+    justify-content: space-between;
+    flex-shrink: 0;
+    gap: 12px;
+    padding: 14px 26px;
+    border-top: 1px solid #c3d4d41a;
+    font-size: 9px;
+    color: #96aaaa;
+}
+
+@media (max-width: 600px) {
+    .backdrop-picker {
+        width: calc(100vw - 24px);
+        max-height: calc(100dvh - 24px);
+        border-radius: 14px;
+    }
+    .backdrop-picker-header { padding: 20px 16px 16px; }
+    .backdrop-picker-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        padding: 2px 16px 16px;
+    }
+    .backdrop-card-caption { padding: 10px; }
+    .backdrop-picker-footer { padding: 12px 16px; }
+    .backdrop-picker-footer span { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .matrix-wallpaper,
+    .matrix-nature,
+    .matrix-scene-status,
+    .backdrop-card {
+        transition: none;
+    }
 }
