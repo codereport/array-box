@@ -1,4 +1,4 @@
-namespace("jvm")
+$namespace jvm
 
 ∇ toJvmType (arg) {
     objectClass ← findClass "java.lang.Object"

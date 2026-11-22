@@ -1,4 +1,4 @@
-namespace("time")
+$namespace time
 
 ∇ measureTimeInternal (fn) {
   startTime ← time:timeMillis 0
@@ -9,13 +9,13 @@ namespace("time")
 }
 
 ⍝ This name is kept for now, in case it's in use
-defsyntax measureTime (:nfunction fn) {
+$defsyntax measureTime (:nfunction fn) {
   measureTimeInternal fn
 }
 
-defsyntax runtime (:nfunction fn) {
+$defsyntax runtime (:nfunction fn) {
   measureTimeInternal fn
 }
 
-declare(:export measureTime)
-declare(:export runtime)
+$declare :export measureTime
+$declare :export runtime

@@ -1,4 +1,4 @@
-namespace("output")
+$namespace output
 
 ∇ isArray (v) {
   (typeof v) ≡ 'array
@@ -115,4 +115,4 @@ namespace("output")
   0
 }
 
-declare(:export prettyPrint)
+$declare :export prettyPrint

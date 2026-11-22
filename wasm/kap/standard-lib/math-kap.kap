@@ -1,7 +1,7 @@
 ⍝ Implementation here:
 ⍝ https://gitlab.com/n9n/apl/-/commit/af428f5713b2ddd5c928806168316b6fb3b79132
 
-namespace("kap")
+$namespace kap
 
 ∇ norm (B) {
   (B +∙× +B) * 0.5
@@ -59,14 +59,14 @@ namespace("kap")
   }
 }
 
-declare(:export ⌹)
+$declare :export ⌹
 
 ∇ (A) ⊥ (B) {
   1≥≢⍴A or 'kap:InvalidDimensionsException int:throwNative "Left argument must have rank 0 or 1"
   +⌿ (×⍀ ¯1↓1⍪(0×B) (+⍤¯1) ⌽A) × ⊖B
 }
 
-declare(:export ⊥)
+$declare :export ⊥
 
 ∇ (A) scalarEncode (B) {
   1 ∊ B<0 and 'kap:IllegalArgumentException int:throwNative "B must be positive"
@@ -100,4 +100,4 @@ declare(:export ⊥)
   }
 }
 
-declare(:export ⊤)
+$declare :export ⊤

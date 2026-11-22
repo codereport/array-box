@@ -1,4 +1,4 @@
-namespace("regex")
+$namespace regex
 
 ∇ (m) finderror (s) {
   result ← m regex:find s
@@ -9,4 +9,4 @@ namespace("regex")
   }
 }
 
-declare(:export finderror)
+$declare :export finderror

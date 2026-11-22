@@ -1,4 +1,4 @@
-namespace("map")
+$namespace map
 
 ∇ (m) appendTo (values) {
   (2=≢⍴values and 2=↑↓⍴values) or (1=≢⍴values and 0=2|≢values) or 'kap:InvalidDimensionsException int:throwNative "Right argument to map should be either a rank-1 array with an even element count or a rank-2 array with 2 columns"
@@ -6,7 +6,7 @@ namespace("map")
   m map:with pairs ({ (↑⍺) ⍮ (⊃(null≡⍵) ⊇ (⊃⍵) ⍬),⊂↑↓⍺ }⍤1 0) m map:get ,null 1 ↑ pairs
 }
 
-declare(:export appendTo)
+$declare :export appendTo
 
 ∇ (p) find2 (m) {
   'kap:map ≡ typeof m or 'kap:IllegalArgumentException int:throwNative "Right argument must be a map. Got: ",⍕typeof m
@@ -26,8 +26,8 @@ declare(:export appendTo)
   findone/ m , (@.≠)⍛⊂ p
 }
 
-declare(:export find)
+$declare :export find
 
 flip ⇐ (∧∪,/map:keys¨)⍛{⍺ labels ⊃(⊂⍺) {⍵[⍺]}¨⍵}
 
-declare(:export flip)
+$declare :export flip
