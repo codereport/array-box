@@ -83,6 +83,40 @@ async function snapshot(page) {
     return canvas.evaluate(canvas => canvas.toDataURL());
 }
 
+async function pauseSceneFades(page) {
+    await page.evaluate(() => {
+        const animate = Element.prototype.animate;
+        Element.prototype.animate = function(...args) {
+            const animation = animate.apply(this, args);
+            // Hold the fade before any browser round trips or GPU readbacks can
+            // outlast it. Tests advance and finish the real animation explicitly.
+            if (this.matches('.matrix-wallpaper')) animation.pause();
+            return animation;
+        };
+    });
+}
+
+async function typeRainGlyph(page, key, glyph) {
+    const { highlightCode } = await import('../src/syntax.js');
+    await page.locator('#codeInput').focus();
+    await page.keyboard.press('Backquote');
+    await page.keyboard.press(key);
+    // Colored tokens appear after the debounced highlighter; plain text has no
+    // span. Ignore the browser's trailing empty line in a contenteditable field.
+    await page.waitForFunction(({ glyph, needsSpan }) => {
+        const input = document.getElementById('codeInput');
+        return input.textContent.trimEnd() === glyph && (!needsSpan ||
+            [...input.querySelectorAll('span')].some(span => span.textContent === glyph));
+    }, { glyph, needsSpan: highlightCode(glyph, 'apl').startsWith('<span ') });
+    return page.evaluate(glyph => {
+        const input = document.getElementById('codeInput');
+        const span = [...input.querySelectorAll('span')].find(span => span.textContent === glyph);
+        const context = document.createElement('canvas').getContext('2d');
+        context.fillStyle = getComputedStyle(span || input).color;
+        return { expected: context.fillStyle, matches: window.rainPaint.filter(item => item.glyph === glyph) };
+    }, glyph);
+}
+
 async function finishSceneCycle(page) {
     for (let i = 0; i < SCENE_IDS.length && await page.locator('.matrix-backdrop').count(); i++) {
         await page.keyboard.press('Control+Shift+m');
@@ -498,6 +532,28 @@ test('rain glyphs and their glow match editor syntax colors in every language', 
     assert.deepEqual(errors, []);
 });
 
+test('plain-text APL glyphs glow with the editor text color', async t => {
+    const { page, errors } = await openEditor(t, { reducedMotion: 'reduce' });
+    await captureRainHighlights(page);
+    // Ambient scenes include every glyph, so these cases do not depend on random rain.
+    await page.keyboard.press('Control+Shift+m');
+    await page.keyboard.press('Control+Shift+m');
+    await snapshot(page);
+    for (const [key, glyph] of [['w', '⍵'], ['a', '⍺'], ['f', '_']]) {
+        const { expected, matches } = await typeRainGlyph(page, key, glyph);
+        assert.equal(await page.locator('#codeInput span').count(), 0, 'plain text needs no syntax span');
+        assert.ok(matches.length, `${glyph} appears in the scene`);
+        for (const item of matches) {
+            assert.equal(item.alpha, 1);
+            assert.equal(item.color, expected);
+            assert.equal(item.shadowColor, expected);
+            assert.ok(item.glow > 0);
+        }
+        await page.locator('#codeInput').fill('');
+    }
+    assert.deepEqual(errors, []);
+});
+
 test('the shortcut visits every local scene, preserves glyph glow in each, then returns to the editor', async t => {
     const { page, errors } = await openEditor(t, { reducedMotion: 'reduce' });
     await captureRainHighlights(page);
@@ -551,17 +607,7 @@ test('the shortcut visits every local scene, preserves glyph glow in each, then 
             return Object.entries(aplKeymap).find(([key, glyph]) => /^[a-z]$/.test(key) &&
                 window.rainPaint.some(item => item.glyph === glyph));
         });
-        await page.locator('#codeInput').focus();
-        await page.keyboard.press('Backquote');
-        await page.keyboard.press(key);
-        await page.waitForFunction(glyph => [...document.querySelectorAll('#codeInput span')]
-            .some(span => span.textContent === glyph), glyph);
-        const { expected, matches } = await page.evaluate(glyph => {
-            const span = [...document.querySelectorAll('#codeInput span')].find(span => span.textContent === glyph);
-            const context = document.createElement('canvas').getContext('2d');
-            context.fillStyle = getComputedStyle(span).color;
-            return { expected: context.fillStyle, matches: window.rainPaint.filter(item => item.glyph === glyph) };
-        }, glyph);
+        const { expected, matches } = await typeRainGlyph(page, key, glyph);
         assert.ok(matches.length, `${scene} includes the typed glyph`);
         for (const item of matches) {
             assert.equal(item.alpha, 1, `${scene} highlights matches`);
@@ -620,6 +666,7 @@ test('ambient scenes stay still with reduced motion, animate when allowed, and f
 
 test('every decoded scene crossfades, retaining outgoing crops and colors including Lofoten', async t => {
     const { page, errors } = await openEditor(t, { viewport: { width: 720, height: 450 } });
+    await pauseSceneFades(page);
     await page.evaluate(async () => {
         const { BACKGROUND_SCENES } = await import('/src/background-scenes.js');
         // Hold decoded images in memory to exercise the cached-image path.
@@ -682,6 +729,7 @@ test('every decoded scene crossfades, retaining outgoing crops and colors includ
 test('live 3D crossfades retain the outgoing frame and interrupted blends without a preserved WebGL buffer', async t => {
     const { page, errors } = await openEditor(t, { nature3D: true, preserveNatureFrames: false,
         reducedMotion: 'reduce', viewport: { width: 720, height: 405 } });
+    await pauseSceneFades(page);
     for (let i = 0; i <= SCENE_IDS.indexOf('creek'); i++) await page.keyboard.press('Control+Shift+m');
     await page.waitForFunction(() => document.querySelector('.matrix-wallpaper.is-visible[data-scene="creek"] canvas.matrix-nature.is-visible'));
     await page.emulateMedia({ reducedMotion: 'no-preference' });
