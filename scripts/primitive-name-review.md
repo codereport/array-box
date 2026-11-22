@@ -4,26 +4,26 @@ Search labels below differ from the bundled hover documentation. Some are useful
 
 | Language | Glyph | Search label | Documentation name |
 | --- | --- | --- | --- |
-| kap | [⌈](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L968) | ceiling / max | ceiling / maximum |
-| kap | [⌊](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L955) | floor / min | floor / minimum |
-| kap | [⍟](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L751) | natural log / log base | natural logarithm / logarithm |
-| kap | [~](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L928) | not / without | logical not / without |
-| kap | [≤](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L850) | less or equal | less than or equal |
-| kap | [≥](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L859) | greater or equal | greater than or equal |
-| kap | [≢](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1012) | major axis size / compare not equal | tally (major axis size) / compare not equal |
-| kap | [⍲](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L912) | nand | logical nand |
-| kap | [⍱](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L920) | nor | logical nor |
-| kap | [⌹](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1836) | matrix inverse / matrix divide | matrix inverse / matrix division |
-| kap | [/](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1982) | replicate / reduce | reduce / replicate |
-| kap | [⌿](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2029) | replicate first / reduce first | reduce first / replicate first |
-| kap | [⍨](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2071) | commute / duplicate | duplicate / commute |
-| kap | [⍕](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1640) | format | format / format with pattern |
+| kap | [⌈](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L970) | ceiling / max | ceiling / maximum |
+| kap | [⌊](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L957) | floor / min | floor / minimum |
+| kap | [⍟](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L753) | natural log / log base | natural logarithm / logarithm |
+| kap | [~](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L930) | not / without | logical not / without |
+| kap | [≤](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L852) | less or equal | less than or equal |
+| kap | [≥](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L861) | greater or equal | greater than or equal |
+| kap | [≢](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1014) | major axis size / compare not equal | tally (major axis size) / compare not equal |
+| kap | [⍲](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L914) | nand | logical nand |
+| kap | [⍱](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L922) | nor | logical nor |
+| kap | [⌹](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1838) | matrix inverse / matrix divide | matrix inverse / matrix division |
+| kap | [/](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1984) | replicate / reduce | reduce / replicate |
+| kap | [⌿](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2031) | replicate first / reduce first | reduce first / replicate first |
+| kap | [⍨](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2073) | commute / duplicate | duplicate / commute |
+| kap | [⍕](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L1642) | format | format / format with pattern |
 | kap | [⍞](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L300) | quote-quad | apply function reference |
 | kap | [⍬](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc) | zilde (empty) | zilde (empty numeric vector) |
 | kap | [λ](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L286) | lambda | create function reference |
 | kap | [←](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc) | assign | assignment |
 | kap | [⇐](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L266) | const assign | local function declaration |
-| kap | [→](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2612) | guard | return / conditional return |
+| kap | [→](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc?display=source#L2614) | guard | return / conditional return |
 | kap | [⋄](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc) | statement sep | statement separator |
 | kap | [⍺](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc) | left arg | left argument |
 | kap | [⍵](https://codeberg.org/loke/array/src/branch/master/docs/reference.asciidoc) | right arg | right argument |
