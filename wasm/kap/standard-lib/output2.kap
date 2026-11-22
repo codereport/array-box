@@ -1,4 +1,4 @@
-namespace("output2")
+$namespace output2
 
 ⍝ ┌┌┌→──┐
 ⍝ ↓↓↓0 1│

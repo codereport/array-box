@@ -1,10 +1,10 @@
-namespace("stat")
+$namespace stat
 
 avg ⇐ +/«÷»≢
 
 median ⇐ 2 ÷⍨ +/ (¯1r2 0+2÷⍨≢)⍛⊇ ∧
 
-declare(:export (avg median))
+$declare :export (avg median)
 
 rationalStats ⇐ {
 	¯1 2 ⍴ "max" (⌈/,⍵) "min" (⌊/,⍵) "avg" (avg ,⍵) "median" (median ,⍵)

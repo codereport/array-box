@@ -1,4 +1,4 @@
-namespace("xml")
+$namespace xml
 
 objectClass ← jvm:findClass "java.lang.Object"
 stringClass ← jvm:findClass "java.lang.String"
@@ -59,7 +59,7 @@ readFile ⇐ {
 	{ jvm:callMethod⟦parseFromFileMethod; builder; file⟧ } catch 'jvm:jvmMethodCallException λhandleXmlParseException
 }
 
-declare(:export readFile)
+$declare :export readFile
 
 readString ⇐ {
 	s ← ⍵
@@ -73,14 +73,14 @@ readString ⇐ {
 	{ jvm:callMethod⟦parseFromStreamMethod; builder; stream⟧ } catch 'jvm:jvmMethodCallException λhandleXmlParseException
 }
 
-declare(:export readString)
+$declare :export readString
 
 nodeName ⇐ {
 	node ← ⍵
 	jvm:fromJvm jvm:callMethod⟦getNodeNameMethod; node⟧
 }
 
-declare(:export nodeName)
+$declare :export nodeName
 
 childNodes ⇐ {
 	node ← ⍵
@@ -89,7 +89,7 @@ childNodes ⇐ {
 	{ nodeList⍠item (node; ⍵) }¨ ⍳n
 }
 
-declare(:export childNodes)
+$declare :export childNodes
 
 nodeTypePairs ← {
 	field ⇐ {
@@ -116,14 +116,14 @@ nodeType ⇐ {
 	nodeTypePairs[type ⍳⍨ ,null ¯1↑nodeTypePairs ; 0]
 }
 
-declare(:export nodeType)
+$declare :export nodeType
 
 nodeText ⇐ {
 	node ← ⍵
 	jvm:fromJvm jvm:callMethod⟦getNodeValueMethod; node⟧
 }
 
-declare(:export nodeText)
+$declare :export nodeText
 
 attributes ⇐ {
 	node ← ⍵
@@ -139,7 +139,7 @@ attributes ⇐ {
 	}
 }
 
-declare(:export attributes)
+$declare :export attributes
 
 nodeToMap ⇐ {
 	node ← ⍵
@@ -165,7 +165,7 @@ toTree ⇐ {
 	}
 }
 
-declare(:export toTree)
+$declare :export toTree
 
 xPath ← {
 	factoryClass  ← jvm:findClass⟦"javax.xml.xpath.XPathFactory"⟧
@@ -199,7 +199,7 @@ xpathEvalToString ⇐ {
 	jvm:fromJvm xPath⍠evalToString (xp; path; node)
 }
 
-declare(:export xpathEvalToString)
+$declare :export xpathEvalToString
 
 xpathEvalToNode ⇐ {
 	(path ; node) ← ⍵
@@ -207,7 +207,7 @@ xpathEvalToNode ⇐ {
 	xPath⍠evalToNode (xp; path; node)	
 }
 
-declare(:export xpathEvalToNode)
+$declare :export xpathEvalToNode
 
 xpathEvalToNodeList ⇐ {
 	(path ; node) ← ⍵
@@ -217,4 +217,4 @@ xpathEvalToNodeList ⇐ {
 	{ nodeList⍠item (res; ⍵) }¨ ⍳n
 }
 
-declare(:export xpathEvalToNodeList)
+$declare :export xpathEvalToNodeList

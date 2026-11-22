@@ -1,6 +1,6 @@
-namespace("http")
+$namespace http
 
-import("io")
+$import io
 
 ∇ urlEscape (s) {
   enc ⇐ { ,/ (@=,2 toHex)¨ encodeUtf8 ⍵ }
@@ -8,14 +8,14 @@ import("io")
   ,/ (s∊validChars) % (enc¨ s) s
 }
 
-declare(:export urlEscape)
+$declare :export urlEscape
 
 ∇ mkParams (content) {
   ((≢⍴content)≠2 or (↑↓⍴content)≠2) and throw "Form data has invalid dimensions"
   ,/¯1↓,((⊂"="),(⊂"&"),urlEscape¨ content)[;2 0 3 1]
 }
 
-declare(:export mkParams)
+$declare :export mkParams
 
 ∇ getJSON (url) {
   (code;data;headers) ← get url
@@ -23,4 +23,4 @@ declare(:export mkParams)
   json:readString data
 }
 
-declare(:export getJSON)
+$declare :export getJSON

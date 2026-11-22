@@ -1,4 +1,4 @@
-namespace("animation")
+$namespace animation
 
 layout ⇐ {
 	⌽¨ (1r2 + ⍳⍴⍵) ÷ ⊂⍴⍵ 
@@ -21,4 +21,4 @@ animateTransform ⇐ {
 	,res
 }
 
-declare(:export (showArray animateTransform))
+$declare :export (showArray animateTransform)

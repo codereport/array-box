@@ -1,4 +1,4 @@
-namespace("o3")
+$namespace o3
 
 ⍝ Configuration options:
 
@@ -359,4 +359,4 @@ int:registerCmd ("ratmode" ; "Select how to display rational numbers (normal, fa
   x
 }
 
-declare(:export show)
+$declare :export show

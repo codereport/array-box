@@ -1,16 +1,16 @@
-namespace("kap")
+$namespace kap
 
-defsyntax unwindProtect (:function statement :function handler) {
+$defsyntax unwindProtect (:function statement :function handler) {
   int:unwindProtect statement handler
 }
 
-declare(:export unwindProtect)
+$declare :export unwindProtect
 
-defsyntaxsub whenInner (:nexprfunction cond :nfunction thenStatement :optional (:special :newline)) {
+$defsyntaxsub whenInner (:nexprfunction cond :nfunction thenStatement :optional (:special :newline)) {
   cond thenStatement
 }
 
-defsyntax when (:special :openBrace :optional (:special :newline) :repeat (entryList whenInner) :special :closeBrace) {
+$defsyntax when (:special :openBrace :optional (:special :newline) :repeat (entryList whenInner) :special :closeBrace) {
   i ← 0
   n ← ≢entryList
   cont ← 1
@@ -23,4 +23,4 @@ defsyntax when (:special :openBrace :optional (:special :newline) :repeat (entry
   res
 }
 
-declare(:export when)
+$declare :export when
