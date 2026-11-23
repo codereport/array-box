@@ -5,6 +5,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { fetchText, fetchBuffer } from './fetch-upstream.cjs';
 import { loadUiuaPrimitives, scrapeUiuaDocs } from './scrape-uiua-docs.cjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -19,16 +20,8 @@ const fingerprintPath = path.join(root, 'scripts', 'kap-reference-fingerprint.js
 const kapNamesPath = path.join(root, 'scripts', 'kap-heading-names.json');
 const notes = [];
 
-async function get(url) {
-    const response = await fetch(url, { headers: { 'User-Agent': 'array-box-upstream-sync' }, signal: AbortSignal.timeout(30000) });
-    if (!response.ok) throw new Error(`${url}: HTTP ${response.status}`);
-    return response.text();
-}
-
 async function getFont(url) {
-    const response = await fetch(url, { headers: { 'User-Agent': 'array-box-upstream-sync' }, signal: AbortSignal.timeout(30000) });
-    if (!response.ok) throw new Error(`${url}: HTTP ${response.status}`);
-    const bytes = Buffer.from(await response.arrayBuffer());
+    const bytes = await fetchBuffer(url);
     if (bytes.length < 200000 || bytes.readUInt32BE(0) !== 0x00010000) throw new Error('Uiua font download looks invalid');
     return bytes;
 }
@@ -241,9 +234,9 @@ function fixKapLinks(code, headings) {
 }
 
 async function main() {
-    // Validate both remote sources before invoking generators that write files.
+    // Fetch remote sources before invoking generators that write files.
     const [uiuaRaw, kapSource, tinyKeyboardSource, uiuaFont] = await Promise.all([
-        get(uiuaUrl), get(kapRawUrl), get(tinyKeyboardUrl), getFont(uiuaFontUrl),
+        fetchText(uiuaUrl), fetchText(kapRawUrl), fetchText(tinyKeyboardUrl), getFont(uiuaFontUrl),
     ]);
     const upstreamUiua = JSON.parse(uiuaRaw);
     if (Object.keys(upstreamUiua).length < 100) throw new Error('Uiua primitive list looks incomplete');

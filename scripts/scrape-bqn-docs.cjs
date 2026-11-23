@@ -10,41 +10,15 @@
  * Run this periodically to update the docs if upstream changes.
  */
 
-const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const { fetchText: fetchUrl } = require('./fetch-upstream.cjs');
 
 const BASE_URL = 'https://mlochbaum.github.io/BQN/help';
 const HELP_INDEX_URL = `${BASE_URL}/index.html`;
 
 // Output path
 const JS_OUTPUT_FILE = path.join(__dirname, '..', 'src', 'bqn-docs.js');
-
-/**
- * Fetch a URL and return the HTML content
- */
-function fetchUrl(url) {
-    return new Promise((resolve, reject) => {
-        https.get(url, (res) => {
-            if (res.statusCode === 301 || res.statusCode === 302) {
-                fetchUrl(res.headers.location).then(resolve).catch(reject);
-                return;
-            }
-            
-            if (res.statusCode !== 200) {
-                reject(new Error(`HTTP ${res.statusCode} for ${url}`));
-                return;
-            }
-            
-            // Set encoding to UTF-8 to properly handle multi-byte characters
-            res.setEncoding('utf8');
-            let data = '';
-            res.on('data', chunk => data += chunk);
-            res.on('end', () => resolve(data));
-            res.on('error', reject);
-        }).on('error', reject);
-    });
-}
 
 /**
  * Simple HTML entity decoder

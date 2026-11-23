@@ -10,9 +10,9 @@
  * Run this periodically to update the docs if upstream changes.
  */
 
-const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const { fetchText } = require('./fetch-upstream.cjs');
 
 // TinyAPL GitHub raw URLs (using beta branch for latest features)
 const BRANCH = 'beta';
@@ -26,33 +26,9 @@ const JS_OUTPUT_FILE = path.join(__dirname, '..', 'src', 'tinyapl-docs.js');
 /**
  * Fetch a URL and return the content
  */
-function fetchUrl(url, isJson = false) {
-    return new Promise((resolve, reject) => {
-        const options = {
-            headers: {
-                'User-Agent': 'ArrayBox-DocScraper/1.0',
-                'Accept': isJson ? 'application/json' : 'text/plain'
-            }
-        };
-        
-        https.get(url, options, (res) => {
-            if (res.statusCode === 301 || res.statusCode === 302) {
-                fetchUrl(res.headers.location, isJson).then(resolve).catch(reject);
-                return;
-            }
-            
-            if (res.statusCode !== 200) {
-                reject(new Error(`HTTP ${res.statusCode} for ${url}`));
-                return;
-            }
-            
-            res.setEncoding('utf8');
-            let data = '';
-            res.on('data', chunk => data += chunk);
-            res.on('end', () => resolve(isJson ? JSON.parse(data) : data));
-            res.on('error', reject);
-        }).on('error', reject);
-    });
+async function fetchUrl(url, isJson = false) {
+    const text = await fetchText(url);
+    return isJson ? JSON.parse(text) : text;
 }
 
 /**

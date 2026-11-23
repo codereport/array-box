@@ -25,10 +25,12 @@ jobs:
           node-version: '22'
 
       - name: Refresh upstream docs and glyphs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: npm run sync:primitives
 
       - name: Test upstream sync
-        run: node --test tests/upstream-sync.test.cjs
+        run: node --test tests/upstream-fetch.test.cjs tests/upstream-sync.test.cjs
 
       - name: Check primitive names
         run: node scripts/check-primitive-names.mjs
