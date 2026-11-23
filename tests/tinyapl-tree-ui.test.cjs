@@ -269,10 +269,15 @@ test('TinyAPL evaluation opens directly without a view toggle and supports expan
 
 test('TinyAPL evaluation supports keyboard expansion and constant results', async t => {
     const page = await openEditor(t);
+    await page.clock.install({ time: new Date('2026-01-01T00:00:00Z') });
+    await page.clock.pauseAt(new Date('2026-01-01T00:00:01Z'));
     await evaluate(page, 'Ms', { structure: false });
     await page.locator('.eval-expandable').first().focus();
     await page.keyboard.press('Space');
     assert.equal(await page.locator('.eval-call').count(), 5);
+    // Run the pending editor highlight after focus has moved to the diagram.
+    await page.clock.runFor(100);
+    assert.equal(await page.locator('#codeInput .syntax-function').textContent(), 'Ms');
     assert.equal(await page.locator('.eval-node:focus').count(), 1);
     await page.keyboard.press('Control+Shift+R');
     assert.equal(await page.locator('.eval-expandable').count(), 2);

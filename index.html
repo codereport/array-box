@@ -4397,14 +4397,16 @@
                 highlightAnimationFrame = null;
             }
 
-            const selections = multiCursor.captureSelection();
+            // Restoring a contenteditable selection also focuses the editor.
+            // Keep focus on a result or control if the user has moved there.
+            const selections = document.activeElement === codeInput ? multiCursor.captureSelection() : null;
             const text = getInputText();
             const highlighted = highlightInputText(text);
 
             // Only update if content actually changed
             if (codeInput.innerHTML !== highlighted) {
                 codeInput.innerHTML = highlighted;
-                multiCursor.restoreSelection(selections);
+                if (selections) multiCursor.restoreSelection(selections);
             }
         }
 
@@ -4424,17 +4426,8 @@
             // Debounce: wait 50ms after last keystroke before highlighting
             highlightTimeout = setTimeout(() => {
                 highlightAnimationFrame = requestAnimationFrame(() => {
-                    const selections = multiCursor.captureSelection();
-                    const text = getInputText();
-                    const highlighted = highlightInputText(text);
-
-                    // Only update if content actually changed
-                    if (codeInput.innerHTML !== highlighted) {
-                        codeInput.innerHTML = highlighted;
-                        multiCursor.restoreSelection(selections);
-                    }
-
                     highlightAnimationFrame = null;
+                    applySyntaxHighlightingImmediate();
                 });
                 highlightTimeout = null;
             }, 50);
