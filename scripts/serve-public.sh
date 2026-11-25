@@ -133,7 +133,7 @@ show_backend_failure() {
 }
 
 verify_deploy_preconditions() {
-    local branch upstream behind ahead
+    local branch upstream behind ahead commit subject files
 
     [[ -f "$config_file" ]] || die "Missing configuration file: $config_file"
     git rev-parse --is-inside-work-tree >/dev/null 2>&1 || die "$repo_dir is not a Git worktree."
@@ -144,8 +144,21 @@ verify_deploy_preconditions() {
     upstream="$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null)" \
         || die "Branch $branch has no upstream; configure one or use --no-deploy."
     read -r behind ahead < <(git rev-list --left-right --count "$upstream...HEAD")
-    if (( behind != 0 || ahead != 0 )); then
+    if (( behind != 0 )); then
         die "Branch $branch differs from $upstream ($behind behind, $ahead ahead); synchronize it before automatic deployment."
+    fi
+    # A failed push or an interrupted deployment can leave generated URL commits
+    # unpublished. Let the next launch replace the dead URL and retry the push,
+    # while continuing to reject unpublished application changes.
+    if (( ahead != 0 )); then
+        while IFS= read -r commit; do
+            subject="$(git show -s --format=%s "$commit")"
+            files="$(git diff-tree --root --no-commit-id --name-only -r "$commit")"
+            if [[ "$subject" != "🔧 Update production tunnel URL" || "$files" != "config.js" ]]; then
+                die "Branch $branch has unpublished changes beyond generated tunnel URLs; synchronize it with $upstream or use --no-deploy."
+            fi
+        done < <(git rev-list "$upstream..HEAD")
+        log "Recovering $ahead unpublished tunnel URL update(s); the new URL will be pushed after its health check passes."
     fi
 }
 
@@ -154,10 +167,6 @@ for command_name in node docker cloudflared curl git grep pgrep ss; do
 done
 
 node scripts/check-public-prerequisites.cjs
-
-if [[ "$deploy" == true ]]; then
-    verify_deploy_preconditions
-fi
 
 if [[ "$check_only" == true ]]; then
     if backends_healthy; then
@@ -177,6 +186,10 @@ if [[ "$check_only" == true ]]; then
     fi
     log "Preflight checks passed."
     exit 0
+fi
+
+if [[ "$deploy" == true ]]; then
+    verify_deploy_preconditions
 fi
 
 if pgrep -x cloudflared >/dev/null 2>&1; then

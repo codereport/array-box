@@ -12,7 +12,8 @@
  * - Execution timeout
  */
 
-const { spawn, execSync } = require('child_process');
+const { spawn, execSync, execFileSync } = require('child_process');
+const { randomUUID } = require('crypto');
 const path = require('path');
 const { extractAplFunctionResult } = require('./apl-output.cjs');
 
@@ -43,6 +44,35 @@ const CONFIG = {
 
 // Warm container pool: language -> { container, busy, requestCount, lastUsed }
 const warmPool = {};
+// Busy interpreters can be displaced by concurrent requests. Keep ownership of
+// all of them until they finish or are terminated.
+const activeWarmContainers = new Set();
+
+function stopDockerContainer(name, child) {
+    try {
+        // Killing `docker run` alone can leave its interpreter running.
+        execFileSync('docker', ['rm', '--force', name], { stdio: 'ignore', timeout: 5000 });
+    } catch (error) {
+        console.warn(`[Sandbox] Could not remove container ${name}: ${error.message}`);
+        child?.kill();
+    }
+}
+
+function stopWarmContainer(container) {
+    if (container.disposed) return;
+    container.disposed = true;
+    activeWarmContainers.delete(container);
+    if (warmPool[container.language] === container) delete warmPool[container.language];
+    stopDockerContainer(container.name, container.process);
+}
+
+function releaseWarmContainer(container) {
+    container.busy = false;
+    container.lastUsed = Date.now();
+    if (activeWarmContainers.has(container) && warmPool[container.language] !== container) {
+        stopWarmContainer(container);
+    }
+}
 
 // Track if Docker is available
 let dockerAvailable = null;
@@ -326,13 +356,15 @@ function filterAplErrorOutput(stdout, stderr, code, markers = null) {
 /**
  * Start a warm container for a language
  */
-async function startWarmContainer(language, options = {}) {
+function startWarmContainer(language, options = {}) {
     const imageName = CONFIG.images[language];
+    const name = `arraybox-${language}-${randomUUID()}`;
     
     const uid = 1000;
     
     const dockerArgs = [
         'run',
+        '--name', name,
         '--rm',
         '-i',
         '--init',
@@ -359,16 +391,23 @@ async function startWarmContainer(language, options = {}) {
         stdio: ['pipe', 'pipe', 'pipe']
     });
     
-    return {
+    const warmContainer = {
+        name,
         process: container,
         stdin: container.stdin,
         stdout: container.stdout,
         stderr: container.stderr,
-        busy: false,
+        busy: true,
         requestCount: 0,
         lastUsed: Date.now(),
         language
     };
+    activeWarmContainers.add(warmContainer);
+    container.once('exit', () => {
+        activeWarmContainers.delete(warmContainer);
+        if (warmPool[language] === warmContainer) delete warmPool[language];
+    });
+    return warmContainer;
 }
 
 /**
@@ -380,13 +419,13 @@ async function getWarmContainer(language, options = {}) {
         const container = warmPool[language];
         const processExited = container.process && (container.process.exitCode !== null || container.process.signalCode !== null);
         // Check if container is still running
-        if (container.process && !container.process.killed && !processExited) {
+        if (container.process && !container.process.killed && !processExited && !container.disposed) {
             // Check if we should recycle it
-            if (container.requestCount >= CONFIG.maxRequestsPerContainer) {
+            if (!container.busy && container.requestCount >= CONFIG.maxRequestsPerContainer) {
                 console.log(`[Sandbox] Recycling ${language} container after ${container.requestCount} requests`);
-                container.process.kill();
-                delete warmPool[language];
+                stopWarmContainer(container);
             } else if (!container.busy) {
+                container.busy = true;
                 return container;
             }
         } else {
@@ -396,7 +435,8 @@ async function getWarmContainer(language, options = {}) {
     
     // Start a new warm container
     console.log(`[Sandbox] Starting warm container for ${language}...`);
-    const container = await startWarmContainer(language, options);
+    // Reserve before yielding so startup cannot be shared by two requests.
+    const container = startWarmContainer(language, options);
     warmPool[language] = container;
     
     // Wait for container to be ready (read and discard initial output)
@@ -512,6 +552,7 @@ async function loadSafe3(container) {
  */
 async function executeWithWarmContainer(language, code, options = {}) {
     const container = await getWarmContainer(language, options);
+    const timeout = options.timeout || CONFIG.timeout;
     if (container.process && (container.process.exitCode !== null || container.process.signalCode !== null)) {
         throw new Error('Warm container exited');
     }
@@ -525,11 +566,11 @@ async function executeWithWarmContainer(language, code, options = {}) {
         let timeoutId;
         
         const cleanup = () => {
-            container.busy = false;
             container.stdout.removeListener('data', onData);
             container.stderr.removeListener('data', onStderr);
             if (timeoutId) clearTimeout(timeoutId);
             if (errorCheckTimeout) clearTimeout(errorCheckTimeout);
+            releaseWarmContainer(container);
         };
         
         let resolved = false;
@@ -566,15 +607,16 @@ async function executeWithWarmContainer(language, code, options = {}) {
             let resetOutput = '';
             let resetStderr = '';
             let resetTimeout;
-            const finishReset = () => {
+            const finishReset = (reusable = false) => {
                 container.stdout.removeListener('data', onResetData);
                 container.stderr.removeListener('data', onResetStderr);
                 clearTimeout(resetTimeout);
-                container.busy = false;
+                if (reusable) releaseWarmContainer(container);
+                else stopWarmContainer(container);
             };
             const checkReset = () => {
                 if (hasAplMarker(resetOutput, resetMarker) && hasAplMarker(resetStderr, resetMarker)) {
-                    finishReset();
+                    finishReset(true);
                 }
             };
             
@@ -752,49 +794,10 @@ async function executeWithWarmContainer(language, code, options = {}) {
         timeoutId = setTimeout(() => {
             if (resolved) return;
             resolved = true;
+            stopWarmContainer(container);
             cleanup();
-            
-            if (language === 'apl') {
-                // APL timeouts are handled by returning stderr/partial output below.
-            }
-            
-            // Filter Dyalog banner from stderr
-            let filteredStderr = '';
-            if (stderrOutput.trim()) {
-                let errorLines = stderrOutput.split('\n').filter(line => {
-                    const trimmed = line.trim();
-                    if (trimmed.startsWith('Dyalog APL')) return false;
-                    if (trimmed.startsWith('Serial number:')) return false;
-                    if (trimmed.startsWith('Copyright')) return false;
-                    if (trimmed.startsWith('+---')) return false;
-                    if (trimmed.startsWith('|')) return false;
-                    if (trimmed.startsWith('⎕←')) return false;
-                    if (trimmed.startsWith(']boxing')) return false;
-                    if (trimmed.startsWith('Was ')) return false;
-                    if (trimmed === 'clear ws') return false;
-                    if (trimmed === ')SIC') return false;
-                    if (trimmed === ')CLEAR') return false;
-                    if (trimmed === '') return false;
-                    return true;
-                });
-                filteredStderr = errorLines.join('\n').trim();
-            }
-            
-            // If we have stderr output (error messages), return that
-            if (filteredStderr) {
-                resolve({
-                    success: false,
-                    output: humanizeAplError(filteredStderr),
-                    warm: true
-                });
-            } else {
-                resolve({
-                    success: false,
-                    output: humanizeAplError(output.trim()) || 'Execution timed out',
-                    warm: true
-                });
-            }
-        }, CONFIG.timeout);
+            resolve({ success: false, output: `Execution timed out (${timeout / 1000} seconds)`, timedOut: true, warm: true });
+        }, timeout);
         
         // Send code
         container.stdin.write(input);
@@ -829,6 +832,7 @@ function executeInSandbox(language, code, options = {}) {
         }
         
         const imageName = CONFIG.images[language];
+        const name = `arraybox-${language}-${randomUUID()}`;
         const timeout = options.timeout || CONFIG.timeout;
         
         const uid = 1000;
@@ -836,6 +840,7 @@ function executeInSandbox(language, code, options = {}) {
         // Build Docker run command with security restrictions
         const dockerArgs = [
             'run',
+            '--name', name,
             '--rm',                              // Remove container after exit
             '-i',                                // Interactive (for stdin)
             '--init',                            // Use tini for faster signal handling
@@ -884,7 +889,7 @@ function executeInSandbox(language, code, options = {}) {
         const timeoutId = setTimeout(() => {
             if (!finished) {
                 timedOut = true;
-                container.kill('SIGKILL');
+                stopDockerContainer(name, container);
             }
         }, timeout);
         
@@ -1002,12 +1007,9 @@ function getStatus() {
  * Cleanup warm containers
  */
 function cleanupWarmContainers() {
-    for (const [language, container] of Object.entries(warmPool)) {
-        if (container.process && !container.process.killed) {
-            console.log(`[Sandbox] Stopping warm container for ${language}`);
-            container.process.kill();
-        }
-        delete warmPool[language];
+    for (const container of activeWarmContainers) {
+        console.log(`[Sandbox] Stopping warm container for ${container.language}`);
+        stopWarmContainer(container);
     }
 }
 
@@ -1023,10 +1025,7 @@ if (CONFIG.warmContainerIdleTimeout > 0) {
         for (const [language, container] of Object.entries(warmPool)) {
             if (!container.busy && (now - container.lastUsed) > CONFIG.warmContainerIdleTimeout) {
                 console.log(`[Sandbox] Stopping idle warm container for ${language}`);
-                if (container.process && !container.process.killed) {
-                    container.process.kill();
-                }
-                delete warmPool[language];
+                stopWarmContainer(container);
             }
         }
     }, 60000);  // Check every minute
@@ -1055,7 +1054,7 @@ async function prewarmContainers() {
             }
             
             // Start warm container
-            await getWarmContainer(lang);
+            releaseWarmContainer(await getWarmContainer(lang));
             console.log(`[Sandbox] ${lang.toUpperCase()} container warmed`);
         } catch (e) {
             console.log(`[Sandbox] Failed to pre-warm ${lang}: ${e.message}`);

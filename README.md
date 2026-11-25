@@ -95,6 +95,10 @@ start while a Cloudflare tunnel process is running, and stops only the processes
 it starts when it exits. Stop the existing backend before relaunching to load
 backend code changes. By default it updates, commits, and pushes `config.js`;
 use `-- --no-deploy` to skip deployment or `-- --check` for read-only checks.
+Checks work even with unpublished commits or edits to `config.js`. If a previous
+deployment left only generated tunnel URL commits unpublished, the next launch
+creates a fresh URL and retries the push. Other unpublished changes must be
+synchronized with the upstream branch before automatic deployment.
 
 The dashboard checks availability every 15 seconds. **APL** turns green only when
 both the local APL server and the published website's APL health route respond

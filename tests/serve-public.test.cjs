@@ -1,5 +1,5 @@
 const assert = require('node:assert/strict');
-const { spawn } = require('node:child_process');
+const { spawn, execFileSync } = require('node:child_process');
 const { once } = require('node:events');
 const fs = require('node:fs');
 const os = require('node:os');
@@ -233,12 +233,17 @@ kill -0 "$pid" 2>/dev/null
     };
     fs.mkdirSync(stateDir, { recursive: true });
     return {
+        dir,
+        write,
         start,
         startBackend: () => start('servers/server-manager.cjs', null, { env }),
         startGateway: () => start('servers/api-gateway.cjs', null, { env }),
         launch: (args = [], overrides = {}) => start('scripts/serve-public.sh', null, {
             executable: 'bash', args: ['--no-deploy', ...args],
             env: { ...env, ...overrides }
+        }),
+        launchDeploy: (args = []) => start('scripts/serve-public.sh', null, {
+            executable: 'bash', args, env
         }),
         pids: () => ['manager', 'gateway', 'tunnel', 'worker']
             .map(name => Number(fs.readFileSync(path.join(stateDir, `${name}.pid`), 'utf8'))),
@@ -365,3 +370,64 @@ test('launcher cleans up the backend and its children when gateway startup fails
         assert.ok(!isAlive(pid), launcher.output);
     }
 });
+
+test('read-only checks do not require a clean or synchronized deployment branch', async t => {
+    // This fixture has neither a Git repository nor config.js, and its Git stub
+    // fails every command. The documented --check command must still work.
+    const { launchDeploy, stateDir } = await launcherFixture(t);
+    const check = await launchDeploy(['--check']);
+    assert.deepEqual(await check.completion, [0, null], check.output);
+    assert.match(check.output, /Preflight checks passed/);
+    assert.ok(!fs.existsSync(path.join(stateDir, 'manager.pid')));
+});
+
+async function deploymentFixture(t) {
+    const f = await launcherFixture(t);
+    f.write('bin/git', '#!/bin/sh\nexec /usr/bin/git "$@"\n', 0o755);
+    f.write('scripts/set-backend-url.mjs', fs.readFileSync(path.join(__dirname, '../scripts/set-backend-url.mjs')));
+    const git = (...args) => execFileSync('/usr/bin/git', args, {
+        cwd: f.dir, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe']
+    }).trim();
+    git('init', '--bare', 'remote.git');
+    git('init', '-b', 'main');
+    git('config', 'user.name', 'ArrayBox Test');
+    git('config', 'user.email', 'arraybox@example.test');
+    f.write('config.js', "const ArrayBoxConfig = {\n    BACKEND_URL: 'https://initial.trycloudflare.com',\n};\n");
+    git('add', 'config.js');
+    git('commit', '-m', '🔧 Initial test configuration');
+    git('remote', 'add', 'origin', path.join(f.dir, 'remote.git'));
+    git('push', '-u', 'origin', 'main');
+    return { ...f, git };
+}
+
+test('launcher recovers generated tunnel URL commits left unpublished by a failed push', { timeout: 10000 }, async t => {
+    const f = await deploymentFixture(t);
+    for (const url of ['first', 'second']) {
+        f.write('config.js', `const ArrayBoxConfig = {\n    BACKEND_URL: 'https://${url}.trycloudflare.com',\n};\n`);
+        f.git('add', 'config.js');
+        f.git('commit', '-m', '🔧 Update production tunnel URL');
+    }
+    const launcher = await f.launchDeploy();
+    await waitForPublicStack(launcher);
+    assert.match(launcher.output, /Recovering 2 unpublished tunnel URL update/);
+    assert.match(launcher.output, /config.js committed and pushed/);
+    assert.equal(f.git('rev-list', '--count', '@{upstream}..HEAD'), '0');
+    assert.match(f.git('show', 'origin/main:config.js'), /https:\/\/fixture.trycloudflare.com/);
+});
+
+for (const kind of ['application change', 'URL commit hiding an application change', 'handwritten configuration commit']) {
+    test(`launcher refuses to automatically publish an unpublished ${kind}`, async t => {
+        const f = await deploymentFixture(t);
+        const file = kind === 'handwritten configuration commit' ? 'config.js' : 'application.js';
+        f.write(file, '// Unpublished work\n');
+        f.git('add', file);
+        f.git('commit', '-m', kind === 'URL commit hiding an application change'
+            ? '🔧 Update production tunnel URL' : '🔧 User changes');
+        const originalRemote = f.git('rev-parse', 'origin/main');
+        const launcher = await f.launchDeploy();
+        assert.deepEqual(await launcher.completion, [1, null], launcher.output);
+        assert.match(launcher.output, /unpublished changes beyond generated tunnel URLs/);
+        assert.equal(f.git('rev-parse', 'origin/main'), originalRemote);
+        assert.ok(!fs.existsSync(path.join(f.stateDir, 'manager.pid')));
+    });
+}
