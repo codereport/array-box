@@ -10,7 +10,7 @@
  */
 
 const ArrayBoxConfig = {
-    BACKEND_URL: 'https://found-colleague-controllers-brought.trycloudflare.com',
+    BACKEND_URL: 'https://netscape-threshold-revealed-correlation.trycloudflare.com',
     
     // Example configurations:
     // BACKEND_URL: 'https://arraybox.your-domain.com',     // Custom domain with Cloudflare Tunnel
