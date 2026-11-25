@@ -496,35 +496,41 @@ async function getWarmContainer(language, options = {}) {
  * This blocks ⍎ (execute), ⎕SH, ⎕CMD, ⎕NA and other dangerous operations
  */
 async function loadSafe3(container) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         let output = '';
+        let stderrOutput = '';
         let resolved = false;
         const SAFE3_LOADED_MARKER = '___SAFE3_LOADED___';
-        
-        const onData = (data) => {
-            output += data.toString();
-            if (output.includes(SAFE3_LOADED_MARKER)) {
-                if (!resolved) {
-                    resolved = true;
-                    container.stdout.removeListener('data', onData);
-                    container.stderr.removeListener('data', onStderr);
-                    console.log('[Sandbox] Safe3.dyalog loaded successfully');
-                    resolve();
-                }
+        let timeoutId;
+
+        const finish = (error) => {
+            if (resolved) return;
+            resolved = true;
+            clearTimeout(timeoutId);
+            container.stdout.removeListener('data', onData);
+            container.stderr.removeListener('data', onStderr);
+            if (error) {
+                stopWarmContainer(container);
+                reject(error);
+            } else {
+                console.log('[Sandbox] Safe3.dyalog loaded successfully');
+                resolve();
+            }
+        };
+        const checkReady = () => {
+            if (hasAplMarker(output, SAFE3_LOADED_MARKER) && hasAplMarker(stderrOutput, SAFE3_LOADED_MARKER)) {
+                finish();
             }
         };
         
-        const onStderr = (data) => {
+        const onData = (data) => {
             output += data.toString();
-            if (output.includes(SAFE3_LOADED_MARKER)) {
-                if (!resolved) {
-                    resolved = true;
-                    container.stdout.removeListener('data', onData);
-                    container.stderr.removeListener('data', onStderr);
-                    console.log('[Sandbox] Safe3.dyalog loaded successfully');
-                    resolve();
-                }
-            }
+            checkReady();
+        };
+        
+        const onStderr = (data) => {
+            stderrOutput += data.toString();
+            checkReady();
         };
         
         container.stdout.on('data', onData);
@@ -532,18 +538,10 @@ async function loadSafe3(container) {
         
         // Load Safe3.dyalog and configure timeout
         const timeoutSeconds = Math.floor(CONFIG.timeout / 1000);
-        container.stdin.write(`⎕FIX 'file:///opt/Safe3.dyalog'\nSafe3.DefaultTimeout←${timeoutSeconds}\n⎕←'${SAFE3_LOADED_MARKER}'\n`);
-        
-        // Timeout fallback
-        setTimeout(() => {
-            if (!resolved) {
-                resolved = true;
-                container.stdout.removeListener('data', onData);
-                container.stderr.removeListener('data', onStderr);
-                console.warn('[Sandbox] Safe3.dyalog load timeout - continuing anyway');
-                resolve();
-            }
-        }, 5000);
+        // Drain both streams before evaluation. An echoed command can contain
+        // the marker before initialization has finished or its echo has drained.
+        timeoutId = setTimeout(() => finish(new Error('Safe3 initialization timed out')), 5000);
+        container.stdin.write(`⎕FIX 'file:///opt/Safe3.dyalog'\nSafe3.DefaultTimeout←${timeoutSeconds}\n⎕←'${SAFE3_LOADED_MARKER}' ⋄ ⍞←(⎕UCS 10),'${SAFE3_LOADED_MARKER}',⎕UCS 10\n`);
     });
 }
 

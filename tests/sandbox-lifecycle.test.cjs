@@ -59,6 +59,7 @@ function fixture() {
         child.stdout.emit('data', Buffer.from('Copyright Dyalog\n'));
         await fire(200);
         child.stdout.emit('data', Buffer.from('___SAFE3_LOADED___\n'));
+        child.stderr.emit('data', Buffer.from('\n___SAFE3_LOADED___\n'));
         await tick();
     }
     function complete(child, output = '2') {
@@ -136,5 +137,38 @@ test('an interpreter that cannot reset after an error is terminated', async () =
     assert.equal((await pending).success, false);
     assert.deepEqual(f.removed, []);
     await f.fire(2000);
+    assert.deepEqual(f.removed, [f.children[0].name]);
+});
+
+test('initialization drains complete markers on both pipes and ignores echoes', async () => {
+    const f = fixture();
+    let settled = false;
+    const pending = f.context.getWarmContainer('apl').then(value => { settled = true; return value; });
+    const child = f.children[0];
+    child.stdout.emit('data', Buffer.from('Copyright Dyalog\n'));
+    await f.fire(200);
+    child.stderr.emit('data', Buffer.from("      ⎕←'___SAFE3_LOADED___'\n"));
+    child.stdout.emit('data', Buffer.from('___SAFE3_LOADED___'));
+    await f.tick();
+    assert.equal(settled, false);
+    child.stderr.emit('data', Buffer.from('\n___SAFE3_LOA'));
+    child.stdout.emit('data', Buffer.from('\n'));
+    await f.tick();
+    assert.equal(settled, false);
+    child.stderr.emit('data', Buffer.from('DED___\n'));
+    await pending;
+    assert.equal(settled, true);
+    assert.equal(child.stdout.listenerCount('data'), 0);
+    assert.equal(child.stderr.listenerCount('data'), 0);
+    f.sandbox.cleanupWarmContainers();
+});
+
+test('initialization timeout removes an interpreter instead of reusing it', async () => {
+    const f = fixture();
+    const rejected = assert.rejects(f.context.getWarmContainer('apl'), /Safe3 initialization timed out/);
+    f.children[0].stdout.emit('data', Buffer.from('Copyright Dyalog\n'));
+    await f.fire(200);
+    await f.fire(5000);
+    await rejected;
     assert.deepEqual(f.removed, [f.children[0].name]);
 });
