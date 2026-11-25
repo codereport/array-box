@@ -25,6 +25,23 @@ stpath ⇐ {
 
 $declare :export stpath
 
+stpaths ⇐ {
+	tree ← ⍵
+	root ← ⍵ ⍳ ¯1
+	paths ← (root=⍳≢⍵) ↑¨ root
+	recurse ⇐ {
+		next ← (⍵=⊂tree) /¨ ⊂⍳≢tree
+		∧/(⊂⍬)≡¨next and →⍺
+		exts ← (⊂¨⍵⊃¨⊂⍺),¨¨next
+		indx ← ⊃,/next
+		paths ← {,/,exts}⍢(indx⊇) ⍺
+		paths recurse indx
+	}
+	paths recurse root
+}
+
+$declare :export stpaths
+
 search ⇐ {
 	graph ← ⍺
 	pos ← ⍵
