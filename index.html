@@ -1881,6 +1881,7 @@
     <!-- TinyAPL WASM Loader -->
     <script type="module">
         import { formatTinyaplFunctionTree } from './src/tinyapl-tree.js';
+        import { prepareTinyaplCode } from './src/tinyapl-runner.js';
 
         // Load TinyAPL WASM module from local files
         let tinyaplReady = false;
@@ -1920,7 +1921,8 @@
                         async () => '', // input - return empty for now
                         async (what) => { outputBuffer += what; }, // output
                         async (what) => { errorBuffer += what; }, // error
-                        {} // quads - basic primitives only
+                        {}, // quads - basic primitives only
+                        window.location.href // base directory, also needed when returning defined functions
                     );
 
                     tinyaplReady = true;
@@ -1987,19 +1989,7 @@
             errorBuffer = '';
 
             try {
-                // For multiline code, join lines with ⋄ (statement separator)
-                // Filter out empty lines and comment-only lines (⍝ comments out rest of line)
-                const lines = code.split('\n')
-                    .map(line => line.trim())
-                    .filter(line => line && !line.startsWith('⍝'))
-                    .map(line => {
-                        // Strip inline comments
-                        const commentIndex = line.indexOf('⍝');
-                        return commentIndex >= 0 ? line.substring(0, commentIndex).trim() : line;
-                    })
-                    .filter(line => line);
-
-                const processedCode = lines.length > 1 ? lines.join(' ⋄ ') : (lines[0] || '');
+                const processedCode = prepareTinyaplCode(code);
                 console.log('[TinyAPL] Processing code:', processedCode);
 
                 // Run code
@@ -2013,8 +2003,11 @@
                     // Expected format: [Value | Error, boolean]
                     [value, success] = result;
                 } else if (result && typeof result === 'object') {
-                    // Maybe it's an object with value/success properties
-                    if ('success' in result) {
+                    // The bundled runtime returns errors as { code, message }.
+                    if ('code' in result) {
+                        success = false;
+                        value = result;
+                    } else if ('success' in result) {
                         success = result.success;
                         value = result.value || result.error || result;
                     } else {

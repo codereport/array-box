@@ -100,6 +100,7 @@
     "satori": "^0.19.1"
   },
   "devDependencies": {
+    "@bjorn3/browser_wasi_shim": "0.4.1",
     "playwright": "^1.58.2"
   }
 }
